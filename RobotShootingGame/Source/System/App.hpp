@@ -5,6 +5,7 @@
 	Date: 2025/07/19 13:15 初回作成
 			  /07/19 18:56 D3D12の初期化を追加
 			  /07/20 22:53 描画処理を追加
+			  /07/21 00:19 リファクタリング
 ===================================================================+*/
 #pragma once
 
@@ -15,12 +16,18 @@
 #include <cstdint>
 #include <d3d12.h>
 #include <dxgi1_4.h>
+#include <wrl/client.h>
 
 // ==============================
 //	Linker
 // ==============================
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
+
+// ==============================
+//	Type Definitions
+// ==============================
+template<typename T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 /**
  * @brief Appクラス
@@ -67,16 +74,16 @@ private:
 	uint32_t m_unWidth{};	// ウィンドウの幅
 	uint32_t m_unHeight{};	// ウィンドウの高さ
 
-	ID3D12Device* m_pDevice{};								// Direct3D 12デバイス
-	ID3D12CommandQueue* m_pQueue{};							// コマンドキュー
-	IDXGISwapChain3* m_pSwapChain{};						// スワップチェーン
-	ID3D12Resource* m_pColorBuffer[FrameCount]{};			// カラーバッファ
-	ID3D12CommandAllocator* m_pCmdAllocater[FrameCount]{};	// コマンドアロケータ
-	ID3D12GraphicsCommandList* m_pCmdList{};				// コマンドリスト
-	ID3D12DescriptorHeap* m_pHeapRTV{};						// レンダーターゲットビューのヒープ(ディスクリプタヒープ)
-	ID3D12Fence* m_pFence{};								// フェンス
-	HANDLE m_hFenceEvent{};									// フェンスイベントハンドル
-	uint64_t m_unFenceCounter[FrameCount]{};				// フェンスカウンター(フレームごとに1つ)
-	uint32_t m_unFrameIndex{};								// 現在のフレームインデックス
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hRTV[FrameCount]{};		// レンダーターゲットビューのハンドル(CPUディスクリプタ)
+	ComPtr<ID3D12Device> m_pDevice{};								// Direct3D 12デバイス
+	ComPtr<ID3D12CommandQueue> m_pQueue{};							// コマンドキュー
+	ComPtr<IDXGISwapChain3> m_pSwapChain{};							// スワップチェーン
+	ComPtr<ID3D12Resource> m_pColorBuffer[FrameCount]{};			// カラーバッファ
+	ComPtr<ID3D12CommandAllocator> m_pCmdAllocater[FrameCount]{};	// コマンドアロケータ
+	ComPtr<ID3D12GraphicsCommandList> m_pCmdList{};					// コマンドリスト
+	ComPtr<ID3D12DescriptorHeap> m_pHeapRTV{};						// レンダーターゲットビューのヒープ(ディスクリプタヒープ)
+	ComPtr<ID3D12Fence> m_pFence{};									// フェンス
+	HANDLE m_hFenceEvent{};											// フェンスイベントハンドル
+	uint64_t m_unFenceCounter[FrameCount]{};						// フェンスカウンター(フレームごとに1つ)
+	uint32_t m_unFrameIndex{};										// 現在のフレームインデックス
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hRTV[FrameCount]{};				// レンダーターゲットビューのハンドル(CPUディスクリプタ)
 };

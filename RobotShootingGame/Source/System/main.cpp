@@ -3,8 +3,13 @@
 	Summary: エントリーポイント
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/19 13:15 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+			  /07/21 00:20 デバック処理追加
 ===================================================================+*/
+
+#if defined(_DEBUG) || defined(DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 
 // ==============================
 //	include
@@ -13,6 +18,10 @@
 
 int main()
 {
+#if defined(_DEBUG) || defined(DEBUG)
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
 	// アプリケーションを実行
 	App app(960, 540);
 	app.Run();

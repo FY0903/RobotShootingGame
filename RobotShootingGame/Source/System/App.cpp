@@ -5,6 +5,7 @@
 	Date: 2025/07/19 13:15 初回作成
 			  /07/19 18:56 D3D12の初期化を追加
 			  /07/20 22:53 描画処理の追加
+			  /07/21 00:18 リファクタリング
 ===================================================================+*/
 
 // ==============================
@@ -163,12 +164,27 @@ void App::MainLoop()
 bool App::InitD3D()
 {
 	// ==============================
+	//	デバックレイヤーの有効化
+	// ==============================
+#if defined(_DEBUG) || defined(DEBUG)
+	{
+		ComPtr<ID3D12Debug> debug;
+		HRESULT hr = D3D12GetDebugInterface(IID_PPV_ARGS(debug.GetAddressOf()));
+
+		if (SUCCEEDED(hr))
+		{
+			debug->EnableDebugLayer(); // デバッグレイヤーを有効化
+		}
+	}
+#endif
+
+	// ==============================
 	//	デバイスの生成
 	// ==============================
 	HRESULT hr = D3D12CreateDevice(
 		nullptr,
-		D3D_FEATURE_LEVEL_11_0,		// 使用する機能レベル
-		IID_PPV_ARGS(&m_pDevice));	// デバイスのポインタ
+		D3D_FEATURE_LEVEL_11_0,						// 使用する機能レベル
+		IID_PPV_ARGS(m_pDevice.GetAddressOf()));	// デバイスのポインタ
 	
 	if (FAILED(hr))
 	{
@@ -185,7 +201,7 @@ bool App::InitD3D()
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE; // フラグ（なし）
 	queueDesc.NodeMask = 0; // ノードマスク（単一ノード）
 
-	hr = m_pDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_pQueue));
+	hr = m_pDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_pQueue.GetAddressOf()));
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "コマンドキューの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -196,8 +212,8 @@ bool App::InitD3D()
 	//	スワップチェーンの生成
 	// ==============================
 	// DXGIファクトリーの生成
-	IDXGIFactory4* pFactory = nullptr;
-	hr = CreateDXGIFactory1(IID_PPV_ARGS(&pFactory));
+	ComPtr<IDXGIFactory4> pFactory = nullptr;
+	hr = CreateDXGIFactory1(IID_PPV_ARGS(pFactory.GetAddressOf()));
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "DXGIファクトリーの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -223,23 +239,20 @@ bool App::InitD3D()
 	swapDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // モードスイッチを許可
 
 	// スワップチェーンの生成
-	IDXGISwapChain* pSwapChain = nullptr;
+	ComPtr<IDXGISwapChain> pSwapChain = nullptr;
 	hr = pFactory->CreateSwapChain(
-		m_pQueue,					// コマンドキュー
+		m_pQueue.Get(),				// コマンドキュー
 		&swapDesc,					// スワップチェーンの設定
-		&pSwapChain);				// スワップチェーンのポインタ
+		pSwapChain.GetAddressOf());				// スワップチェーンのポインタ
 	if (FAILED(hr))
 	{
-		SafeRelease(pFactory);
 		return false; // エラー終了
 	}
 
 	// IDXGISwapChain3を取得
-	hr = pSwapChain->QueryInterface(IID_PPV_ARGS(&m_pSwapChain));
+	hr = pSwapChain.As(&m_pSwapChain); // IDXGISwapChain3のスマートポインタにキャスト
 	if (FAILED(hr))
 	{
-		SafeRelease(pSwapChain);
-		SafeRelease(pFactory);
 		MessageBox(nullptr, "IDXGISwapChain3の取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
@@ -247,9 +260,9 @@ bool App::InitD3D()
 	// バックバッファ番号を取得
 	m_unFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
-	// スワップチェーンのリソースを解放
-	SafeRelease(pFactory);
-	SafeRelease(pSwapChain);
+	// 不要になったので解放
+	pFactory.Reset(); // DXGIファクトリーのスマートポインタをリセット
+	pSwapChain.Reset(); // IDXGISwapChainのスマートポインタをリセット
 
 	// ==============================
 	//	コマンドアロケーターの生成
@@ -257,8 +270,8 @@ bool App::InitD3D()
 	for (uint32_t i = 0; i < FrameCount; ++i)
 	{
 		hr = m_pDevice->CreateCommandAllocator(
-			D3D12_COMMAND_LIST_TYPE_DIRECT, // コマンドリストのタイプ
-			IID_PPV_ARGS(&m_pCmdAllocater[i])); // コマンドアロケーターのポインタ
+			D3D12_COMMAND_LIST_TYPE_DIRECT,						// コマンドリストのタイプ
+			IID_PPV_ARGS(m_pCmdAllocater[i].GetAddressOf()));	// コマンドアロケーターのポインタ
 		if (FAILED(hr))
 		{
 			MessageBox(nullptr, "コマンドアロケーターの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -270,11 +283,11 @@ bool App::InitD3D()
 	//	コマンドリストの生成
 	// ==============================
 	hr = m_pDevice->CreateCommandList(
-		0,								// コマンドリストのフラグ
-		D3D12_COMMAND_LIST_TYPE_DIRECT, // コマンドリストのタイプ
-		m_pCmdAllocater[m_unFrameIndex], // コマンドアロケーター
-		nullptr,						// パイプラインステートオブジェクト（nullptrならデフォルト）
-		IID_PPV_ARGS(&m_pCmdList));	// コマンドリストのポインタ
+		0,											// コマンドリストのフラグ
+		D3D12_COMMAND_LIST_TYPE_DIRECT,				// コマンドリストのタイプ
+		m_pCmdAllocater[m_unFrameIndex].Get(),		// コマンドアロケーター
+		nullptr,									// パイプラインステートオブジェクト（nullptrならデフォルト）
+		IID_PPV_ARGS(m_pCmdList.GetAddressOf()));	// コマンドリストのポインタ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "コマンドリストの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -291,7 +304,7 @@ bool App::InitD3D()
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // フラグ（なし）
 	rtvHeapDesc.NodeMask = 0; // ノードマスク（単一ノード）
 
-	hr = m_pDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_pHeapRTV));
+	hr = m_pDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(m_pHeapRTV.GetAddressOf()));
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "レンダーターゲットビューの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -303,7 +316,7 @@ bool App::InitD3D()
 	for (uint32_t i = 0; i < FrameCount; ++i)
 	{
 		// バックバッファのリソースを取得
-		hr = m_pSwapChain->GetBuffer(i, IID_PPV_ARGS(&m_pColorBuffer[i]));
+		hr = m_pSwapChain->GetBuffer(i, IID_PPV_ARGS(m_pColorBuffer[i].GetAddressOf()));
 		if (FAILED(hr))
 		{
 			MessageBox(nullptr, "バックバッファの取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -318,9 +331,9 @@ bool App::InitD3D()
 
 		// レンダーターゲットビューの生成
 		m_pDevice->CreateRenderTargetView(
-			m_pColorBuffer[i],			// バックバッファのリソース
+			m_pColorBuffer[i].Get(),	// バックバッファのリソース
 			&rtvDesc,					// レンダーターゲットビューの設定
-			rtvHandle);				// レンダーターゲットビューのハンドル
+			rtvHandle);					// レンダーターゲットビューのハンドル
 
 		m_hRTV[i] = rtvHandle; // レンダーターゲットビューのハンドルを保存
 		rtvHandle.ptr += incrementSize; // 次のハンドルへ移動
@@ -334,9 +347,9 @@ bool App::InitD3D()
 	
 	// フェンスの生成
 	hr = m_pDevice->CreateFence(
-		m_unFenceCounter[m_unFrameIndex], // 初期値
-		D3D12_FENCE_FLAG_NONE, // フェンスのフラグ（なし）
-		IID_PPV_ARGS(&m_pFence)); // フェンスのポインタ
+		m_unFenceCounter[m_unFrameIndex],		// 初期値
+		D3D12_FENCE_FLAG_NONE,					// フェンスのフラグ（なし）
+		IID_PPV_ARGS(m_pFence.GetAddressOf())); // フェンスのポインタ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "フェンスの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -372,39 +385,39 @@ void App::TermD3D()
 	}
 
 	// フェンス破棄
-	SafeRelease(m_pFence);
+	m_pFence.Reset(); // フェンスのスマートポインタをリセット
 
 	// レンダーターゲットビューの破棄
-	SafeRelease(m_pHeapRTV);
-	for (uint32_t i = 0; i < FrameCount; ++i) SafeRelease(m_pColorBuffer[i]); // バックバッファのリソースを解放
+	m_pHeapRTV.Reset(); // レンダーターゲットビューのスマートポインタをリセット
+	for (uint32_t i = 0; i < FrameCount; ++i) m_pColorBuffer[i].Reset(); // バックバッファのリソースを解放
 
 	// コマンドリストの破棄
-	SafeRelease(m_pCmdList);
+	m_pCmdList.Reset();
 
 	// コマンドアロケーターの破棄
-	for (uint32_t i = 0; i < FrameCount; ++i) SafeRelease(m_pCmdAllocater[i]); // コマンドアロケーターを解放
+	for (uint32_t i = 0; i < FrameCount; ++i) m_pCmdAllocater[i].Reset(); // コマンドアロケーターを解放
 
 	// スワップチェーンの破棄
-	SafeRelease(m_pSwapChain);
+	m_pSwapChain.Reset();
 
 	// コマンドキューの破棄
-	SafeRelease(m_pQueue);
+	m_pQueue.Reset();
 
 	// デバイスの破棄
-	SafeRelease(m_pDevice);
+	m_pDevice.Reset();
 }
 
 void App::Render()
 {
 	// コマンドの記録を開始
 	m_pCmdAllocater[m_unFrameIndex]->Reset(); // コマンドアロケーターをリセット
-	m_pCmdList->Reset(m_pCmdAllocater[m_unFrameIndex], nullptr); // コマンドリストをリセット
+	m_pCmdList->Reset(m_pCmdAllocater[m_unFrameIndex].Get(), nullptr); // コマンドリストをリセット
 
 	// リソースバリアの設定
 	D3D12_RESOURCE_BARRIER barrier{};
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE; // フラグ（なし）
-	barrier.Transition.pResource = m_pColorBuffer[m_unFrameIndex]; // 対象のリソース
+	barrier.Transition.pResource = m_pColorBuffer[m_unFrameIndex].Get(); // 対象のリソース
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT; // 前の状態
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET; // 後の状態
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES; // 全サブリソース
@@ -432,7 +445,7 @@ void App::Render()
 	// リソースバリアの設定
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
 	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE; // フラグ（なし）
-	barrier.Transition.pResource = m_pColorBuffer[m_unFrameIndex]; // 対象のリソース
+	barrier.Transition.pResource = m_pColorBuffer[m_unFrameIndex].Get(); // 対象のリソース
 	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET; // 前の状態
 	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT; // 後の状態
 	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES; // 全サブリソース
@@ -444,7 +457,7 @@ void App::Render()
 	m_pCmdList->Close();
 
 	// コマンドを実行
-	ID3D12CommandList* ppCommandLists[] = { m_pCmdList };
+	ID3D12CommandList* ppCommandLists[] = { m_pCmdList.Get()};
 	m_pQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
 	// 画面に表示
@@ -458,7 +471,7 @@ void App::WaitGPU()
 	assert(m_hFenceEvent != nullptr);
 
 	// シグナル処理
-	m_pQueue->Signal(m_pFence, m_unFenceCounter[m_unFrameIndex]); // コマンドキューをシグナル
+	m_pQueue->Signal(m_pFence.Get(), m_unFenceCounter[m_unFrameIndex]); // コマンドキューをシグナル
 
 	// 完了時にイベントを設定する
 	m_pFence->SetEventOnCompletion(m_unFenceCounter[m_unFrameIndex], m_hFenceEvent);
@@ -477,7 +490,7 @@ void App::Present(uint32_t interval)
 
 	// シグナル処理
 	const uint64_t currentValue = m_unFenceCounter[m_unFrameIndex];
-	m_pQueue->Signal(m_pFence, currentValue); // コマンドキューをシグナル
+	m_pQueue->Signal(m_pFence.Get(), currentValue); // コマンドキューをシグナル
 
 	// バックバッファ番号を更新
 	m_unFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
