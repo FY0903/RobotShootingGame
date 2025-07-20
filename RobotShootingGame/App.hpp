@@ -3,7 +3,8 @@
 	Summary: ウィンドウの作成をするヘッダファイル
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/19 13:15 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+			  /07/19 18:56 D3D12の初期化を追加
+			  /07/20 22:53 描画処理を追加
 ===================================================================+*/
 #pragma once
 
@@ -75,7 +76,7 @@ private:
 	ID3D12DescriptorHeap* m_pHeapRTV{};						// レンダーターゲットビューのヒープ(ディスクリプタヒープ)
 	ID3D12Fence* m_pFence{};								// フェンス
 	HANDLE m_hFenceEvent{};									// フェンスイベントハンドル
-	uint64_t m_unFrameCounter[FrameCount]{};					// フレームカウンター
+	uint64_t m_unFenceCounter[FrameCount]{};				// フェンスカウンター(フレームごとに1つ)
 	uint32_t m_unFrameIndex{};								// 現在のフレームインデックス
 	D3D12_CPU_DESCRIPTOR_HANDLE m_hRTV[FrameCount]{};		// レンダーターゲットビューのハンドル(CPUディスクリプタ)
 };

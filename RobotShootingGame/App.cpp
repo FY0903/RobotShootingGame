@@ -3,13 +3,15 @@
 	Summary: ウィンドウの作成をするソースファイル
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/19 13:15 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+			  /07/19 18:56 D3D12の初期化を追加
+			  /07/20 22:53 描画処理の追加
 ===================================================================+*/
 
 // ==============================
 //	include
 // ==============================
 #include "App.hpp"
+#include <cassert>
 
 // ==============================
 //	constexpr
@@ -47,11 +49,17 @@ bool App::InitApp()
 	// ウィンドウの初期化
 	if (!InitWnd()) return false;
 
+	// D3Dの初期化
+	if (!InitD3D()) return false;
+
 	return true;	// 正常終了
 }
 
 void App::TermApp()
 {
+	// D3Dの終了処理
+	TermD3D();
+
 	// ウィンドウの終了処理
 	TermWnd();
 }
@@ -144,6 +152,10 @@ void App::MainLoop()
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+		}
+		else
+		{
+			Render(); // 描画処理を呼び出す
 		}
 	}
 }
@@ -318,11 +330,11 @@ bool App::InitD3D()
 	//	フェンスの生成
 	// ==============================
 	// フェンスカウンターをリセット
-	for (uint32_t i = 0; i < FrameCount; ++i) m_unFrameCounter[i] = 0;
+	for (uint32_t i = 0; i < FrameCount; ++i) m_unFenceCounter[i] = 0;
 	
 	// フェンスの生成
 	hr = m_pDevice->CreateFence(
-		m_unFrameCounter[m_unFrameIndex], // 初期値
+		m_unFenceCounter[m_unFrameIndex], // 初期値
 		D3D12_FENCE_FLAG_NONE, // フェンスのフラグ（なし）
 		IID_PPV_ARGS(&m_pFence)); // フェンスのポインタ
 	if (FAILED(hr))
@@ -331,7 +343,7 @@ bool App::InitD3D()
 		return false; // エラー終了
 	}
 
-	m_unFrameCounter[m_unFrameIndex]++; // フレームカウンターをインクリメント
+	m_unFenceCounter[m_unFrameIndex]++; // フレームカウンターをインクリメント
 
 	// イベントの生成
 	m_hFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -349,18 +361,136 @@ bool App::InitD3D()
 
 void App::TermD3D()
 {
+	// GPU処理の完了を待機
+	WaitGPU();
+
+	// イベント破棄
+	if (m_hFenceEvent)
+	{
+		CloseHandle(m_hFenceEvent);
+		m_hFenceEvent = nullptr;
+	}
+
+	// フェンス破棄
+	SafeRelease(m_pFence);
+
+	// レンダーターゲットビューの破棄
+	SafeRelease(m_pHeapRTV);
+	for (uint32_t i = 0; i < FrameCount; ++i) SafeRelease(m_pColorBuffer[i]); // バックバッファのリソースを解放
+
+	// コマンドリストの破棄
+	SafeRelease(m_pCmdList);
+
+	// コマンドアロケーターの破棄
+	for (uint32_t i = 0; i < FrameCount; ++i) SafeRelease(m_pCmdAllocater[i]); // コマンドアロケーターを解放
+
+	// スワップチェーンの破棄
+	SafeRelease(m_pSwapChain);
+
+	// コマンドキューの破棄
+	SafeRelease(m_pQueue);
+
+	// デバイスの破棄
+	SafeRelease(m_pDevice);
 }
 
 void App::Render()
 {
+	// コマンドの記録を開始
+	m_pCmdAllocater[m_unFrameIndex]->Reset(); // コマンドアロケーターをリセット
+	m_pCmdList->Reset(m_pCmdAllocater[m_unFrameIndex], nullptr); // コマンドリストをリセット
+
+	// リソースバリアの設定
+	D3D12_RESOURCE_BARRIER barrier{};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE; // フラグ（なし）
+	barrier.Transition.pResource = m_pColorBuffer[m_unFrameIndex]; // 対象のリソース
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT; // 前の状態
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET; // 後の状態
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES; // 全サブリソース
+
+	// リソースバリア
+	m_pCmdList->ResourceBarrier(1, &barrier);
+
+	// レンダーターゲットの設定
+	m_pCmdList->OMSetRenderTargets(1, &m_hRTV[m_unFrameIndex], FALSE, nullptr);
+
+	// クリアカラーの設定
+	float clearColor[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
+
+	// レンダーターゲットビューをクリア
+	m_pCmdList->ClearRenderTargetView(
+		m_hRTV[m_unFrameIndex],		// レンダーターゲットビューのハンドル
+		clearColor,					// クリアカラー
+		0,							// 深度ステンシルビューの数（なし）
+		nullptr);					// 深度ステンシルビューのハンドル（なし）
+
+	// ===============================
+	//	ここに描画処理を追加
+	// ===============================
+
+	// リソースバリアの設定
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE; // フラグ（なし）
+	barrier.Transition.pResource = m_pColorBuffer[m_unFrameIndex]; // 対象のリソース
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET; // 前の状態
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT; // 後の状態
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES; // 全サブリソース
+
+	// リソースバリア
+	m_pCmdList->ResourceBarrier(1, &barrier);
+
+	// コマンドの記録を終了
+	m_pCmdList->Close();
+
+	// コマンドを実行
+	ID3D12CommandList* ppCommandLists[] = { m_pCmdList };
+	m_pQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+	// 画面に表示
+	Present(1);
 }
 
 void App::WaitGPU()
 {
+	assert(m_pQueue != nullptr);
+	assert(m_pFence != nullptr);
+	assert(m_hFenceEvent != nullptr);
+
+	// シグナル処理
+	m_pQueue->Signal(m_pFence, m_unFenceCounter[m_unFrameIndex]); // コマンドキューをシグナル
+
+	// 完了時にイベントを設定する
+	m_pFence->SetEventOnCompletion(m_unFenceCounter[m_unFrameIndex], m_hFenceEvent);
+
+	// 待機処理
+	WaitForSingleObjectEx(m_hFenceEvent, INFINITE, FALSE); // フェンスイベントがシグナルされるまで待機
+
+	// カウンターを増やす
+	m_unFenceCounter[m_unFrameIndex]++; // 次のフレームのフェンスカウンターを増やす
 }
 
 void App::Present(uint32_t interval)
 {
+	// 画面に表示
+	m_pSwapChain->Present(interval, 0); // スワップチェーンをプレゼント
+
+	// シグナル処理
+	const uint64_t currentValue = m_unFenceCounter[m_unFrameIndex];
+	m_pQueue->Signal(m_pFence, currentValue); // コマンドキューをシグナル
+
+	// バックバッファ番号を更新
+	m_unFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+
+	// 次のフレームの描画準備がまだであれば待機する
+	if (m_pFence->GetCompletedValue() < m_unFenceCounter[m_unFrameIndex])
+	{
+		m_pFence->SetEventOnCompletion(m_unFenceCounter[m_unFrameIndex], m_hFenceEvent);
+		WaitForSingleObjectEx(m_hFenceEvent, INFINITE, FALSE); // フェンスイベントがシグナルされるまで待機
+	}
+
+	// 次のフレームのフェンスカウンターを増やす
+	m_unFenceCounter[m_unFrameIndex] = currentValue + 1;
 }
 
 LRESULT App::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
