@@ -10,6 +10,9 @@
     <Filter Include="Source\System\App">
       <UniqueIdentifier>{d2f6b343-c28d-4285-a491-7750317e1e6f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{db6079f1-0cc9-4703-8465-a811d4a81bad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -23,5 +26,13 @@
     <ClInclude Include="Source\System\App.hpp">
       <Filter>Source\System\App</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\SimplePS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SimpleVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
