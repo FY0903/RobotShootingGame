@@ -110,7 +110,8 @@ private:
 	ComPtr<ID3D12Fence> m_pFence{};									// フェンス
 	ComPtr<ID3D12DescriptorHeap> m_pHeapCBV{};						// 定数バッファビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12Resource> m_pVB{};									// 頂点バッファ
-	ComPtr<ID3D12Resource> m_pCB[FrameCount]{};						// 定数バッファ(フレームごとに1つ)
+	ComPtr<ID3D12Resource> m_pIB{};									// インデックスバッファ
+	ComPtr<ID3D12Resource> m_pCB[FrameCount * 2]{};					// 定数バッファ(フレームごとに1つ)
 	ComPtr<ID3D12RootSignature> m_pRootSignature{};					// ルートシグネチャ
 	ComPtr<ID3D12PipelineState> m_pPSO{};							// パイプラインステートオブジェクト
 
@@ -119,8 +120,9 @@ private:
 	uint32_t m_unFrameIndex{};										// 現在のフレームインデックス
 	D3D12_CPU_DESCRIPTOR_HANDLE m_hRTV[FrameCount]{};				// レンダーターゲットビューのハンドル(CPUディスクリプタ)
 	D3D12_VERTEX_BUFFER_VIEW m_VBV{};								// 頂点バッファビュー
+	D3D12_INDEX_BUFFER_VIEW m_IBV{};								// インデックスバッファビュー
 	D3D12_VIEWPORT m_Viewport{};									// ビューポート
 	D3D12_RECT m_Scissor{};											// シザーレクト
-	ConstantBufferView<Transform> m_CBV[FrameCount]{};				// 定数バッファビュー
+	ConstantBufferView<Transform> m_CBV[FrameCount * 2]{};			// 定数バッファビュー
 	float m_fRotateAngle{};											// 回転角度
 };

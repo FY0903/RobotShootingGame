@@ -457,14 +457,16 @@ void App::Render()
 
 	m_pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジの設定
 	m_pCmdList->IASetVertexBuffers(0, 1, &m_VBV); // 頂点バッファの設定
+	m_pCmdList->IASetIndexBuffer(&m_IBV); // インデックスバッファの設定
 	m_pCmdList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
 	m_pCmdList->RSSetScissorRects(1, &m_Scissor); // シザーレクトの設定
 
-	m_pCmdList->DrawInstanced(
-		3, // 頂点数
-		1, // インスタンス数
-		0, // 頂点バッファの開始インデックス
-		0); // インスタンスの開始インデックス
+	m_pCmdList->DrawIndexedInstanced(
+		6,	// インデックスの数
+		1,  // インスタンスの数
+		0,  // インデックスの開始位置
+		0,  // 頂点の開始位置
+		0); // インスタンスの開始位置
 
 	// リソースバリアの設定
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
@@ -537,9 +539,10 @@ bool App::OnInit()
 	// ==============================
 	// 頂点データ
 	Vertex vertices[] = {
-		{DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)},
-		{DirectX::XMFLOAT3(1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)},
-		{DirectX::XMFLOAT3(0.0f,  1.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)},
+		{DirectX::XMFLOAT3(-1.0f,  1.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)},
+		{DirectX::XMFLOAT3( 1.0f,  1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)},
+		{DirectX::XMFLOAT3( 1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)},
+		{DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f)},
 	};
 
 	// ヒーププロパティ
@@ -597,6 +600,68 @@ bool App::OnInit()
 	m_VBV.BufferLocation = m_pVB->GetGPUVirtualAddress(); // GPU仮想アドレスを設定
 	m_VBV.SizeInBytes = static_cast<UINT>(sizeof(vertices)); // サイズを設定
 	m_VBV.StrideInBytes = static_cast <UINT>(sizeof(Vertex)); // ストライドを設定（頂点のサイズ）
+
+	// ==============================
+	//	インデックスバッファの生成
+	// ==============================
+	uint32_t indices[] = {
+		0, 1, 2, // 三角形1
+		0, 2, 3  // 三角形2
+	};
+
+	// ヒーププロパティ
+	prop.Type = D3D12_HEAP_TYPE_UPLOAD;	// ヒープのタイプ（アップロード用）
+	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;	// CPUページプロパティ（不明）
+	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;	// メモリプールの優先度（不明）
+	prop.CreationNodeMask = 1;	// 作成ノードマスク（単一ノード）
+	prop.VisibleNodeMask = 1;	// 可視ノードマスク（単一ノード）
+
+	// リソースの設定
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;	// リソースの次元（バッファ）
+	resourceDesc.Alignment = 0;	// アライメント（0ならデフォルト）
+	resourceDesc.Width = sizeof(indices);	// リソースの幅（インデックスデータのサイズ）
+	resourceDesc.Height = 1;	// 高さ（1なら1Dバッファ）
+	resourceDesc.DepthOrArraySize = 1;	// 深度または配列サイズ（1なら1Dバッファ）
+	resourceDesc.MipLevels = 1;	// ミップレベル（1ならミップマップなし）
+	resourceDesc.Format = DXGI_FORMAT_UNKNOWN;	// フォーマット（バッファなので不明）
+	resourceDesc.SampleDesc.Count = 1;	// サンプル数（1ならマルチサンプリングなし）
+	resourceDesc.SampleDesc.Quality = 0;	// サンプル品質（0ならデフォルト）
+	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;	// レイアウト（行メジャー）
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;	// リソースフラグ（なし）
+	
+	// リソースを生成
+	hr = m_pDevice->CreateCommittedResource(
+		&prop,								// ヒーププロパティ
+		D3D12_HEAP_FLAG_NONE,				// ヒープフラグ（なし）
+		&resourceDesc,						// リソースの設定
+		D3D12_RESOURCE_STATE_GENERIC_READ,	// 初期状態（汎用読み取り）
+		nullptr,							// クリア値（なし）
+		IID_PPV_ARGS(m_pIB.GetAddressOf())); // リソースのポインタ
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "インデックスバッファの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// マッピングする
+	ptr = nullptr;
+	hr = m_pIB->Map(0, nullptr, &ptr); // リソースをマッピングしてポインタを取得
+	if (FAILED(hr) || !ptr)
+	{
+		MessageBox(nullptr, "インデックスバッファのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// インデックスデータをマッピング先に設定
+	memcpy(ptr, indices, sizeof(indices)); // インデックスデータをコピー
+
+	// マッピング解除
+	m_pIB->Unmap(0, nullptr); // マッピングを解除
+
+	// インデックスバッファビューの設定
+	m_IBV.BufferLocation = m_pIB->GetGPUVirtualAddress(); // GPU仮想アドレスを設定
+	m_IBV.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマットを設定（32ビット整数）
+	m_IBV.SizeInBytes = static_cast<UINT>(sizeof(indices)); // サイズを設定
 
 	// ==============================
 	//	定数バッファ用ディスクリプタヒープの作成
