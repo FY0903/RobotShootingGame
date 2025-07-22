@@ -57,6 +57,8 @@ bool App::InitApp()
 
 void App::TermApp()
 {
+	OnTerm();
+
 	// D3Dの終了処理
 	TermD3D();
 
@@ -155,7 +157,7 @@ void App::MainLoop()
 		}
 		else
 		{
-			Render(); // 描画処理を呼び出す
+			Render();
 		}
 	}
 }
@@ -408,6 +410,12 @@ void App::TermD3D()
 
 void App::Render()
 {
+	// ==============================
+	//	更新処理
+	// ==============================
+	m_fRotateAngle += 0.025f;
+	m_CBV[m_unFrameIndex].pBuffer->World = DirectX::XMMatrixRotationY(m_fRotateAngle); // ワールド行列の更新
+
 	// コマンドの記録を開始
 	m_pCmdAllocater[m_unFrameIndex]->Reset(); // コマンドアロケーターをリセット
 	m_pCmdList->Reset(m_pCmdAllocater[m_unFrameIndex].Get(), nullptr); // コマンドリストをリセット
@@ -438,8 +446,25 @@ void App::Render()
 		nullptr);					// 深度ステンシルビューのハンドル（なし）
 
 	// ===============================
-	//	ここに描画処理を追加
+	//	描画処理
 	// ===============================
+	m_pCmdList->SetGraphicsRootSignature(m_pRootSignature.Get()); // ルートシグネチャの設定
+	m_pCmdList->SetDescriptorHeaps(1, m_pHeapCBV.GetAddressOf()); // ディスクリプタヒープの設定
+	m_pCmdList->SetGraphicsRootConstantBufferView(
+		0, // ルートパラメータのインデックス
+		m_CBV[m_unFrameIndex].Desc.BufferLocation);	// 定数バッファビューの設定
+	m_pCmdList->SetPipelineState(m_pPSO.Get()); // パイプラインステートオブジェクトの設定
+
+	m_pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジの設定
+	m_pCmdList->IASetVertexBuffers(0, 1, &m_VBV); // 頂点バッファの設定
+	m_pCmdList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
+	m_pCmdList->RSSetScissorRects(1, &m_Scissor); // シザーレクトの設定
+
+	m_pCmdList->DrawInstanced(
+		3, // 頂点数
+		1, // インスタンス数
+		0, // 頂点バッファの開始インデックス
+		0); // インスタンスの開始インデックス
 
 	// リソースバリアの設定
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
@@ -457,7 +482,7 @@ void App::Render()
 
 	// コマンドを実行
 	ID3D12CommandList* ppCommandLists[] = { m_pCmdList.Get()};
-	m_pQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+	m_pQueue->ExecuteCommandLists(1, ppCommandLists);
 
 	// 画面に表示
 	Present(1);
@@ -639,7 +664,12 @@ bool App::OnInit()
 		handleCPU.ptr += incrementSize * i; // CPUディスクリプタハンドルをフレーム数分ずらす
 		handleGPU.ptr += incrementSize * i; // GPUディスクリプタハンドルをフレーム数分ずらす
 
-		// 定数バッファビューの設定
+		// 定数バッファビューの設定.
+		m_CBV[i].HandleCPU = handleCPU;
+		m_CBV[i].HandleGPU = handleGPU;
+		m_CBV[i].Desc.BufferLocation = address;
+		m_CBV[i].Desc.SizeInBytes = sizeof(Transform);
+
 		m_pDevice->CreateConstantBufferView(
 			&m_CBV[i].Desc,	// 定数バッファビューの設定
 			handleCPU);		// CPUディスクリプタハンドル
@@ -751,6 +781,7 @@ bool App::OnInit()
 	rasterizerDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP; // 深度バイアスクランプ（デフォルト）
 	rasterizerDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS; // スロープスケールド深度バイアス（デフォルト）
 	rasterizerDesc.DepthClipEnable = FALSE; // 深度クリップを無効化
+	rasterizerDesc.MultisampleEnable = FALSE; // マルチサンプリングを無効化
 	rasterizerDesc.AntialiasedLineEnable = FALSE; // アンチエイリアスラインを無効化
 	rasterizerDesc.ForcedSampleCount = 0; // 強制サンプル数（なし）
 	rasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF; // 保守的ラスタライゼーションをオフ
