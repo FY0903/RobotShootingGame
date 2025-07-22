@@ -104,10 +104,12 @@ private:
 	ComPtr<ID3D12CommandQueue> m_pQueue{};							// コマンドキュー
 	ComPtr<IDXGISwapChain3> m_pSwapChain{};							// スワップチェーン
 	ComPtr<ID3D12Resource> m_pColorBuffer[FrameCount]{};			// カラーバッファ
+	ComPtr<ID3D12Resource> m_pDepthBuffer{};						// 深度バッファ
 	ComPtr<ID3D12CommandAllocator> m_pCmdAllocater[FrameCount]{};	// コマンドアロケータ
 	ComPtr<ID3D12GraphicsCommandList> m_pCmdList{};					// コマンドリスト
 	ComPtr<ID3D12DescriptorHeap> m_pHeapRTV{};						// レンダーターゲットビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12Fence> m_pFence{};									// フェンス
+	ComPtr<ID3D12DescriptorHeap> m_pHeapDSV{};						// 深度ステンシルビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12DescriptorHeap> m_pHeapCBV{};						// 定数バッファビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12Resource> m_pVB{};									// 頂点バッファ
 	ComPtr<ID3D12Resource> m_pIB{};									// インデックスバッファ
@@ -119,6 +121,7 @@ private:
 	uint64_t m_unFenceCounter[FrameCount]{};						// フェンスカウンター(フレームごとに1つ)
 	uint32_t m_unFrameIndex{};										// 現在のフレームインデックス
 	D3D12_CPU_DESCRIPTOR_HANDLE m_hRTV[FrameCount]{};				// レンダーターゲットビューのハンドル(CPUディスクリプタ)
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hDSV{};							// 深度ステンシルビューのハンドル(CPUディスクリプタ)
 	D3D12_VERTEX_BUFFER_VIEW m_VBV{};								// 頂点バッファビュー
 	D3D12_INDEX_BUFFER_VIEW m_IBV{};								// インデックスバッファビュー
 	D3D12_VIEWPORT m_Viewport{};									// ビューポート

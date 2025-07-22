@@ -341,6 +341,78 @@ bool App::InitD3D()
 	}
 
 	// ==============================
+	//	深度ステンシルビューの生成
+	// ==============================
+	D3D12_HEAP_PROPERTIES prop{};
+	prop.Type = D3D12_HEAP_TYPE_DEFAULT; // ヒープのタイプ（デフォルト）
+	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN; // CPUページプロパティ
+	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN; // メモリプールの設定
+	prop.CreationNodeMask = 1; // 作成ノードマスク
+	prop.VisibleNodeMask = 1; // 可視ノードマスク
+
+	D3D12_RESOURCE_DESC depthDesc{};
+	depthDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; // リソースの次元（2Dテクスチャ）
+	depthDesc.Alignment = 0; // アライメント（0ならデフォルト）
+	depthDesc.Width = m_unWidth; // 幅
+	depthDesc.Height = m_unHeight; // 高さ
+	depthDesc.DepthOrArraySize = 1; // 深度またはアレイサイズ
+	depthDesc.MipLevels = 1; // ミップレベル
+	depthDesc.Format = DXGI_FORMAT_D32_FLOAT; // フォーマット（深度ステンシル用）
+	depthDesc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
+	depthDesc.SampleDesc.Quality = 0; // マルチサンプリングの品質
+	depthDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN; // テクスチャのレイアウト（未知）
+	depthDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL; // リソースフラグ（深度ステンシルを許可）
+
+	D3D12_CLEAR_VALUE clearValue{};
+	clearValue.Format = DXGI_FORMAT_D32_FLOAT; // 深度ステンシルのフォーマット
+	clearValue.DepthStencil.Depth = 1.0f; // 深度のクリア値
+	clearValue.DepthStencil.Stencil = 0; // ステンシルのクリア値
+
+	hr = m_pDevice->CreateCommittedResource(
+		&prop,								// ヒーププロパティ
+		D3D12_HEAP_FLAG_NONE,				// ヒープフラグ（なし）
+		&depthDesc,							// リソースの設定
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,	// 初期状態（深度書き込み）
+		&clearValue,						// クリア値
+		IID_PPV_ARGS(m_pDepthBuffer.GetAddressOf())); // 深度バッファのポインタ
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "深度ステンシルビューの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// ディスクリプタヒープの設定
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
+	dsvHeapDesc.NumDescriptors = 1; // 深度ステンシルビューの数
+	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV; // 深度ステンシルビュー用
+	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // フラグ（なし）
+	dsvHeapDesc.NodeMask = 0; // ノードマスク（単一ノード）
+
+	hr = m_pDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(m_pHeapDSV.GetAddressOf()));
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "深度ステンシルビューのディスクリプタヒープの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_pHeapDSV->GetCPUDescriptorHandleForHeapStart(); // 深度ステンシルビューのハンドルを取得
+	incrementSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV); // 深度ステンシルビューのインクリメントサイズを取得
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT; // 深度ステンシルビューのフォーマット
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D; // ビューの次元（2Dテクスチャ）
+	dsvDesc.Texture2D.MipSlice = 0; // ミップスライス
+	dsvDesc.Flags = D3D12_DSV_FLAG_NONE; // フラグ（なし）
+
+	// 深度ステンシルビューの生成
+	m_pDevice->CreateDepthStencilView(
+		m_pDepthBuffer.Get(),				// 深度バッファのリソース
+		&dsvDesc,							// 深度ステンシルビューの設定
+		dsvHandle);							// 深度ステンシルビューのハンドル
+
+	m_hDSV = dsvHandle; // 深度ステンシルビューのハンドルを保存
+
+	// ==============================
 	//	フェンスの生成
 	// ==============================
 	// フェンスカウンターをリセット
@@ -414,7 +486,10 @@ void App::Render()
 	//	更新処理
 	// ==============================
 	m_fRotateAngle += 0.025f;
-	m_CBV[m_unFrameIndex].pBuffer->World = DirectX::XMMatrixRotationY(m_fRotateAngle); // ワールド行列の更新
+	m_CBV[m_unFrameIndex * 2 + 0].pBuffer->World =
+		DirectX::XMMatrixRotationZ(m_fRotateAngle + DirectX::XMConvertToRadians(45.0f));
+	m_CBV[m_unFrameIndex * 2 + 1].pBuffer->World =
+		DirectX::XMMatrixRotationY(m_fRotateAngle) * DirectX::XMMatrixScaling(2.0f, 0.5f, 1.0f);
 
 	// コマンドの記録を開始
 	m_pCmdAllocater[m_unFrameIndex]->Reset(); // コマンドアロケーターをリセット
@@ -433,7 +508,11 @@ void App::Render()
 	m_pCmdList->ResourceBarrier(1, &barrier);
 
 	// レンダーターゲットの設定
-	m_pCmdList->OMSetRenderTargets(1, &m_hRTV[m_unFrameIndex], FALSE, nullptr);
+	m_pCmdList->OMSetRenderTargets(
+		1,								// レンダーターゲットビューの数
+		&m_hRTV[m_unFrameIndex],		// レンダーターゲットビューのハンドル
+		FALSE,							// レンダーターゲットビューをクリアしない
+		&m_hDSV);						// 深度ステンシルビューのハンドル
 
 	// クリアカラーの設定
 	float clearColor[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
@@ -445,14 +524,20 @@ void App::Render()
 		0,							// 深度ステンシルビューの数（なし）
 		nullptr);					// 深度ステンシルビューのハンドル（なし）
 
+	// 深度ステンシルビューをクリア
+	m_pCmdList->ClearDepthStencilView(
+		m_hDSV,						// 深度ステンシルビューのハンドル
+		D3D12_CLEAR_FLAG_DEPTH,		// クリアフラグ（深度のみ）
+		1.0f,						// 深度のクリア値
+		0,							// ステンシルのクリア値
+		0,							// 深度ステンシルビューの数（なし）
+		nullptr);					// 深度ステンシルビューのハンドル（なし）
+
 	// ===============================
 	//	描画処理
 	// ===============================
 	m_pCmdList->SetGraphicsRootSignature(m_pRootSignature.Get()); // ルートシグネチャの設定
 	m_pCmdList->SetDescriptorHeaps(1, m_pHeapCBV.GetAddressOf()); // ディスクリプタヒープの設定
-	m_pCmdList->SetGraphicsRootConstantBufferView(
-		0, // ルートパラメータのインデックス
-		m_CBV[m_unFrameIndex].Desc.BufferLocation);	// 定数バッファビューの設定
 	m_pCmdList->SetPipelineState(m_pPSO.Get()); // パイプラインステートオブジェクトの設定
 
 	m_pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジの設定
@@ -460,6 +545,23 @@ void App::Render()
 	m_pCmdList->IASetIndexBuffer(&m_IBV); // インデックスバッファの設定
 	m_pCmdList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
 	m_pCmdList->RSSetScissorRects(1, &m_Scissor); // シザーレクトの設定
+
+	// 手前側の三角形を描画
+	m_pCmdList->SetGraphicsRootConstantBufferView(
+		0, // ルートパラメータのインデックス
+		m_CBV[m_unFrameIndex * 2 + 0].Desc.BufferLocation); // 定数バッファビューの設定
+
+	m_pCmdList->DrawIndexedInstanced(
+		6,	// インデックスの数
+		1,  // インスタンスの数
+		0,  // インデックスの開始位置
+		0,  // 頂点の開始位置
+		0); // インスタンスの開始位置
+
+	// 奥側の三角形を描画
+	m_pCmdList->SetGraphicsRootConstantBufferView(
+		0, // ルートパラメータのインデックス
+		m_CBV[m_unFrameIndex * 2 + 1].Desc.BufferLocation); // 定数バッファビューの設定
 
 	m_pCmdList->DrawIndexedInstanced(
 		6,	// インデックスの数
@@ -668,7 +770,7 @@ bool App::OnInit()
 	// ==============================
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV; // ヒープのタイプ（CBV/SRV/UAV用）
-	heapDesc.NumDescriptors = 1 * FrameCount; // ディスクリプタの数（フレーム数分）
+	heapDesc.NumDescriptors = 2 * FrameCount; // ディスクリプタの数（フレーム数分）
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダーから可視化可能
 	heapDesc.NodeMask = 0; // ノードマスク（単一ノード）
 
@@ -706,7 +808,7 @@ bool App::OnInit()
 
 	UINT incrementSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV); // ディスクリプタのインクリメントサイズ
 	
-	for (uint32_t i = 0; i < FrameCount; ++i)
+	for (uint32_t i = 0; i < FrameCount * 2; ++i)
 	{
 		// リソースを生成
 		hr = m_pDevice->CreateCommittedResource(
@@ -874,6 +976,13 @@ bool App::OnInit()
 		blendDesc.RenderTarget[i] = blendDescRT; // レンダーターゲットのブレンド設定を適用
 	}
 
+	// 深度ステンシルステートの設定
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = TRUE; // 深度ステンシルを有効化
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL; // 深度書き込みマスクを全て有効化
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL; // 深度比較関数（小なりイコール）
+	depthStencilDesc.StencilEnable = FALSE; // ステンシルを無効化
+
 	ComPtr<ID3DBlob> pVSBlob = nullptr; // 頂点シェーダーのバイナリデータ
 	ComPtr<ID3DBlob> pPSBlob = nullptr; // ピクセルシェーダーのバイナリデータ
 
@@ -901,13 +1010,12 @@ bool App::OnInit()
 	psoDesc.PS = { pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize() }; // ピクセルシェーダーを設定
 	psoDesc.RasterizerState = rasterizerDesc; // ラスタライザーステートを設定
 	psoDesc.BlendState = blendDesc; // ブレンドステートを設定
-	psoDesc.DepthStencilState.DepthEnable = FALSE; // 深度ステンシルステートを無効化
-	psoDesc.DepthStencilState.StencilEnable = FALSE; // ステンシルを無効化
+	psoDesc.DepthStencilState = depthStencilDesc; // 深度ステンシルステートを設定
 	psoDesc.SampleMask = UINT_MAX; // サンプルマスクを全て有効化
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // プリミティブトポロジタイプを三角形に設定
 	psoDesc.NumRenderTargets = 1; // レンダーターゲットの数を1に設定
 	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // レンダーターゲットのフォーマットを設定
-	psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN; // 深度ステンシルフォーマットを設定（なし）
+	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT; // 深度ステンシルのフォーマットを設定
 	psoDesc.SampleDesc.Count = 1; // サンプル数を1に設定
 	psoDesc.SampleDesc.Quality = 0; // サンプル品質を0に設定（デフォルト）
 
