@@ -14,6 +14,10 @@
 //	include
 // ==============================
 #include "App.hpp"
+#include "ResourceUploadBatch.h"
+#include "DDSTextureLoader.h"
+#include "VertexTypes.h"
+#include "../Utility/FileUtil.hpp"
 #include <cassert>
 
 // ==============================
@@ -641,11 +645,11 @@ bool App::OnInit()
 	//	頂点バッファの作成
 	// ==============================
 	// 頂点データ
-	Vertex vertices[] = {
-		{DirectX::XMFLOAT3(-1.0f,  1.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)},
-		{DirectX::XMFLOAT3( 1.0f,  1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)},
-		{DirectX::XMFLOAT3( 1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)},
-		{DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f)},
+	DirectX::VertexPositionTexture vertices[] = {
+		DirectX::VertexPositionTexture(DirectX::XMFLOAT3(-1.0f,  1.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 0.0f)),
+		DirectX::VertexPositionTexture(DirectX::XMFLOAT3( 1.0f,  1.0f, 0.0f), DirectX::XMFLOAT2(1.0f, 0.0f)),
+		DirectX::VertexPositionTexture(DirectX::XMFLOAT3( 1.0f, -1.0f, 0.0f), DirectX::XMFLOAT2(1.0f, 1.0f)),
+		DirectX::VertexPositionTexture(DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 1.0f)),
 	};
 
 	// ヒーププロパティ
@@ -702,7 +706,7 @@ bool App::OnInit()
 	// 頂点バッファビューの設定
 	m_VBV.BufferLocation = m_pVB->GetGPUVirtualAddress(); // GPU仮想アドレスを設定
 	m_VBV.SizeInBytes = static_cast<UINT>(sizeof(vertices)); // サイズを設定
-	m_VBV.StrideInBytes = static_cast <UINT>(sizeof(Vertex)); // ストライドを設定（頂点のサイズ）
+	m_VBV.StrideInBytes = static_cast <UINT>(sizeof(DirectX::VertexPositionTexture)); // ストライドを設定（頂点のサイズ）
 
 	// ==============================
 	//	インデックスバッファの生成
@@ -872,18 +876,46 @@ bool App::OnInit()
 	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;	// ジオメトリシェーダーのルートアクセスを拒否
 
 	// ルートパラメーターの設定
-	D3D12_ROOT_PARAMETER param{};
-	param.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // パラメーターのタイプ（CBV）
-	param.Descriptor.ShaderRegister = 0; // シェーダーレジスタ
-	param.Descriptor.RegisterSpace = 0; // レジスタスペース
-	param.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // シェーダーの可視性（頂点シェーダー）
+	D3D12_ROOT_PARAMETER param[2] = {};
+	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // パラメーターのタイプ（CBV）
+	param[0].Descriptor.ShaderRegister = 0; // シェーダーレジスタ
+	param[0].Descriptor.RegisterSpace = 0; // レジスタスペース
+	param[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // シェーダーの可視性（頂点シェーダー）
+
+	D3D12_DESCRIPTOR_RANGE range{};
+	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // ディスクリプタレンジのタイプ（SRV）
+	range.NumDescriptors = 1; // ディスクリプタの数
+	range.BaseShaderRegister = 0; // ベースシェーダーレジスタ
+	range.RegisterSpace = 0; // レジスタスペース
+	range.OffsetInDescriptorsFromTableStart = 0; // テーブル開始からのオフセット
+
+	param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // パラメーターのタイプ（ディスクリプタテーブル）
+	param[1].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
+	param[1].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジの配列
+	param[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
+
+	// スタティックサンプラーの設定
+	D3D12_STATIC_SAMPLER_DESC samplerDesc{};
+	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // フィルタリングモード（線形）
+	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP; // テクスチャアドレスモード（クランプ）
+	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP; // テクスチャアドレスモード（クランプ）
+	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP; // テクスチャアドレスモード（クランプ）
+	samplerDesc.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS; // ミップレベルのバイアス（デフォルト）
+	samplerDesc.MaxAnisotropy = 1; // 最大異方性（1なら異方性なし）
+	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較関数（決して比較しない）
+	samplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK; // ボーダーカラー（透明な黒）
+	samplerDesc.MinLOD = -D3D12_FLOAT32_MAX; // 最小LOD（最小値）
+	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX; // 最大LOD（最大値）
+	samplerDesc.ShaderRegister = 0; // シェーダーレジスタ
+	samplerDesc.RegisterSpace = 0; // レジスタスペース
+	samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
 
 	// ルートシグネチャの設定
 	D3D12_ROOT_SIGNATURE_DESC rootDesc{};
-	rootDesc.NumParameters = 1; // パラメーターの数
-	rootDesc.NumStaticSamplers = 0; // 静的サンプラーの数
-	rootDesc.pParameters = &param; // ルートパラメーターの配列
-	rootDesc.pStaticSamplers = nullptr; // 静的サンプラーの配列（なし）
+	rootDesc.NumParameters = 2; // パラメーターの数
+	rootDesc.NumStaticSamplers = 1; // 静的サンプラーの数
+	rootDesc.pParameters = param; // ルートパラメーターの配列
+	rootDesc.pStaticSamplers = &samplerDesc; // 静的サンプラーの配列
 	rootDesc.Flags = flag; // ルートシグネチャのフラグ
 
 	ComPtr<ID3DBlob> pBlob = nullptr; // ルートシグネチャのバイナリデータ
@@ -932,9 +964,9 @@ bool App::OnInit()
 	elements[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA; // 入力クラス（頂点データ）
 	elements[0].InstanceDataStepRate = 0; // インスタンスデータステップレート（なし）
 
-	elements[1].SemanticName = "COLOR"; // セマンティック名（色）
+	elements[1].SemanticName = "TEXCOORD"; // セマンティック名（テクスチャ座標）
 	elements[1].SemanticIndex = 0; // セマンティックインデックス
-	elements[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT; // フォーマット（RGBA色）
+	elements[1].Format = DXGI_FORMAT_R32G32_FLOAT; // フォーマット（2Dテクスチャ座標）
 	elements[1].InputSlot = 0; // 入力スロット
 	elements[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT; // アライメントオフセット（自動計算）
 	elements[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA; // 入力クラス（頂点データ）
@@ -987,8 +1019,24 @@ bool App::OnInit()
 	ComPtr<ID3DBlob> pVSBlob = nullptr; // 頂点シェーダーのバイナリデータ
 	ComPtr<ID3DBlob> pPSBlob = nullptr; // ピクセルシェーダーのバイナリデータ
 
+	std::wstring vsPath, psPath;
+
+	if (!SearchFilePath(L"SimpleTexVS.cso", vsPath))
+		// 頂点シェーダーのファイルパスを検索
+	{
+		MessageBox(nullptr, "SimpleTexVS.csoが見つかりません。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	if (!SearchFilePath(L"SimpleTexPS.cso", psPath))
+		// ピクセルシェーダーのファイルパスを検索
+	{
+		MessageBox(nullptr, "SimpleTexPS.csoが見つかりません。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
 	// 頂点シェーダー読み込み
-	hr = D3DReadFileToBlob(L"SimpleVS.cso", pVSBlob.GetAddressOf()); // 頂点シェーダーのバイナリデータを読み込み
+	hr = D3DReadFileToBlob(vsPath.c_str(), pVSBlob.GetAddressOf()); // 頂点シェーダーのバイナリデータを読み込み
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -996,7 +1044,7 @@ bool App::OnInit()
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(L"SimplePS.cso", pPSBlob.GetAddressOf()); // ピクセルシェーダーのバイナリデータを読み込み
+	hr = D3DReadFileToBlob(psPath.c_str(), pPSBlob.GetAddressOf()); // ピクセルシェーダーのバイナリデータを読み込み
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -1029,6 +1077,72 @@ bool App::OnInit()
 		MessageBox(nullptr, "パイプラインステートの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false;
 	}
+
+	// ==============================
+	//	テクスチャの生成
+	// ==============================
+	// テクスチャのファイルパスを検索
+	std::wstring texPath;
+	if (!SearchFilePath(L"res/ADC.dds", texPath))
+	{
+		MessageBox(nullptr, "ADC.ddsが見つかりません。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	DirectX::ResourceUploadBatch batch(m_pDevice.Get()); // リソースアップロードバッチを作成
+	batch.Begin(); // アップロードバッチを開始
+
+	// リソースを生成
+	hr = DirectX::CreateDDSTextureFromFile(
+		m_pDevice.Get(),					// デバイス
+		batch,								// アップロードバッチ
+		texPath.c_str(),					// テクスチャのファイルパス
+		m_Texture.pResource.GetAddressOf(),	// テクスチャのポインタ
+		true);								// ミップマップを生成するかどうか
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "テクスチャの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// コマンドを実行
+	auto future = batch.End(m_pQueue.Get()); // アップロードバッチを終了し、コマンドを実行
+
+	// コマンドの完了を待機する
+	future.wait(); // コマンドの完了を待つ
+
+	// インクリメントサイズを取得
+	incrementSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV); // ディスクリプタのインクリメントサイズ
+
+	// CPUディスクリプタハンドルとGPUディスクリプタハンドルをディスクリプタヒープから取得
+	auto handleCPU = m_pHeapCBV->GetCPUDescriptorHandleForHeapStart(); // CPUディスクリプタハンドルを取得
+	auto handleGPU = m_pHeapCBV->GetGPUDescriptorHandleForHeapStart(); // GPUディスクリプタハンドルを取得
+
+	// テクスチャにディスクリプタを割り当てる
+	handleCPU.ptr += incrementSize * 2; // CPUディスクリプタハンドルをフレーム数分ずらす
+	handleGPU.ptr += incrementSize * 2; // GPUディスクリプタハンドルをフレーム数分ずらす
+
+	m_Texture.HandleCPU = handleCPU; // CPUディスクリプタハンドルを設定
+	m_Texture.HandleGPU = handleGPU; // GPUディスクリプタハンドルを設定
+
+	// テクスチャの構成設定を取得
+	auto textureDesc = m_Texture.pResource->GetDesc(); // テクスチャの設定を取得
+
+	// シェーダーリソースビューの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // シェーダーリソースビューの次元（2Dテクスチャ）
+	srvDesc.Format = textureDesc.Format; // テクスチャのフォーマットを設定
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーコンポーネントマッピングをデフォルトに設定
+	srvDesc.Texture2D.MostDetailedMip = 0; // 最も詳細なミップレベルを0に設定
+	srvDesc.Texture2D.MipLevels = textureDesc.MipLevels; // ミップレベルの数を設定
+	srvDesc.Texture2D.PlaneSlice = 0; // プレーンスライスを0に設定
+	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f; // リソースの最小LODクランプを0に設定
+
+	// シェーダーリソースビューを生成
+	m_pDevice->CreateShaderResourceView(
+		m_Texture.pResource.Get(),		// テクスチャのポインタ
+		&srvDesc,						// シェーダーリソースビューの設定
+		handleCPU);						// CPUディスクリプタハンドル
 
 	// ==============================
 	//	ビューポートとシザ―矩形の設定

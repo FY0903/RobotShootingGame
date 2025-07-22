@@ -27,8 +27,8 @@
 // ==============================
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "winmm.lib")
 
 // ==============================
 //	Type Definitions
@@ -53,7 +53,14 @@ struct ConstantBufferView
 	D3D12_GPU_DESCRIPTOR_HANDLE HandleGPU;	// GPUディスクリプタハンドル
 	T* pBuffer;								// 定数バッファのポインタ
 };
- 
+
+struct Texture
+{
+	ComPtr<ID3D12Resource> pResource;		// テクスチャリソース
+	D3D12_CPU_DESCRIPTOR_HANDLE HandleCPU;	// CPUディスクリプタハンドル
+	D3D12_GPU_DESCRIPTOR_HANDLE HandleGPU;	// GPUディスクリプタハンドル
+};
+
 /**
  * @brief Appクラス
  */
@@ -110,6 +117,7 @@ private:
 	ComPtr<ID3D12GraphicsCommandList> m_pCmdList{};					// コマンドリスト
 	ComPtr<ID3D12DescriptorHeap> m_pHeapRTV{};						// レンダーターゲットビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12Fence> m_pFence{};									// フェンス
+	ComPtr<ID3D12DescriptorHeap> m_pHeapCBV_SRV_UAV{};				// 定数バッファビュー、シェーダーリソースビュー、アンオーダードアクセスビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12DescriptorHeap> m_pHeapDSV{};						// 深度ステンシルビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12DescriptorHeap> m_pHeapCBV{};						// 定数バッファビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12Resource> m_pVB{};									// 頂点バッファ
@@ -129,4 +137,5 @@ private:
 	D3D12_RECT m_Scissor{};											// シザーレクト
 	ConstantBufferView<Transform> m_CBV[FrameCount * 2]{};			// 定数バッファビュー
 	float m_fRotateAngle{};											// 回転角度
+	Texture m_Texture{};											// テクスチャ
 };
