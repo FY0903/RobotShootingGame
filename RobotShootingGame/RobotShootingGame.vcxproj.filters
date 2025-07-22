@@ -13,6 +13,9 @@
     <Filter Include="Resource">
       <UniqueIdentifier>{db6079f1-0cc9-4703-8465-a811d4a81bad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility">
+      <UniqueIdentifier>{23655bf2-d6b8-49f6-a669-f2090bef667f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -21,10 +24,16 @@
     <ClCompile Include="Source\System\main.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\FileUtil.cpp">
+      <Filter>Source\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp">
       <Filter>Source\System\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\FileUtil.hpp">
+      <Filter>Source\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -34,10 +43,10 @@
     <FxCompile Include="Resource\SimpleVS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
-    <FxCompile Include="SimpleTexVS.hlsl">
+    <FxCompile Include="Resource\SimpleTexPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
-    <FxCompile Include="SimpleTexPS.hlsl">
+    <FxCompile Include="Resource\SimpleTexVS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>
