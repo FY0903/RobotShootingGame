@@ -491,10 +491,7 @@ void App::Render()
 	//	更新処理
 	// ==============================
 	m_fRotateAngle += 0.025f;
-	m_CBV[m_unFrameIndex * 2 + 0].pBuffer->World =
-		DirectX::XMMatrixRotationZ(m_fRotateAngle + DirectX::XMConvertToRadians(45.0f));
-	m_CBV[m_unFrameIndex * 2 + 1].pBuffer->World =
-		DirectX::XMMatrixRotationY(m_fRotateAngle) * DirectX::XMMatrixScaling(2.0f, 0.5f, 1.0f);
+	m_CBV[m_unFrameIndex].pBuffer->World = DirectX::XMMatrixRotationY(m_fRotateAngle);
 
 	// コマンドの記録を開始
 	m_pCmdAllocater[m_unFrameIndex]->Reset(); // コマンドアロケーターをリセット
@@ -542,7 +539,10 @@ void App::Render()
 	//	描画処理
 	// ===============================
 	m_pCmdList->SetGraphicsRootSignature(m_pRootSignature.Get()); // ルートシグネチャの設定
-	m_pCmdList->SetDescriptorHeaps(1, m_pHeapCBV.GetAddressOf()); // ディスクリプタヒープの設定
+	m_pCmdList->SetDescriptorHeaps(1, m_pHeapCBV_SRV_UAV.GetAddressOf()); // ディスクリプタヒープの設定
+	m_pCmdList->SetGraphicsRootConstantBufferView(0, m_CBV[m_unFrameIndex].Desc.BufferLocation);	// 定数バッファビューの設定
+	
+	m_pCmdList->SetGraphicsRootDescriptorTable(1, m_Texture.HandleGPU);	// テクスチャのディスクリプタテーブルを設定
 	m_pCmdList->SetPipelineState(m_pPSO.Get()); // パイプラインステートオブジェクトの設定
 
 	m_pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジの設定
@@ -551,29 +551,12 @@ void App::Render()
 	m_pCmdList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
 	m_pCmdList->RSSetScissorRects(1, &m_Scissor); // シザーレクトの設定
 
-	// 手前側の三角形を描画
-	m_pCmdList->SetGraphicsRootConstantBufferView(
-		0, // ルートパラメータのインデックス
-		m_CBV[m_unFrameIndex * 2 + 0].Desc.BufferLocation); // 定数バッファビューの設定
-
 	m_pCmdList->DrawIndexedInstanced(
-		6,	// インデックスの数
-		1,  // インスタンスの数
-		0,  // インデックスの開始位置
-		0,  // 頂点の開始位置
-		0); // インスタンスの開始位置
-
-	// 奥側の三角形を描画
-	m_pCmdList->SetGraphicsRootConstantBufferView(
-		0, // ルートパラメータのインデックス
-		m_CBV[m_unFrameIndex * 2 + 1].Desc.BufferLocation); // 定数バッファビューの設定
-
-	m_pCmdList->DrawIndexedInstanced(
-		6,	// インデックスの数
-		1,  // インスタンスの数
-		0,  // インデックスの開始位置
-		0,  // 頂点の開始位置
-		0); // インスタンスの開始位置
+		6,		// インデックスの数
+		1,		// インスタンスの数
+		0,		// インデックスの開始位置
+		0,		// 頂点の開始位置
+		0);		// インスタンスの開始位置
 
 	// リソースバリアの設定
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
@@ -771,7 +754,7 @@ bool App::OnInit()
 	m_IBV.SizeInBytes = static_cast<UINT>(sizeof(indices)); // サイズを設定
 
 	// ==============================
-	//	定数バッファ用ディスクリプタヒープの作成
+	//	CBV/SRV/UAV用ディスクリプタヒープの作成
 	// ==============================
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
 	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV; // ヒープのタイプ（CBV/SRV/UAV用）
@@ -781,10 +764,10 @@ bool App::OnInit()
 
 	hr = m_pDevice->CreateDescriptorHeap(
 		&heapDesc,									// ヒープの設定
-		IID_PPV_ARGS(m_pHeapCBV.GetAddressOf()));	// ヒープのポインタ
+		IID_PPV_ARGS(m_pHeapCBV_SRV_UAV.GetAddressOf()));	// ヒープのポインタ
 	if (FAILED(hr))
 	{
-		MessageBox(nullptr, "定数バッファ用ディスクリプタヒープの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		MessageBox(nullptr, "CBV/SRV/UAV用ディスクリプタヒープの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
@@ -830,8 +813,8 @@ bool App::OnInit()
 		}
 
 		auto address = m_pCB[i]->GetGPUVirtualAddress(); // GPU仮想アドレスを取得
-		auto handleCPU = m_pHeapCBV->GetCPUDescriptorHandleForHeapStart(); // CPUディスクリプタハンドルを取得
-		auto handleGPU = m_pHeapCBV->GetGPUDescriptorHandleForHeapStart(); // GPUディスクリプタハンドルを取得
+		auto handleCPU = m_pHeapCBV_SRV_UAV->GetCPUDescriptorHandleForHeapStart(); // CPUディスクリプタハンドルを取得
+		auto handleGPU = m_pHeapCBV_SRV_UAV->GetGPUDescriptorHandleForHeapStart(); // GPUディスクリプタハンドルを取得
 
 		handleCPU.ptr += incrementSize * i; // CPUディスクリプタハンドルをフレーム数分ずらす
 		handleGPU.ptr += incrementSize * i; // GPUディスクリプタハンドルをフレーム数分ずらす
@@ -1020,20 +1003,8 @@ bool App::OnInit()
 	ComPtr<ID3DBlob> pPSBlob = nullptr; // ピクセルシェーダーのバイナリデータ
 
 	std::wstring vsPath, psPath;
-
-	if (!SearchFilePath(L"SimpleTexVS.cso", vsPath))
-		// 頂点シェーダーのファイルパスを検索
-	{
-		MessageBox(nullptr, "SimpleTexVS.csoが見つかりません。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	if (!SearchFilePath(L"SimpleTexPS.cso", psPath))
-		// ピクセルシェーダーのファイルパスを検索
-	{
-		MessageBox(nullptr, "SimpleTexPS.csoが見つかりません。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
+	vsPath = L"Assets/Shader/SimpleTexVS.cso"; // 頂点シェーダーのファイルパスを設定
+	psPath = L"Assets/Shader/SimpleTexPS.cso"; // ピクセルシェーダーのファイルパスを設定
 
 	// 頂点シェーダー読み込み
 	hr = D3DReadFileToBlob(vsPath.c_str(), pVSBlob.GetAddressOf()); // 頂点シェーダーのバイナリデータを読み込み
@@ -1083,11 +1054,7 @@ bool App::OnInit()
 	// ==============================
 	// テクスチャのファイルパスを検索
 	std::wstring texPath;
-	if (!SearchFilePath(L"res/ADC.dds", texPath))
-	{
-		MessageBox(nullptr, "ADC.ddsが見つかりません。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
+	texPath = L"Assets/ADC.dds"; // テクスチャのファイルパスを設定
 
 	DirectX::ResourceUploadBatch batch(m_pDevice.Get()); // リソースアップロードバッチを作成
 	batch.Begin(); // アップロードバッチを開始
@@ -1115,8 +1082,8 @@ bool App::OnInit()
 	incrementSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV); // ディスクリプタのインクリメントサイズ
 
 	// CPUディスクリプタハンドルとGPUディスクリプタハンドルをディスクリプタヒープから取得
-	auto handleCPU = m_pHeapCBV->GetCPUDescriptorHandleForHeapStart(); // CPUディスクリプタハンドルを取得
-	auto handleGPU = m_pHeapCBV->GetGPUDescriptorHandleForHeapStart(); // GPUディスクリプタハンドルを取得
+	auto handleCPU = m_pHeapCBV_SRV_UAV->GetCPUDescriptorHandleForHeapStart(); // CPUディスクリプタハンドルを取得
+	auto handleGPU = m_pHeapCBV_SRV_UAV->GetGPUDescriptorHandleForHeapStart(); // GPUディスクリプタハンドルを取得
 
 	// テクスチャにディスクリプタを割り当てる
 	handleCPU.ptr += incrementSize * 2; // CPUディスクリプタハンドルをフレーム数分ずらす

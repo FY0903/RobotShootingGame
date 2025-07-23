@@ -117,9 +117,8 @@ private:
 	ComPtr<ID3D12GraphicsCommandList> m_pCmdList{};					// コマンドリスト
 	ComPtr<ID3D12DescriptorHeap> m_pHeapRTV{};						// レンダーターゲットビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12Fence> m_pFence{};									// フェンス
-	ComPtr<ID3D12DescriptorHeap> m_pHeapCBV_SRV_UAV{};				// 定数バッファビュー、シェーダーリソースビュー、アンオーダードアクセスビューのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12DescriptorHeap> m_pHeapDSV{};						// 深度ステンシルビューのヒープ(ディスクリプタヒープ)
-	ComPtr<ID3D12DescriptorHeap> m_pHeapCBV{};						// 定数バッファビューのヒープ(ディスクリプタヒープ)
+	ComPtr<ID3D12DescriptorHeap> m_pHeapCBV_SRV_UAV{};				// 定数バッファ、SRV、UAVのヒープ(ディスクリプタヒープ)
 	ComPtr<ID3D12Resource> m_pVB{};									// 頂点バッファ
 	ComPtr<ID3D12Resource> m_pIB{};									// インデックスバッファ
 	ComPtr<ID3D12Resource> m_pCB[FrameCount * 2]{};					// 定数バッファ(フレームごとに1つ)
