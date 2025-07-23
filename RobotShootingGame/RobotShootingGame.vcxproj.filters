@@ -16,6 +16,9 @@
     <Filter Include="Source\Utility">
       <UniqueIdentifier>{23655bf2-d6b8-49f6-a669-f2090bef667f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Mesh">
+      <UniqueIdentifier>{82a5fe1c-1cc9-48a6-bab6-5874dcc341da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -24,16 +27,16 @@
     <ClCompile Include="Source\System\main.cpp">
       <Filter>Source\System</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\FileUtil.cpp">
-      <Filter>Source\Utility</Filter>
+    <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
+      <Filter>Source\Utility\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp">
       <Filter>Source\System\App</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\FileUtil.hpp">
-      <Filter>Source\Utility</Filter>
+    <ClInclude Include="Source\Utility\Mesh\Mesh.hpp">
+      <Filter>Source\Utility\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
