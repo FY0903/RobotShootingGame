@@ -3,7 +3,7 @@
 	Summary: モデルの読み取りをするユーティリティ
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/23 15:48 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+			  /07/24 13:03 モデル読み込み機能を追加
 ===================================================================+*/
 #pragma once
 
@@ -30,6 +30,8 @@ struct MeshVertex
 	MeshVertex(DirectX::XMFLOAT3 const& position, DirectX::XMFLOAT3 const& normal, DirectX::XMFLOAT2 const& texcoord, DirectX::XMFLOAT3 const& tangent)
 		: Position(position), Normal(normal), TexCoord(texcoord), Tangent(tangent){};
 
+	static const D3D12_INPUT_LAYOUT_DESC InputLayout;
+
 private:
 	static const int InputElementCount = 4;
 	static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
@@ -53,9 +55,9 @@ struct Mesh
 
 /**
  * @brief 指定されたファイルからメッシュとマテリアルを読み込みます。
- * @param [filename] 読み込むメッシュファイルのパス（ワイド文字列）。
+ * @param [filename] 読み込むファイルのパス。
  * @param [meshes] 読み込まれたメッシュ情報が格納される std::vector への参照。
  * @param [materials] 読み込まれたマテリアル情報が格納される std::vector への参照。
  * @return 読み込みに成功した場合は true、失敗した場合は false を返します。
  */
-bool LoadMesh(const wchar_t* filename, std::vector<Mesh>& meshes, std::vector<Material>& materials);
+bool LoadMesh(const char* filename, std::vector<Mesh>& meshes, std::vector<Material>& materials);

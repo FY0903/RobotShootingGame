@@ -9,6 +9,7 @@
 			  /07/22 05:03 描画初期化処理を追加
 			  /07/22 16:48 深度ステンシルビューの追加
 			  /07/23 15:45 テクスチャ読み込み追加
+			  /07/24 13:03 メッシュ読み込み追加
 ===================================================================+*/
 #pragma once
 
@@ -22,6 +23,7 @@
 #include <wrl/client.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
+#include "../Utility/Mesh/Mesh.hpp"
 
 // ==============================
 //	Linker
@@ -138,4 +140,6 @@ private:
 	ConstantBufferView<Transform> m_CBV[FrameCount * 2]{};			// 定数バッファビュー
 	float m_fRotateAngle{};											// 回転角度
 	Texture m_Texture{};											// テクスチャ
+	std::vector<Mesh> m_Meshes{};									// メッシュのリスト
+	std::vector<Material> m_Materials{};							// マテリアルのリスト
 };

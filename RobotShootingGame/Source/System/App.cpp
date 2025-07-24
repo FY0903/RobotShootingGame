@@ -9,6 +9,7 @@
 			  /07/22 05:03 描画初期化処理を追加
 			  /07/22 16:48 深度ステンシルビューの追加
 			  /07/23 15:45 テクスチャ読み込み追加
+			  /07/24 13:03 メッシュ読み込み追加
 ===================================================================+*/
 
 // ==============================
@@ -551,12 +552,13 @@ void App::Render()
 	m_pCmdList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
 	m_pCmdList->RSSetScissorRects(1, &m_Scissor); // シザーレクトの設定
 
+	auto count = static_cast<uint32_t>(m_Meshes[0].Indices.size()); // インデックスの数を取得
 	m_pCmdList->DrawIndexedInstanced(
-		6,		// インデックスの数
-		1,		// インスタンスの数
-		0,		// インデックスの開始位置
-		0,		// 頂点の開始位置
-		0);		// インスタンスの開始位置
+		count,			// インデックスの数
+		1,				// インスタンスの数
+		0,				// インデックスの開始位置
+		0,				// 頂点の開始位置
+		0);				// インスタンスの開始位置
 
 	// リソースバリアの設定
 	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
@@ -625,15 +627,21 @@ void App::Present(uint32_t interval)
 bool App::OnInit()
 {
 	// ==============================
+	//	メッシュをロード
+	// ==============================
+	if (!LoadMesh("Assets/teapot/teapot.obj", m_Meshes, m_Materials))
+	{
+		MessageBox(nullptr, "メッシュのロードに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	assert(m_Meshes.size() == 1); // １と仮定
+
+	// ==============================
 	//	頂点バッファの作成
 	// ==============================
-	// 頂点データ
-	DirectX::VertexPositionTexture vertices[] = {
-		DirectX::VertexPositionTexture(DirectX::XMFLOAT3(-1.0f,  1.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 0.0f)),
-		DirectX::VertexPositionTexture(DirectX::XMFLOAT3( 1.0f,  1.0f, 0.0f), DirectX::XMFLOAT2(1.0f, 0.0f)),
-		DirectX::VertexPositionTexture(DirectX::XMFLOAT3( 1.0f, -1.0f, 0.0f), DirectX::XMFLOAT2(1.0f, 1.0f)),
-		DirectX::VertexPositionTexture(DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 1.0f)),
-	};
+	auto size = sizeof(MeshVertex) * m_Meshes[0].Vertices.size(); // 頂点バッファのサイズ
+	auto vertices = m_Meshes[0].Vertices.data(); // 頂点データのポインタ
 
 	// ヒーププロパティ
 	D3D12_HEAP_PROPERTIES prop{};
@@ -647,7 +655,7 @@ bool App::OnInit()
 	D3D12_RESOURCE_DESC resourceDesc{};
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;	// リソースの次元（バッファ）
 	resourceDesc.Alignment = 0;	// アライメント（0ならデフォルト）
-	resourceDesc.Width = sizeof(vertices);	// リソースの幅（頂点データのサイズ）
+	resourceDesc.Width = size;	// リソースの幅（頂点データのサイズ）
 	resourceDesc.Height = 1;	// 高さ（1なら1Dバッファ）
 	resourceDesc.DepthOrArraySize = 1;	// 深度または配列サイズ（1なら1Dバッファ）
 	resourceDesc.MipLevels = 1;	// ミップレベル（1ならミップマップなし）
@@ -681,23 +689,21 @@ bool App::OnInit()
 	}
 
 	// 頂点データーをマッピング先に設定
-	memcpy(ptr, vertices, sizeof(vertices)); // 頂点データをコピー
+	memcpy(ptr, vertices, size); // 頂点データをコピー
 
 	// マッピング解除
 	m_pVB->Unmap(0, nullptr); // マッピングを解除
 
 	// 頂点バッファビューの設定
 	m_VBV.BufferLocation = m_pVB->GetGPUVirtualAddress(); // GPU仮想アドレスを設定
-	m_VBV.SizeInBytes = static_cast<UINT>(sizeof(vertices)); // サイズを設定
-	m_VBV.StrideInBytes = static_cast <UINT>(sizeof(DirectX::VertexPositionTexture)); // ストライドを設定（頂点のサイズ）
+	m_VBV.SizeInBytes = static_cast<UINT>(size); // サイズを設定
+	m_VBV.StrideInBytes = static_cast <UINT>(sizeof(MeshVertex)); // ストライドを設定（頂点のサイズ）
 
 	// ==============================
 	//	インデックスバッファの生成
 	// ==============================
-	uint32_t indices[] = {
-		0, 1, 2, // 三角形1
-		0, 2, 3  // 三角形2
-	};
+	size = sizeof(uint32_t) * m_Meshes[0].Indices.size(); // インデックスバッファのサイズ
+	auto indices = m_Meshes[0].Indices.data(); // インデックスデータのポインタ
 
 	// ヒーププロパティ
 	prop.Type = D3D12_HEAP_TYPE_UPLOAD;	// ヒープのタイプ（アップロード用）
@@ -709,7 +715,7 @@ bool App::OnInit()
 	// リソースの設定
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;	// リソースの次元（バッファ）
 	resourceDesc.Alignment = 0;	// アライメント（0ならデフォルト）
-	resourceDesc.Width = sizeof(indices);	// リソースの幅（インデックスデータのサイズ）
+	resourceDesc.Width = size;	// リソースの幅（インデックスデータのサイズ）
 	resourceDesc.Height = 1;	// 高さ（1なら1Dバッファ）
 	resourceDesc.DepthOrArraySize = 1;	// 深度または配列サイズ（1なら1Dバッファ）
 	resourceDesc.MipLevels = 1;	// ミップレベル（1ならミップマップなし）
@@ -743,7 +749,7 @@ bool App::OnInit()
 	}
 
 	// インデックスデータをマッピング先に設定
-	memcpy(ptr, indices, sizeof(indices)); // インデックスデータをコピー
+	memcpy(ptr, indices, size); // インデックスデータをコピー
 
 	// マッピング解除
 	m_pIB->Unmap(0, nullptr); // マッピングを解除
@@ -751,7 +757,7 @@ bool App::OnInit()
 	// インデックスバッファビューの設定
 	m_IBV.BufferLocation = m_pIB->GetGPUVirtualAddress(); // GPU仮想アドレスを設定
 	m_IBV.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマットを設定（32ビット整数）
-	m_IBV.SizeInBytes = static_cast<UINT>(sizeof(indices)); // サイズを設定
+	m_IBV.SizeInBytes = static_cast<UINT>(size); // サイズを設定
 
 	// ==============================
 	//	CBV/SRV/UAV用ディスクリプタヒープの作成
@@ -837,7 +843,7 @@ bool App::OnInit()
 			return false; // エラー終了
 		}
 
-		auto eyePos = DirectX::XMVectorSet(0.0f, 0.0f, 5.0f, 0.0f); // 視点の位置を設定
+		auto eyePos = DirectX::XMVectorSet(0.0f, 1.0f, 2.0f, 0.0f); // 視点の位置を設定
 		auto targetPos = DirectX::XMVectorZero(); // 注視点の位置を設定
 		auto upward = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // 上方向を設定
 
@@ -1024,7 +1030,7 @@ bool App::OnInit()
 
 	// パイプラインステートの設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
-	psoDesc.InputLayout = { elements, _countof(elements) }; // 入力レイアウトを設定
+	psoDesc.InputLayout = MeshVertex::InputLayout; // 入力レイアウトを設定
 	psoDesc.pRootSignature = m_pRootSignature.Get(); // ルートシグネチャを設定
 	psoDesc.VS = { pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize() }; // 頂点シェーダーを設定
 	psoDesc.PS = { pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize() }; // ピクセルシェーダーを設定
@@ -1054,7 +1060,7 @@ bool App::OnInit()
 	// ==============================
 	// テクスチャのファイルパスを検索
 	std::wstring texPath;
-	texPath = L"Assets/ADC.dds"; // テクスチャのファイルパスを設定
+	texPath = L"Assets/teapot/default.dds"; // テクスチャのファイルパスを設定
 
 	DirectX::ResourceUploadBatch batch(m_pDevice.Get()); // リソースアップロードバッチを作成
 	batch.Begin(); // アップロードバッチを開始
