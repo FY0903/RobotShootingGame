@@ -8,7 +8,7 @@
 // ==============================
 //	include
 // ==============================
-#include "DiscriptorPool.hpp"
+#include "DescriptorPool.hpp"
 
 bool DiscriptorPool::Create(ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC* desc, DiscriptorPool** ppPool)
 {

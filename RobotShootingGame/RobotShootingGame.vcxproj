@@ -25,7 +25,11 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Pool\DescriptorPool\DiscriptorPool.cpp">
+    <ClCompile Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Texture\Texture.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -36,11 +40,15 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Source\Utility\Pool\DescriptorPool\DiscriptorPool.hpp">
+    <ClInclude Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.hpp">
       <SubType>
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Pool\Pool.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Texture\Texture.hpp">
       <SubType>
       </SubType>
     </ClInclude>

@@ -20,10 +20,19 @@
 class DescriptorHandle
 {
 public:
-	D3D12_CPU_DESCRIPTOR_HANDLE HandleCPU;	// CPUディスクリプタハンドル
-	D3D12_GPU_DESCRIPTOR_HANDLE HandleGPU;	// GPUディスクリプタハンドル
+	D3D12_CPU_DESCRIPTOR_HANDLE HandleCPU{};	// CPUディスクリプタハンドル
+	D3D12_GPU_DESCRIPTOR_HANDLE HandleGPU{};	// GPUディスクリプタハンドル
 
+	/**
+	 * @brief CPUが存在するかどうかを判定します。
+	 * @return CPUが存在する場合はtrue、存在しない場合はfalseを返します。
+	 */
 	inline bool HasCPU() const { return HandleCPU.ptr != 0; }
+
+	/**
+	 * @brief GPUが存在するかどうかを判定します。
+	 * @return GPUが存在する場合はtrue、存在しない場合はfalseを返します。
+	 */
 	inline bool HasGPU() const { return HandleGPU.ptr != 0; }
 };
 
@@ -33,16 +42,41 @@ public:
 class DiscriptorPool
 {
 public:
+	/**
+	 * @brief ID3D12Device と記述子ヒープ記述を使用して DiscriptorPool を作成します。
+	 * @param [pDevice] ID3D12Device へのポインタ。
+	 * @param [desc] D3D12_DESCRIPTOR_HEAP_DESC 構造体へのポインタ。作成する記述子ヒープの情報を指定します。
+	 * @param [ppPool] 作成された DiscriptorPool オブジェクトへのポインタを受け取るポインタ。
+	 * @return 作成に成功した場合は true、失敗した場合は false を返します。
+	 */
 	static bool Create(ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC* desc, DiscriptorPool** ppPool);
 
+	/**
+	 * @brief 参照カウントを1増やします。
+	 */
 	void AddRef();
 
+	/**
+	 * @brief リソースを解放します。
+	 */
 	void Release();	
 
+	/**
+	 * @brief 現在の参照カウントを取得します。
+	 * @return 現在の参照カウント値（uint32_t 型）。
+	 */
 	uint32_t GetCount() const { return m_RefCount; }
 
+	/**
+	 * @brief ハンドルを割り当てて返します。
+	 * @return 新しく割り当てられた DescriptorHandle へのポインタ。
+	 */
 	DescriptorHandle* AllocHandle();
 
+	/**
+	 * @brief ハンドルを解放します。
+	 * @param pHandle 解放するDescriptorHandleへのポインタ。
+	 */
 	void FreeHandle(DescriptorHandle* pHandle);
 
 	/**

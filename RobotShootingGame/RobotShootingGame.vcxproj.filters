@@ -22,7 +22,10 @@
     <Filter Include="Source\Utility\Pool">
       <UniqueIdentifier>{ba26a58a-dfe6-42a0-8c3e-cd0181861211}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\Pool\DiscriptorPool">
+    <Filter Include="Source\Utility\Texture">
+      <UniqueIdentifier>{b34f0686-eb72-4e29-9fb5-94c08168170e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Pool\DescriptorPool">
       <UniqueIdentifier>{6a833e9d-796b-467f-87fb-d6e4188663e2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -36,8 +39,11 @@
     <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
       <Filter>Source\Utility\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Pool\DescriptorPool\DiscriptorPool.cpp">
-      <Filter>Source\Utility\Pool\DiscriptorPool</Filter>
+    <ClCompile Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.cpp">
+      <Filter>Source\Utility\Pool\DescriptorPool</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Texture\Texture.cpp">
+      <Filter>Source\Utility\Texture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,8 +56,11 @@
     <ClInclude Include="Source\Utility\Pool\Pool.hpp">
       <Filter>Source\Utility\Pool</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\Pool\DescriptorPool\DiscriptorPool.hpp">
-      <Filter>Source\Utility\Pool\DiscriptorPool</Filter>
+    <ClInclude Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.hpp">
+      <Filter>Source\Utility\Pool\DescriptorPool</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Texture\Texture.hpp">
+      <Filter>Source\Utility\Texture</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
