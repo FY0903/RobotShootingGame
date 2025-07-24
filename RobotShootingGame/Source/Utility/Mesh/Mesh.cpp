@@ -52,10 +52,28 @@ namespace {
 		MeshLoader() = default;
 		~MeshLoader() = default;
 
+		/**
+		 * @brief 指定されたファイルからメッシュとマテリアルの情報を読み込みます。
+		 * @param [filename] 読み込むファイルのパスを指す文字列。
+		 * @param [meshes] 読み込まれたメッシュ情報が格納される std::vector<Mesh> への参照。
+		 * @param [materials] 読み込まれたマテリアル情報が格納される std::vector<Material> への参照。
+		 * @return 読み込みが成功した場合は true、失敗した場合は false を返します。
+		 */
 		bool Load(const char* filename, std::vector<Mesh>& meshes, std::vector<Material>& materials);
 
 	private:
+		/**
+		 * @brief aiMesh オブジェクトから情報を抽出し、Mesh オブジェクトに解析結果を格納します。
+		 * @param [dstMesh] 解析結果を格納する Mesh オブジェクトへの参照。
+		 * @param [pSrcMesh] 解析対象となる aiMesh オブジェクトへのポインタ。
+		 */
 		void ParseMesh(Mesh& dstMesh, const aiMesh* pSrcMesh);
+
+		/**
+		 * @brief aiMaterial オブジェクトから情報を抽出し、Material オブジェクトに解析結果を格納します。
+		 * @param [dstMaterial] 解析結果を格納する Material オブジェクトへの参照。
+		 * @param [pSrcMaterial] 解析元となる aiMaterial オブジェクトへのポインタ。
+		 */
 		void ParseMaterial(Material& dstMaterial, const aiMaterial* pSrcMaterial);
 	};
 	

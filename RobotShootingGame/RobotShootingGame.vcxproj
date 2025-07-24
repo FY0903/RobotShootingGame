@@ -25,10 +25,22 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Pool\DescriptorPool\DiscriptorPool.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp" />
     <ClInclude Include="Source\Utility\Mesh\Mesh.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Pool\DescriptorPool\DiscriptorPool.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Pool\Pool.hpp">
       <SubType>
       </SubType>
     </ClInclude>
