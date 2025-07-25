@@ -1,6 +1,6 @@
 /*+===================================================================
 	File: Texture.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: テクスチャクラスのソースファイル
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/24 16:30 初回作成
 ===================================================================+*/
@@ -160,8 +160,8 @@ D3D12_SHADER_RESOURCE_VIEW_DESC Texture::GetViewDesc(bool isCube)
 	case D3D12_RESOURCE_DIMENSION_BUFFER:
 		abort();	// バッファの場合はサポートされていないため、処理を中断
 		break;
-	case D3D12_RESOURCE_DIMENSION_TEXTURE1D:
-		if (desc.Dimension > 1)
+	case D3D12_RESOURCE_DIMENSION_TEXTURE1D:	// 1Dテクスチャの場合
+		if (desc.Dimension > 1)	// 1Dテクスチャアレイの場合
 		{
 			viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1DARRAY;	// 1Dテクスチャアレイの場合
 
@@ -171,7 +171,7 @@ D3D12_SHADER_RESOURCE_VIEW_DESC Texture::GetViewDesc(bool isCube)
 			viewDesc.Texture1DArray.ArraySize = desc.DepthOrArraySize;	// アレイサイズを設定
 			viewDesc.Texture1DArray.ResourceMinLODClamp = 0.0f;	// 最小LODクランプを0に設定
 		}
-		else
+		else // 1Dテクスチャの場合
 		{
 			viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;	// 1Dテクスチャの場合
 
@@ -180,14 +180,80 @@ D3D12_SHADER_RESOURCE_VIEW_DESC Texture::GetViewDesc(bool isCube)
 			viewDesc.Texture1D.ResourceMinLODClamp = 0.0f;	// 最小LODクランプを0に設定
 		}
 		break;
-	case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
-		if (desc.DepthOrArraySize > 6)
+	case D3D12_RESOURCE_DIMENSION_TEXTURE2D:	// 2Dテクスチャの場合
+		if (isCube)	// キューブマップの場合
 		{
+			if (desc.DepthOrArraySize > 6)	// キューブマップアレイの場合
+			{
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;	// キューブマップアレイの場合
 
+				viewDesc.TextureCubeArray.MostDetailedMip = 0;	// 最も詳細なミップレベルを0に設定
+				viewDesc.TextureCubeArray.MipLevels = desc.MipLevels;	// ミップレベル数を設定
+				viewDesc.TextureCubeArray.First2DArrayFace = 0;	// 最初の2Dアレイスライスを0に設定
+				viewDesc.TextureCubeArray.NumCubes = desc.DepthOrArraySize / 6;	// キューブ数を設定
+				viewDesc.TextureCubeArray.ResourceMinLODClamp = 0.0f;	// 最小LODクランプを0に設定
+			}
+			else // キューブマップの場合
+			{
+				viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;	// キューブマップの場合
+
+				viewDesc.TextureCube.MostDetailedMip = 0;	// 最も詳細なミップレベルを0に設定
+				viewDesc.TextureCube.MipLevels = desc.MipLevels;	// ミップレベル数を設定
+				viewDesc.TextureCube.ResourceMinLODClamp = 0.0f;	// 最小LODクランプを0に設定
+			}
 		}
-		else
+		else // キューブマップではない場合
 		{
+			if (desc.DepthOrArraySize > 1)	// 2Dテクスチャアレイまたはマルチサンプルの場合
+			{
+				if (desc.MipLevels > 1)	// 2Dマルチサンプルアレイの場合
+				{
+					viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMSARRAY;	// 2Dマルチサンプルアレイの場合
 
+					viewDesc.Texture2DMSArray.FirstArraySlice = 0;	// 最初のアレイスライスを0に設定
+					viewDesc.Texture2DMSArray.ArraySize = desc.DepthOrArraySize;	// アレイサイズを設定
+				}
+				else // 2Dテクスチャアレイの場合
+				{
+					viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;	// 2Dテクスチャアレイの場合
+
+					viewDesc.Texture2DArray.MostDetailedMip = 0;	// 最も詳細なミップレベルを0に設定
+					viewDesc.Texture2DArray.MipLevels = desc.MipLevels;	// ミップレベル数を設定
+					viewDesc.Texture2DArray.FirstArraySlice = 0;	// 最初のアレイスライスを0に設定
+					viewDesc.Texture2DArray.ArraySize = desc.DepthOrArraySize;	// アレイサイズを設定
+					viewDesc.Texture2DArray.PlaneSlice = 0;	// プレーンスライスを0に設定
+					viewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;	// 最小LODクランプを0に設定
+				}
+			}
+			else // 2Dテクスチャまたはマルチサンプルの場合
+			{
+				if (desc.MipLevels > 1)	// 2Dマルチサンプルの場合
+				{
+					viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;	// 2Dマルチサンプルの場合
+				}
+				else // 2Dテクスチャの場合
+				{
+					viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;	// 2Dテクスチャの場合
+
+					viewDesc.Texture2D.MostDetailedMip = 0;	// 最も詳細なミップレベルを0に設定
+					viewDesc.Texture2D.MipLevels = desc.MipLevels;	// ミップレベル数を設定
+					viewDesc.Texture2D.PlaneSlice = 0;	// プレーンスライスを0に設定
+					viewDesc.Texture2D.ResourceMinLODClamp = 0.0f;	// 最小LODクランプを0に設定
+				}
+			}
 		}
+		break;
+	case D3D12_RESOURCE_DIMENSION_TEXTURE3D:	// 3Dテクスチャの場合
+		viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;	// 3Dテクスチャの場合
+
+		viewDesc.Texture3D.MostDetailedMip = 0;	// 最も詳細なミップレベルを0に設定
+		viewDesc.Texture3D.MipLevels = desc.MipLevels;	// ミップレベル数を設定
+		viewDesc.Texture3D.ResourceMinLODClamp = 0.0f;	// 最小LODクランプを0に設定
+		break;
+	default:
+		abort();	// サポートされていないリソース次元の場合は処理を中断
+		break;
 	}
+
+	return viewDesc;	// ビューの設定を返す
 }
