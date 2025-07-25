@@ -1,5 +1,5 @@
 /*+===================================================================
-	File: DiscriptorPool.hpp
+	File: DescriptorPool.hpp
 	Summary: ディスクリプタプールのヘッダファイル
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/24 14:22 初回作成
@@ -39,7 +39,7 @@ public:
 /**
  * @brief DiscriptorPoolクラス
  */
-class DiscriptorPool
+class DescriptorPool
 {
 public:
 	/**
@@ -49,7 +49,7 @@ public:
 	 * @param [ppPool] 作成された DiscriptorPool オブジェクトへのポインタを受け取るポインタ。
 	 * @return 作成に成功した場合は true、失敗した場合は false を返します。
 	 */
-	static bool Create(ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC* desc, DiscriptorPool** ppPool);
+	static bool Create(ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC* desc, DescriptorPool** ppPool);
 
 	/**
 	 * @brief 参照カウントを1増やします。
@@ -107,15 +107,15 @@ private:
 	/**
 	 * コンストラクタ
 	 */
-	DiscriptorPool() = default;
+	DescriptorPool() = default;
 
 	/**
 	 * デストラクタ
 	 */
-	~DiscriptorPool();
+	~DescriptorPool();
 
-	DiscriptorPool(const DiscriptorPool&) = delete;	// コピーコンストラクタを削除
-	void operator=(const DiscriptorPool&) = delete;	// コピー代入演算子を削除
+	DescriptorPool(const DescriptorPool&) = delete;	// コピーコンストラクタを削除
+	void operator=(const DescriptorPool&) = delete;	// コピー代入演算子を削除
 
 	std::atomic<uint32_t> m_RefCount = 1;	// 参照カウント
 	Pool<DescriptorHandle> m_Pool{};	// ディスクリプタハンドルのプール

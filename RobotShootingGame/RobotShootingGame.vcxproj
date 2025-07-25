@@ -21,6 +21,10 @@
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
+    <ClCompile Include="Source\Utility\ConstantBuffer\ConstantBuffer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
       <SubType>
       </SubType>
@@ -36,6 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp" />
+    <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\Mesh\Mesh.hpp">
       <SubType>
       </SubType>

@@ -28,6 +28,9 @@
     <Filter Include="Source\Utility\Pool\DescriptorPool">
       <UniqueIdentifier>{6a833e9d-796b-467f-87fb-d6e4188663e2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\ConstantBuffer">
+      <UniqueIdentifier>{68136f5c-7fcc-48ab-8a89-a381a1bca890}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -45,6 +48,9 @@
     <ClCompile Include="Source\Utility\Texture\Texture.cpp">
       <Filter>Source\Utility\Texture</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\ConstantBuffer\ConstantBuffer.cpp">
+      <Filter>Source\Utility\ConstantBuffer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp">
@@ -61,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Texture\Texture.hpp">
       <Filter>Source\Utility\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
+      <Filter>Source\Utility\ConstantBuffer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

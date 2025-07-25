@@ -1,5 +1,5 @@
 /*+===================================================================
-	File: DiscriptorPool.cpp
+	File: DescriptorPool.cpp
 	Summary: ディスクリプタプールのソースファイル
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/24 14:22 初回作成
@@ -10,13 +10,13 @@
 // ==============================
 #include "DescriptorPool.hpp"
 
-bool DiscriptorPool::Create(ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC* desc, DiscriptorPool** ppPool)
+bool DescriptorPool::Create(ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_DESC* desc, DescriptorPool** ppPool)
 {
 	// 引数チェック
 	if (!pDevice || !desc || !ppPool) return false;	// pDevice, desc, ppPoolのいずれかがnullptrならfalseを返す
 
 	// インスタンスを生成
-	auto instance = new(std::nothrow) DiscriptorPool();	// 例外を投げないようにnewを使用
+	auto instance = new(std::nothrow) DescriptorPool();	// 例外を投げないようにnewを使用
 	if (!instance) return false;	// インスタンスの生成に失敗したらfalseを返す
 
 	// ディスクリプタヒープを作成
@@ -37,18 +37,18 @@ bool DiscriptorPool::Create(ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_D
 	return true;	// 成功したらtrueを返す
 }
 
-void DiscriptorPool::AddRef()
+void DescriptorPool::AddRef()
 {
 	++m_RefCount;	// 参照カウントを増やす
 }
 
-void DiscriptorPool::Release()
+void DescriptorPool::Release()
 {
 	--m_RefCount;	// 参照カウントを減らす
 	if (m_RefCount == 0) delete this;	// 参照カウントが0になったら自分自身を削除
 }
 
-DescriptorHandle* DiscriptorPool::AllocHandle()
+DescriptorHandle* DescriptorPool::AllocHandle()
 {
 	auto func = [&](uint32_t index, DescriptorHandle* pHandle)
 	{
@@ -65,7 +65,7 @@ DescriptorHandle* DiscriptorPool::AllocHandle()
 	return m_Pool.Alloc(func);	// プールからディスクリプタハンドルを割り当てる
 }
 
-void DiscriptorPool::FreeHandle(DescriptorHandle* pHandle)
+void DescriptorPool::FreeHandle(DescriptorHandle* pHandle)
 {
 	if (pHandle)
 	{
@@ -74,7 +74,7 @@ void DiscriptorPool::FreeHandle(DescriptorHandle* pHandle)
 	}
 }
 
-DiscriptorPool::~DiscriptorPool()
+DescriptorPool::~DescriptorPool()
 {
 	m_Pool.Term();	// プールを解放
 	m_pHeap.Reset();	// ディスクリプタヒープをリセット

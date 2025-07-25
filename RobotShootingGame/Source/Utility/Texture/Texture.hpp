@@ -16,8 +16,8 @@
 // ==============================
 //	前方宣言
 // ==============================
-class DiscriptorHandle;
-class DiscriptorPool;
+class DescriptorHandle;
+class DescriptorPool;
 
 /**
  * @brief Textureクラス
@@ -43,7 +43,7 @@ public:
 	 * @param [uploadBatch] DirectX::ResourceUploadBatchへの参照。リソースのアップロードに使用されます。
 	 * @return 初期化が成功した場合はtrue、失敗した場合はfalseを返します。
 	 */
-	bool Init(ID3D12Device* pDevice, DiscriptorPool* pPool, const wchar_t* filename, DirectX::ResourceUploadBatch& uploadBatch);
+	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* filename, DirectX::ResourceUploadBatch& uploadBatch);
 
 	/**
 	 * @brief ID3D12Device、DiscriptorPool、およびリソース記述を使用して初期化を行います。
@@ -53,7 +53,7 @@ public:
 	 * @param [isCube] リソースがキューブマップかどうかを示す真偽値。
 	 * @return 初期化が成功した場合はtrue、失敗した場合はfalseを返します。
 	 */
-	bool Init(ID3D12Device* pDevice, DiscriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isCube);
+	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isCube);
 
 	/**
 	 * @brief 終了処理を実行します。
@@ -81,9 +81,9 @@ private:
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetViewDesc(bool isCube);
 
 	Texture(const Texture&) = delete; // コピーコンストラクタを削除
-	Texture& operator=(const Texture&) = delete; // コピー代入演算子を削除
+	void operator=(const Texture&) = delete; // コピー代入演算子を削除
 
-	ComPtr<ID3D12Resource> m_pTex;	// テクスチャリソース
-	DescriptorHandle* m_pHandle;	// ディスクリプタハンドル
-	DiscriptorPool* m_pPool;		// ディスクリプタプール
+	ComPtr<ID3D12Resource> m_pTex{};	// テクスチャリソース
+	DescriptorHandle* m_pHandle{};	// ディスクリプタハンドル
+	DescriptorPool* m_pPool;		// ディスクリプタプール
 };
