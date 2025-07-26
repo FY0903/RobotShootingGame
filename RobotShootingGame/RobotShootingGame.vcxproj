@@ -29,6 +29,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Material\Material.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
       <SubType>
       </SubType>
@@ -54,6 +58,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\IndexBuffer\IndexBuffer.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Material\Material.hpp">
       <SubType>
       </SubType>
     </ClInclude>

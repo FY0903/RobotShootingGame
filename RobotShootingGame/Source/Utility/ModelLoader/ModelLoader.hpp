@@ -55,7 +55,7 @@ private:
 /**
  * @brief マテリアルの物理的特性とテクスチャ情報を表す構造体です。
  */
-struct Material
+struct MaterialData
 {
 	DirectX::XMFLOAT3 Diffuse{};	// 拡散反射色
 	DirectX::XMFLOAT3 Specular{};	// 鏡面反射色
@@ -84,7 +84,7 @@ struct MeshData
  * @brief 指定されたファイルからメッシュとマテリアルを読み込みます。
  * @param [filename] 読み込むメッシュファイルのパス。
  * @param [meshes] 読み込まれたメッシュ情報を格納する std::vector<MeshData> への参照。
- * @param [materials] 読み込まれたマテリアル情報を格納する std::vector<Material> への参照。
+ * @param [materials] 読み込まれたマテリアル情報を格納する std::vector<MaterialData> への参照。
  * @return メッシュとマテリアルの読み込みに成功した場合は true、失敗した場合は false を返します。
  */
-bool LoadMesh(const char* filename, std::vector<MeshData>& meshes, std::vector<Material>& materials);
+bool LoadMesh(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials);

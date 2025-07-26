@@ -141,5 +141,5 @@ private:
 	float m_fRotateAngle{};											// 回転角度
 	Texture m_Texture{};											// テクスチャ
 	std::vector<MeshData> m_Meshes{};									// メッシュのリスト
-	std::vector<Material> m_Materials{};							// マテリアルのリスト
+	std::vector<MaterialData> m_Materials{};							// マテリアルのリスト
 };

@@ -57,10 +57,10 @@ namespace {
 		 * @brief 指定されたファイルからメッシュとマテリアルの情報を読み込みます。
 		 * @param [filename] 読み込むファイルのパスを指す文字列。
 		 * @param [meshes] 読み込まれたメッシュ情報が格納される std::vector<Mesh> への参照。
-		 * @param [materials] 読み込まれたマテリアル情報が格納される std::vector<Material> への参照。
+		 * @param [materials] 読み込まれたマテリアル情報が格納される std::vector<MaterialData> への参照。
 		 * @return 読み込みが成功した場合は true、失敗した場合は false を返します。
 		 */
-		bool Load(const char* filename, std::vector<MeshData>& meshes, std::vector<Material>& materials);
+		bool Load(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials);
 
 	private:
 		/**
@@ -71,14 +71,14 @@ namespace {
 		void ParseMesh(MeshData& dstMesh, const aiMesh* pSrcMesh);
 
 		/**
-		 * @brief aiMaterial オブジェクトから情報を抽出し、Material オブジェクトに解析結果を格納します。
-		 * @param [dstMaterial] 解析結果を格納する Material オブジェクトへの参照。
+		 * @brief aiMaterial オブジェクトから情報を抽出し、MaterialData オブジェクトに解析結果を格納します。
+		 * @param [dstMaterial] 解析結果を格納する MaterialData オブジェクトへの参照。
 		 * @param [pSrcMaterial] 解析元となる aiMaterial オブジェクトへのポインタ。
 		 */
-		void ParseMaterial(Material& dstMaterial, const aiMaterial* pSrcMaterial);
+		void ParseMaterial(MaterialData& dstMaterial, const aiMaterial* pSrcMaterial);
 	};
 	
-	bool MeshLoader::Load(const char* filename, std::vector<MeshData>& meshes, std::vector<Material>& materials)
+	bool MeshLoader::Load(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials)
 	{
 		if (!filename) return false;
 
@@ -172,7 +172,7 @@ namespace {
 
 	}
 
-	void MeshLoader::ParseMaterial(Material& dstMaterial, const aiMaterial* pSrcMaterial)
+	void MeshLoader::ParseMaterial(MaterialData& dstMaterial, const aiMaterial* pSrcMaterial)
 	{
 		aiColor3D color(0.0f, 0.0f, 0.0f);
 
@@ -265,7 +265,7 @@ namespace {
 	}
 }
 
-bool LoadMesh(const char* filename, std::vector<MeshData>& meshes, std::vector<Material>& materials)
+bool LoadMesh(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials)
 {
 	MeshLoader loader;
 	return loader.Load(filename, meshes, materials);
