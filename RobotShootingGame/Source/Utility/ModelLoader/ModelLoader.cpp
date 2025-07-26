@@ -60,15 +60,15 @@ namespace {
 		 * @param [materials] 読み込まれたマテリアル情報が格納される std::vector<Material> への参照。
 		 * @return 読み込みが成功した場合は true、失敗した場合は false を返します。
 		 */
-		bool Load(const char* filename, std::vector<Mesh>& meshes, std::vector<Material>& materials);
+		bool Load(const char* filename, std::vector<MeshData>& meshes, std::vector<Material>& materials);
 
 	private:
 		/**
 		 * @brief aiMesh オブジェクトから情報を抽出し、Mesh オブジェクトに解析結果を格納します。
-		 * @param [dstMesh] 解析結果を格納する Mesh オブジェクトへの参照。
+		 * @param [dstMesh] 解析結果を格納する MeshData オブジェクトへの参照。
 		 * @param [pSrcMesh] 解析対象となる aiMesh オブジェクトへのポインタ。
 		 */
-		void ParseMesh(Mesh& dstMesh, const aiMesh* pSrcMesh);
+		void ParseMesh(MeshData& dstMesh, const aiMesh* pSrcMesh);
 
 		/**
 		 * @brief aiMaterial オブジェクトから情報を抽出し、Material オブジェクトに解析結果を格納します。
@@ -78,7 +78,7 @@ namespace {
 		void ParseMaterial(Material& dstMaterial, const aiMaterial* pSrcMaterial);
 	};
 	
-	bool MeshLoader::Load(const char* filename, std::vector<Mesh>& meshes, std::vector<Material>& materials)
+	bool MeshLoader::Load(const char* filename, std::vector<MeshData>& meshes, std::vector<Material>& materials)
 	{
 		if (!filename) return false;
 
@@ -130,7 +130,7 @@ namespace {
 		return true; // 読み込み成功
 	}
 
-	void MeshLoader::ParseMesh(Mesh& dstMesh, const aiMesh* pSrcMesh)
+	void MeshLoader::ParseMesh(MeshData& dstMesh, const aiMesh* pSrcMesh)
 	{
 		// マテリアル番号を設定
 		dstMesh.MaterialId = pSrcMesh->mMaterialIndex;
@@ -265,7 +265,7 @@ namespace {
 	}
 }
 
-bool LoadMesh(const char* filename, std::vector<Mesh>& meshes, std::vector<Material>& materials)
+bool LoadMesh(const char* filename, std::vector<MeshData>& meshes, std::vector<Material>& materials)
 {
 	MeshLoader loader;
 	return loader.Load(filename, meshes, materials);

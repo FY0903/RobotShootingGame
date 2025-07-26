@@ -37,6 +37,9 @@
     <Filter Include="Source\Utility\ModelLoader">
       <UniqueIdentifier>{82a5fe1c-1cc9-48a6-bab6-5874dcc341da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Mesh">
+      <UniqueIdentifier>{b6766288-cbe3-462a-b46c-209303177b68}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -63,6 +66,9 @@
     <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp">
       <Filter>Source\Utility\ModelLoader</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
+      <Filter>Source\Utility\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp">
@@ -88,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp">
       <Filter>Source\Utility\ModelLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Mesh\Mesh.hpp">
+      <Filter>Source\Utility\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

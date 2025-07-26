@@ -140,6 +140,6 @@ private:
 	ConstantBufferView<Transform> m_CBV[FrameCount * 2]{};			// 定数バッファビュー
 	float m_fRotateAngle{};											// 回転角度
 	Texture m_Texture{};											// テクスチャ
-	std::vector<Mesh> m_Meshes{};									// メッシュのリスト
+	std::vector<MeshData> m_Meshes{};									// メッシュのリスト
 	std::vector<Material> m_Materials{};							// マテリアルのリスト
 };

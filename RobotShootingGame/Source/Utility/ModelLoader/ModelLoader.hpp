@@ -70,7 +70,7 @@ struct Material
 /**
  * @brief メッシュデータを表す構造体です。
  */
-struct Mesh
+struct MeshData
 {
 	std::vector<MeshVertex> Vertices{};	// 頂点データ
 	std::vector<uint32_t> Indices{};	// インデックスデータ
@@ -83,8 +83,8 @@ struct Mesh
 /**
  * @brief 指定されたファイルからメッシュとマテリアルを読み込みます。
  * @param [filename] 読み込むメッシュファイルのパス。
- * @param [meshes] 読み込まれたメッシュ情報を格納する std::vector<Mesh> への参照。
+ * @param [meshes] 読み込まれたメッシュ情報を格納する std::vector<MeshData> への参照。
  * @param [materials] 読み込まれたマテリアル情報を格納する std::vector<Material> への参照。
  * @return メッシュとマテリアルの読み込みに成功した場合は true、失敗した場合は false を返します。
  */
-bool LoadMesh(const char* filename, std::vector<Mesh>& meshes, std::vector<Material>& materials);
+bool LoadMesh(const char* filename, std::vector<MeshData>& meshes, std::vector<Material>& materials);
