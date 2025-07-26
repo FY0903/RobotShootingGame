@@ -23,7 +23,7 @@
 #include <wrl/client.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
-#include "../Utility/Mesh/Mesh.hpp"
+#include "../Utility/ModelLoader/ModelLoader.hpp"
 
 // ==============================
 //	Linker

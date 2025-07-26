@@ -1,15 +1,16 @@
 /*+===================================================================
-	File: Mesh.cpp
+	File: ModelLoader.cpp
 	Summary: モデルの読み取りをするユーティリティ
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/23 15:48 初回作成
 			  /07/24 13:03 モデル読み込み機能を追加
+			  /07/26 14:36 ファイル名の変更
 ===================================================================+*/
 
 // ==============================
 //	include
 // ==============================
-#include "Mesh.hpp"
+#include "ModelLoader.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -93,10 +94,6 @@ namespace {
 
 		// ファイルを読み込む
 		auto pScene = importer.ReadFile(filename, flag);
-		if (!pScene) {
-			std::cerr << "Assimp読み込み失敗: " << importer.GetErrorString() << std::endl;
-			return false;
-		}
 
 		// 読み込みに失敗した場合
 		if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mNumMeshes)
@@ -127,6 +124,7 @@ namespace {
 		}
 
 		// 不要になったのでクリア
+		importer.FreeScene(); // Assimpのシーンを解放
 		pScene = nullptr;
 
 		return true; // 読み込み成功
@@ -222,11 +220,47 @@ namespace {
 		aiString path;
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.DiffuseMap = std::string(path.C_Str());
+			dstMaterial.DiffuseMap = path.C_Str();
 		}
 		else
 		{
-			dstMaterial.DiffuseMap.clear(); // デフォルト値
+			dstMaterial.DiffuseMap = nullptr; // デフォルト値
+		}
+
+		// ==============================
+		//	スペキュラーマップの取得
+		// ==============================
+		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SPECULAR(0), path) == AI_SUCCESS)
+		{
+			dstMaterial.SpecularMap = path.C_Str();
+		}
+		else
+		{
+			dstMaterial.SpecularMap = nullptr; // デフォルト値
+		}
+
+		// ==============================
+		//	光沢度マップの取得
+		// ==============================
+		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SHININESS(0), path) == AI_SUCCESS)
+		{
+			dstMaterial.ShininessMap = path.C_Str();
+		}
+		else
+		{
+			dstMaterial.ShininessMap = nullptr; // デフォルト値
+		}
+
+		// ==============================
+		//	法線マップの取得
+		// ==============================
+		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_NORMALS(0), path) == AI_SUCCESS)
+		{
+			dstMaterial.NormalMap = path.C_Str();
+		}
+		else
+		{
+			dstMaterial.NormalMap = nullptr; // デフォルト値
 		}
 	}
 }

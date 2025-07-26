@@ -16,9 +16,6 @@
     <Filter Include="Source\Utility">
       <UniqueIdentifier>{23655bf2-d6b8-49f6-a669-f2090bef667f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\Mesh">
-      <UniqueIdentifier>{82a5fe1c-1cc9-48a6-bab6-5874dcc341da}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Utility\Pool">
       <UniqueIdentifier>{ba26a58a-dfe6-42a0-8c3e-cd0181861211}</UniqueIdentifier>
     </Filter>
@@ -37,6 +34,9 @@
     <Filter Include="Source\Utility\VertexBuffer">
       <UniqueIdentifier>{2eb73504-b42c-4ec4-a455-f15555527d21}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\ModelLoader">
+      <UniqueIdentifier>{82a5fe1c-1cc9-48a6-bab6-5874dcc341da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -44,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="Source\System\main.cpp">
       <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
-      <Filter>Source\Utility\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.cpp">
       <Filter>Source\Utility\Pool\DescriptorPool</Filter>
@@ -63,13 +60,13 @@
     <ClCompile Include="Source\Utility\VertexBuffer\VertexBuffer.cpp">
       <Filter>Source\Utility\VertexBuffer</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp">
+      <Filter>Source\Utility\ModelLoader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp">
       <Filter>Source\System\App</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\Mesh\Mesh.hpp">
-      <Filter>Source\Utility\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\Pool\Pool.hpp">
       <Filter>Source\Utility\Pool</Filter>
@@ -88,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\VertexBuffer\VertexBuffer.hpp">
       <Filter>Source\Utility\VertexBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp">
+      <Filter>Source\Utility\ModelLoader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

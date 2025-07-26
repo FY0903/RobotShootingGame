@@ -29,10 +29,7 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
+    <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp" />
     <ClCompile Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.cpp">
       <SubType>
       </SubType>
@@ -56,10 +53,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Source\Utility\Mesh\Mesh.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
+    <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp" />
     <ClInclude Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.hpp">
       <SubType>
       </SubType>
