@@ -31,6 +31,12 @@
     <Filter Include="Source\Utility\ConstantBuffer">
       <UniqueIdentifier>{68136f5c-7fcc-48ab-8a89-a381a1bca890}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\IndexBuffer">
+      <UniqueIdentifier>{3b70fee4-3268-49e7-a0f6-7acdbc834fcb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\VertexBuffer">
+      <UniqueIdentifier>{2eb73504-b42c-4ec4-a455-f15555527d21}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -51,6 +57,12 @@
     <ClCompile Include="Source\Utility\ConstantBuffer\ConstantBuffer.cpp">
       <Filter>Source\Utility\ConstantBuffer</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\IndexBuffer\IndexBuffer.cpp">
+      <Filter>Source\Utility\IndexBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\VertexBuffer\VertexBuffer.cpp">
+      <Filter>Source\Utility\VertexBuffer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp">
@@ -70,6 +82,12 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
       <Filter>Source\Utility\ConstantBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\IndexBuffer\IndexBuffer.hpp">
+      <Filter>Source\Utility\IndexBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\VertexBuffer\VertexBuffer.hpp">
+      <Filter>Source\Utility\VertexBuffer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

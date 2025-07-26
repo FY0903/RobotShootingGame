@@ -25,6 +25,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\IndexBuffer\IndexBuffer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
       <SubType>
       </SubType>
@@ -37,10 +41,18 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\VertexBuffer\VertexBuffer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp" />
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\IndexBuffer\IndexBuffer.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -57,6 +69,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Texture\Texture.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\VertexBuffer\VertexBuffer.hpp">
       <SubType>
       </SubType>
     </ClInclude>
