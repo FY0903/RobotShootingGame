@@ -85,22 +85,52 @@ bool ConstantBuffer::Init(ID3D12Device* pDevice, DescriptorPool* pPool, size_t s
 	return true; // 初期化成功
 }
 
-D3D12_GPU_VIRTUAL_ADDRESS ConstantBuffer::GetAddress() const
+void ConstantBuffer::Term()
 {
-	return D3D12_GPU_VIRTUAL_ADDRESS();
+	// メモリマッピングを解除して、定数バッファを解放
+	if (m_pCB)
+	{
+		m_pCB->Unmap(0, nullptr); // マッピングを解除
+		m_pCB.Reset(); // リソースをリセット
+	}
+
+	// ビューを破棄
+	if (m_pPool)
+	{
+		m_pPool->FreeHandle(m_pHandle); // ディスクリプタハンドルをプールに返す
+		m_pPool = nullptr; // プールポインタをリセット
+	}
+
+	// ディスクリプタプールを解放
+	if (m_pPool)
+	{
+		m_pPool->Release(); // プールの参照カウントを減らす
+		m_pPool = nullptr; // プールポインタをリセット
+	}
+
+	m_pMappedPtr = nullptr; // マッピングされたポインタをリセット
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE ConstantBuffer::GetHandleCPU() const
 {
-	return D3D12_CPU_DESCRIPTOR_HANDLE();
+	if (m_pHandle)
+	{
+		return m_pHandle->HandleCPU; // CPUディスクリプタハンドルを返す
+	}
+	else
+	{
+		return D3D12_CPU_DESCRIPTOR_HANDLE(); // ハンドルがない場合は空のハンドルを返す
+	}
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE ConstantBuffer::GetHandleGPU() const
 {
-	return D3D12_GPU_DESCRIPTOR_HANDLE();
-}
-
-void* ConstantBuffer::GetPtr() const
-{
-	return nullptr;
+	if (m_pHandle)
+	{
+		return m_pHandle->HandleGPU; // GPUディスクリプタハンドルを返す
+	}
+	else
+	{
+		return D3D12_GPU_DESCRIPTOR_HANDLE(); // ハンドルがない場合は空のハンドルを返す
+	}
 }
