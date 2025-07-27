@@ -46,7 +46,7 @@ public:
 
 	void Term();
 
-	bool SetTexture(size_t index, TEXTURE_USAGE usage, const char* path, DirectX::ResourceUploadBatch& batch);
+	bool SetTexture(size_t index, TEXTURE_USAGE usage, const wchar_t* path, DirectX::ResourceUploadBatch& batch);
 
 	void* GetBufferPtr(size_t index) const;
 	
@@ -69,7 +69,7 @@ private:
 	Material(const Material&) = delete;	// コピーコンストラクタを削除
 	void operator=(const Material&) = delete;	// コピー代入演算子を削除
 
-	std::map<const char*, Texture*> m_pTexture{};	// テクスチャのマップ
+	std::map<const wchar_t*, Texture*> m_pTexture{};	// テクスチャのマップ
 	std::vector<Subset> m_Subset{};	// サブセットのベクター
 	ID3D12Device* m_pDevice{};	// デバイスへのポインタ
 	DescriptorPool* m_pPool{};	// ディスクリプタプールへのポインタ(CBV_UAV_SRV)
