@@ -52,6 +52,9 @@
     <Filter Include="Source\System\CommandList">
       <UniqueIdentifier>{e123c447-9d99-4f1c-bba2-85eb00d83196}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System\ColorTarget">
+      <UniqueIdentifier>{f708071e-2c59-4847-81f9-78e4719bab81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -93,6 +96,9 @@
     <ClCompile Include="Source\System\CommandList\CommandList.cpp">
       <Filter>Source\System\CommandList</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\ColorTarget\ColorTarget.cpp">
+      <Filter>Source\System\ColorTarget</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp">
@@ -133,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="Source\System\CommandList\CommandList.hpp">
       <Filter>Source\System\CommandList</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\ColorTarget\ColorTarget.hpp">
+      <Filter>Source\System\ColorTarget</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

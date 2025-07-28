@@ -38,8 +38,8 @@ public:
 	ID3D12GraphicsCommandList* Reset();
 
 private:
-	CommandList(const CommandList&) = delete;
-	void operator = (const CommandList&) = delete;
+	CommandList(const CommandList&) = delete;	// コピーコンストラクタを禁止
+	void operator = (const CommandList&) = delete;	// 代入演算子を禁止
 	
 	ComPtr<ID3D12GraphicsCommandList> m_pCmdList{};	// コマンドリスト
 	std::vector<ComPtr<ID3D12CommandAllocator>> m_pAllocators{};	// コマンドアロケータの配列

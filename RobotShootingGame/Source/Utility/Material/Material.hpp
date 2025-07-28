@@ -111,8 +111,8 @@ private:
 		D3D12_GPU_DESCRIPTOR_HANDLE textureHandles[TEXTURE_USAGE_COUNT];	// テクスチャのハンドル
 	};
 
-	Material(const Material&) = delete;	// コピーコンストラクタを削除
-	void operator=(const Material&) = delete;	// コピー代入演算子を削除
+	Material(const Material&) = delete;	// コピーコンストラクタを禁止
+	void operator=(const Material&) = delete;	// コピー代入演算子を禁止
 
 	std::map<const wchar_t*, Texture*> m_pTexture{};	// テクスチャのマップ
 	std::vector<Subset> m_Subset{};	// サブセットのベクター
