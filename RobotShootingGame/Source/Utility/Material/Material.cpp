@@ -18,7 +18,7 @@ Material::~Material()
 
 bool Material::Init(ID3D12Device* pDevice, DescriptorPool* pPool, size_t bufferSize, size_t count)
 {
-	if (!pDevice || !pPool || bufferSize == 0 || count == 0) return false;
+	if (!pDevice || !pPool || count == 0) return false;
 
 	Term();
 
@@ -121,7 +121,7 @@ void Material::Term()
 	}
 }
 
-bool Material::SetTexture(size_t index, TEXTURE_USAGE usage, const wchar_t* path, DirectX::ResourceUploadBatch& batch)
+bool Material::SetTexture(size_t index, TEXTURE_USAGE usage, const std::wstring& path, DirectX::ResourceUploadBatch& batch)
 {
 	if (index >= GetCount()) return false;	// インデックスが範囲外ならfalseを返す
 
@@ -139,8 +139,7 @@ bool Material::SetTexture(size_t index, TEXTURE_USAGE usage, const wchar_t* path
 		return false;	// メモリ確保失敗
 	}
 
-
-	if (!pTexture->Init(m_pDevice, m_pPool, path, batch))
+	if (!pTexture->Init(m_pDevice, m_pPool, path.c_str(), batch))
 	{
 		MessageBox(nullptr, "テクスチャの初期化に失敗しました", "エラー", MB_OK | MB_ICONERROR);
 		pTexture->Term();	// テクスチャの終了処理

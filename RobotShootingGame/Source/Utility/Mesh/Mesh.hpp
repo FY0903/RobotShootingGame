@@ -30,13 +30,30 @@ public:
 	 */
 	virtual ~Mesh();
 
+	/**
+	 * @brief ID3D12Device オブジェクトと MeshData リソースを使用して初期化を行います。
+	 * @param [pDevice] 初期化に使用する ID3D12Device へのポインタ。
+	 * @param [resource] 初期化対象の MeshData リソース。
+	 * @return 初期化が成功した場合は true、失敗した場合は false を返します。
+	 */
 	bool Init(ID3D12Device* pDevice, const MeshData& resource);
 
+	/**
+	 * @brief 終了処理を実行します。
+	 */
 	void Term();
 
+	/**
+	 * @brief 指定されたコマンドリストを使用して描画処理を実行します。
+	 * @param [pCmdList] 描画コマンドを記録するための ID3D12GraphicsCommandList へのポインタ。
+	 */
 	void Draw(ID3D12GraphicsCommandList* pCmdList);
 
-	inline uint32_t GetiMaterialId() const { return m_materialId; }
+	/**
+	 * @brief マテリアルIDを取得します。
+	 * @return マテリアルID（uint32_t型の値）を返します。
+	 */
+	inline uint32_t GetMaterialId() const { return m_materialId; }
 
 private:
 	Mesh(const Mesh&) = delete;	// コピーコンストラクタを禁止

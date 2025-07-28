@@ -11,7 +11,7 @@
 // ==============================
 #include <d3d12.h>
 #include <atomic>
-#include "../../../System/App.hpp"
+#include "../../ComPtr.h"
 #include "../Pool.hpp"
 
 /**

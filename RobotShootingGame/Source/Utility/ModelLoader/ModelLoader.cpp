@@ -16,7 +16,6 @@
 #include <assimp/postprocess.h>
 #include <codecvt>
 #include <cassert>
-#include <iostream>
 
 // ==============================
 //	defines
@@ -44,6 +43,20 @@ const D3D12_INPUT_LAYOUT_DESC MeshVertex::InputLayout = {
 static_assert(sizeof(MeshVertex) == 44, "Vertex struct/layout mismatch");
 
 namespace {
+
+	/**
+	 * @brief aiString 型の文字列を std::wstring 型に変換します。
+	 * @param [path] 変換する aiString 型の文字列。
+	 * @return 変換後の std::wstring 型の文字列。
+	 */
+	std::wstring Convert(const aiString& path)
+	{
+		wchar_t temp[256] = {};
+		size_t  size;
+		mbstowcs_s(&size, temp, path.C_Str(), 256);
+		return std::wstring(temp);
+	}
+
 	/**
 	 * @brief MeshLoaderクラス
 	 */
@@ -220,11 +233,7 @@ namespace {
 		aiString path;
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.DiffuseMap = path.C_Str();
-		}
-		else
-		{
-			dstMaterial.DiffuseMap = nullptr; // デフォルト値
+			dstMaterial.DiffuseMap = Convert(path);
 		}
 
 		// ==============================
@@ -232,11 +241,7 @@ namespace {
 		// ==============================
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SPECULAR(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.SpecularMap = path.C_Str();
-		}
-		else
-		{
-			dstMaterial.SpecularMap = nullptr; // デフォルト値
+			dstMaterial.SpecularMap = Convert(path);
 		}
 
 		// ==============================
@@ -244,11 +249,7 @@ namespace {
 		// ==============================
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SHININESS(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.ShininessMap = path.C_Str();
-		}
-		else
-		{
-			dstMaterial.ShininessMap = nullptr; // デフォルト値
+			dstMaterial.ShininessMap = Convert(path);
 		}
 
 		// ==============================
@@ -256,11 +257,7 @@ namespace {
 		// ==============================
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_NORMALS(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.NormalMap = path.C_Str();
-		}
-		else
-		{
-			dstMaterial.NormalMap = nullptr; // デフォルト値
+			dstMaterial.NormalMap = Convert(path);
 		}
 	}
 }

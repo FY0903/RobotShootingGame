@@ -28,6 +28,14 @@ bool DescriptorPool::Create(ID3D12Device* pDevice, const D3D12_DESCRIPTOR_HEAP_D
 		return false;	// 失敗したらfalseを返す
 	}
 
+	// プールを初期化
+	if (!instance->m_Pool.Init(desc->NumDescriptors))	// プールを初期化
+	{
+		MessageBox(nullptr, "ディスクリプタプールの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);	// エラーメッセージを表示
+		instance->Release();	// インスタンスを解放
+		return false;	// 失敗したらfalseを返す
+	}
+
 	// ディスクリプタサイズを取得
 	instance->m_DescriptorSize = pDevice->GetDescriptorHandleIncrementSize(desc->Type);	// ディスクリプタサイズを取得
 

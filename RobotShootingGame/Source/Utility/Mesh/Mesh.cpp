@@ -21,7 +21,7 @@ bool Mesh::Init(ID3D12Device* pDevice, const MeshData& resource)
 	if (!pDevice) return false;
 
 	// 頂点バッファの初期化
-	if (!m_VB.Init(pDevice, sizeof(MeshData) * resource.Vertices.size(), resource.Vertices.data())) return false;
+	if (!m_VB.Init(pDevice, sizeof(MeshVertex) * resource.Vertices.size(), resource.Vertices.data())) return false;
 
 	// インデックスバッファの初期化
 	if (!m_IB.Init(pDevice, sizeof(uint32_t) * resource.Indices.size(), resource.Indices.data())) return false;

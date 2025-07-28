@@ -10,7 +10,7 @@
 //	include
 // ==============================
 #include <d3d12.h>
-#include "../../System/App.hpp"
+#include "../ComPtr.h"
 #include <ResourceUploadBatch.h>
 
 // ==============================
@@ -85,5 +85,5 @@ private:
 
 	ComPtr<ID3D12Resource> m_pTex{};	// テクスチャリソース
 	DescriptorHandle* m_pHandle{};	// ディスクリプタハンドル
-	DescriptorPool* m_pPool;		// ディスクリプタプール
+	DescriptorPool* m_pPool{};		// ディスクリプタプール
 };

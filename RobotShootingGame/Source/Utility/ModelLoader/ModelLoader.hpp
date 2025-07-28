@@ -61,10 +61,10 @@ struct MaterialData
 	DirectX::XMFLOAT3 Specular{};	// 鏡面反射色
 	float Alpha{};					// アルファ値
 	float Shininess{};				// 光沢度
-	const char* DiffuseMap{};		// 拡散反射マップのファイル名
-	const char* SpecularMap{};		// 鏡面反射マップのファイル名
-	const char* ShininessMap{};		// 光沢度マップのファイル名
-	const char* NormalMap{};		// 法線マップのファイル名
+	std::wstring DiffuseMap{};		// 拡散反射マップのファイル名
+	std::wstring SpecularMap{};		// 鏡面反射マップのファイル名
+	std::wstring ShininessMap{};	// 光沢度マップのファイル名
+	std::wstring NormalMap{};		// 法線マップのファイル名
 };
 
 /**

@@ -61,11 +61,11 @@ public:
 	 * @brief 指定したインデックスにテクスチャを設定します。
 	 * @param [index] テクスチャを設定するインデックス。
 	 * @param [usage] テクスチャの使用方法を指定するTEXTURE_USAGE列挙体の値。
-	 * @param [path] 読み込むテクスチャファイルのパス（ワイド文字列）。
+	 * @param [path] テクスチャのファイルパス（ワイド文字列）。
 	 * @param [batch] リソースのアップロードに使用するDirectX::ResourceUploadBatchオブジェクトへの参照。
 	 * @return テクスチャの設定に成功した場合はtrue、失敗した場合はfalseを返します。
 	 */
-	bool SetTexture(size_t index, TEXTURE_USAGE usage, const wchar_t* path, DirectX::ResourceUploadBatch& batch);
+	bool SetTexture(size_t index, TEXTURE_USAGE usage, const std::wstring& path, DirectX::ResourceUploadBatch& batch);
 
 	/**
 	 * @brief 指定したインデックスのバッファポインタを取得します。
@@ -114,7 +114,7 @@ private:
 	Material(const Material&) = delete;	// コピーコンストラクタを禁止
 	void operator=(const Material&) = delete;	// コピー代入演算子を禁止
 
-	std::map<const wchar_t*, Texture*> m_pTexture{};	// テクスチャのマップ
+	std::map<std::wstring, Texture*> m_pTexture{};	// テクスチャのマップ
 	std::vector<Subset> m_Subset{};	// サブセットのベクター
 	ID3D12Device* m_pDevice{};	// デバイスへのポインタ
 	DescriptorPool* m_pPool{};	// ディスクリプタプールへのポインタ(CBV_UAV_SRV)
