@@ -20,6 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp" />
+    <ClCompile Include="Source\System\CommandList\CommandList.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\System\DepthTarget\DepthTarget.cpp" />
     <ClCompile Include="Source\System\Fence\Fence.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
@@ -55,6 +59,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp" />
+    <ClInclude Include="Source\System\CommandList\CommandList.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\System\DepthTarget\DepthTarget.hpp" />
     <ClInclude Include="Source\System\Fence\Fence.hpp" />
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">

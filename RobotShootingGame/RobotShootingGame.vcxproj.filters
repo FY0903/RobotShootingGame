@@ -43,6 +43,15 @@
     <Filter Include="Source\Utility\Material">
       <UniqueIdentifier>{c00adb00-06ab-407e-b5cc-ee58cc8b4574}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System\DepthTarget">
+      <UniqueIdentifier>{4e8da8ad-bdea-4f1c-bddb-ad2432adb3f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\System\Fence">
+      <UniqueIdentifier>{440a8008-66c1-4239-b822-dd74e3bac60c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\System\CommandList">
+      <UniqueIdentifier>{e123c447-9d99-4f1c-bba2-85eb00d83196}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -75,6 +84,15 @@
     <ClCompile Include="Source\Utility\Material\Material.cpp">
       <Filter>Source\Utility\Material</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\DepthTarget\DepthTarget.cpp">
+      <Filter>Source\System\DepthTarget</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\Fence\Fence.cpp">
+      <Filter>Source\System\Fence</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\CommandList\CommandList.cpp">
+      <Filter>Source\System\CommandList</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\System\App.hpp">
@@ -106,6 +124,15 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Material\Material.hpp">
       <Filter>Source\Utility\Material</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\DepthTarget\DepthTarget.hpp">
+      <Filter>Source\System\DepthTarget</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Fence\Fence.hpp">
+      <Filter>Source\System\Fence</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\CommandList\CommandList.hpp">
+      <Filter>Source\System\CommandList</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
