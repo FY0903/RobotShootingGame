@@ -107,7 +107,7 @@ void Fence::Sync(ID3D12CommandQueue* pQueue)
 	}
 	
 	// 完了時にイベントを設定
-	HRESULT hr = m_pFence->SetEventOnCompletion(m_Counter, m_hEvent);
+	hr = m_pFence->SetEventOnCompletion(m_Counter, m_hEvent);
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "フェンスの完了待機に失敗しました。", "エラー", MB_OK | MB_ICONERROR);

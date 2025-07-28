@@ -11,7 +11,7 @@
 //	include
 // ==============================
 #include <d3d12.h>
-#include "../App.hpp"
+#include "../../Utility/ComPtr.h"
 #include <cstdint>
 
 // ==============================

@@ -6,6 +6,7 @@
 			  /07/21 00:20 デバック処理追加
 ===================================================================+*/
 
+
 #if defined(_DEBUG) || defined(DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>

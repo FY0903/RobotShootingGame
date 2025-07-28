@@ -11,7 +11,7 @@
 //	include
 // ==============================
 #include <d3d12.h>
-#include "../App.hpp"
+#include "../../Utility/ComPtr.h"
 #include <cstdint>
 #include <vector>
 
@@ -31,10 +31,24 @@ public:
 	 */
 	~CommandList();
 
+	/**
+	 * @brief 初期化処理を行います。
+	 * @param [pDevice] Direct3D 12 デバイスへのポインタ。
+	 * @param [type] コマンドリストのタイプ。
+	 * @param [count] コマンドアロケータの数。
+	 * @return 初期化が成功した場合は true、失敗した場合は false を返します。
+	 */
 	bool Init(ID3D12Device* pDevice, D3D12_COMMAND_LIST_TYPE type, uint32_t count);
 
+	/**
+	 * @brief 終了処理を行います。
+	 */
 	void Term();
 
+	/**
+	 * @brief コマンドリストを取得します。
+	 * @return ID3D12GraphicsCommandListへのポインタ。
+	 */
 	ID3D12GraphicsCommandList* Reset();
 
 private:
