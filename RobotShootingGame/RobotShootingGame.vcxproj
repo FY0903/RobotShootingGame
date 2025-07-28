@@ -73,6 +73,7 @@
     </ClInclude>
     <ClInclude Include="Source\System\DepthTarget\DepthTarget.hpp" />
     <ClInclude Include="Source\System\Fence\Fence.hpp" />
+    <ClInclude Include="Source\Utility\ComPtr.h" />
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
       <SubType>
       </SubType>

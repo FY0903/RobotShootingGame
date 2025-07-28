@@ -55,6 +55,9 @@
     <Filter Include="Source\System\ColorTarget">
       <UniqueIdentifier>{f708071e-2c59-4847-81f9-78e4719bab81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\ComPtr">
+      <UniqueIdentifier>{2fd880d2-b39b-40e8-8aa5-001dcdc46649}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\App.cpp">
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="Source\System\ColorTarget\ColorTarget.hpp">
       <Filter>Source\System\ColorTarget</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\ComPtr.h">
+      <Filter>Source\Utility\ComPtr</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
