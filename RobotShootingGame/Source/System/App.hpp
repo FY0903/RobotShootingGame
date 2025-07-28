@@ -23,7 +23,17 @@
 #include <wrl/client.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
-#include "../Utility/ModelLoader/ModelLoader.hpp"
+#include "../Utility/ComPtr.h"
+#include "../Utility/Pool/DescriptorPool/DescriptorPool.hpp"
+#include "ColorTarget/ColorTarget.hpp"
+#include "DepthTarget/DepthTarget.hpp"
+#include "CommandList/CommandList.hpp"
+#include "Fence/Fence.hpp"
+#include "../Utility/Mesh/Mesh.hpp"
+#include "../Utility/Texture/Texture.hpp"
+
+#include "../Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "../Utility/Material/Material.hpp"
 
 // ==============================
 //	Linker
@@ -32,37 +42,6 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3dcompiler.lib")
-
-// ==============================
-//	Type Definitions
-// ==============================
-template<typename T> using ComPtr = Microsoft::WRL::ComPtr<T>;
-
-// ==============================
-//	structs
-// ==============================
-struct alignas(256) Transform	// 定数バッファの構造体(256バイト境界でアライメント)
-{
-	DirectX::XMMATRIX World;	// ワールド行列
-	DirectX::XMMATRIX View;		// ビュー行列
-	DirectX::XMMATRIX Proj;		// プロジェクション行列
-};
-
-template<typename T>
-struct ConstantBufferView
-{
-	D3D12_CONSTANT_BUFFER_VIEW_DESC Desc;	// 定数バッファビューの説明
-	D3D12_CPU_DESCRIPTOR_HANDLE HandleCPU;	// CPUディスクリプタハンドル
-	D3D12_GPU_DESCRIPTOR_HANDLE HandleGPU;	// GPUディスクリプタハンドル
-	T* pBuffer;								// 定数バッファのポインタ
-};
-
-struct Texture
-{
-	ComPtr<ID3D12Resource> pResource;		// テクスチャリソース
-	D3D12_CPU_DESCRIPTOR_HANDLE HandleCPU;	// CPUディスクリプタハンドル
-	D3D12_GPU_DESCRIPTOR_HANDLE HandleGPU;	// GPUディスクリプタハンドル
-};
 
 /**
  * @brief Appクラス
@@ -92,17 +71,27 @@ private:
 	void TermApp();
 	bool InitWnd();
 	void TermWnd();
-	void MainLoop();
-
 	bool InitD3D();
 	void TermD3D();
-	void Render();
-	void WaitGPU();
+	void MainLoop();
+
 	void Present(uint32_t interval);
-	bool OnInit();
-	void OnTerm();
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+
+	bool OnInit();
+	void OnTerm();
+	void OnRender();
+	void OnMsgProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {}
+
+	enum POOL_TYPE
+	{
+		POOL_TYPE_RES,	// CBV/SRV/UAV用のプール
+		POOL_TYPE_SMP,	// サンプラ用のプール
+		POOL_TYPE_RTV,	// レンダーターゲットビュー用のプール
+		POOL_TYPE_DSV,	// 深度ステンシルビュー用のプール
+		POOL_TYPE_COUNT	// プールの数
+	};
 
 	static const uint32_t FrameCount = 2;	// フレームバッファの数
 
@@ -111,35 +100,25 @@ private:
 	uint32_t m_unWidth{};	// ウィンドウの幅
 	uint32_t m_unHeight{};	// ウィンドウの高さ
 
-	ComPtr<ID3D12Device> m_pDevice{};								// Direct3D 12デバイス
-	ComPtr<ID3D12CommandQueue> m_pQueue{};							// コマンドキュー
-	ComPtr<IDXGISwapChain3> m_pSwapChain{};							// スワップチェーン
-	ComPtr<ID3D12Resource> m_pColorBuffer[FrameCount]{};			// カラーバッファ
-	ComPtr<ID3D12Resource> m_pDepthBuffer{};						// 深度バッファ
-	ComPtr<ID3D12CommandAllocator> m_pCmdAllocater[FrameCount]{};	// コマンドアロケータ
-	ComPtr<ID3D12GraphicsCommandList> m_pCmdList{};					// コマンドリスト
-	ComPtr<ID3D12DescriptorHeap> m_pHeapRTV{};						// レンダーターゲットビューのヒープ(ディスクリプタヒープ)
-	ComPtr<ID3D12Fence> m_pFence{};									// フェンス
-	ComPtr<ID3D12DescriptorHeap> m_pHeapDSV{};						// 深度ステンシルビューのヒープ(ディスクリプタヒープ)
-	ComPtr<ID3D12DescriptorHeap> m_pHeapCBV_SRV_UAV{};				// 定数バッファ、SRV、UAVのヒープ(ディスクリプタヒープ)
-	ComPtr<ID3D12Resource> m_pVB{};									// 頂点バッファ
-	ComPtr<ID3D12Resource> m_pIB{};									// インデックスバッファ
-	ComPtr<ID3D12Resource> m_pCB[FrameCount * 2]{};					// 定数バッファ(フレームごとに1つ)
-	ComPtr<ID3D12RootSignature> m_pRootSignature{};					// ルートシグネチャ
-	ComPtr<ID3D12PipelineState> m_pPSO{};							// パイプラインステートオブジェクト
+	ComPtr<ID3D12Device> m_pDevice{};				// Direct3D 12デバイス
+	ComPtr<ID3D12CommandQueue> m_pQueue{};			// コマンドキュー
+	ComPtr<IDXGISwapChain3> m_pSwapChain{};			// スワップチェーン
+	ColorTarget m_colorTarget[FrameCount]{};		// カラーバッファ
+	DepthTarget m_depthTarget{};					// 深度ステンシルバッファ
+	DescriptorPool* m_pPools[POOL_TYPE_COUNT]{};	// ディスクリプタプールの配列
+	CommandList m_commandList{};					// コマンドリスト
+	Fence m_fence{};								// フェンス
+	uint32_t m_frameIndex{};						// 現在のフレーム番号
+	D3D12_VIEWPORT m_Viewport{};					// ビューポート
+	D3D12_RECT m_scissor{};							// シザー矩形
 
-	HANDLE m_hFenceEvent{};											// フェンスイベントハンドル
-	uint64_t m_unFenceCounter[FrameCount]{};						// フェンスカウンター(フレームごとに1つ)
-	uint32_t m_unFrameIndex{};										// 現在のフレームインデックス
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hRTV[FrameCount]{};				// レンダーターゲットビューのハンドル(CPUディスクリプタ)
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hDSV{};							// 深度ステンシルビューのハンドル(CPUディスクリプタ)
-	D3D12_VERTEX_BUFFER_VIEW m_VBV{};								// 頂点バッファビュー
-	D3D12_INDEX_BUFFER_VIEW m_IBV{};								// インデックスバッファビュー
-	D3D12_VIEWPORT m_Viewport{};									// ビューポート
-	D3D12_RECT m_Scissor{};											// シザーレクト
-	ConstantBufferView<Transform> m_CBV[FrameCount * 2]{};			// 定数バッファビュー
-	float m_fRotateAngle{};											// 回転角度
-	Texture m_Texture{};											// テクスチャ
-	std::vector<MeshData> m_Meshes{};									// メッシュのリスト
-	std::vector<MaterialData> m_Materials{};							// マテリアルのリスト
+	// ==============================
+	//	各シーンに置くやつ(本来は)
+	// ==============================
+	std::vector<Mesh*> m_pMesh{};				// メッシュの配列
+	std::vector<ConstantBuffer*> m_Transform{};	// 変換行列の定数バッファ
+	Material m_material{};						// マテリアル
+	ComPtr<ID3D12PipelineState> m_pPSO{};		// パイプラインステートオブジェクト
+	ComPtr<ID3D12RootSignature> m_pRootSig{};	// ルートシグネチャ
+	float m_RotateAngle{};						// 回転角度
 };

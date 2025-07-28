@@ -16,10 +16,9 @@
 //	include
 // ==============================
 #include "App.hpp"
-#include "ResourceUploadBatch.h"
-#include "DDSTextureLoader.h"
-#include "VertexTypes.h"
-#include <cassert>
+
+#include "CommonStates.h"
+#include "DirectXHelpers.h"
 
 // ==============================
 //	constexpr
@@ -27,13 +26,16 @@
 constexpr const char* ClassName = "RobotShootingGameClass";
 
 // ==============================
-//	structs
+//	定数定義
 // ==============================
-struct Vertex
-{
-	DirectX::XMFLOAT3 Position; // 頂点の位置
-	DirectX::XMFLOAT4 Color;    // 頂点の色
-};
+namespace {
+	struct Transform
+	{
+		DirectX::XMMATRIX World{};	// ワールド変換行列
+		DirectX::XMMATRIX View{};	// ビュー変換行列
+		DirectX::XMMATRIX Proj{};	// 投影変換行列
+	};
+}
 
 App::App(uint32_t width, uint32_t height)
 {
@@ -53,16 +55,27 @@ bool App::InitApp()
 	// ウィンドウの初期化
 	if (!InitWnd()) return false;
 
-	// D3Dの初期化
+	// D3D12の初期化
 	if (!InitD3D()) return false;
 
+	// アプリケーション固有の初期化
 	if (!OnInit()) return false;
+
+	// ウィンドウを表示
+	ShowWindow(m_hWnd, SW_SHOWNORMAL);
+
+	// ウィンドウの更新
+	UpdateWindow(m_hWnd);
+
+	// フォーカスをウィンドウに設定
+	SetFocus(m_hWnd);
 
 	return true;	// 正常終了
 }
 
 void App::TermApp()
 {
+	// アプリケーション固有の終了処理
 	OnTerm();
 
 	// D3Dの終了処理
@@ -122,22 +135,13 @@ bool App::InitWnd()
 		nullptr,						// 親ウィンドウ（nullptrならトップレベルウィンドウ）
 		nullptr,						// メニューハンドル（nullptrならメニューなし）
 		m_hInst,						// インスタンスハンドル
-		nullptr);						// 追加のパラメータ（nullptrならなし）
+		this);							// ユーザデータ（thisポインタを渡す）
 
 	if (!m_hWnd)
 	{
 		MessageBox(nullptr, "ウィンドウの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false;
 	}
-
-	// ウィンドウを表示
-	ShowWindow(m_hWnd, SW_SHOWNORMAL);
-
-	// ウィンドウの更新
-	UpdateWindow(m_hWnd);
-
-	// ウィンドウにフォーカスを設定
-	SetFocus(m_hWnd);
 
 	return true;	// 正常終了
 }
@@ -149,23 +153,6 @@ void App::TermWnd()
 
 	m_hInst = nullptr;
 	m_hWnd = nullptr;
-}
-
-void App::MainLoop()
-{
-	MSG msg{};
-	while (WM_QUIT != msg.message)
-	{
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else
-		{
-			Render();
-		}
-	}
 }
 
 bool App::InitD3D()
@@ -265,37 +252,73 @@ bool App::InitD3D()
 	}
 
 	// バックバッファ番号を取得
-	m_unFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+	m_frameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
 	// 不要になったので解放
 	pFactory.Reset(); // DXGIファクトリーのスマートポインタをリセット
 	pSwapChain.Reset(); // IDXGISwapChainのスマートポインタをリセット
 
 	// ==============================
-	//	コマンドアロケーターの生成
+	//	ディスクリプタプールの生成
 	// ==============================
-	for (uint32_t i = 0; i < FrameCount; ++i)
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
+
+	rtvHeapDesc.NodeMask = 1; // ノードマスク（単一ノード）
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;	// ディスクリプタヒープのタイプ
+	rtvHeapDesc.NumDescriptors = 512; // ディスクリプタの数
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダーからアクセス可能なフラグ
+	if (!DescriptorPool::Create(
+		m_pDevice.Get(),			// デバイス
+		&rtvHeapDesc,				// ディスクリプタヒープの設定
+		&m_pPools[POOL_TYPE_RES]))	// リソース用のディスクリプタプールを生成
 	{
-		hr = m_pDevice->CreateCommandAllocator(
-			D3D12_COMMAND_LIST_TYPE_DIRECT,						// コマンドリストのタイプ
-			IID_PPV_ARGS(m_pCmdAllocater[i].GetAddressOf()));	// コマンドアロケーターのポインタ
-		if (FAILED(hr))
-		{
-			MessageBox(nullptr, "コマンドアロケーターの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-			return false; // エラー終了
-		}
+		MessageBox(nullptr, "CBV/SRV/UAV用のディスクリプタプールの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;	// ディスクリプタヒープのタイプをサンプラ用に変更
+	rtvHeapDesc.NumDescriptors = 256; // サンプラの数を256に設定
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダーからアクセス可能なフラグ
+	if (!DescriptorPool::Create(
+		m_pDevice.Get(),			// デバイス
+		&rtvHeapDesc,				// ディスクリプタヒープの設定
+		&m_pPools[POOL_TYPE_SMP]))	// サンプラ用のディスクリプタプールを生成
+	{
+		MessageBox(nullptr, "サンプラ用のディスクリプタプールの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;	// ディスクリプタヒープのタイプをレンダーターゲットビュー用に変更
+	rtvHeapDesc.NumDescriptors = 512; // レンダーターゲットビューの数を512に設定
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // フラグ（なし）
+	if (!DescriptorPool::Create(
+		m_pDevice.Get(),			// デバイス
+		&rtvHeapDesc,				// ディスクリプタヒープの設定
+		&m_pPools[POOL_TYPE_RTV]))	// レンダーターゲットビュー用のディスクリプタプールを生成
+	{
+		MessageBox(nullptr, "レンダーターゲットビュー用のディスクリプタプールの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;	// ディスクリプタヒープのタイプを深度ステンシルビュー用に変更
+	rtvHeapDesc.NumDescriptors = 512; // 深度ステンシルビューの数を512に設定
+	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // フラグ（なし）
+	if (!DescriptorPool::Create(
+		m_pDevice.Get(),			// デバイス
+		&rtvHeapDesc,				// ディスクリプタヒープの設定
+		&m_pPools[POOL_TYPE_DSV]))	// 深度ステンシルビュー用のディスクリプタプールを生成
+	{
+		MessageBox(nullptr, "深度ステンシルビュー用のディスクリプタプールの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
 	}
 
 	// ==============================
 	//	コマンドリストの生成
 	// ==============================
-	hr = m_pDevice->CreateCommandList(
-		0,											// コマンドリストのフラグ
-		D3D12_COMMAND_LIST_TYPE_DIRECT,				// コマンドリストのタイプ
-		m_pCmdAllocater[m_unFrameIndex].Get(),		// コマンドアロケーター
-		nullptr,									// パイプラインステートオブジェクト（nullptrならデフォルト）
-		IID_PPV_ARGS(m_pCmdList.GetAddressOf()));	// コマンドリストのポインタ
-	if (FAILED(hr))
+	if (!m_commandList.Init(
+		m_pDevice.Get(),					// デバイス
+		D3D12_COMMAND_LIST_TYPE_DIRECT,		// コマンドリストのタイプ
+		FrameCount))						// コマンドアロケータの数
 	{
 		MessageBox(nullptr, "コマンドリストの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
@@ -304,149 +327,59 @@ bool App::InitD3D()
 	// ===============================
 	//	レンダーターゲットビューの生成
 	// ===============================
-	// ディスクリプタヒープの設定
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
-	rtvHeapDesc.NumDescriptors = FrameCount; // フレーム数分のディスクリプタを確保
-	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV; // レンダーターゲットビュー用
-	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // フラグ（なし）
-	rtvHeapDesc.NodeMask = 0; // ノードマスク（単一ノード）
-
-	hr = m_pDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(m_pHeapRTV.GetAddressOf()));
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, "レンダーターゲットビューの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pHeapRTV->GetCPUDescriptorHandleForHeapStart();
-	UINT incrementSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	for (uint32_t i = 0; i < FrameCount; ++i)
 	{
-		// バックバッファのリソースを取得
-		hr = m_pSwapChain->GetBuffer(i, IID_PPV_ARGS(m_pColorBuffer[i].GetAddressOf()));
-		if (FAILED(hr))
+		if (!m_colorTarget[i].InitFromBackBuffer(
+			m_pDevice.Get(),			// デバイス
+			m_pPools[POOL_TYPE_RTV],	// レンダーターゲットビュー用のディスクリプタプール
+			i,							// バックバッファのインデックス
+			m_pSwapChain.Get()))		// スワップチェーン
 		{
-			MessageBox(nullptr, "バックバッファの取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			MessageBox(nullptr, "バックバッファのレンダーターゲットビューの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 			return false; // エラー終了
 		}
-
-		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // レンダーターゲットのフォーマット
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; // ビューの次元
-		rtvDesc.Texture2D.MipSlice = 0; // ミップスライス
-		rtvDesc.Texture2D.PlaneSlice = 0; // プレーンスライス
-
-		// レンダーターゲットビューの生成
-		m_pDevice->CreateRenderTargetView(
-			m_pColorBuffer[i].Get(),	// バックバッファのリソース
-			&rtvDesc,					// レンダーターゲットビューの設定
-			rtvHandle);					// レンダーターゲットビューのハンドル
-
-		m_hRTV[i] = rtvHandle; // レンダーターゲットビューのハンドルを保存
-		rtvHandle.ptr += incrementSize; // 次のハンドルへ移動
 	}
 
 	// ==============================
 	//	深度ステンシルビューの生成
 	// ==============================
-	D3D12_HEAP_PROPERTIES prop{};
-	prop.Type = D3D12_HEAP_TYPE_DEFAULT; // ヒープのタイプ（デフォルト）
-	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN; // CPUページプロパティ
-	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN; // メモリプールの設定
-	prop.CreationNodeMask = 1; // 作成ノードマスク
-	prop.VisibleNodeMask = 1; // 可視ノードマスク
-
-	D3D12_RESOURCE_DESC depthDesc{};
-	depthDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D; // リソースの次元（2Dテクスチャ）
-	depthDesc.Alignment = 0; // アライメント（0ならデフォルト）
-	depthDesc.Width = m_unWidth; // 幅
-	depthDesc.Height = m_unHeight; // 高さ
-	depthDesc.DepthOrArraySize = 1; // 深度またはアレイサイズ
-	depthDesc.MipLevels = 1; // ミップレベル
-	depthDesc.Format = DXGI_FORMAT_D32_FLOAT; // フォーマット（深度ステンシル用）
-	depthDesc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
-	depthDesc.SampleDesc.Quality = 0; // マルチサンプリングの品質
-	depthDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN; // テクスチャのレイアウト（未知）
-	depthDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL; // リソースフラグ（深度ステンシルを許可）
-
-	D3D12_CLEAR_VALUE clearValue{};
-	clearValue.Format = DXGI_FORMAT_D32_FLOAT; // 深度ステンシルのフォーマット
-	clearValue.DepthStencil.Depth = 1.0f; // 深度のクリア値
-	clearValue.DepthStencil.Stencil = 0; // ステンシルのクリア値
-
-	hr = m_pDevice->CreateCommittedResource(
-		&prop,								// ヒーププロパティ
-		D3D12_HEAP_FLAG_NONE,				// ヒープフラグ（なし）
-		&depthDesc,							// リソースの設定
-		D3D12_RESOURCE_STATE_DEPTH_WRITE,	// 初期状態（深度書き込み）
-		&clearValue,						// クリア値
-		IID_PPV_ARGS(m_pDepthBuffer.GetAddressOf())); // 深度バッファのポインタ
-	if (FAILED(hr))
+	if (!m_depthTarget.Init(
+		m_pDevice.Get(),			// デバイス
+		m_pPools[POOL_TYPE_DSV],	// 深度ステンシルビュー用のディスクリプタプール
+		m_unWidth,					// 幅
+		m_unHeight,					// 高さ
+		DXGI_FORMAT_D32_FLOAT))		// 深度ステンシルフォーマット
 	{
 		MessageBox(nullptr, "深度ステンシルビューの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
-	// ディスクリプタヒープの設定
-	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
-	dsvHeapDesc.NumDescriptors = 1; // 深度ステンシルビューの数
-	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV; // 深度ステンシルビュー用
-	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE; // フラグ（なし）
-	dsvHeapDesc.NodeMask = 0; // ノードマスク（単一ノード）
-
-	hr = m_pDevice->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(m_pHeapDSV.GetAddressOf()));
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, "深度ステンシルビューのディスクリプタヒープの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_pHeapDSV->GetCPUDescriptorHandleForHeapStart(); // 深度ステンシルビューのハンドルを取得
-	incrementSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV); // 深度ステンシルビューのインクリメントサイズを取得
-
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT; // 深度ステンシルビューのフォーマット
-	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D; // ビューの次元（2Dテクスチャ）
-	dsvDesc.Texture2D.MipSlice = 0; // ミップスライス
-	dsvDesc.Flags = D3D12_DSV_FLAG_NONE; // フラグ（なし）
-
-	// 深度ステンシルビューの生成
-	m_pDevice->CreateDepthStencilView(
-		m_pDepthBuffer.Get(),				// 深度バッファのリソース
-		&dsvDesc,							// 深度ステンシルビューの設定
-		dsvHandle);							// 深度ステンシルビューのハンドル
-
-	m_hDSV = dsvHandle; // 深度ステンシルビューのハンドルを保存
-
 	// ==============================
 	//	フェンスの生成
 	// ==============================
-	// フェンスカウンターをリセット
-	for (uint32_t i = 0; i < FrameCount; ++i) m_unFenceCounter[i] = 0;
-	
-	// フェンスの生成
-	hr = m_pDevice->CreateFence(
-		m_unFenceCounter[m_unFrameIndex],		// 初期値
-		D3D12_FENCE_FLAG_NONE,					// フェンスのフラグ（なし）
-		IID_PPV_ARGS(m_pFence.GetAddressOf())); // フェンスのポインタ
-	if (FAILED(hr))
+	if (!m_fence.Init(m_pDevice.Get())) // フェンスの初期化
 	{
 		MessageBox(nullptr, "フェンスの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
-	m_unFenceCounter[m_unFrameIndex]++; // フレームカウンターをインクリメント
+	// ==============================
+	//	ビューポートの設定
+	// ==============================
+	m_Viewport.TopLeftX = 0.0f;							// ビューポートの左上X座標
+	m_Viewport.TopLeftY = 0.0f;							// ビューポートの左上Y座標
+	m_Viewport.Width = static_cast<float>(m_unWidth);	// ビューポートの幅
+	m_Viewport.Height = static_cast<float>(m_unHeight);	// ビューポートの高さ
+	m_Viewport.MinDepth = 0.0f;							// ビューポートの最小深度
+	m_Viewport.MaxDepth = 1.0f;							// ビューポートの最大深度
 
-	// イベントの生成
-	m_hFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-	if (!m_hFenceEvent)
-	{
-		MessageBox(nullptr, "フェンスイベントの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	// コマンドリストを閉じる
-	m_pCmdList->Close();
+	// ==============================
+	//	シザー矩形の設定
+	// ==============================
+	m_scissor.left = 0;				// シザー矩形の左端
+	m_scissor.right = m_unWidth;	// シザー矩形の右端
+	m_scissor.top = 0;				// シザー矩形の上端
+	m_scissor.bottom = m_unHeight;	// シザー矩形の下端
 
 	return true; // 正常終了
 }
@@ -454,27 +387,31 @@ bool App::InitD3D()
 void App::TermD3D()
 {
 	// GPU処理の完了を待機
-	WaitGPU();
-
-	// イベント破棄
-	if (m_hFenceEvent)
-	{
-		CloseHandle(m_hFenceEvent);
-		m_hFenceEvent = nullptr;
-	}
+	m_fence.Sync(m_pQueue.Get()); // フェンスを使用してGPU処理の完了を待機
 
 	// フェンス破棄
-	m_pFence.Reset(); // フェンスのスマートポインタをリセット
+	m_fence.Term(); // フェンスの終了処理
 
 	// レンダーターゲットビューの破棄
-	m_pHeapRTV.Reset(); // レンダーターゲットビューのスマートポインタをリセット
-	for (uint32_t i = 0; i < FrameCount; ++i) m_pColorBuffer[i].Reset(); // バックバッファのリソースを解放
+	for (uint32_t i = 0; i < FrameCount; ++i)
+	{
+		m_colorTarget[i].Term(); // 各バックバッファのレンダーターゲットビューを終了
+	}
+
+	// 深度ステンシルビューの破棄
+	m_depthTarget.Term();
 
 	// コマンドリストの破棄
-	m_pCmdList.Reset();
+	m_commandList.Reset();
 
-	// コマンドアロケーターの破棄
-	for (uint32_t i = 0; i < FrameCount; ++i) m_pCmdAllocater[i].Reset(); // コマンドアロケーターを解放
+	for (uint32_t i = 0; i < POOL_TYPE_COUNT; ++i)
+	{
+		if (m_pPools[i])
+		{
+			m_pPools[i]->Release(); // 各ディスクリプタプールを終了
+			m_pPools[i] = nullptr; // ポインタをnullptrに設定
+		}
+	}
 
 	// スワップチェーンの破棄
 	m_pSwapChain.Reset();
@@ -486,119 +423,21 @@ void App::TermD3D()
 	m_pDevice.Reset();
 }
 
-void App::Render()
+void App::MainLoop()
 {
-	// ==============================
-	//	更新処理
-	// ==============================
-	m_fRotateAngle += 0.025f;
-	m_CBV[m_unFrameIndex].pBuffer->World = DirectX::XMMatrixRotationY(m_fRotateAngle);
-
-	// コマンドの記録を開始
-	m_pCmdAllocater[m_unFrameIndex]->Reset(); // コマンドアロケーターをリセット
-	m_pCmdList->Reset(m_pCmdAllocater[m_unFrameIndex].Get(), nullptr); // コマンドリストをリセット
-
-	// リソースバリアの設定
-	D3D12_RESOURCE_BARRIER barrier{};
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE; // フラグ（なし）
-	barrier.Transition.pResource = m_pColorBuffer[m_unFrameIndex].Get(); // 対象のリソース
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT; // 前の状態
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET; // 後の状態
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES; // 全サブリソース
-
-	// リソースバリア
-	m_pCmdList->ResourceBarrier(1, &barrier);
-
-	// レンダーターゲットの設定
-	m_pCmdList->OMSetRenderTargets(
-		1,								// レンダーターゲットビューの数
-		&m_hRTV[m_unFrameIndex],		// レンダーターゲットビューのハンドル
-		FALSE,							// レンダーターゲットビューをクリアしない
-		&m_hDSV);						// 深度ステンシルビューのハンドル
-
-	// クリアカラーの設定
-	float clearColor[4] = { 0.25f, 0.25f, 0.25f, 1.0f };
-
-	// レンダーターゲットビューをクリア
-	m_pCmdList->ClearRenderTargetView(
-		m_hRTV[m_unFrameIndex],		// レンダーターゲットビューのハンドル
-		clearColor,					// クリアカラー
-		0,							// 深度ステンシルビューの数（なし）
-		nullptr);					// 深度ステンシルビューのハンドル（なし）
-
-	// 深度ステンシルビューをクリア
-	m_pCmdList->ClearDepthStencilView(
-		m_hDSV,						// 深度ステンシルビューのハンドル
-		D3D12_CLEAR_FLAG_DEPTH,		// クリアフラグ（深度のみ）
-		1.0f,						// 深度のクリア値
-		0,							// ステンシルのクリア値
-		0,							// 深度ステンシルビューの数（なし）
-		nullptr);					// 深度ステンシルビューのハンドル（なし）
-
-	// ===============================
-	//	描画処理
-	// ===============================
-	m_pCmdList->SetGraphicsRootSignature(m_pRootSignature.Get()); // ルートシグネチャの設定
-	m_pCmdList->SetDescriptorHeaps(1, m_pHeapCBV_SRV_UAV.GetAddressOf()); // ディスクリプタヒープの設定
-	m_pCmdList->SetGraphicsRootConstantBufferView(0, m_CBV[m_unFrameIndex].Desc.BufferLocation);	// 定数バッファビューの設定
-	
-	m_pCmdList->SetGraphicsRootDescriptorTable(1, m_Texture.HandleGPU);	// テクスチャのディスクリプタテーブルを設定
-	m_pCmdList->SetPipelineState(m_pPSO.Get()); // パイプラインステートオブジェクトの設定
-
-	m_pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジの設定
-	m_pCmdList->IASetVertexBuffers(0, 1, &m_VBV); // 頂点バッファの設定
-	m_pCmdList->IASetIndexBuffer(&m_IBV); // インデックスバッファの設定
-	m_pCmdList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
-	m_pCmdList->RSSetScissorRects(1, &m_Scissor); // シザーレクトの設定
-
-	auto count = static_cast<uint32_t>(m_Meshes[0].Indices.size()); // インデックスの数を取得
-	m_pCmdList->DrawIndexedInstanced(
-		count,			// インデックスの数
-		1,				// インスタンスの数
-		0,				// インデックスの開始位置
-		0,				// 頂点の開始位置
-		0);				// インスタンスの開始位置
-
-	// リソースバリアの設定
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // リソースバリアのタイプ
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE; // フラグ（なし）
-	barrier.Transition.pResource = m_pColorBuffer[m_unFrameIndex].Get(); // 対象のリソース
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET; // 前の状態
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT; // 後の状態
-	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES; // 全サブリソース
-
-	// リソースバリア
-	m_pCmdList->ResourceBarrier(1, &barrier);
-
-	// コマンドの記録を終了
-	m_pCmdList->Close();
-
-	// コマンドを実行
-	ID3D12CommandList* ppCommandLists[] = { m_pCmdList.Get()};
-	m_pQueue->ExecuteCommandLists(1, ppCommandLists);
-
-	// 画面に表示
-	Present(1);
-}
-
-void App::WaitGPU()
-{
-	assert(m_pQueue != nullptr);
-	assert(m_pFence != nullptr);
-	assert(m_hFenceEvent != nullptr);
-
-	// シグナル処理
-	m_pQueue->Signal(m_pFence.Get(), m_unFenceCounter[m_unFrameIndex]); // コマンドキューをシグナル
-
-	// 完了時にイベントを設定する
-	m_pFence->SetEventOnCompletion(m_unFenceCounter[m_unFrameIndex], m_hFenceEvent);
-
-	// 待機処理
-	WaitForSingleObjectEx(m_hFenceEvent, INFINITE, FALSE); // フェンスイベントがシグナルされるまで待機
-
-	// カウンターを増やす
-	m_unFenceCounter[m_unFrameIndex]++; // 次のフレームのフェンスカウンターを増やす
+	MSG msg{};
+	while (WM_QUIT != msg.message)
+	{
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			OnRender();
+		}
+	}
 }
 
 void App::Present(uint32_t interval)
@@ -606,444 +445,223 @@ void App::Present(uint32_t interval)
 	// 画面に表示
 	m_pSwapChain->Present(interval, 0); // スワップチェーンをプレゼント
 
-	// シグナル処理
-	const uint64_t currentValue = m_unFenceCounter[m_unFrameIndex];
-	m_pQueue->Signal(m_pFence.Get(), currentValue); // コマンドキューをシグナル
+	// 完了待ち
+	m_fence.Wait(m_pQueue.Get(), INFINITE);
+	
+	// フレーム番号を更新
+	m_frameIndex = m_pSwapChain->GetCurrentBackBufferIndex(); // 現在のバックバッファのインデックスを取得
+}
 
-	// バックバッファ番号を更新
-	m_unFrameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+LRESULT App::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	// ウィンドウプロシージャのポインタを取得
+	auto instance = reinterpret_cast<App*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
-	// 次のフレームの描画準備がまだであれば待機する
-	if (m_pFence->GetCompletedValue() < m_unFenceCounter[m_unFrameIndex])
+	switch (msg)
 	{
-		m_pFence->SetEventOnCompletion(m_unFenceCounter[m_unFrameIndex], m_hFenceEvent);
-		WaitForSingleObjectEx(m_hFenceEvent, INFINITE, FALSE); // フェンスイベントがシグナルされるまで待機
+	case WM_CREATE:
+	{
+		// ウィンドウの作成時にユーザデータを設定
+		auto pCreateStruct = reinterpret_cast<LPCREATESTRUCT>(lp);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pCreateStruct->lpCreateParams));	// ユーザデータにthisポインタを設定
+	}
+	break;
+	case WM_DESTROY:
+		PostQuitMessage(0); // アプリケーションの終了
+		break;
+	default:
+		break;
 	}
 
-	// 次のフレームのフェンスカウンターを増やす
-	m_unFenceCounter[m_unFrameIndex] = currentValue + 1;
+	if (instance)
+	{
+		// アプリケーションのメッセージ処理
+		instance->OnMsgProc(hWnd, msg, wp, lp);
+	}
+
+	return DefWindowProc(hWnd, msg, wp, lp);
 }
 
 bool App::OnInit()
 {
-	// ==============================
+	// ===============================
 	//	メッシュをロード
-	// ==============================
-	if (!LoadMesh("Assets/teapot/teapot.obj", m_Meshes, m_Materials))
+	// ===============================
+	std::vector<MeshData> meshData;
+	std::vector<MaterialData> materialData;
+
+	if (!LoadMesh("Assets/teapot/teapot.obj", meshData, materialData))
 	{
 		MessageBox(nullptr, "メッシュのロードに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
-	assert(m_Meshes.size() == 1); // １と仮定
+	// メモリを予約
+	m_pMesh.reserve(meshData.size()); // メッシュの数だけメモリを予約
 
-	// ==============================
-	//	頂点バッファの作成
-	// ==============================
-	auto size = sizeof(MeshVertex) * m_Meshes[0].Vertices.size(); // 頂点バッファのサイズ
-	auto vertices = m_Meshes[0].Vertices.data(); // 頂点データのポインタ
-
-	// ヒーププロパティ
-	D3D12_HEAP_PROPERTIES prop{};
-	prop.Type = D3D12_HEAP_TYPE_UPLOAD;	// ヒープのタイプ（アップロード用）
-	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;	// CPUページプロパティ（不明）
-	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;	// メモリプールの優先度（不明）
-	prop.CreationNodeMask = 1;	// 作成ノードマスク（単一ノード）
-	prop.VisibleNodeMask = 1;	// 可視ノードマスク（単一ノード）
-
-	// リソースの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;	// リソースの次元（バッファ）
-	resourceDesc.Alignment = 0;	// アライメント（0ならデフォルト）
-	resourceDesc.Width = size;	// リソースの幅（頂点データのサイズ）
-	resourceDesc.Height = 1;	// 高さ（1なら1Dバッファ）
-	resourceDesc.DepthOrArraySize = 1;	// 深度または配列サイズ（1なら1Dバッファ）
-	resourceDesc.MipLevels = 1;	// ミップレベル（1ならミップマップなし）
-	resourceDesc.Format = DXGI_FORMAT_UNKNOWN;	// フォーマット（バッファなので不明）
-	resourceDesc.SampleDesc.Count = 1;	// サンプル数（1ならマルチサンプリングなし）
-	resourceDesc.SampleDesc.Quality = 0;	// サンプル品質（0ならデフォルト）
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;	// レイアウト（行メジャー）
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;	// リソースフラグ（なし）
-
-	// リソースを生成
-	HRESULT hr = m_pDevice->CreateCommittedResource(
-		&prop,								// ヒーププロパティ
-		D3D12_HEAP_FLAG_NONE,				// ヒープフラグ（なし）
-		&resourceDesc,						// リソースの設定
-		D3D12_RESOURCE_STATE_GENERIC_READ,	// 初期状態（汎用読み取り）
-		nullptr,							// クリア値（なし）
-		IID_PPV_ARGS(m_pVB.GetAddressOf())); // リソースのポインタ
-	if (FAILED(hr))
+	// メッシュを初期化
+	for (size_t i = 0; i < meshData.size(); ++i)
 	{
-		MessageBox(nullptr, "頂点バッファの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
+		// メッシュ生成
+		Mesh* mesh = new (std::nothrow) Mesh();
 
-	// マッピングする
-	void* ptr = nullptr;
-	hr = m_pVB->Map(0, nullptr, &ptr); // リソースをマッピングしてポインタを取得
-	if (FAILED(hr) || !ptr)
-	{
-		MessageBox(nullptr, "頂点バッファのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	// 頂点データーをマッピング先に設定
-	memcpy(ptr, vertices, size); // 頂点データをコピー
-
-	// マッピング解除
-	m_pVB->Unmap(0, nullptr); // マッピングを解除
-
-	// 頂点バッファビューの設定
-	m_VBV.BufferLocation = m_pVB->GetGPUVirtualAddress(); // GPU仮想アドレスを設定
-	m_VBV.SizeInBytes = static_cast<UINT>(size); // サイズを設定
-	m_VBV.StrideInBytes = static_cast <UINT>(sizeof(MeshVertex)); // ストライドを設定（頂点のサイズ）
-
-	// ==============================
-	//	インデックスバッファの生成
-	// ==============================
-	size = sizeof(uint32_t) * m_Meshes[0].Indices.size(); // インデックスバッファのサイズ
-	auto indices = m_Meshes[0].Indices.data(); // インデックスデータのポインタ
-
-	// ヒーププロパティ
-	prop.Type = D3D12_HEAP_TYPE_UPLOAD;	// ヒープのタイプ（アップロード用）
-	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;	// CPUページプロパティ（不明）
-	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;	// メモリプールの優先度（不明）
-	prop.CreationNodeMask = 1;	// 作成ノードマスク（単一ノード）
-	prop.VisibleNodeMask = 1;	// 可視ノードマスク（単一ノード）
-
-	// リソースの設定
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;	// リソースの次元（バッファ）
-	resourceDesc.Alignment = 0;	// アライメント（0ならデフォルト）
-	resourceDesc.Width = size;	// リソースの幅（インデックスデータのサイズ）
-	resourceDesc.Height = 1;	// 高さ（1なら1Dバッファ）
-	resourceDesc.DepthOrArraySize = 1;	// 深度または配列サイズ（1なら1Dバッファ）
-	resourceDesc.MipLevels = 1;	// ミップレベル（1ならミップマップなし）
-	resourceDesc.Format = DXGI_FORMAT_UNKNOWN;	// フォーマット（バッファなので不明）
-	resourceDesc.SampleDesc.Count = 1;	// サンプル数（1ならマルチサンプリングなし）
-	resourceDesc.SampleDesc.Quality = 0;	// サンプル品質（0ならデフォルト）
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;	// レイアウト（行メジャー）
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;	// リソースフラグ（なし）
-	
-	// リソースを生成
-	hr = m_pDevice->CreateCommittedResource(
-		&prop,								// ヒーププロパティ
-		D3D12_HEAP_FLAG_NONE,				// ヒープフラグ（なし）
-		&resourceDesc,						// リソースの設定
-		D3D12_RESOURCE_STATE_GENERIC_READ,	// 初期状態（汎用読み取り）
-		nullptr,							// クリア値（なし）
-		IID_PPV_ARGS(m_pIB.GetAddressOf())); // リソースのポインタ
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, "インデックスバッファの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	// マッピングする
-	ptr = nullptr;
-	hr = m_pIB->Map(0, nullptr, &ptr); // リソースをマッピングしてポインタを取得
-	if (FAILED(hr) || !ptr)
-	{
-		MessageBox(nullptr, "インデックスバッファのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	// インデックスデータをマッピング先に設定
-	memcpy(ptr, indices, size); // インデックスデータをコピー
-
-	// マッピング解除
-	m_pIB->Unmap(0, nullptr); // マッピングを解除
-
-	// インデックスバッファビューの設定
-	m_IBV.BufferLocation = m_pIB->GetGPUVirtualAddress(); // GPU仮想アドレスを設定
-	m_IBV.Format = DXGI_FORMAT_R32_UINT; // インデックスフォーマットを設定（32ビット整数）
-	m_IBV.SizeInBytes = static_cast<UINT>(size); // サイズを設定
-
-	// ==============================
-	//	CBV/SRV/UAV用ディスクリプタヒープの作成
-	// ==============================
-	D3D12_DESCRIPTOR_HEAP_DESC heapDesc{};
-	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV; // ヒープのタイプ（CBV/SRV/UAV用）
-	heapDesc.NumDescriptors = 2 * FrameCount; // ディスクリプタの数（フレーム数分）
-	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE; // シェーダーから可視化可能
-	heapDesc.NodeMask = 0; // ノードマスク（単一ノード）
-
-	hr = m_pDevice->CreateDescriptorHeap(
-		&heapDesc,									// ヒープの設定
-		IID_PPV_ARGS(m_pHeapCBV_SRV_UAV.GetAddressOf()));	// ヒープのポインタ
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, "CBV/SRV/UAV用ディスクリプタヒープの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	// ===============================
-	//	定数バッファの作成
-	// ===============================
-	// ヒーププロパティ
-	prop.Type = D3D12_HEAP_TYPE_UPLOAD;	// ヒープのタイプ（アップロード用）
-	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;	// CPUページプロパティ（不明）
-	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;	// メモリプールの優先度（不明）
-	prop.CreationNodeMask = 1;	// 作成ノードマスク（単一ノード）
-	prop.VisibleNodeMask = 1;	// 可視ノードマスク（単一ノード）
-
-	// リソースの設定
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;	// リソースの次元（バッファ）
-	resourceDesc.Alignment = 0;	// アライメント（0ならデフォルト）
-	resourceDesc.Width = sizeof(Transform);	// リソースの幅（Transform構造体のサイズ）
-	resourceDesc.Height = 1;	// 高さ（1なら1Dバッファ）
-	resourceDesc.DepthOrArraySize = 1;	// 深度または配列サイズ（1なら1Dバッファ）
-	resourceDesc.MipLevels = 1;	// ミップレベル（1ならミップマップなし）
-	resourceDesc.Format = DXGI_FORMAT_UNKNOWN;	// フォーマット（バッファなので不明）
-	resourceDesc.SampleDesc.Count = 1;	// サンプル数（1ならマルチサンプリングなし）
-	resourceDesc.SampleDesc.Quality = 0;	// サンプル品質（0ならデフォルト）
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;	// レイアウト（行メジャー）
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;	// リソースフラグ（なし）
-
-	UINT incrementSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV); // ディスクリプタのインクリメントサイズ
-	
-	for (uint32_t i = 0; i < FrameCount * 2; ++i)
-	{
-		// リソースを生成
-		hr = m_pDevice->CreateCommittedResource(
-			&prop,								// ヒーププロパティ
-			D3D12_HEAP_FLAG_NONE,				// ヒープフラグ（なし）
-			&resourceDesc,								// リソースの設定
-			D3D12_RESOURCE_STATE_GENERIC_READ,	// 初期状態（汎用読み取り）
-			nullptr,							// クリア値（なし）
-			IID_PPV_ARGS(m_pCB[i].GetAddressOf())); // リソースのポインタ
-		if (FAILED(hr))
+		if (!mesh)
 		{
-			MessageBox(nullptr, "定数バッファの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			MessageBox(nullptr, "メモリの確保に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 			return false; // エラー終了
 		}
 
-		auto address = m_pCB[i]->GetGPUVirtualAddress(); // GPU仮想アドレスを取得
-		auto handleCPU = m_pHeapCBV_SRV_UAV->GetCPUDescriptorHandleForHeapStart(); // CPUディスクリプタハンドルを取得
-		auto handleGPU = m_pHeapCBV_SRV_UAV->GetGPUDescriptorHandleForHeapStart(); // GPUディスクリプタハンドルを取得
-
-		handleCPU.ptr += incrementSize * i; // CPUディスクリプタハンドルをフレーム数分ずらす
-		handleGPU.ptr += incrementSize * i; // GPUディスクリプタハンドルをフレーム数分ずらす
-
-		// 定数バッファビューの設定.
-		m_CBV[i].HandleCPU = handleCPU;
-		m_CBV[i].HandleGPU = handleGPU;
-		m_CBV[i].Desc.BufferLocation = address;
-		m_CBV[i].Desc.SizeInBytes = sizeof(Transform);
-
-		m_pDevice->CreateConstantBufferView(
-			&m_CBV[i].Desc,	// 定数バッファビューの設定
-			handleCPU);		// CPUディスクリプタハンドル
-
-		// マッピング
-		hr = m_pCB[i]->Map(0, nullptr, reinterpret_cast<void**>(&m_CBV[i].pBuffer)); // リソースをマッピングしてポインタを取得
-		if (FAILED(hr) || !m_CBV[i].pBuffer)
+		// 初期化処理
+		if (!mesh->Init(m_pDevice.Get(), meshData[i]))
 		{
-			MessageBox(nullptr, "定数バッファのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			delete mesh; // メモリ解放
+			MessageBox(nullptr, "メッシュの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 			return false; // エラー終了
 		}
-
-		auto eyePos = DirectX::XMVectorSet(0.0f, 1.0f, 2.0f, 0.0f); // 視点の位置を設定
-		auto targetPos = DirectX::XMVectorZero(); // 注視点の位置を設定
-		auto upward = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // 上方向を設定
-
-		auto fovY = DirectX::XMConvertToRadians(37.5f); // 垂直視野角を設定
-		auto aspect = static_cast<float>(m_unWidth) / static_cast<float>(m_unHeight); // アスペクト比を計算
-
-		// 変換行列を計算
-		m_CBV[i].pBuffer->World = DirectX::XMMatrixIdentity(); // ワールド行列を単位行列に設定
-		m_CBV[i].pBuffer->View = DirectX::XMMatrixLookAtLH(eyePos, targetPos, upward); // ビュー行列を計算
-		m_CBV[i].pBuffer->Proj = DirectX::XMMatrixPerspectiveFovLH(fovY, aspect, 1.0f, 1000.0f);
 	}
+
+	// メモリ最適化
+	m_pMesh.shrink_to_fit();
+
+	// マテリアル初期化
+	if (!m_material.Init(
+		m_pDevice.Get(),			// デバイス
+		m_pPools[POOL_TYPE_RES],	// リソース用のディスクリプタプール
+		0,							// マテリアルのインデックス
+		materialData.size()			// マテリアルの数
+	))
+	{
+		MessageBox(nullptr, "マテリアルの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// リソースバッチを用意
+	DirectX::ResourceUploadBatch batch(m_pDevice.Get());
+
+	// バッチ開始
+	batch.Begin();
+
+	// テクスチャ設定
+	for (size_t i = 0; i < materialData.size(); ++i)
+	{
+		m_material.SetTexture(
+			i,							// マテリアルのインデックス
+			TU_DIFFUSE,					// テクスチャユニット
+			materialData[i].DiffuseMap,	// 拡散反射マップのファイル名
+			batch);						// リソースアップロードバッチ
+	}
+
+	// バッチ終了
+	auto future = batch.End(m_pQueue.Get()); // リソースアップロードバッチを終了
+
+	// バッチ完了を待機
+	future.wait(); // 非同期処理の完了を待機
 
 	// ==============================
 	//	ルートシグネチャの生成
 	// ==============================
-	auto flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;	// ルートシグネチャのフラグ（入力アセンブラー入力レイアウトを許可）
-	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;	// ドメインシェーダーのルートアクセスを拒否
-	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS;	// ハルシェーダーのルートアクセスを拒否
-	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;	// ジオメトリシェーダーのルートアクセスを拒否
+	auto flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT; // 入力アセンブラ入力レイアウトを許可
+	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS; // ドメインシェーダーのルートアクセスを拒否
+	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS; // ハルシェーダーのルートアクセスを拒否
+	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS; // ジオメトリシェーダーのルートアクセスを拒否
+
+	// ディスクリプタレンジを設定
+	D3D12_DESCRIPTOR_RANGE range{};
+	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // シェーダーリソースビューのタイプ
+	range.NumDescriptors = 1; // ディスクリプタの数
+	range.BaseShaderRegister = 0; // ベースシェーダーレジスタ
+	range.RegisterSpace = 0; // レジスタスペース
+	range.OffsetInDescriptorsFromTableStart = 0; // テーブルの開始からのオフセット
 
 	// ルートパラメーターの設定
-	D3D12_ROOT_PARAMETER param[2] = {};
-	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // パラメーターのタイプ（CBV）
+	D3D12_ROOT_PARAMETER param[2]{};
+	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
 	param[0].Descriptor.ShaderRegister = 0; // シェーダーレジスタ
 	param[0].Descriptor.RegisterSpace = 0; // レジスタスペース
 	param[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // シェーダーの可視性（頂点シェーダー）
 
-	D3D12_DESCRIPTOR_RANGE range{};
-	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // ディスクリプタレンジのタイプ（SRV）
-	range.NumDescriptors = 1; // ディスクリプタの数
-	range.BaseShaderRegister = 0; // ベースシェーダーレジスタ
-	range.RegisterSpace = 0; // レジスタスペース
-	range.OffsetInDescriptorsFromTableStart = 0; // テーブル開始からのオフセット
-
-	param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // パラメーターのタイプ（ディスクリプタテーブル）
+	// ルートパラメーターを設定
+	param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブル
 	param[1].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
-	param[1].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジの配列
+	param[1].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジのポインタ
 	param[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
 
 	// スタティックサンプラーの設定
-	D3D12_STATIC_SAMPLER_DESC samplerDesc{};
-	samplerDesc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // フィルタリングモード（線形）
-	samplerDesc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP; // テクスチャアドレスモード（クランプ）
-	samplerDesc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP; // テクスチャアドレスモード（クランプ）
-	samplerDesc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP; // テクスチャアドレスモード（クランプ）
-	samplerDesc.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS; // ミップレベルのバイアス（デフォルト）
-	samplerDesc.MaxAnisotropy = 1; // 最大異方性（1なら異方性なし）
-	samplerDesc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較関数（決して比較しない）
-	samplerDesc.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK; // ボーダーカラー（透明な黒）
-	samplerDesc.MinLOD = -D3D12_FLOAT32_MAX; // 最小LOD（最小値）
-	samplerDesc.MaxLOD = D3D12_FLOAT32_MAX; // 最大LOD（最大値）
-	samplerDesc.ShaderRegister = 0; // シェーダーレジスタ
-	samplerDesc.RegisterSpace = 0; // レジスタスペース
-	samplerDesc.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
+	D3D12_STATIC_SAMPLER_DESC sampler{};
+	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // フィルタリングタイプ
+	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // U座標のアドレスモード
+	sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // V座標のアドレスモード
+	sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // W座標のアドレスモード
+	sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS; // MIPレベルのバイアス
+	sampler.MaxAnisotropy = 1; // 最大異方性
+	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較関数（常に失敗）
+	sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK; // ボーダーカラー（透明黒）
+	sampler.MinLOD = -D3D12_FLOAT32_MAX; // 最小LOD
+	sampler.MaxLOD = D3D12_FLOAT32_MAX; // 最大LOD
+	sampler.ShaderRegister = 0; // シェーダーレジスタ
+	sampler.RegisterSpace = 0; // レジスタスペース
+	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
 
 	// ルートシグネチャの設定
-	D3D12_ROOT_SIGNATURE_DESC rootDesc{};
-	rootDesc.NumParameters = 2; // パラメーターの数
-	rootDesc.NumStaticSamplers = 1; // 静的サンプラーの数
-	rootDesc.pParameters = param; // ルートパラメーターの配列
-	rootDesc.pStaticSamplers = &samplerDesc; // 静的サンプラーの配列
-	rootDesc.Flags = flag; // ルートシグネチャのフラグ
+	D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
+	rootSigDesc.NumParameters = _countof(param); // ルートパラメーターの数
+	rootSigDesc.NumStaticSamplers = 1; // スタティックサンプラーの数
+	rootSigDesc.pParameters = param; // ルートパラメーターのポインタ
+	rootSigDesc.pStaticSamplers = &sampler; // スタティックサンプラーのポインタ
+	rootSigDesc.Flags = flag; // ルートシグネチャのフラグ
 
 	ComPtr<ID3DBlob> pBlob = nullptr; // ルートシグネチャのバイナリデータ
 	ComPtr<ID3DBlob> pErrorBlob = nullptr; // エラーメッセージ用のバイナリデータ
 
-	// シリアライズ
-	hr = D3D12SerializeRootSignature(
-		&rootDesc,								// ルートシグネチャの設定
-		D3D_ROOT_SIGNATURE_VERSION_1_0,			// バージョン
-		pBlob.GetAddressOf(),					// シリアライズされたバイナリデータ
-		pErrorBlob.GetAddressOf());				// エラーメッセージ
-	if (FAILED(hr))
-	{
-		if (pErrorBlob)
-		{
-			MessageBoxA(nullptr, static_cast<const char*>(pErrorBlob->GetBufferPointer()), "ルートシグネチャのシリアライズエラー", MB_OK | MB_ICONERROR);
-		}
-		else
-		{
-			MessageBox(nullptr, "ルートシグネチャのシリアライズに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		}
-		return false; // エラー終了
-	}
-
-	// ルートシグネチャを生成
-	hr = m_pDevice->CreateRootSignature(
-		0,									// ノードマスク（単一ノード）
-		pBlob->GetBufferPointer(),			// シリアライズされたバイナリデータ
-		pBlob->GetBufferSize(),			// バッファのサイズ
-		IID_PPV_ARGS(m_pRootSignature.GetAddressOf())); // ルートシグネチャのポインタ
+	HRESULT hr = m_pDevice->CreateRootSignature(
+		0,											// ノードマスク（単一ノード）
+		pBlob->GetBufferPointer(),					// ルートシグネチャのバッファポインタ
+		pBlob->GetBufferSize(),						// ルートシグネチャのバッファサイズ
+		IID_PPV_ARGS(m_pRootSig.GetAddressOf()));	// ルートシグネチャのポインタ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ルートシグネチャの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
-	// ==============================
+	// ===============================
 	//	パイプラインステートの生成
-	// ==============================
-	D3D12_INPUT_ELEMENT_DESC elements[2];
-	elements[0].SemanticName = "POSITION"; // セマンティック名（位置）
-	elements[0].SemanticIndex = 0; // セマンティックインデックス
-	elements[0].Format = DXGI_FORMAT_R32G32B32_FLOAT; // フォーマット（3D位置）
-	elements[0].InputSlot = 0; // 入力スロット
-	elements[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT; // アライメントオフセット（自動計算）
-	elements[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA; // 入力クラス（頂点データ）
-	elements[0].InstanceDataStepRate = 0; // インスタンスデータステップレート（なし）
-
-	elements[1].SemanticName = "TEXCOORD"; // セマンティック名（テクスチャ座標）
-	elements[1].SemanticIndex = 0; // セマンティックインデックス
-	elements[1].Format = DXGI_FORMAT_R32G32_FLOAT; // フォーマット（2Dテクスチャ座標）
-	elements[1].InputSlot = 0; // 入力スロット
-	elements[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT; // アライメントオフセット（自動計算）
-	elements[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA; // 入力クラス（頂点データ）
-	elements[1].InstanceDataStepRate = 0; // インスタンスデータステップレート（なし）
-
-	// ラスタライザーステートの設定
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID; // 塗りつぶしモード（ソリッド）
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE; // カリングモード（なし）
-	rasterizerDesc.FrontCounterClockwise = FALSE; // フロントカウンタークロックワイズ（時計回り）
-	rasterizerDesc.DepthBias = D3D12_DEFAULT_DEPTH_BIAS; // 深度バイアス（デフォルト）
-	rasterizerDesc.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP; // 深度バイアスクランプ（デフォルト）
-	rasterizerDesc.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS; // スロープスケールド深度バイアス（デフォルト）
-	rasterizerDesc.DepthClipEnable = FALSE; // 深度クリップを無効化
-	rasterizerDesc.MultisampleEnable = FALSE; // マルチサンプリングを無効化
-	rasterizerDesc.AntialiasedLineEnable = FALSE; // アンチエイリアスラインを無効化
-	rasterizerDesc.ForcedSampleCount = 0; // 強制サンプル数（なし）
-	rasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF; // 保守的ラスタライゼーションをオフ
-
-	// レンダーターゲットのブレンド設定
-	D3D12_RENDER_TARGET_BLEND_DESC blendDescRT = {
-		FALSE, // ブレンドを無効化
-		FALSE, // アルファブレンドを無効化
-		D3D12_BLEND_ONE, // ソースブレンド（1）
-		D3D12_BLEND_ZERO, // デスティネーションブレンド（0）
-		D3D12_BLEND_OP_ADD, // ブレンドオペレーション（加算）
-		D3D12_BLEND_ONE, // ソースアルファブレンド（1）
-		D3D12_BLEND_ZERO, // デスティネーションアルファブレンド（0）
-		D3D12_BLEND_OP_ADD, // アルファブレンドオペレーション（加算）
-		D3D12_LOGIC_OP_NOOP, // ロジックオペレーション（なし）
-		D3D12_COLOR_WRITE_ENABLE_ALL // カラー書き込みを全て有効化
-	};
-
-	// ブレンドステートの設定
-	D3D12_BLEND_DESC blendDesc{};
-	blendDesc.AlphaToCoverageEnable = FALSE; // アルファカバレッジを無効化
-	blendDesc.IndependentBlendEnable = FALSE; // 独立ブレンドを無効化
-	for (UINT i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i)
-	{
-		blendDesc.RenderTarget[i] = blendDescRT; // レンダーターゲットのブレンド設定を適用
-	}
-
-	// 深度ステンシルステートの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	depthStencilDesc.DepthEnable = TRUE; // 深度ステンシルを有効化
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL; // 深度書き込みマスクを全て有効化
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL; // 深度比較関数（小なりイコール）
-	depthStencilDesc.StencilEnable = FALSE; // ステンシルを無効化
-
+	// ===============================
 	ComPtr<ID3DBlob> pVSBlob = nullptr; // 頂点シェーダーのバイナリデータ
 	ComPtr<ID3DBlob> pPSBlob = nullptr; // ピクセルシェーダーのバイナリデータ
 
-	std::wstring vsPath, psPath;
-	vsPath = L"Assets/Shader/SimpleTexVS.cso"; // 頂点シェーダーのファイルパスを設定
-	psPath = L"Assets/Shader/SimpleTexPS.cso"; // ピクセルシェーダーのファイルパスを設定
-
 	// 頂点シェーダー読み込み
-	hr = D3DReadFileToBlob(vsPath.c_str(), pVSBlob.GetAddressOf()); // 頂点シェーダーのバイナリデータを読み込み
+	hr = D3DReadFileToBlob(L"Assets/Shader/SimpleTexVS.cso", pVSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false;
+		return false; // エラー終了
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(psPath.c_str(), pPSBlob.GetAddressOf()); // ピクセルシェーダーのバイナリデータを読み込み
+	hr = D3DReadFileToBlob(L"Assets/Shader/SimpleTexPS.cso", pPSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false;
+		return false; // エラー終了
 	}
 
-	// パイプラインステートの設定
+	// グラフィックスパイプラインステートを設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
-	psoDesc.InputLayout = MeshVertex::InputLayout; // 入力レイアウトを設定
-	psoDesc.pRootSignature = m_pRootSignature.Get(); // ルートシグネチャを設定
-	psoDesc.VS = { pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize() }; // 頂点シェーダーを設定
-	psoDesc.PS = { pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize() }; // ピクセルシェーダーを設定
-	psoDesc.RasterizerState = rasterizerDesc; // ラスタライザーステートを設定
-	psoDesc.BlendState = blendDesc; // ブレンドステートを設定
-	psoDesc.DepthStencilState = depthStencilDesc; // 深度ステンシルステートを設定
-	psoDesc.SampleMask = UINT_MAX; // サンプルマスクを全て有効化
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // プリミティブトポロジタイプを三角形に設定
-	psoDesc.NumRenderTargets = 1; // レンダーターゲットの数を1に設定
-	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // レンダーターゲットのフォーマットを設定
-	psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT; // 深度ステンシルのフォーマットを設定
-	psoDesc.SampleDesc.Count = 1; // サンプル数を1に設定
-	psoDesc.SampleDesc.Quality = 0; // サンプル品質を0に設定（デフォルト）
+	psoDesc.InputLayout = MeshVertex::InputLayout; // 入力レイアウト
+	psoDesc.pRootSignature = m_pRootSig.Get(); // ルートシグネチャ
+	psoDesc.VS = { pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize() }; // 頂点シェーダー
+	psoDesc.PS = { pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize() }; // ピクセルシェーダー
+	psoDesc.RasterizerState = DirectX::CommonStates::CullNone; // ラスタライザーステート（カリングなし）
+	psoDesc.BlendState = DirectX::CommonStates::Opaque; // ブレンドステート（不透明）
+	psoDesc.DepthStencilState = DirectX::CommonStates::DepthDefault; // 深度ステンシルステート（デフォルト）
+	psoDesc.SampleMask = UINT_MAX; // サンプルマスク（全サンプル）
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // プリミティブトポロジタイプ（三角形）
+	psoDesc.NumRenderTargets = 1; // レンダーターゲットの数
+	psoDesc.RTVFormats[0] = m_colorTarget[0].GetViewDesc().Format; // レンダーターゲットのフォーマット
+	psoDesc.DSVFormat = m_depthTarget.GetViewDesc().Format; // 深度ステンシルビューのフォーマット
+	psoDesc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
+	psoDesc.SampleDesc.Quality = 0; // マルチサンプリングの品質
 
 	// パイプラインステートを生成
 	hr = m_pDevice->CreateGraphicsPipelineState(
@@ -1052,115 +670,164 @@ bool App::OnInit()
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "パイプラインステートの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false;
-	}
-
-	// ==============================
-	//	テクスチャの生成
-	// ==============================
-	// テクスチャのファイルパスを検索
-	std::wstring texPath;
-	texPath = L"Assets/teapot/default.dds"; // テクスチャのファイルパスを設定
-
-	DirectX::ResourceUploadBatch batch(m_pDevice.Get()); // リソースアップロードバッチを作成
-	batch.Begin(); // アップロードバッチを開始
-
-	// リソースを生成
-	hr = DirectX::CreateDDSTextureFromFile(
-		m_pDevice.Get(),					// デバイス
-		batch,								// アップロードバッチ
-		texPath.c_str(),					// テクスチャのファイルパス
-		m_Texture.pResource.GetAddressOf(),	// テクスチャのポインタ
-		true);								// ミップマップを生成するかどうか
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, "テクスチャの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
-	// コマンドを実行
-	auto future = batch.End(m_pQueue.Get()); // アップロードバッチを終了し、コマンドを実行
-
-	// コマンドの完了を待機する
-	future.wait(); // コマンドの完了を待つ
-
-	// インクリメントサイズを取得
-	incrementSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV); // ディスクリプタのインクリメントサイズ
-
-	// CPUディスクリプタハンドルとGPUディスクリプタハンドルをディスクリプタヒープから取得
-	auto handleCPU = m_pHeapCBV_SRV_UAV->GetCPUDescriptorHandleForHeapStart(); // CPUディスクリプタハンドルを取得
-	auto handleGPU = m_pHeapCBV_SRV_UAV->GetGPUDescriptorHandleForHeapStart(); // GPUディスクリプタハンドルを取得
-
-	// テクスチャにディスクリプタを割り当てる
-	handleCPU.ptr += incrementSize * 2; // CPUディスクリプタハンドルをフレーム数分ずらす
-	handleGPU.ptr += incrementSize * 2; // GPUディスクリプタハンドルをフレーム数分ずらす
-
-	m_Texture.HandleCPU = handleCPU; // CPUディスクリプタハンドルを設定
-	m_Texture.HandleGPU = handleGPU; // GPUディスクリプタハンドルを設定
-
-	// テクスチャの構成設定を取得
-	auto textureDesc = m_Texture.pResource->GetDesc(); // テクスチャの設定を取得
-
-	// シェーダーリソースビューの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // シェーダーリソースビューの次元（2Dテクスチャ）
-	srvDesc.Format = textureDesc.Format; // テクスチャのフォーマットを設定
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // シェーダーコンポーネントマッピングをデフォルトに設定
-	srvDesc.Texture2D.MostDetailedMip = 0; // 最も詳細なミップレベルを0に設定
-	srvDesc.Texture2D.MipLevels = textureDesc.MipLevels; // ミップレベルの数を設定
-	srvDesc.Texture2D.PlaneSlice = 0; // プレーンスライスを0に設定
-	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f; // リソースの最小LODクランプを0に設定
-
-	// シェーダーリソースビューを生成
-	m_pDevice->CreateShaderResourceView(
-		m_Texture.pResource.Get(),		// テクスチャのポインタ
-		&srvDesc,						// シェーダーリソースビューの設定
-		handleCPU);						// CPUディスクリプタハンドル
-
 	// ==============================
-	//	ビューポートとシザ―矩形の設定
+	//	変換行列用の定数バッファの生成
 	// ==============================
-	m_Viewport.TopLeftX = 0.0f; // ビューポートの左上X座標
-	m_Viewport.TopLeftY = 0.0f; // ビューポートの左上Y座標
-	m_Viewport.Width = static_cast<float>(m_unWidth); // ビューポートの幅
-	m_Viewport.Height = static_cast<float>(m_unHeight); // ビューポートの高さ
-	m_Viewport.MinDepth = 0.0f; // ビューポートの最小深度
-	m_Viewport.MaxDepth = 1.0f; // ビューポートの最大深度
+	m_Transform.reserve(FrameCount); // 変換行列の数だけメモリを予約
 
-	m_Scissor.left = 0; // シザ―矩形の左端
-	m_Scissor.right = m_unWidth; // シザ―矩形の右端
-	m_Scissor.top = 0; // シザ―矩形の上端
-	m_Scissor.bottom = m_unHeight; // シザ―矩形の下端
+	for (size_t i = 0; i < FrameCount; ++i)
+	{
+		auto pCB = new (std::nothrow) ConstantBuffer();
+		if (!pCB)
+		{
+			MessageBox(nullptr, "メモリの確保に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return false; // エラー終了
+		}
 
-	return true; // 初期化成功
+		// 定数バッファ初期化
+		if (!pCB->Init(
+			m_pDevice.Get(),			// デバイス
+			m_pPools[POOL_TYPE_RES],	// リソース用のディスクリプタプール
+			sizeof(Transform) * 2		// 定数バッファのサイズ
+		))
+		{
+			delete pCB; // メモリ解放
+			MessageBox(nullptr, "定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return false; // エラー終了
+		}
+
+		// カメラ設定
+		auto eyePos = DirectX::XMVectorSet(0.0f, 1.0f, 2.0f, 0.0f); // カメラの位置
+		auto targetPos = DirectX::XMVectorZero(); // カメラの注視点
+		auto upDir = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f); // カメラの上方向
+
+		// 垂直画角とアスペクト比の設定
+		auto fovY = DirectX::XMConvertToRadians(37.5f); // 垂直画角
+		auto aspect = static_cast<float>(m_unWidth) / static_cast<float>(m_unHeight); // アスペクト比
+
+		// 変換行列を設定
+		auto ptr = pCB->GetPtr<Transform>(); // 定数バッファのポインタを取得
+		ptr->World = DirectX::XMMatrixIdentity(); // ワールド行列を単位行列に設定
+		ptr->View = DirectX::XMMatrixLookAtLH(eyePos, targetPos, upDir); // ビュー行列を設定
+		ptr->Proj = DirectX::XMMatrixPerspectiveFovLH(fovY, aspect, 1.0f, 100.0f); // プロジェクション行列を設定
+
+		m_Transform.push_back(pCB); // 変換行列をリストに追加
+	}
+
+	m_RotateAngle = 0.0f; // 回転角度を初期化
+
+	return true; // 正常終了
 }
 
 void App::OnTerm()
 {
-	for (uint32_t i = 0; i < FrameCount; ++i)
+	// メッシュ破棄
+	for (auto& mesh : m_pMesh)
 	{
-		if (m_pCB[i].Get())
+		if (mesh)
 		{
-			m_pCB[i]->Unmap(0, nullptr); // 定数バッファのマッピングを解除
-			memset(m_CBV[i].pBuffer, 0, sizeof(m_CBV[i])); // 定数バッファの内容をクリア
+			mesh->Term(); // メッシュの終了処理
+			delete mesh; // メモリ解放
+			mesh = nullptr; // ポインタをnullptrに設定
 		}
-		m_pCB[i].Reset(); // 定数バッファのリセット
 	}
+	m_pMesh.clear(); // メッシュのリストをクリア
+	m_pMesh.shrink_to_fit(); // メモリを最適化
 
-	m_pVB.Reset(); // 頂点バッファのリセット
-	m_pPSO.Reset(); // パイプラインステートのリセット
+	// マテリアル破棄
+	m_material.Term(); // マテリアルの終了処理
+
+	// 変換行列用の定数バッファ破棄
+	for (auto& pCB : m_Transform)
+	{
+		if (pCB)
+		{
+			pCB->Term(); // 定数バッファの終了処理
+			delete pCB; // メモリ解放
+			pCB = nullptr; // ポインタをnullptrに設定
+		}
+	}
+	m_Transform.clear(); // 変換行列のリストをクリア
+	m_Transform.shrink_to_fit(); // メモリを最適化
 }
 
-LRESULT App::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
+void App::OnRender()
 {
-	switch (msg)
+	// ===============================
+	//	更新処理
+	// ===============================
+	m_RotateAngle += 0.025f; // 回転角度を更新
+
+	auto pTransform = m_Transform[m_frameIndex]->GetPtr<Transform>(); // 現在の変換行列を取得
+	pTransform->World = DirectX::XMMatrixRotationY(m_RotateAngle); // ワールド行列を回転行列に設定
+
+	// コマンドリストの記録を開始
+	auto pCmd = m_commandList.Reset();
+
+	// 書き込み用リソースバリア設定
+	DirectX::TransitionResource(
+		pCmd,										// コマンドリスト
+		m_colorTarget[m_frameIndex].GetResource(),	// レンダーターゲットビュー
+		D3D12_RESOURCE_STATE_PRESENT,				// レンダーターゲット状態
+		D3D12_RESOURCE_STATE_RENDER_TARGET);		// レンダーターゲット状態に変更
+
+	// ディスクリプタ取得
+	auto handleRTV = m_colorTarget[m_frameIndex].GetHandleRTV(); // レンダーターゲットビューのハンドルを取得
+	auto handleDSV = m_depthTarget.GetHandleDSV(); // 深度ステンシルビューのハンドルを取得
+
+	// レンダーターゲットを設定
+	pCmd->OMSetRenderTargets(1, &handleRTV->HandleCPU, FALSE, &handleDSV->HandleCPU); // レンダーターゲットと深度ステンシルビューを設定
+
+	// クリアカラー
+	float clearColor[4] = { 0.25f, 0.25f, 0.25f, 1.0f }; // クリアカラーを黒に設定
+
+	// レンダーターゲットをクリア
+	pCmd->ClearRenderTargetView(handleRTV->HandleCPU, clearColor, 0, nullptr); // レンダーターゲットビューをクリア
+
+	// 深度ステンシルビューをクリア
+	pCmd->ClearDepthStencilView(handleDSV->HandleCPU, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr); // 深度ステンシルビューをクリア
+
+	// 描画処理
+	ID3D12DescriptorHeap* ppHeaps[] = { m_pPools[POOL_TYPE_RES]->GetHeap() }; // リソース用のディスクリプタヒープを取得
+
+	pCmd->SetGraphicsRootSignature(m_pRootSig.Get()); // ルートシグネチャを設定
+	pCmd->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps); // ディスクリプタヒープを設定
+	pCmd->SetGraphicsRootConstantBufferView(0, m_Transform[m_frameIndex]->GetAddress()); // 定数バッファビューを設定
+	pCmd->SetPipelineState(m_pPSO.Get()); // パイプラインステートを設定
+	pCmd->RSSetViewports(1, &m_Viewport); // ビューポートを設定
+	pCmd->RSSetScissorRects(1, &m_scissor); // シザー矩形を設定
+
+	for (size_t i = 0; i < m_pMesh.size(); ++i)
 	{
-	case WM_DESTROY:
-		PostQuitMessage(0); // アプリケーションの終了
-		return 0;
-	default:
-		break;
+		// マテリアルIDを取得
+		auto id = m_pMesh[i]->GetMaterialId();
+
+		// テクスチャを設定
+		pCmd->SetGraphicsRootDescriptorTable(
+			1,												// ルートパラメーターのインデックス
+			m_material.GetTextureHandle(id, TU_DIFFUSE));	// テクスチャのハンドルを設定
+
+		// メッシュを描画
+		m_pMesh[i]->Draw(pCmd);
 	}
 
-	return DefWindowProc(hWnd, msg, wp, lp);
+	// 表示用リソースバリア設定
+	DirectX::TransitionResource(
+		pCmd,										// コマンドリスト
+		m_colorTarget[m_frameIndex].GetResource(),	// レンダーターゲットビュー
+		D3D12_RESOURCE_STATE_RENDER_TARGET,			// レンダーターゲット状態
+		D3D12_RESOURCE_STATE_PRESENT);				// プレゼント状態に変更
+
+	// コマンドリストの記録を終了
+	pCmd->Close(); // コマンドリストをクローズ
+
+	// コマンドリストを実行
+	ID3D12CommandList* pCommandLists[] = { pCmd }; // コマンドリストの配列を作成
+	m_pQueue->ExecuteCommandLists(_countof(pCommandLists), pCommandLists); // コマンドリストを実行
+
+	// 画面に表示
+	Present(1); // スワップチェーンをプレゼント
 }
