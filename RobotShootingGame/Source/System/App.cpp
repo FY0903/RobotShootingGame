@@ -19,6 +19,7 @@
 
 #include "CommonStates.h"
 #include "DirectXHelpers.h"
+#include "SimpleMath.h"
 
 // ==============================
 //	constexpr
@@ -34,6 +35,18 @@ namespace {
 		DirectX::XMMATRIX World{};	// ワールド変換行列
 		DirectX::XMMATRIX View{};	// ビュー変換行列
 		DirectX::XMMATRIX Proj{};	// 投影変換行列
+	};
+
+	struct LightBuffer
+	{
+		DirectX::SimpleMath::Vector4 LightPosition;	// ライトの位置
+		DirectX::SimpleMath::Vector4 LightColor;	// ライトの色
+	};
+
+	struct MaterialBuffer
+	{
+		DirectX::SimpleMath::Vector3 Diffuse;	// 拡散反射率
+		float Alpha;							// 透過度
 	};
 }
 
@@ -530,7 +543,7 @@ bool App::OnInit()
 	if (!m_material.Init(
 		m_pDevice.Get(),			// デバイス
 		m_pPools[POOL_TYPE_RES],	// リソース用のディスクリプタプール
-		0,							// マテリアルのインデックス
+		sizeof(MaterialBuffer),		// マテリアルのインデックス
 		materialData.size()			// マテリアルの数
 	))
 	{
@@ -547,6 +560,10 @@ bool App::OnInit()
 	// テクスチャ設定
 	for (size_t i = 0; i < materialData.size(); ++i)
 	{
+		auto ptr = m_material.GetBufferPtr<MaterialBuffer>(i); // マテリアルのバッファポインタを取得
+		ptr->Diffuse = materialData[i].Diffuse; // 拡散反射率を設定
+		ptr->Alpha = materialData[i].Alpha; // 透過度を設定
+
 		m_material.SetTexture(
 			i,							// マテリアルのインデックス
 			TU_DIFFUSE,					// テクスチャユニット

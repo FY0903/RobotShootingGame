@@ -163,6 +163,12 @@
     <FxCompile Include="Resource\SimpleTexVS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
+    <FxCompile Include="Resource\LambertVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\LambertPS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
