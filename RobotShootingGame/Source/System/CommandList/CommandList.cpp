@@ -45,6 +45,9 @@ bool CommandList::Init(ID3D12Device* pDevice, D3D12_COMMAND_LIST_TYPE type, uint
 		return false;	// コマンドリストの作成に失敗した場合はfalseを返す
 	}
 
+	// コマンドリストをクローズ
+	m_pCmdList->Close();
+
 	m_index = 0;	// コマンドアロケータのインデックスを初期化
 	return true;	// 成功した場合はtrueを返す
 }

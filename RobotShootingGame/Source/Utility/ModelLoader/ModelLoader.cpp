@@ -16,6 +16,9 @@
 #include <assimp/postprocess.h>
 #include <codecvt>
 #include <cassert>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 // ==============================
 //	defines
@@ -43,20 +46,6 @@ const D3D12_INPUT_LAYOUT_DESC MeshVertex::InputLayout = {
 static_assert(sizeof(MeshVertex) == 44, "Vertex struct/layout mismatch");
 
 namespace {
-
-	/**
-	 * @brief aiString 型の文字列を std::wstring 型に変換します。
-	 * @param [path] 変換する aiString 型の文字列。
-	 * @return 変換後の std::wstring 型の文字列。
-	 */
-	std::wstring Convert(const aiString& path)
-	{
-		wchar_t temp[256] = {};
-		size_t  size;
-		mbstowcs_s(&size, temp, path.C_Str(), 256);
-		return std::wstring(temp);
-	}
-
 	/**
 	 * @brief MeshLoaderクラス
 	 */
@@ -89,11 +78,15 @@ namespace {
 		 * @param [pSrcMaterial] 解析元となる aiMaterial オブジェクトへのポインタ。
 		 */
 		void ParseMaterial(MaterialData& dstMaterial, const aiMaterial* pSrcMaterial);
+
+		const char* m_filename = nullptr; // 読み込むファイル名
 	};
 	
 	bool MeshLoader::Load(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials)
 	{
 		if (!filename) return false;
+
+		m_filename = filename;	// 読み込むファイル名を保存
 
 		Assimp::Importer importer;
 		int flag = 0;
@@ -106,7 +99,7 @@ namespace {
 		flag |= aiProcess_OptimizeMeshes; // メッシュの最適化
 
 		// ファイルを読み込む
-		auto pScene = importer.ReadFile(filename, flag);
+		auto pScene = importer.ReadFile(m_filename, flag);
 
 		// 読み込みに失敗した場合
 		if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mNumMeshes)
@@ -233,7 +226,9 @@ namespace {
 		aiString path;
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.DiffuseMap = Convert(path);
+			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
+
+			dstMaterial.DiffuseMap = fullPath;
 		}
 
 		// ==============================
@@ -241,7 +236,9 @@ namespace {
 		// ==============================
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SPECULAR(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.SpecularMap = Convert(path);
+			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
+
+			dstMaterial.SpecularMap = fullPath;
 		}
 
 		// ==============================
@@ -249,7 +246,9 @@ namespace {
 		// ==============================
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SHININESS(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.ShininessMap = Convert(path);
+			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
+
+			dstMaterial.ShininessMap = fullPath;
 		}
 
 		// ==============================
@@ -257,7 +256,9 @@ namespace {
 		// ==============================
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_NORMALS(0), path) == AI_SUCCESS)
 		{
-			dstMaterial.NormalMap = Convert(path);
+			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
+
+			dstMaterial.NormalMap = fullPath;
 		}
 	}
 }

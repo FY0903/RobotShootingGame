@@ -518,6 +518,9 @@ bool App::OnInit()
 			MessageBox(nullptr, "メッシュの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 			return false; // エラー終了
 		}
+
+		// 成功したら登録
+		m_pMesh.push_back(mesh); // メッシュをベクターに追加
 	}
 
 	// メモリ最適化
@@ -610,10 +613,31 @@ bool App::OnInit()
 	rootSigDesc.pStaticSamplers = &sampler; // スタティックサンプラーのポインタ
 	rootSigDesc.Flags = flag; // ルートシグネチャのフラグ
 
-	ComPtr<ID3DBlob> pBlob = nullptr; // ルートシグネチャのバイナリデータ
-	ComPtr<ID3DBlob> pErrorBlob = nullptr; // エラーメッセージ用のバイナリデータ
+	ComPtr<ID3DBlob> pBlob; // ルートシグネチャのバイナリデータ
+	ComPtr<ID3DBlob> pErrorBlob; // エラーメッセージ用のバイナリデータ
 
-	HRESULT hr = m_pDevice->CreateRootSignature(
+	// ルートシグネチャをシリアライズ
+	HRESULT hr = D3D12SerializeRootSignature(
+		&rootSigDesc,						// ルートシグネチャの設定
+		D3D_ROOT_SIGNATURE_VERSION_1,		// ルートシグネチャのバージョン
+		pBlob.GetAddressOf(),				// シリアライズされたルートシグネチャのポインタ
+		pErrorBlob.GetAddressOf());			// エラーメッセージのポインタ
+	if (FAILED(hr))
+	{
+		// エラーメッセージが存在する場合は表示
+		if (pErrorBlob)
+		{
+			MessageBoxA(nullptr, static_cast<const char*>(pErrorBlob->GetBufferPointer()), "ルートシグネチャのシリアライズに失敗", MB_OK | MB_ICONERROR);
+		}
+		else
+		{
+			MessageBox(nullptr, "ルートシグネチャのシリアライズに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		}
+		return false; // エラー終了
+	}
+
+	// ルートシグネチャを生成
+	hr = m_pDevice->CreateRootSignature(
 		0,											// ノードマスク（単一ノード）
 		pBlob->GetBufferPointer(),					// ルートシグネチャのバッファポインタ
 		pBlob->GetBufferSize(),						// ルートシグネチャのバッファサイズ
