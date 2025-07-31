@@ -39,14 +39,17 @@ namespace {
 
 	struct LightBuffer
 	{
-		DirectX::SimpleMath::Vector4 LightPosition;	// ライトの位置
-		DirectX::SimpleMath::Vector4 LightColor;	// ライトの色
+		DirectX::SimpleMath::Vector4 LightPosition;		// ライトの位置
+		DirectX::SimpleMath::Color LightColor;			// ライトの色
+		DirectX::SimpleMath::Vector4 CameraPosition;	// カメラの位置
 	};
 
 	struct MaterialBuffer
 	{
 		DirectX::SimpleMath::Vector3 Diffuse;	// 拡散反射率
 		float Alpha;							// 透過度
+		DirectX::SimpleMath::Vector3 Specular;	// 鏡面反射率
+		float Shininess;						// 光沢度
 	};
 }
 
@@ -563,11 +566,19 @@ bool App::OnInit()
 		auto ptr = m_material.GetBufferPtr<MaterialBuffer>(i); // マテリアルのバッファポインタを取得
 		ptr->Diffuse = materialData[i].Diffuse; // 拡散反射率を設定
 		ptr->Alpha = materialData[i].Alpha; // 透過度を設定
+		ptr->Specular = materialData[i].Specular; // 鏡面反射率を設定
+		ptr->Shininess = materialData[i].Shininess; // 光沢度を設定
 
 		m_material.SetTexture(
 			i,							// マテリアルのインデックス
 			TU_DIFFUSE,					// テクスチャユニット
 			materialData[i].DiffuseMap,	// 拡散反射マップのファイル名
+			batch);						// リソースアップロードバッチ
+
+		m_material.SetTexture(
+			i,							// マテリアルのインデックス
+			TU_NORMAL,					// テクスチャユニット
+			materialData[i].NormalMap,	// 法線マップのファイル名
 			batch);						// リソースアップロードバッチ
 	}
 
@@ -601,6 +612,7 @@ bool App::OnInit()
 	auto ptr = pCB->GetPtr<LightBuffer>(); // ライトバッファのポインタを取得
 	ptr->LightPosition = DirectX::SimpleMath::Vector4(0.0f, 50.0f, 100.0f, 1.0f); // ライトの位置を設定
 	ptr->LightColor = DirectX::SimpleMath::Color(1.0f, 1.0f, 1.0f, 0.0f); // ライトの色を設定
+	ptr->CameraPosition = DirectX::SimpleMath::Vector4(0.0f, 1.0f, 2.0f, 1.0f); // カメラの位置を設定
 
 	m_pLight = pCB; // ライトバッファのポインタを保存
 
@@ -613,15 +625,21 @@ bool App::OnInit()
 	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS; // ジオメトリシェーダーのルートアクセスを拒否
 
 	// ディスクリプタレンジを設定
-	D3D12_DESCRIPTOR_RANGE range{};
-	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // シェーダーリソースビューのタイプ
-	range.NumDescriptors = 1; // ディスクリプタの数
-	range.BaseShaderRegister = 0; // ベースシェーダーレジスタ
-	range.RegisterSpace = 0; // レジスタスペース
-	range.OffsetInDescriptorsFromTableStart = 0; // テーブルの開始からのオフセット
+	D3D12_DESCRIPTOR_RANGE range[2]{};
+	range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // シェーダーリソースビューのタイプ
+	range[0].NumDescriptors = 1; // ディスクリプタの数
+	range[0].BaseShaderRegister = 0; // ベースシェーダーレジスタ
+	range[0].RegisterSpace = 0; // レジスタスペース
+	range[0].OffsetInDescriptorsFromTableStart = 0; // テーブルの開始からのオフセット
+
+	range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // シェーダーリソースビューのタイプ
+	range[1].NumDescriptors = 1; // ディスクリプタの数
+	range[1].BaseShaderRegister = 1; // ベースシェーダーレジスタ
+	range[1].RegisterSpace = 0; // レジスタスペース
+	range[1].OffsetInDescriptorsFromTableStart = 0; // テーブルの開始からのオフセット
 
 	// ルートパラメーターの設定
-	D3D12_ROOT_PARAMETER param[4]{};
+	D3D12_ROOT_PARAMETER param[5]{};
 	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
 	param[0].Descriptor.ShaderRegister = 0; // シェーダーレジスタ
 	param[0].Descriptor.RegisterSpace = 0; // レジスタスペース
@@ -639,8 +657,13 @@ bool App::OnInit()
 
 	param[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブル
 	param[3].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
-	param[3].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジのポインタ
+	param[3].DescriptorTable.pDescriptorRanges = &range[0]; // ディスクリプタレンジのポインタ
 	param[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
+
+	param[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブル
+	param[4].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
+	param[4].DescriptorTable.pDescriptorRanges = &range[1]; // ディスクリプタレンジのポインタ
+	param[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
 
 	// スタティックサンプラーの設定
 	auto sampler = DirectX::CommonStates::StaticLinearWrap(0, D3D12_SHADER_VISIBILITY_PIXEL); // ピクセルシェーダーで使用するスタティックサンプラー
@@ -695,7 +718,7 @@ bool App::OnInit()
 	ComPtr<ID3DBlob> pPSBlob = nullptr; // ピクセルシェーダーのバイナリデータ
 
 	// 頂点シェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/LambertVS.cso", pVSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/BumpVS.cso", pVSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -703,7 +726,7 @@ bool App::OnInit()
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/LambertPS.cso", pPSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/BumpPS.cso", pPSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -879,6 +902,9 @@ void App::OnRender()
 		pCmd->SetGraphicsRootDescriptorTable(
 			3,												// ルートパラメーターのインデックス
 			m_material.GetTextureHandle(id, TU_DIFFUSE));	// テクスチャのハンドルを設定
+		pCmd->SetGraphicsRootDescriptorTable(
+			4,												// ルートパラメーターのインデックス
+			m_material.GetTextureHandle(id, TU_NORMAL));	// スペキュラマップのハンドルを設定
 
 		// メッシュを描画
 		m_pMesh[i]->Draw(pCmd);

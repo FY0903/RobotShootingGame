@@ -169,6 +169,15 @@
     <FxCompile Include="Resource\LambertPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
+    <FxCompile Include="Resource\PhongPS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\BumpVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\BumpPS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

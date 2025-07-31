@@ -230,35 +230,65 @@ namespace {
 
 			dstMaterial.DiffuseMap = fullPath;
 		}
+		else
+		{
+			// ディフューズマップがない場合は空にする
+			dstMaterial.DiffuseMap.clear();
+		}
 
 		// ==============================
 		//	スペキュラーマップの取得
 		// ==============================
+		path.Clear(); // aiStringをクリア
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SPECULAR(0), path) == AI_SUCCESS)
 		{
 			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
 
 			dstMaterial.SpecularMap = fullPath;
 		}
+		else
+		{
+			// スペキュラーマップがない場合は空にする
+			dstMaterial.SpecularMap.clear();
+		}
 
 		// ==============================
 		//	光沢度マップの取得
 		// ==============================
+		path.Clear(); // aiStringをクリア
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SHININESS(0), path) == AI_SUCCESS)
 		{
 			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
 
 			dstMaterial.ShininessMap = fullPath;
 		}
+		else
+		{
+			// 光沢度マップがない場合は空にする
+			dstMaterial.ShininessMap.clear();
+		}
 
 		// ==============================
 		//	法線マップの取得
 		// ==============================
+		path.Clear(); // aiStringをクリア
 		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_NORMALS(0), path) == AI_SUCCESS)
 		{
 			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
 
 			dstMaterial.NormalMap = fullPath;
+		}
+		else
+		{
+			if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_HEIGHT(0), path) == AI_SUCCESS)
+			{
+				auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
+				dstMaterial.NormalMap = fullPath; // 高さマップを法線マップとして使用
+			}
+			else
+			{
+				dstMaterial.NormalMap.clear(); // 法線マップがない場合は空にする
+			}
 		}
 	}
 }
