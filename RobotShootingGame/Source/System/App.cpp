@@ -578,6 +578,33 @@ bool App::OnInit()
 	future.wait(); // 非同期処理の完了を待機
 
 	// ==============================
+	//	ライトバッファの設定
+	// ==============================
+	auto pCB = new (std::nothrow) ConstantBuffer();
+	if (!pCB)
+	{
+		MessageBox(nullptr, "ライトバッファのメモリ確保に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	if (!pCB->Init(
+		m_pDevice.Get(),			// デバイス
+		m_pPools[POOL_TYPE_RES],	// リソース用のディスクリプタプール
+		sizeof(LightBuffer)			// バッファサイズ
+	))
+	{
+		delete pCB; // メモリ解放
+		MessageBox(nullptr, "ライトバッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	auto ptr = pCB->GetPtr<LightBuffer>(); // ライトバッファのポインタを取得
+	ptr->LightPosition = DirectX::SimpleMath::Vector4(0.0f, 50.0f, 100.0f, 1.0f); // ライトの位置を設定
+	ptr->LightColor = DirectX::SimpleMath::Color(1.0f, 1.0f, 1.0f, 0.0f); // ライトの色を設定
+
+	m_pLight = pCB; // ライトバッファのポインタを保存
+
+	// ==============================
 	//	ルートシグネチャの生成
 	// ==============================
 	auto flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT; // 入力アセンブラ入力レイアウトを許可
@@ -594,33 +621,29 @@ bool App::OnInit()
 	range.OffsetInDescriptorsFromTableStart = 0; // テーブルの開始からのオフセット
 
 	// ルートパラメーターの設定
-	D3D12_ROOT_PARAMETER param[2]{};
+	D3D12_ROOT_PARAMETER param[4]{};
 	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
 	param[0].Descriptor.ShaderRegister = 0; // シェーダーレジスタ
 	param[0].Descriptor.RegisterSpace = 0; // レジスタスペース
 	param[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // シェーダーの可視性（頂点シェーダー）
 
-	// ルートパラメーターを設定
-	param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブル
-	param[1].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
-	param[1].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジのポインタ
+	param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
+	param[1].Descriptor.ShaderRegister = 1; // シェーダーレジスタ
+	param[1].Descriptor.RegisterSpace = 0; // レジスタスペース
 	param[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
 
+	param[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
+	param[2].Descriptor.ShaderRegister = 2; // シェーダーレジスタ
+	param[2].Descriptor.RegisterSpace = 0; // レジスタスペース
+	param[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
+
+	param[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブル
+	param[3].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
+	param[3].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジのポインタ
+	param[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
+
 	// スタティックサンプラーの設定
-	D3D12_STATIC_SAMPLER_DESC sampler{};
-	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // フィルタリングタイプ
-	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // U座標のアドレスモード
-	sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // V座標のアドレスモード
-	sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // W座標のアドレスモード
-	sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS; // MIPレベルのバイアス
-	sampler.MaxAnisotropy = 1; // 最大異方性
-	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較関数（常に失敗）
-	sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK; // ボーダーカラー（透明黒）
-	sampler.MinLOD = -D3D12_FLOAT32_MAX; // 最小LOD
-	sampler.MaxLOD = D3D12_FLOAT32_MAX; // 最大LOD
-	sampler.ShaderRegister = 0; // シェーダーレジスタ
-	sampler.RegisterSpace = 0; // レジスタスペース
-	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
+	auto sampler = DirectX::CommonStates::StaticLinearWrap(0, D3D12_SHADER_VISIBILITY_PIXEL); // ピクセルシェーダーで使用するスタティックサンプラー
 
 	// ルートシグネチャの設定
 	D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
@@ -672,7 +695,7 @@ bool App::OnInit()
 	ComPtr<ID3DBlob> pPSBlob = nullptr; // ピクセルシェーダーのバイナリデータ
 
 	// 頂点シェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/SimpleTexVS.cso", pVSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/LambertVS.cso", pVSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -680,7 +703,7 @@ bool App::OnInit()
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/SimpleTexPS.cso", pPSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/LambertPS.cso", pPSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -758,7 +781,7 @@ bool App::OnInit()
 		m_Transform.push_back(pCB); // 変換行列をリストに追加
 	}
 
-	m_RotateAngle = 0.0f; // 回転角度を初期化
+	m_RotateAngle = DirectX::XMConvertToRadians(-60.0f); // 初期回転角度を設定
 
 	return true; // 正常終了
 }
@@ -837,6 +860,7 @@ void App::OnRender()
 	pCmd->SetGraphicsRootSignature(m_pRootSig.Get()); // ルートシグネチャを設定
 	pCmd->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps); // ディスクリプタヒープを設定
 	pCmd->SetGraphicsRootConstantBufferView(0, m_Transform[m_frameIndex]->GetAddress()); // 定数バッファビューを設定
+	pCmd->SetGraphicsRootConstantBufferView(1, m_pLight->GetAddress()); // マテリアル定数バッファビューを設定
 	pCmd->SetPipelineState(m_pPSO.Get()); // パイプラインステートを設定
 	pCmd->RSSetViewports(1, &m_Viewport); // ビューポートを設定
 	pCmd->RSSetScissorRects(1, &m_scissor); // シザー矩形を設定
@@ -846,9 +870,14 @@ void App::OnRender()
 		// マテリアルIDを取得
 		auto id = m_pMesh[i]->GetMaterialId();
 
+		// 定数バッファを設定
+		pCmd->SetGraphicsRootConstantBufferView(
+			2,									// ルートパラメーターのインデックス
+			m_material.GetBufferAddress(i));	// マテリアルの定数バッファのアドレスを設定
+
 		// テクスチャを設定
 		pCmd->SetGraphicsRootDescriptorTable(
-			1,												// ルートパラメーターのインデックス
+			3,												// ルートパラメーターのインデックス
 			m_material.GetTextureHandle(id, TU_DIFFUSE));	// テクスチャのハンドルを設定
 
 		// メッシュを描画

@@ -117,6 +117,7 @@ private:
 	// ==============================
 	std::vector<Mesh*> m_pMesh{};				// メッシュの配列
 	std::vector<ConstantBuffer*> m_Transform{};	// 変換行列の定数バッファ
+	ConstantBuffer* m_pLight{};					// ライトの定数バッファ
 	Material m_material{};						// マテリアル
 	ComPtr<ID3D12PipelineState> m_pPSO{};		// パイプラインステートオブジェクト
 	ComPtr<ID3D12RootSignature> m_pRootSig{};	// ルートシグネチャ
