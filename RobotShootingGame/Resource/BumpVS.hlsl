@@ -11,7 +11,11 @@ struct VSOutput
     float4 position : SV_POSITION;
     float2 TexCoord : TEXCOORD;
     float4 WorldPos : WORLD_POS;
+#if 0
     float3x3 TangentBasis : TANGENT_BASIS;
+#else
+    float3x3 InvTangentBaisis : INV_TANGENT_BASIS; // 接線空間の逆行列を使用
+#endif
 };
 
 cbuffer Transform : register(b0)
@@ -39,8 +43,15 @@ VSOutput main(VSInput input)
     float3 T = normalize(mul((float3x3) World, input.Tangent));
     float3 B = normalize(cross(N, T)); // 法線と接線から従法線を計算
     
-    // 基底変換行列
+#if 0
+    // 接線空間上でライティングする場合
+    // 基底行列変換
     output.TangentBasis = float3x3(T, B, N); // 接線、従法線、法線の順で格納
+#else
+    // ワールド空間上でライティングする場合
+    // 基底変換行列の逆行列
+    output.InvTangentBaisis = transpose(float3x3(T, B, N)); // 接線、従法線、法線の逆行列を格納
+#endif
 
     return output;
 }

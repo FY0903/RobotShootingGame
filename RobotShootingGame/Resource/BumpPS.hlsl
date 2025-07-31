@@ -3,7 +3,11 @@ struct VSOutput
     float4 position : SV_POSITION;
     float2 TexCoord : TEXCOORD;
     float4 WorldPos : WORLD_POS;
+#if 0
     float3x3 TangentBasis : TANGENT_BASIS;
+#else
+    float3x3 InvTangentBaisis : INV_TANGENT_BASIS; // 接線空間の逆行列を使用
+#endif
 };
 
 struct PSOutput
@@ -34,6 +38,8 @@ PSOutput main(VSOutput input)
 {
     PSOutput output = (PSOutput) 0;
     
+#if 0
+    // 接線空間でライティングを行う場合
     // ライトベクトル
     float3 L = normalize(input.WorldPos.xyz - LightPosition);
     L *= -1.0f; // ライト位置からのベクトルを反転
@@ -44,7 +50,20 @@ PSOutput main(VSOutput input)
     V = mul(input.TangentBasis, V); // 接線空間に変換
     
     // 法線ベクトル
-    float3 N = NormalMap.Sample(WrapSmp, input.TexCoord).rgb * 2.0f - 1.0f; // 法線マップから法線を取得し、[-1, 1]の範囲に変換
+    float3 N = NormalMap.Sample(WrapSmp, input.TexCoord).xyz * 2.0f - 1.0f; // 法線マップから法線を取得し、[-1, 1]の範囲に変換
+#else
+    // ワールド空間でライティングを行う場合
+    // ライトベクトル
+    float3 L = normalize(input.WorldPos.xyz - LightPosition);
+    L *= -1.0f; // ライト位置からのベクトルを反転
+    
+    // 視線ベクトル
+    float3 V = normalize(CameraPosition - input.WorldPos.xyz);
+    
+    // 法線ベクトル
+    float3 N = NormalMap.Sample(WrapSmp, input.TexCoord).xyz * 2.0f - 1.0f; // 法線マップから法線を取得し、[-1, 1]の範囲に変換
+    N = mul(input.InvTangentBaisis, N); // 接線空間の逆行列を使用して法線を変換
+#endif
     
     // 反射ベクトル
     float3 R = normalize(-reflect(V, N));
