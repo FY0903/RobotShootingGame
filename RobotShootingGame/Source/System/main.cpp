@@ -23,6 +23,8 @@ int main()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+	//_CrtSetBreakAlloc(396); // メモリリークの検出を有効化（必要に応じて行番号を変更）
+
 	// アプリケーションを実行
 	App app(960, 540);
 	app.Run();

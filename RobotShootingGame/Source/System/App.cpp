@@ -48,8 +48,8 @@ namespace {
 	{
 		DirectX::SimpleMath::Vector3 BaseColor;	// ベースカラー
 		float Alpha;							// 透過度
+		float Roughness;						// 粗さ
 		float Metallic;							// 金属度
-		float Shininess;						// 光沢度
 	};
 }
 
@@ -567,8 +567,8 @@ bool App::OnInit()
 		auto ptr = m_material.GetBufferPtr<MaterialBuffer>(i); // マテリアルのバッファポインタを取得
 		ptr->BaseColor = materialData[i].Diffuse; // ベースカラーを設定
 		ptr->Alpha = materialData[i].Alpha; // 透過度を設定
-		ptr->Metallic = 0.5f; // 金属度を設定（固定値）
-		ptr->Shininess = materialData[i].Shininess; // 光沢度を設定
+		ptr->Roughness = 0.2f; // 粗さを設定（固定値）
+		ptr->Metallic = 0.75f; // 金属度を設定（固定値）
 
 		m_material.SetTexture(
 			i,							// マテリアルのインデックス
@@ -710,7 +710,7 @@ bool App::OnInit()
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/PhongPS.cso", pPSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/CookTorrancePS.cso", pPSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -810,6 +810,10 @@ void App::OnTerm()
 
 	// マテリアル破棄
 	m_material.Term(); // マテリアルの終了処理
+
+	// ライトバッファ破棄
+	m_pLight->Term(); // ライトバッファの終了処理
+	delete m_pLight; // メモリ解放
 
 	// 変換行列用の定数バッファ破棄
 	for (auto& pCB : m_Transform)

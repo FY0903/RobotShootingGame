@@ -84,6 +84,6 @@ private:
 	VertexBuffer(const VertexBuffer&) = delete;	// コピーコンストラクタを禁止
 	void operator=(const VertexBuffer&) = delete;	 // コピー代入演算子を禁止
 
-	ComPtr<ID3D12Resource> m_pVB; // VertexBufferのリソース
-	D3D12_VERTEX_BUFFER_VIEW m_view; // VertexBufferビュー
+	ComPtr<ID3D12Resource> m_pVB{}; // VertexBufferのリソース
+	D3D12_VERTEX_BUFFER_VIEW m_view{}; // VertexBufferビュー
 };

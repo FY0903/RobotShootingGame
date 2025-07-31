@@ -80,18 +80,18 @@ public:
 	 */
 	inline void Term()
 	{
-		std::lock_guard < std::mutex> guard(m_Mutex);
+		std::lock_guard<std::mutex> guard(m_Mutex);
 
 		if (m_pBuffer)
 		{
 			free(m_pBuffer);	// バッファを解放
 			m_pBuffer = nullptr;	// ポインタをnullptrに設定
-
-			m_pActive = nullptr;	// アクティブなアイテムのポインタをnullptrに設定
-			m_pFree = nullptr;		// フリーアイテムのポインタをnullptrに設定
-			m_Capacity = 0;		// 総アイテム数を0に設定
-			m_Count = 0;		// 確保したアイテム数を0に設定
 		}
+
+		m_pActive = nullptr;	// アクティブなアイテムのポインタをnullptrに設定
+		m_pFree = nullptr;		// フリーアイテムのポインタをnullptrに設定
+		m_Capacity = 0;		// 総アイテム数を0に設定
+		m_Count = 0;		// 確保したアイテム数を0に設定
 	}
 
 	/**

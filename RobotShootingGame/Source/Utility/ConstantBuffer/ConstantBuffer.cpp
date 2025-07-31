@@ -98,7 +98,7 @@ void ConstantBuffer::Term()
 	if (m_pPool)
 	{
 		m_pPool->FreeHandle(m_pHandle); // ディスクリプタハンドルをプールに返す
-		m_pPool = nullptr; // プールポインタをリセット
+		m_pHandle = nullptr;	// ハンドルポインタをリセット
 	}
 
 	// ディスクリプタプールを解放
