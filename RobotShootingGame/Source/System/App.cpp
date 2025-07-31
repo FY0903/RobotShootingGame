@@ -46,9 +46,9 @@ namespace {
 
 	struct MaterialBuffer
 	{
-		DirectX::SimpleMath::Vector3 Diffuse;	// 拡散反射率
+		DirectX::SimpleMath::Vector3 BaseColor;	// ベースカラー
 		float Alpha;							// 透過度
-		DirectX::SimpleMath::Vector3 Specular;	// 鏡面反射率
+		float Metallic;							// 金属度
 		float Shininess;						// 光沢度
 	};
 }
@@ -565,9 +565,9 @@ bool App::OnInit()
 	for (size_t i = 0; i < materialData.size(); ++i)
 	{
 		auto ptr = m_material.GetBufferPtr<MaterialBuffer>(i); // マテリアルのバッファポインタを取得
-		ptr->Diffuse = materialData[i].Diffuse; // 拡散反射率を設定
+		ptr->BaseColor = materialData[i].Diffuse; // ベースカラーを設定
 		ptr->Alpha = materialData[i].Alpha; // 透過度を設定
-		ptr->Specular = materialData[i].Specular; // 鏡面反射率を設定
+		ptr->Metallic = 0.5f; // 金属度を設定（固定値）
 		ptr->Shininess = materialData[i].Shininess; // 光沢度を設定
 
 		m_material.SetTexture(
@@ -710,7 +710,7 @@ bool App::OnInit()
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/LambertPS.cso", pPSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/PhongPS.cso", pPSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);

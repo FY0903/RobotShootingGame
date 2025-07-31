@@ -5,7 +5,7 @@ struct VSOutput
     float4 position : SV_POSITION;
     float2 TexCoord : TEXCOORD;
     float3 Normal : NORMAL;
-    float4 WorldPos : WORLD_POS;
+    float3 WorldPos : WORLD_POS;
 };
 
 struct PSOutput

@@ -11,7 +11,7 @@ struct VSOutput
     float4 position : SV_POSITION;
     float2 TexCoord : TEXCOORD;
     float3 Normal : NORMAL;
-    float4 WorldPos : WORLD_POS;
+    float3 WorldPos : WORLD_POS;
 };
 
 cbuffer Transform : register(b0)
@@ -33,7 +33,7 @@ VSOutput main(VSInput input)
     output.position = projPos;
     output.TexCoord = input.TexCoord;
     output.Normal = normalize(mul((float3x3) World, input.Normal)); // ワールド空間の法線を計算
-    output.WorldPos = worldPos;
+    output.WorldPos = worldPos.xyz;
 
     return output;
 }
