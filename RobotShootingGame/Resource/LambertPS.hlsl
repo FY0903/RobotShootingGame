@@ -1,3 +1,5 @@
+static const float F_PI = 3.14159265358979323846f;
+
 struct VSOutput
 {
     float4 position : SV_POSITION;
@@ -34,10 +36,12 @@ PSOutput main(VSOutput input)
     float3 L = normalize(input.WorldPos.xyz - LightPosition);
     L *= -1.0f; // ライト位置からのベクトルを反転
     
+    float NL = saturate(dot(N, L)); // 法線とライトベクトルのドット積を計算し、0から1の範囲に制限
+    
     float4 color = ColorMap.Sample(WrapSmp, input.TexCoord);
-    float3 diffuse = LightColor * Diffuse * saturate(dot(L, N)); // ライトの色と拡散係数を掛け合わせ、法線とライトベクトルのドット積を計算
+    float3 diffuse = Diffuse * (1.0f / F_PI); // 拡散反射係数を計算
 
-    output.Color = float4(color.rgb * diffuse, color.a * Alpha);
+    output.Color = float4(LightColor * color.rgb * diffuse * NL, color.a * Alpha);
 
     return output;
 }

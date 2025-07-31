@@ -12,12 +12,39 @@
 #include "ColorTarget.hpp"
 #include "../../Utility/Pool/DescriptorPool/DescriptorPool.hpp"
 
+// ==============================
+//	static
+// ==============================
+namespace
+{
+	/**
+	 * @brief 指定された DXGI フォーマットを sRGB フォーマットに変換します。
+	 * @param [format] 変換対象の DXGI_FORMAT 値。
+	 * @return sRGB 対応の DXGI_FORMAT。変換できない場合は元の値を返します。
+	 */
+	DXGI_FORMAT ConvertToSRGB(DXGI_FORMAT format)
+	{
+		DXGI_FORMAT result = format;	// 入力フォーマットを結果にコピー
+		switch (format)
+		{
+		case DXGI_FORMAT_R8G8B8A8_UNORM: result = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; break;
+		case DXGI_FORMAT_BC1_UNORM: result = DXGI_FORMAT_BC1_UNORM_SRGB; break;
+		case DXGI_FORMAT_BC2_UNORM: result = DXGI_FORMAT_BC2_UNORM_SRGB; break;
+		case DXGI_FORMAT_BC3_UNORM: result = DXGI_FORMAT_BC3_UNORM_SRGB; break;
+		case DXGI_FORMAT_B8G8R8A8_UNORM: result = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; break;
+		case DXGI_FORMAT_B8G8R8X8_UNORM: result = DXGI_FORMAT_B8G8R8X8_UNORM_SRGB; break;
+		case DXGI_FORMAT_BC7_UNORM: result = DXGI_FORMAT_BC7_UNORM_SRGB; break;
+		}
+		return result;
+	}
+}
+
 ColorTarget::~ColorTarget()
 {
 	Term();
 }
 
-bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t width, uint32_t height, DXGI_FORMAT format)
+bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t width, uint32_t height, DXGI_FORMAT format, bool useSRGB)
 {
 	if (!pDevice || !pPoolRTV || !width || !height) return false;	// 無効な引数チェック
 	
@@ -75,8 +102,15 @@ bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t
 		return false;	// レンダーターゲットの作成に失敗した場合はfalseを返す
 	}
 
+	auto view_format = format;	// フォーマットを変数にコピー
+
+	if (useSRGB)	// sRGBを使用する場合
+	{
+		view_format = ConvertToSRGB(format);	// フォーマットをsRGBに変換
+	}
+
 	m_ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;	// レンダーターゲットビューの次元を2Dテクスチャに設定
-	m_ViewDesc.Format = format;	// レンダーターゲットビューのフォーマットを指定
+	m_ViewDesc.Format = view_format;	// レンダーターゲットビューのフォーマットを指定
 	m_ViewDesc.Texture2D.MipSlice = 0;	// ミップスライスを0に設定
 	m_ViewDesc.Texture2D.PlaneSlice = 0;	// プレーンスライスを0に設定
 
@@ -89,7 +123,7 @@ bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t
 	return true;	// 成功した場合はtrueを返す
 }
 
-bool ColorTarget::InitFromBackBuffer(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t index, IDXGISwapChain* pSwapChain)
+bool ColorTarget::InitFromBackBuffer(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, bool useSRGB, uint32_t index, IDXGISwapChain* pSwapChain)
 {
 	if (!pDevice || !pPoolRTV || !pSwapChain) return false;	// 無効な引数チェック
 
@@ -116,8 +150,15 @@ bool ColorTarget::InitFromBackBuffer(ID3D12Device* pDevice, DescriptorPool* pPoo
 	DXGI_SWAP_CHAIN_DESC desc{};
 	pSwapChain->GetDesc(&desc);
 
+	auto format = desc.BufferDesc.Format;	// バックバッファのフォーマットを取得
+
+	if (useSRGB)
+	{
+		format = ConvertToSRGB(format);	// フォーマットをsRGBに変換
+	}
+
 	m_ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;	// レンダーターゲットビューの次元を2Dテクスチャに設定
-	m_ViewDesc.Format = desc.BufferDesc.Format;	// レンダーターゲットビューのフォーマットをバックバッファのフォーマットに設定
+	m_ViewDesc.Format = format;	// レンダーターゲットビューのフォーマットをバックバッファのフォーマットに設定
 	m_ViewDesc.Texture2D.MipSlice = 0;	// ミップスライスを0に設定
 	m_ViewDesc.Texture2D.PlaneSlice = 0;	// プレーンスライスを0に設定
 
