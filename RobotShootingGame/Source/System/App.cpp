@@ -568,7 +568,7 @@ bool App::OnInit()
 		ptr->BaseColor = materialData[i].Diffuse; // ベースカラーを設定
 		ptr->Alpha = materialData[i].Alpha; // 透過度を設定
 		ptr->Roughness = 0.2f; // 粗さを設定（固定値）
-		ptr->Metallic = 0.75f; // 金属度を設定（固定値）
+		ptr->Metallic = 0.5f; // 金属度を設定（固定値）
 
 		m_material.SetTexture(
 			i,							// マテリアルのインデックス
@@ -710,7 +710,7 @@ bool App::OnInit()
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/CookTorrancePS.cso", pPSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/GGXPS.cso", pPSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
