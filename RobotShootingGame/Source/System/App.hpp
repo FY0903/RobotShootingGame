@@ -74,15 +74,19 @@ private:
 	bool InitD3D();
 	void TermD3D();
 	void MainLoop();
+	void CheckSupportHDR();
 
 	void Present(uint32_t interval);
+	bool IsSupportHDR() const;
+	float GetMaxLuminance() const;
+	float GetMinLuminance() const;
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	bool OnInit();
 	void OnTerm();
 	void OnRender();
-	void OnMsgProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {}
+	void OnMsgProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	enum POOL_TYPE
 	{
@@ -100,6 +104,7 @@ private:
 	uint32_t m_unWidth{};	// ウィンドウの幅
 	uint32_t m_unHeight{};	// ウィンドウの高さ
 
+	ComPtr<IDXGIFactory4> m_pFactory{};				// DXGIファクトリー
 	ComPtr<ID3D12Device> m_pDevice{};				// Direct3D 12デバイス
 	ComPtr<ID3D12CommandQueue> m_pQueue{};			// コマンドキュー
 	ComPtr<IDXGISwapChain3> m_pSwapChain{};			// スワップチェーン
@@ -112,9 +117,14 @@ private:
 	D3D12_VIEWPORT m_Viewport{};					// ビューポート
 	D3D12_RECT m_scissor{};							// シザー矩形
 
+	bool m_supportHDR{};			// HDRサポートフラグ
+	float m_maxLuminance{};			// 最大輝度
+	float m_minLuminance{};			// 最小輝度
+
 	// ==============================
 	//	各シーンに置くやつ(本来は)
 	// ==============================
+#if 0
 	std::vector<Mesh*> m_pMesh{};				// メッシュの配列
 	std::vector<ConstantBuffer*> m_Transform{};	// 変換行列の定数バッファ
 	ConstantBuffer* m_pLight{};					// ライトの定数バッファ
@@ -122,4 +132,16 @@ private:
 	ComPtr<ID3D12PipelineState> m_pPSO{};		// パイプラインステートオブジェクト
 	ComPtr<ID3D12RootSignature> m_pRootSig{};	// ルートシグネチャ
 	float m_RotateAngle{};						// 回転角度
+#endif
+	ComPtr<ID3D12PipelineState> m_pPSO{};		// パイプラインステートオブジェクト
+	ComPtr<ID3D12PipelineState> m_pGridPSO{};	// グリッド用パイプラインステートオブジェクト
+	ComPtr<ID3D12RootSignature> m_pRootSig{};	// ルートシグネチャ
+	VertexBuffer m_quadVB{};					// 四角形の頂点バッファ
+	ConstantBuffer m_CB[FrameCount]{};			// 定数バッファ
+	Texture m_texture{};						// テクスチャ
+	int m_tonemapType{};						// トーンマッピングの種類
+	int m_ColorSpace{};							// 出力色空間
+	float m_BaseLuminance{};					// 基準輝度値
+	float m_MaxLuminance{};						// 最大輝度値
+	float m_Exposure{};							// 露出値
 };

@@ -16,6 +16,9 @@
 //	include
 // ==============================
 #include "App.hpp"
+#include <algorithm>
+#undef max
+#undef min
 
 #include "CommonStates.h"
 #include "DirectXHelpers.h"
@@ -30,6 +33,7 @@ constexpr const char* ClassName = "RobotShootingGameClass";
 //	定数定義
 // ==============================
 namespace {
+#if 0
 	struct Transform
 	{
 		DirectX::XMMATRIX World{};	// ワールド変換行列
@@ -51,6 +55,32 @@ namespace {
 		float Roughness;						// 粗さ
 		float Metallic;							// 金属度
 	};
+#endif
+	enum COLOR_TYPE
+	{
+		COLOR_TYPE_BT709,
+		COLOR_TYPE_BT2100_PQ,
+	};
+
+	enum TONEMAP_TYPE
+	{
+		TONEMAP_NONE,
+		TONEMAP_REINHARD,
+		TONEMAP_GT,
+	};
+
+	struct alignas(256) CbTonemap
+	{
+		int Type;				// トーンマッピングの種類
+		int ColorSpace;			// 出力色空間
+		float BaseLuminance;	// 基準輝度値
+		float MaxLuminance;		// 最大輝度値
+	};
+
+	inline int ComputeIntersectionArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
+	{
+		return std::max(0, std::min(ax2, bx2) - std::max(ax1, bx1)) * std::max(0, std::min(ay2, by2) - std::max(ay1, by1));
+	}
 }
 
 App::App(uint32_t width, uint32_t height)
@@ -222,8 +252,7 @@ bool App::InitD3D()
 	//	スワップチェーンの生成
 	// ==============================
 	// DXGIファクトリーの生成
-	ComPtr<IDXGIFactory4> pFactory = nullptr;
-	hr = CreateDXGIFactory1(IID_PPV_ARGS(pFactory.GetAddressOf()));
+	hr = CreateDXGIFactory1(IID_PPV_ARGS(m_pFactory.GetAddressOf()));
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "DXGIファクトリーの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -250,7 +279,7 @@ bool App::InitD3D()
 
 	// スワップチェーンの生成
 	ComPtr<IDXGISwapChain> pSwapChain = nullptr;
-	hr = pFactory->CreateSwapChain(
+	hr = m_pFactory->CreateSwapChain(
 		m_pQueue.Get(),				// コマンドキュー
 		&swapDesc,					// スワップチェーンの設定
 		pSwapChain.GetAddressOf());				// スワップチェーンのポインタ
@@ -457,6 +486,104 @@ void App::MainLoop()
 	}
 }
 
+void App::CheckSupportHDR()
+{
+	// 何も作られてない場合は処理しない
+	if (!m_pSwapChain || !m_pFactory || !m_pDevice) return;
+
+	HRESULT hr = S_OK;
+
+	// ウィンドウ領域を取得
+	RECT rect;
+	GetWindowRect(m_hWnd, &rect); // ウィンドウの矩形を取得
+
+	if (!m_pFactory->IsCurrent())
+	{
+		m_pFactory.Reset(); // DXGIファクトリーをリセット
+		hr = CreateDXGIFactory2(
+			0, // フラグ（なし）
+			IID_PPV_ARGS(m_pFactory.GetAddressOf()) // DXGIファクトリーのポインタを取得
+		);
+
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr, "DXGIファクトリーの再生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return; // エラー終了
+		}
+	}
+
+	ComPtr<IDXGIAdapter1> pAdapter;
+	hr = m_pFactory->EnumAdapters1(0, pAdapter.GetAddressOf()); // アダプターを取得
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "アダプターの取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return; // エラー終了
+	}
+
+	UINT i = 0;
+	ComPtr<IDXGIOutput> currentOutput;
+	ComPtr<IDXGIOutput> bestOutput;
+	int bestIntersectArea = -1;
+
+	// 各ディスプレイを調べる
+	while (pAdapter->EnumOutputs(i, &currentOutput) != DXGI_ERROR_NOT_FOUND)
+	{
+		auto ax1 = rect.left;	// ウィンドウの左端
+		auto ay1 = rect.top;	// ウィンドウの上端
+		auto ax2 = rect.right;	// ウィンドウの右端
+		auto ay2 = rect.bottom;	// ウィンドウの下端
+
+		// ディスプレイの設定を取得
+		DXGI_OUTPUT_DESC desc;
+		hr = currentOutput->GetDesc(&desc);
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr, "ディスプレイの設定取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return; // エラー終了
+		}
+
+		auto bx1 = desc.DesktopCoordinates.left;	// ディスプレイの左端
+		auto by1 = desc.DesktopCoordinates.top;	// ディスプレイの上端
+		auto bx2 = desc.DesktopCoordinates.right;	// ディスプレイの右端
+		auto by2 = desc.DesktopCoordinates.bottom;	// ディスプレイの下端
+
+		// 領域が一致するかどうか調べる
+		int intersectArea = ComputeIntersectionArea(
+			ax1, ay1, ax2, ay2,	// ウィンドウの座標
+			bx1, by1, bx2, by2);	// ディスプレイの座標
+		if (intersectArea > bestIntersectArea)
+		{
+			bestOutput = currentOutput;			// 最適なディスプレイを更新
+			bestIntersectArea = intersectArea;	// 最も大きい領域を更新
+		}
+
+		++i; // 次のディスプレイへ
+	}
+
+	// 一番適しているディスプレイ
+	ComPtr<IDXGIOutput6> pOutput6;
+	hr = bestOutput.As(&pOutput6); // IDXGIOutput6にキャスト
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "IDXGIOutput6の取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return; // エラー終了
+	}
+
+	// 出力設定を取得
+	DXGI_OUTPUT_DESC1 desc1;
+	hr = pOutput6->GetDesc1(&desc1); // 出力の設定を取得
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "出力設定の取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return; // エラー終了
+	}
+
+	// 色空間がITU-R BT.2100 PQをサポートしているか確認
+	m_supportHDR = (desc1.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
+	m_maxLuminance = desc1.MaxLuminance; // 最大輝度を取得
+	m_minLuminance = desc1.MinLuminance; // 最小輝度を取得
+}
+
 void App::Present(uint32_t interval)
 {
 	// 画面に表示
@@ -480,11 +607,18 @@ LRESULT App::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		// ウィンドウの作成時にユーザデータを設定
 		auto pCreateStruct = reinterpret_cast<LPCREATESTRUCT>(lp);
-		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pCreateStruct->lpCreateParams));	// ユーザデータにthisポインタを設定
+		auto pApp = reinterpret_cast<LONG_PTR>(pCreateStruct->lpCreateParams);	// ユーザデータからthisポインタを取得
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, pApp);	// ユーザデータにthisポインタを設定
 	}
-	break;
+		break;
 	case WM_DESTROY:
 		PostQuitMessage(0); // アプリケーションの終了
+		break;
+	case WM_MOVE:
+		instance->CheckSupportHDR();
+		break;
+	case WM_DISPLAYCHANGE:
+		instance->CheckSupportHDR();
 		break;
 	default:
 		break;
@@ -501,6 +635,7 @@ LRESULT App::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 bool App::OnInit()
 {
+#if 0
 	// ===============================
 	//	メッシュをロード
 	// ===============================
@@ -610,7 +745,7 @@ bool App::OnInit()
 	ptr->CameraPosition = DirectX::SimpleMath::Vector4(0.0f, 1.0f, 2.0f, 1.0f); // カメラの位置を設定
 
 	m_pLight = pCB; // ライトバッファのポインタを保存
-
+#endif
 	// ==============================
 	//	ルートシグネチャの生成
 	// ==============================
@@ -717,9 +852,14 @@ bool App::OnInit()
 		return false; // エラー終了
 	}
 
+	D3D12_INPUT_ELEMENT_DESC elements[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+	};
+
 	// グラフィックスパイプラインステートを設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
-	psoDesc.InputLayout = MeshVertex::InputLayout; // 入力レイアウト
+	psoDesc.InputLayout = { elements , 2 }; // 入力レイアウト
 	psoDesc.pRootSignature = m_pRootSig.Get(); // ルートシグネチャ
 	psoDesc.VS = { pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize() }; // 頂点シェーダー
 	psoDesc.PS = { pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize() }; // ピクセルシェーダー
@@ -744,6 +884,62 @@ bool App::OnInit()
 		return false; // エラー終了
 	}
 
+	// =============================
+	//	頂点バッファの作成
+	// =============================
+	struct Vertex
+	{
+		float px, py; // 頂点位置
+		float tx, ty; // テクスチャ座標
+	};
+
+	if (!m_quadVB.Init<Vertex>(m_pDevice.Get(), 3))
+	{
+		MessageBox(nullptr, "四角形の頂点バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	auto ptr = m_quadVB.Map<Vertex>(); // 頂点バッファのポインタを取得
+	assert(ptr); // ポインタがnullptrでないことを確認
+	ptr[0] = { -1.0f, 1.0f, 0.0f, -1.0f };
+	ptr[1] = { 3.0f, 1.0f, 2.0f, -1.0f };
+	ptr[2] = { -1.0f, -3.0f, 0.0f, 1.0f };
+	m_quadVB.Unmap(); // 頂点バッファのアンマップ
+
+	for (uint32_t i = 0; i < FrameCount; ++i)
+	{
+		if (!m_CB[i].Init(m_pDevice.Get(), m_pPools[POOL_TYPE_RES], sizeof(CbTonemap)))
+		{
+			MessageBox(nullptr, "定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return false; // エラー終了
+		}
+	}
+
+	// ==============================
+	//	テクスチャロード
+	// ==============================
+	DirectX::ResourceUploadBatch batch(m_pDevice.Get()); // リソースアップロードバッチの生成
+
+	// バッチ開始
+	batch.Begin();
+
+	// テクスチャ初期化
+	if (!m_texture.Init(
+		m_pDevice.Get(),					// デバイス
+		m_pPools[POOL_TYPE_RES],			// リソース用のディスクリプタプール
+		L"Assets/Texture/hdr014.hdr",		// テクスチャファイル名
+		batch))								// リソースアップロードバッチ
+	{
+		MessageBox(nullptr, "テクスチャの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// バッチ終了
+	auto future = batch.End(m_pQueue.Get()); // リソースアップロードバッチを終了
+
+	future.wait(); // 非同期処理の完了を待機
+
+#if 0
 	// ==============================
 	//	変換行列用の定数バッファの生成
 	// ==============================
@@ -789,7 +985,7 @@ bool App::OnInit()
 	}
 
 	m_RotateAngle = DirectX::XMConvertToRadians(-60.0f); // 初期回転角度を設定
-
+#endif
 	return true; // 正常終了
 }
 
@@ -911,4 +1107,42 @@ void App::OnRender()
 
 	// 画面に表示
 	Present(1); // スワップチェーンをプレゼント
+}
+
+void App::OnMsgProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	// キーボードの処理
+	if ((msg == WM_KEYDOWN) || (msg == WM_SYSKEYDOWN) || (msg == WM_KEYUP) || (msg == WM_SYSKEYUP))
+	{
+		DWORD mask = (1 << 29);	// 29ビット目のマスク（キーボードの状態を取得するためのマスク）
+
+		auto isKeyDown = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN); // キーが押されたかどうかを判定
+		auto isAltDown = ((lp & mask) != 0);	// Altキーが押されているかどうかを判定
+		auto keyCode = static_cast<uint32_t>(wp); // キーコードを取得
+
+		if (isKeyDown)
+		{
+			switch (keyCode)
+			{
+			case VK_ESCAPE:
+				PostQuitMessage(0); // ESCキーでアプリケーションを終了
+				break;
+			case 'H':
+				ChangeDisplayMode(true);
+				break;
+			case 'S':
+				ChangeDisplayMode(false);
+				break;
+			case 'N':
+				m_tonemapType = TONEMAP_NONE; // トーンマッピングなし
+				break;
+			case 'R':
+				m_tonemapType = TONEMAP_REINHARD; // Reinhardトーンマッピング
+				break;
+			case 'G':
+				m_tonemapType = TONEMAP_GT; // Gammaトーンマッピング
+				break;
+			}
+		}
+	}
 }
