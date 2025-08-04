@@ -77,9 +77,9 @@ private:
 	void CheckSupportHDR();
 
 	void Present(uint32_t interval);
-	bool IsSupportHDR() const;
-	float GetMaxLuminance() const;
-	float GetMinLuminance() const;
+	inline bool IsSupportHDR() const { return m_supportHDR; }
+	inline float GetMaxLuminance() const { return m_maxLuminance; }
+	inline float GetMinLuminance() const { return m_minLuminance; }
 
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 
@@ -87,6 +87,7 @@ private:
 	void OnTerm();
 	void OnRender();
 	void OnMsgProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
+	void ChangeDisplayMode(bool hdr);
 
 	enum POOL_TYPE
 	{
@@ -107,7 +108,7 @@ private:
 	ComPtr<IDXGIFactory4> m_pFactory{};				// DXGIファクトリー
 	ComPtr<ID3D12Device> m_pDevice{};				// Direct3D 12デバイス
 	ComPtr<ID3D12CommandQueue> m_pQueue{};			// コマンドキュー
-	ComPtr<IDXGISwapChain3> m_pSwapChain{};			// スワップチェーン
+	ComPtr<IDXGISwapChain4> m_pSwapChain{};			// スワップチェーン
 	ColorTarget m_colorTarget[FrameCount]{};		// カラーバッファ
 	DepthTarget m_depthTarget{};					// 深度ステンシルバッファ
 	DescriptorPool* m_pPools[POOL_TYPE_COUNT]{};	// ディスクリプタプールの配列
@@ -140,7 +141,7 @@ private:
 	ConstantBuffer m_CB[FrameCount]{};			// 定数バッファ
 	Texture m_texture{};						// テクスチャ
 	int m_tonemapType{};						// トーンマッピングの種類
-	int m_ColorSpace{};							// 出力色空間
+	int m_colorSpace{};							// 出力色空間
 	float m_BaseLuminance{};					// 基準輝度値
 	float m_MaxLuminance{};						// 最大輝度値
 	float m_Exposure{};							// 露出値

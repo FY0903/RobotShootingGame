@@ -181,6 +181,13 @@
     <FxCompile Include="Resource\CookTorrancePS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
+    <FxCompile Include="Resource\GGXPS.hlsl" />
+    <FxCompile Include="Resource\TonemapVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\TonemapPS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

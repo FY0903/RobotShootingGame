@@ -77,6 +77,11 @@ namespace {
 		float MaxLuminance;		// 最大輝度値
 	};
 
+	UINT16 inline GetChromaticityCoord(double value)
+	{
+		return static_cast<UINT16>(value * 50000);
+	}
+
 	inline int ComputeIntersectionArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
 	{
 		return std::max(0, std::min(ax2, bx2) - std::max(ax1, bx1)) * std::max(0, std::min(ay2, by2) - std::max(ay1, by1));
@@ -300,7 +305,6 @@ bool App::InitD3D()
 	m_frameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
 	// 不要になったので解放
-	pFactory.Reset(); // DXGIファクトリーのスマートポインタをリセット
 	pSwapChain.Reset(); // IDXGISwapChainのスマートポインタをリセット
 
 	// ==============================
@@ -837,7 +841,7 @@ bool App::OnInit()
 	ComPtr<ID3DBlob> pPSBlob = nullptr; // ピクセルシェーダーのバイナリデータ
 
 	// 頂点シェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/LambertVS.cso", pVSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/TonemapVS.cso", pVSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -845,7 +849,7 @@ bool App::OnInit()
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/GGXPS.cso", pPSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/TonemapPS.cso", pPSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -991,6 +995,7 @@ bool App::OnInit()
 
 void App::OnTerm()
 {
+#if 0
 	// メッシュ破棄
 	for (auto& mesh : m_pMesh)
 	{
@@ -1023,6 +1028,16 @@ void App::OnTerm()
 	}
 	m_Transform.clear(); // 変換行列のリストをクリア
 	m_Transform.shrink_to_fit(); // メモリを最適化
+#endif
+
+	m_pRootSig.Reset(); // ルートシグネチャのリセット
+	m_pPSO.Reset(); // パイプラインステートのリセット
+	m_quadVB.Term();
+	for (uint32_t i = 0; i < FrameCount; ++i)
+	{
+		m_CB[i].Term();
+	}
+	m_texture.Term();
 }
 
 void App::OnRender()
@@ -1030,10 +1045,17 @@ void App::OnRender()
 	// ===============================
 	//	更新処理
 	// ===============================
+#if 0
 	m_RotateAngle += 0.025f; // 回転角度を更新
 
 	auto pTransform = m_Transform[m_frameIndex]->GetPtr<Transform>(); // 現在の変換行列を取得
 	pTransform->World = DirectX::XMMatrixRotationY(m_RotateAngle); // ワールド行列を回転行列に設定
+#endif
+	auto ptr = m_CB[m_frameIndex].GetPtr<CbTonemap>();
+	ptr->Type = m_tonemapType;
+	ptr->ColorSpace = m_colorSpace;
+	ptr->BaseLuminance = m_BaseLuminance;
+	ptr->MaxLuminance = m_maxLuminance;
 
 	// コマンドリストの記録を開始
 	auto pCmd = m_commandList.Reset();
@@ -1063,7 +1085,7 @@ void App::OnRender()
 
 	// 描画処理
 	ID3D12DescriptorHeap* ppHeaps[] = { m_pPools[POOL_TYPE_RES]->GetHeap() }; // リソース用のディスクリプタヒープを取得
-
+#if 0
 	pCmd->SetGraphicsRootSignature(m_pRootSig.Get()); // ルートシグネチャを設定
 	pCmd->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps); // ディスクリプタヒープを設定
 	pCmd->SetGraphicsRootConstantBufferView(0, m_Transform[m_frameIndex]->GetAddress()); // 定数バッファビューを設定
@@ -1090,6 +1112,21 @@ void App::OnRender()
 		// メッシュを描画
 		m_pMesh[i]->Draw(pCmd);
 	}
+#endif
+
+	pCmd->SetGraphicsRootSignature(m_pRootSig.Get()); // ルートシグネチャを設定
+	pCmd->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps); // ディスクリプタヒープを設定
+	pCmd->SetGraphicsRootConstantBufferView(0, m_CB[m_frameIndex].GetAddress());	// トーンマッピング定数バッファを設定
+	pCmd->SetGraphicsRootDescriptorTable(1, m_texture.GetHandleGPU());	// テクスチャのハンドルを設定
+
+	pCmd->SetPipelineState(m_pPSO.Get()); // パイプラインステートを設定
+	pCmd->RSSetViewports(1, &m_Viewport);	// ビューポートを設定
+	pCmd->RSSetScissorRects(1, &m_scissor); // シザー矩形を設定
+
+	pCmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジを設定
+	auto vbView = m_quadVB.GetView();
+	pCmd->IASetVertexBuffers(0, 1, &vbView);	// 頂点バッファを設定
+	pCmd->DrawInstanced(3, 1, 0, 0); // 四角形を描画
 
 	// 表示用リソースバリア設定
 	DirectX::TransitionResource(
@@ -1144,5 +1181,57 @@ void App::OnMsgProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 				break;
 			}
 		}
+	}
+}
+
+void App::ChangeDisplayMode(bool hdr)
+{
+	if (hdr)
+	{
+		if (!IsSupportHDR())
+		{
+			MessageBox(nullptr, "HDRはサポートされていません。", "エラー", MB_OK | MB_ICONERROR);
+			return; // HDRがサポートされていない場合は終了
+		}
+
+		HRESULT hr = m_pSwapChain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr, "HDRモードへの切り替えに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return; // HDRモードへの切り替えに失敗した場合は終了
+		}
+
+		DXGI_HDR_METADATA_HDR10 metaData{};
+			
+		// ITU-R BT.2100の原刺激と白色点を設定
+		metaData.RedPrimary[0] = GetChromaticityCoord(0.64);
+		metaData.RedPrimary[1] = GetChromaticityCoord(0.33);
+		metaData.BluePrimary[0] = GetChromaticityCoord(0.3);
+		metaData.BluePrimary[1] = GetChromaticityCoord(0.6);
+		metaData.GreenPrimary[0] = GetChromaticityCoord(0.15);
+		metaData.GreenPrimary[1] = GetChromaticityCoord(0.06);
+		metaData.WhitePoint[0] = GetChromaticityCoord(0.3127);
+		metaData.WhitePoint[1] = GetChromaticityCoord(0.329);
+
+		// ディスプレイがサポートすると最大輝度値と最小輝度値を設定
+		metaData.MaxMasteringLuminance = static_cast<UINT>(GetMaxLuminance() * 10000);
+		metaData.MinMasteringLuminance = static_cast<UINT>(GetMinLuminance() * 0.001);
+
+		// 最大値を100[nit]に設定
+		metaData.MaxContentLightLevel = 100;
+
+		hr = m_pSwapChain->SetHDRMetaData(
+			DXGI_HDR_METADATA_TYPE_HDR10,			// メタデータのタイプ
+			sizeof(DXGI_HDR_METADATA_TYPE_HDR10),	// メタデータのサイズ
+			&metaData								// メタデータのポインタ
+		);
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr, "HDRメタデータの設定に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return; // HDRメタデータの設定に失敗した場合は終了
+		}
+
+		m_BaseLuminance = 100.0f;
+		m_MaxLuminance = 100.0f;
 	}
 }
