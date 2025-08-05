@@ -26,7 +26,7 @@ int main()
 	//_CrtSetBreakAlloc(396); // メモリリークの検出を有効化（必要に応じて行番号を変更）
 
 	// アプリケーションを実行
-	App app(960, 540);
+	App app(960, 540, DXGI_FORMAT_R10G10B10A2_UNORM);
 	app.Run();
 
 	return 0;

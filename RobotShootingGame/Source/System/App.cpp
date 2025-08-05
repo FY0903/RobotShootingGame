@@ -88,10 +88,16 @@ namespace {
 	}
 }
 
-App::App(uint32_t width, uint32_t height)
+App::App(uint32_t width, uint32_t height, DXGI_FORMAT format)
 {
 	m_unWidth = width;
 	m_unHeight = height;
+	m_backBufferFormat = format;
+	m_tonemapType = TONEMAP_NONE;
+	m_colorSpace = COLOR_TYPE_BT709;
+	m_BaseLuminance = 100.0f;	// 基準輝度値
+	m_MaxLuminance = 100.0f;	// 最大輝度値
+	m_Exposure = 1.0f;		// 露出値
 }
 
 void App::Run()
@@ -257,7 +263,7 @@ bool App::InitD3D()
 	//	スワップチェーンの生成
 	// ==============================
 	// DXGIファクトリーの生成
-	hr = CreateDXGIFactory1(IID_PPV_ARGS(m_pFactory.GetAddressOf()));
+	hr = CreateDXGIFactory2(0, IID_PPV_ARGS(m_pFactory.GetAddressOf()));
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "DXGIファクトリーの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -272,7 +278,7 @@ bool App::InitD3D()
 	swapDesc.BufferDesc.RefreshRate.Denominator = 1;	// リフレッシュレートの分母
 	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED; // スキャンラインの順序
 	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED; // スケーリングの指定
-	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // バッファのフォーマット
+	swapDesc.BufferDesc.Format = m_backBufferFormat; // バッファのフォーマット
 	swapDesc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
 	swapDesc.SampleDesc.Quality = 0; // マルチサンプリングの品質
 	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // バッファの使用法
@@ -293,11 +299,11 @@ bool App::InitD3D()
 		return false; // エラー終了
 	}
 
-	// IDXGISwapChain3を取得
-	hr = pSwapChain.As(&m_pSwapChain); // IDXGISwapChain3のスマートポインタにキャスト
+	// IDXGISwapChain4を取得
+	hr = pSwapChain.As(&m_pSwapChain); // IDXGISwapChain4のスマートポインタにキャスト
 	if (FAILED(hr))
 	{
-		MessageBox(nullptr, "IDXGISwapChain3の取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		MessageBox(nullptr, "IDXGISwapChain4の取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
@@ -801,7 +807,11 @@ bool App::OnInit()
 	sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // W座標のアドレスモード（ラップ）
 	sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS; // MIPレベルのバイアス（デフォルト）
 	sampler.MaxAnisotropy = 1; // 最大異方性フィルタリングのレベル
+#if 0
 	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS; // 比較関数（常に真）
+#else
+	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較関数（常に偽）
+#endif
 	sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK; // ボーダーカラー（透明な黒）
 	sampler.MinLOD = -D3D12_FLOAT32_MAX; // 最小LOD（負の最大値）
 	sampler.MaxLOD = D3D12_FLOAT32_MAX; // 最大LOD（最大値）

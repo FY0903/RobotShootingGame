@@ -53,8 +53,9 @@ public:
 	 * @brief 指定された幅と高さでアプリケーションを初期化します。
 	 * @param width アプリケーションウィンドウの幅（ピクセル単位）。
 	 * @param height アプリケーションウィンドウの高さ（ピクセル単位）。
+	 * @param format バックバッファのフォーマット。
 	 */
-	App(uint32_t width, uint32_t height);
+	App(uint32_t width, uint32_t height, DXGI_FORMAT format);
 
 	/**
 	 * @brief デストラクタ
@@ -117,6 +118,7 @@ private:
 	uint32_t m_frameIndex{};						// 現在のフレーム番号
 	D3D12_VIEWPORT m_Viewport{};					// ビューポート
 	D3D12_RECT m_scissor{};							// シザー矩形
+	DXGI_FORMAT m_backBufferFormat{};				// バックバッファのフォーマット
 
 	bool m_supportHDR{};			// HDRサポートフラグ
 	float m_maxLuminance{};			// 最大輝度
