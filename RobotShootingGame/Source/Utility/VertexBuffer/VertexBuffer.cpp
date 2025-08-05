@@ -82,15 +82,15 @@ void VertexBuffer::Term()
 	m_view = {}; // ビューをリセット
 }
 
-void* VertexBuffer::Map()
+void* VertexBuffer::Map() const
 {
-	void* pData;
-	HRESULT hr = m_pVB->Map(0, nullptr, &pData);
-	if (FAILED(hr) || !pData)
+	void* ptr;
+	HRESULT hr = m_pVB->Map(0, nullptr, &ptr);
+	if (FAILED(hr) || !ptr)
 	{
 		MessageBox(nullptr, "VertexBufferのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return nullptr; // マッピングに失敗した場合はnullptrを返す
 	}
 
-	return pData; // マッピング成功時はポインタを返す
+	return ptr; // マッピング成功時はポインタを返す
 }

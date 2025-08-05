@@ -59,7 +59,7 @@ public:
 	 * @brief メモリ領域をマッピングします。
 	 * @return マッピングされたメモリ領域へのポインタ。失敗した場合はnullptrを返すことがあります。
 	 */
-	void* Map();
+	void* Map() const;
 
 	/**
 	 * @brief バッファのマッピングを解除します。

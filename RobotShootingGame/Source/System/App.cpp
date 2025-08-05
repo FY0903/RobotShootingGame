@@ -766,6 +766,7 @@ bool App::OnInit()
 	range.RegisterSpace = 0; // レジスタスペース
 	range.OffsetInDescriptorsFromTableStart = 0; // テーブルの開始からのオフセット
 
+#if 0
 	// ルートパラメーターの設定
 	D3D12_ROOT_PARAMETER param[4]{};
 	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
@@ -790,6 +791,35 @@ bool App::OnInit()
 
 	// スタティックサンプラーの設定
 	auto sampler = DirectX::CommonStates::StaticLinearWrap(0, D3D12_SHADER_VISIBILITY_PIXEL); // ピクセルシェーダーで使用するスタティックサンプラー
+#endif
+
+	// スタティックサンプラーの設定
+	D3D12_STATIC_SAMPLER_DESC sampler{};
+	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // 線形フィルタリング
+	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // U座標のアドレスモード（ラップ）
+	sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // V座標のアドレスモード（ラップ）
+	sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // W座標のアドレスモード（ラップ）
+	sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS; // MIPレベルのバイアス（デフォルト）
+	sampler.MaxAnisotropy = 1; // 最大異方性フィルタリングのレベル
+	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS; // 比較関数（常に真）
+	sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK; // ボーダーカラー（透明な黒）
+	sampler.MinLOD = -D3D12_FLOAT32_MAX; // 最小LOD（負の最大値）
+	sampler.MaxLOD = D3D12_FLOAT32_MAX; // 最大LOD（最大値）
+	sampler.ShaderRegister = 0; // シェーダーレジスタ
+	sampler.RegisterSpace = 0; // レジスタスペース
+	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
+
+	// ルートパラメーターの設定
+	D3D12_ROOT_PARAMETER param[2]{};
+	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
+	param[0].Descriptor.ShaderRegister = 0; // シェーダーレジスタ
+	param[0].Descriptor.RegisterSpace = 0; // レジスタスペース
+	param[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
+
+	param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブル
+	param[1].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
+	param[1].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジのポインタ
+	param[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
 
 	// ルートシグネチャの設定
 	D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
