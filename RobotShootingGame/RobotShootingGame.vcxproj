@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -52,6 +52,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Texture\Texture.cpp">
       <SubType>
       </SubType>
@@ -99,6 +103,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\Texture\Texture.hpp">
       <SubType>
       </SubType>
@@ -109,6 +117,18 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Assets\Shader\BasicPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\BasicVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Resource\BumpPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -201,6 +221,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Shader\BRDF.hlsli" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

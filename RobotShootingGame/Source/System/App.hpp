@@ -34,6 +34,7 @@
 
 #include "../Utility/ConstantBuffer/ConstantBuffer.hpp"
 #include "../Utility/Material/Material.hpp"
+#include "../Utility/RootSignature/RootSignature.hpp"
 
 // ==============================
 //	Linker
@@ -90,6 +91,10 @@ private:
 	void OnMsgProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 	void ChangeDisplayMode(bool hdr);
 
+	void DrawScene(ID3D12GraphicsCommandList* pCmdList);
+	void DrawTonemap(ID3D12GraphicsCommandList* pCmdList);
+	void DrawMesh(ID3D12GraphicsCommandList* pCmdList);
+
 	enum POOL_TYPE
 	{
 		POOL_TYPE_RES,	// CBV/SRV/UAV用のプール
@@ -127,24 +132,29 @@ private:
 	// ==============================
 	//	各シーンに置くやつ(本来は)
 	// ==============================
-#if 0
-	std::vector<Mesh*> m_pMesh{};				// メッシュの配列
-	std::vector<ConstantBuffer*> m_Transform{};	// 変換行列の定数バッファ
-	ConstantBuffer* m_pLight{};					// ライトの定数バッファ
-	Material m_material{};						// マテリアル
-	ComPtr<ID3D12PipelineState> m_pPSO{};		// パイプラインステートオブジェクト
-	ComPtr<ID3D12RootSignature> m_pRootSig{};	// ルートシグネチャ
-	float m_RotateAngle{};						// 回転角度
-#endif
-	ComPtr<ID3D12PipelineState> m_pPSO{};		// パイプラインステートオブジェクト
-	ComPtr<ID3D12PipelineState> m_pGridPSO{};	// グリッド用パイプラインステートオブジェクト
-	ComPtr<ID3D12RootSignature> m_pRootSig{};	// ルートシグネチャ
-	VertexBuffer m_quadVB{};					// 四角形の頂点バッファ
-	ConstantBuffer m_CB[FrameCount]{};			// 定数バッファ
-	Texture m_texture{};						// テクスチャ
-	int m_tonemapType{};						// トーンマッピングの種類
-	int m_colorSpace{};							// 出力色空間
-	float m_BaseLuminance{};					// 基準輝度値
-	float m_MaxLuminance{};						// 最大輝度値
-	float m_Exposure{};							// 露出値
+	ComPtr <ID3D12PipelineState>m_pScenePSO{};		// シーンのパイプラインステートオブジェクト
+	RootSignature m_SceneRootSig{};					// シーンのルートシグネチャ
+	ComPtr<ID3D12PipelineState> m_pTonemapPSO{};	// トーンマッピングのパイプラインステートオブジェクト
+	RootSignature m_TonemapRootSig{};				// トーンマッピングのルートシグネチャ
+	ColorTarget m_SceneColorTarget{};				// シーンのカラーバッファ
+	DepthTarget m_SceneDepthTarget{};				// シーンの深度ステンシルバッファ
+	VertexBuffer m_QuadVB{};						// 頂点バッファ
+	VertexBuffer m_WallVB{};						// 壁の頂点バッファ
+	VertexBuffer m_FloorVB{};						// 床の頂点バッファ
+	ConstantBuffer m_TonemapCB[FrameCount]{};		// トーンマッピングの定数バッファ
+	ConstantBuffer m_LightCB[FrameCount]{};			// ライトの定数バッファ
+	ConstantBuffer m_CameraCB[FrameCount]{};		// カメラの定数バッファ
+	ConstantBuffer m_TransformCB[FrameCount]{};		// 変換の定数バッファ
+	ConstantBuffer m_MeshCB[FrameCount]{};			// メッシュの定数バッファ
+	std::vector<Mesh*> m_pMesh{};					// メッシュの配列
+	Material m_material{};							// マテリアル
+	ComPtr<ID3D12RootSignature> m_pRootSig{};		// ルートシグネチャ
+	float m_RotateAngle{};							// 回転角度
+	int m_tonemapType{};							// トーンマッピングの種類
+	int m_colorSpace{};								// 出力色空間
+	float m_BaseLuminance{};						// 基準輝度値
+	float m_MaxLuminance{};							// 最大輝度値
+	float m_Exposure{};								// 露出値
+
+	std::chrono::system_clock::time_point m_startTime{};	// アプリケーション開始時刻
 };

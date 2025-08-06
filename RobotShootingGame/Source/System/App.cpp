@@ -33,29 +33,6 @@ constexpr const char* ClassName = "RobotShootingGameClass";
 //	定数定義
 // ==============================
 namespace {
-#if 0
-	struct Transform
-	{
-		DirectX::XMMATRIX World{};	// ワールド変換行列
-		DirectX::XMMATRIX View{};	// ビュー変換行列
-		DirectX::XMMATRIX Proj{};	// 投影変換行列
-	};
-
-	struct LightBuffer
-	{
-		DirectX::SimpleMath::Vector4 LightPosition;		// ライトの位置
-		DirectX::SimpleMath::Color LightColor;			// ライトの色
-		DirectX::SimpleMath::Vector4 CameraPosition;	// カメラの位置
-	};
-
-	struct MaterialBuffer
-	{
-		DirectX::SimpleMath::Vector3 BaseColor;	// ベースカラー
-		float Alpha;							// 透過度
-		float Roughness;						// 粗さ
-		float Metallic;							// 金属度
-	};
-#endif
 	enum COLOR_TYPE
 	{
 		COLOR_TYPE_BT709,
@@ -77,6 +54,38 @@ namespace {
 		float MaxLuminance;		// 最大輝度値
 	};
 
+	struct alignas(256) CbMesh
+	{
+		DirectX::SimpleMath::Matrix World;
+	};
+
+	struct alignas(256) CbTransform
+	{
+		DirectX::SimpleMath::Matrix View;	// ビュー行列
+		DirectX::SimpleMath::Matrix Proj;	// 投影行列
+	};
+
+	struct alignas(256) CbLight
+	{
+		DirectX::SimpleMath::Vector3 LightPosition;	// ライトの位置
+		float LightInvSqrRadius;	// ライトの逆二乗半径
+		DirectX::SimpleMath::Vector3 LightColor;	// ライトの色
+		float LightIntensity;		// ライトの強度
+	};
+
+	struct alignas(256) CbCamera
+	{
+		DirectX::SimpleMath::Vector3 CameraPosition;	// カメラの位置
+	};
+	
+	struct alignas(256) CbMaterial
+	{
+		DirectX::SimpleMath::Vector3 BaseColor;	// ベースカラー
+		float Alpha;			// アルファ値
+		float Roughness;		// ラフネス値
+		float Metallic;			// メタリック値
+	};
+
 	UINT16 inline GetChromaticityCoord(double value)
 	{
 		return static_cast<UINT16>(value * 50000);
@@ -85,6 +94,42 @@ namespace {
 	inline int ComputeIntersectionArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
 	{
 		return std::max(0, std::min(ax2, bx2) - std::max(ax1, bx1)) * std::max(0, std::min(ay2, by2) - std::max(ay1, by1));
+	}
+
+	CbLight ComputePointLight(const DirectX::SimpleMath::Vector3& pos, float radius, const DirectX::SimpleMath::Vector3& color, float intensity)
+	{
+		CbLight result{};
+		result.LightPosition = pos;
+		result.LightInvSqrRadius = 1.0f / (radius * radius);
+		result.LightColor = color;
+		result.LightIntensity = intensity;
+		return result;
+	}
+
+	DirectX::SimpleMath::Vector3 CalocLightColor(float time)
+	{
+		auto c = fmodf(time, 3.0f);
+		auto result = DirectX::SimpleMath::Vector3(0.25f, 0.25f, 0.25f);
+
+		if (c < 1.0f)
+		{
+			result.x += 1.0f - c;
+			result.y += c;
+		}
+		else if (c < 2.0f)
+		{
+			c -= 1.0f;
+			result.y += 1.0f - c;
+			result.z += c;
+		}
+		else
+		{
+			c -= 2.0f;
+			result.z += 1.0f - c;
+			result.x += c;
+		}
+		
+		return result;
 	}
 }
 
@@ -645,14 +690,13 @@ LRESULT App::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
 bool App::OnInit()
 {
-#if 0
 	// ===============================
 	//	メッシュをロード
 	// ===============================
 	std::vector<MeshData> meshData;
 	std::vector<MaterialData> materialData;
 
-	if (!LoadMesh("Assets/teapot/teapot.obj", meshData, materialData))
+	if (!LoadMesh("Assets/material_test/material_test.obj", meshData, materialData))
 	{
 		MessageBox(nullptr, "メッシュのロードに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
@@ -692,7 +736,7 @@ bool App::OnInit()
 	if (!m_material.Init(
 		m_pDevice.Get(),			// デバイス
 		m_pPools[POOL_TYPE_RES],	// リソース用のディスクリプタプール
-		sizeof(MaterialBuffer),		// マテリアルのインデックス
+		sizeof(CbMaterial),			// マテリアルのインデックス
 		materialData.size()			// マテリアルの数
 	))
 	{
@@ -707,20 +751,8 @@ bool App::OnInit()
 	batch.Begin();
 
 	// テクスチャ設定
-	for (size_t i = 0; i < materialData.size(); ++i)
-	{
-		auto ptr = m_material.GetBufferPtr<MaterialBuffer>(i); // マテリアルのバッファポインタを取得
-		ptr->BaseColor = materialData[i].Diffuse; // ベースカラーを設定
-		ptr->Alpha = materialData[i].Alpha; // 透過度を設定
-		ptr->Roughness = 0.2f; // 粗さを設定（固定値）
-		ptr->Metallic = 0.5f; // 金属度を設定（固定値）
 
-		m_material.SetTexture(
-			i,							// マテリアルのインデックス
-			TU_DIFFUSE,					// テクスチャユニット
-			materialData[i].DiffuseMap,	// 拡散反射マップのファイル名
-			batch);						// リソースアップロードバッチ
-	}
+	// ハードコーディングする
 
 	// バッチ終了
 	auto future = batch.End(m_pQueue.Get()); // リソースアップロードバッチを終了
@@ -755,7 +787,7 @@ bool App::OnInit()
 	ptr->CameraPosition = DirectX::SimpleMath::Vector4(0.0f, 1.0f, 2.0f, 1.0f); // カメラの位置を設定
 
 	m_pLight = pCB; // ライトバッファのポインタを保存
-#endif
+
 	// ==============================
 	//	ルートシグネチャの生成
 	// ==============================
@@ -1277,4 +1309,16 @@ void App::ChangeDisplayMode(bool hdr)
 		m_BaseLuminance = 100.0f;
 		m_MaxLuminance = 100.0f;
 	}
+}
+
+void App::DrawScene(ID3D12GraphicsCommandList* pCmdList)
+{
+}
+
+void App::DrawTonemap(ID3D12GraphicsCommandList* pCmdList)
+{
+}
+
+void App::DrawMesh(ID3D12GraphicsCommandList* pCmdList)
+{
 }
