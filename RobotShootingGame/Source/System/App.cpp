@@ -933,8 +933,10 @@ bool App::OnInit()
 	// =============================
 	struct Vertex
 	{
-		float px, py; // 頂点位置
-		float tx, ty; // テクスチャ座標
+		float px;
+		float py; // 頂点位置
+		float tx;
+		float ty; // テクスチャ座標
 	};
 
 	if (!m_quadVB.Init<Vertex>(m_pDevice.Get(), 3))
@@ -971,7 +973,7 @@ bool App::OnInit()
 	if (!m_texture.Init(
 		m_pDevice.Get(),					// デバイス
 		m_pPools[POOL_TYPE_RES],			// リソース用のディスクリプタプール
-		L"Assets/hdr014.hdr",				// テクスチャファイル名
+		L"Assets/hdr014.dds",				// テクスチャファイル名
 		false,								// sRGBカラー空間を使用しない
 		batch))								// リソースアップロードバッチ
 	{
@@ -1165,7 +1167,7 @@ void App::OnRender()
 	pCmd->RSSetScissorRects(1, &m_scissor); // シザー矩形を設定
 
 	pCmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジを設定
-	auto vbView = m_quadVB.GetView();
+	auto vbView = m_quadVB.GetView();	// 頂点バッファビューを取得
 	pCmd->IASetVertexBuffers(0, 1, &vbView);	// 頂点バッファを設定
 	pCmd->DrawInstanced(3, 1, 0, 0); // 四角形を描画
 

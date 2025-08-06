@@ -40,15 +40,15 @@ public:
 	bool Init(ID3D12Device* pDevice, size_t size, size_t stride, const void* pInitData = nullptr);
 
 	/**
-	 * @brief ID3D12Device を使用してバッファを初期化します。
-	 * @tparam [T] 初期データの型。
+	 * @brief ID3D12Device を使用して、指定された型のデータで初期化を行います。
+	 * @tparam [T] 初期化するデータの型。
 	 * @param [pDevice] 初期化に使用する ID3D12Device へのポインタ。
-	 * @param [size] バッファのサイズ（バイト単位）。
-	 * @param [pInitData] 初期データへのポインタ。省略可能です。
+	 * @param [count] 初期化する要素数。
+	 * @param [pInitData] 初期化データへのポインタ。nullptr の場合はデフォルト値が使用されます。
 	 * @return 初期化が成功した場合は true、失敗した場合は false を返します。
 	 */
 	template<typename T>
-	inline bool Init(ID3D12Device* pDevice, size_t size, const T* pInitData = nullptr) { return Init(pDevice, size, sizeof(T), pInitData); }
+	inline bool Init(ID3D12Device* pDevice, size_t count, const T* pInitData = nullptr) { return Init(pDevice, sizeof(T) * count, sizeof(T), pInitData); }
 
 	/**
 	 * @brief 終了処理を実行します。
@@ -72,13 +72,13 @@ public:
 	 * @return 内部の Map 関数の戻り値を T* 型にキャストしたもの。
 	 */
 	template<typename T>
-	inline T* Map() const { return static_cast<T*>(Map()); }
+	inline T* Map() const { return reinterpret_cast<T*>(Map()); }
 
 	/**
 	 * @brief 頂点バッファビューを取得します。
 	 * @return このオブジェクトに関連付けられた D3D12_VERTEX_BUFFER_VIEW 構造体。
 	 */
-	D3D12_VERTEX_BUFFER_VIEW GetView() const { return m_view; }
+	inline D3D12_VERTEX_BUFFER_VIEW GetView() const { return m_view; }
 
 private:
 	VertexBuffer(const VertexBuffer&) = delete;	// コピーコンストラクタを禁止
