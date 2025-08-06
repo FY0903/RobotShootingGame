@@ -40,20 +40,22 @@ public:
 	 * @param [pDevice] 初期化に使用するID3D12Deviceへのポインタ。
 	 * @param [pPool] ディスクリプタプールへのポインタ。
 	 * @param [filename] 初期化に使用するファイル名（ワイド文字列）。
+	 * @param [isSRGB] sRGBカラー空間を使用するかどうかを示す真偽値。
 	 * @param [uploadBatch] DirectX::ResourceUploadBatchへの参照。リソースのアップロードに使用されます。
 	 * @return 初期化が成功した場合はtrue、失敗した場合はfalseを返します。
 	 */
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* filename, DirectX::ResourceUploadBatch& uploadBatch);
+	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* filename, bool isSRGB, DirectX::ResourceUploadBatch& uploadBatch);
 
 	/**
 	 * @brief ID3D12Device、DiscriptorPool、およびリソース記述を使用して初期化を行います。
 	 * @param [pDevice] 初期化に使用するID3D12Deviceへのポインタ。
 	 * @param [pPool] ディスクリプタプールへのポインタ。
 	 * @param [pDesc] リソースの記述を示すD3D12_RESOURCE_DESC構造体へのポインタ。
+	 * @param [isSRGB] sRGBカラー空間を使用するかどうかを示す真偽値。
 	 * @param [isCube] リソースがキューブマップかどうかを示す真偽値。
 	 * @return 初期化が成功した場合はtrue、失敗した場合はfalseを返します。
 	 */
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isCube);
+	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isSRGB, bool isCube);
 
 	/**
 	 * @brief 終了処理を実行します。

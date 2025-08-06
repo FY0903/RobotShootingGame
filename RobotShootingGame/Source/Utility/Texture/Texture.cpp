@@ -12,12 +12,62 @@
 #include <DDSTextureLoader.h>
 #include "../Pool/DescriptorPool/DescriptorPool.hpp"
 
+// ==============================
+//	namespace
+// ==============================
+namespace {
+	/**
+	 * @brief 指定されたDXGIフォーマットをsRGBフォーマットに変換します。
+	 * @param [format] 変換対象のDXGIフォーマット。
+	 * @return 対応するsRGBフォーマット。変換できない場合は元のフォーマットを返します。
+	 */
+	DXGI_FORMAT ConvertToSRGB(DXGI_FORMAT format)
+	{
+		DXGI_FORMAT result = format;
+		switch (format)
+		{
+		case DXGI_FORMAT_R8G8B8A8_UNORM:
+		{ result = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; }
+		break;
+
+		case DXGI_FORMAT_BC1_UNORM:
+		{ result = DXGI_FORMAT_BC1_UNORM_SRGB; }
+		break;
+
+		case DXGI_FORMAT_BC2_UNORM:
+		{ result = DXGI_FORMAT_BC2_UNORM_SRGB; }
+		break;
+
+		case DXGI_FORMAT_BC3_UNORM:
+		{ result = DXGI_FORMAT_BC3_UNORM_SRGB; }
+		break;
+
+		case DXGI_FORMAT_B8G8R8A8_UNORM:
+		{ result = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB; }
+		break;
+
+		case DXGI_FORMAT_B8G8R8X8_UNORM:
+		{ result = DXGI_FORMAT_B8G8R8X8_UNORM_SRGB; }
+		break;
+
+		case DXGI_FORMAT_BC7_UNORM:
+		{ result = DXGI_FORMAT_BC7_UNORM_SRGB; }
+		break;
+
+		default:
+			break;
+		}
+
+		return result;
+	}
+}
+
 Texture::~Texture()
 {
 	Term();
 }
 
-bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* filename, DirectX::ResourceUploadBatch& uploadBatch)
+bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* filename, bool isSRGB, DirectX::ResourceUploadBatch& uploadBatch)
 {
 	// 引数チェック
 	if (!pDevice || !pPool || !filename) return false;	// pDevice, pPool, filenameのいずれかがnullptrならfalseを返す
@@ -34,15 +84,22 @@ bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* 
 
 	// ファイルからテクスチャを生成
 	bool isCube = false;	// キューブマップではないと仮定
-	HRESULT hr = DirectX::CreateDDSTextureFromFile(
+	auto flag = DirectX::DDS_LOADER_MIP_AUTOGEN; // ミップマップ自動生成フラグを設定
+	if (isSRGB)	// sRGBカラー空間を使用する場合
+	{
+		flag |= DirectX::DDS_LOADER_FORCE_SRGB;	// sRGBフラグを追加
+	}
+
+	HRESULT hr = DirectX::CreateDDSTextureFromFileEx(
 		pDevice,					// デバイス
 		uploadBatch,				// アップロードバッチ
 		filename,					// テクスチャのファイル名
+		0,							// サブリソースインデックス（0はデフォルト）
+		D3D12_RESOURCE_FLAG_NONE,	// リソースフラグ（なし）
+		flag,						// ミップマップを生成するかどうか
 		m_pTex.GetAddressOf(),		// テクスチャリソースのポインタ
-		true,					// ミップマップを生成するかどうか
-		0,						// 最大サイズ（0は無制限）
-		nullptr,				// アルファモード（使用しないのでnullptr）
-		&isCube);				// キューブマップかどうかのフラグ
+		nullptr,					// アルファモード（使用しないのでnullptr）
+		&isCube);					// キューブマップかどうかのフラグ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "テクスチャの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);	// エラーメッセージを表示
@@ -61,7 +118,7 @@ bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* 
 	return true;	// 成功したらtrueを返す
 }
 
-bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isCube)
+bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isSRGB, bool isCube)
 {
 	if (!pDevice || !pPool || !pDesc) return false;	// 引数チェック
 
@@ -98,6 +155,11 @@ bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RES
 
 	// シェーダーリソースビューの設定を求める
 	auto viewDesc = GetViewDesc(isCube); // キューブマップかどうかでビューの設定を取得
+
+	if (isSRGB) // sRGBカラー空間を使用する場合
+	{
+		viewDesc.Format = ConvertToSRGB(viewDesc.Format); // フォーマットをsRGBに変換
+	}
 
 	// シェーダーリソースビューを作成
 	pDevice->CreateShaderResourceView(

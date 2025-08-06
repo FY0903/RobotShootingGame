@@ -45,7 +45,7 @@ bool Material::Init(ID3D12Device* pDevice, DescriptorPool* pPool, size_t bufferS
 	desc.SampleDesc.Count = 1;	// サンプル数を1に設定
 	desc.SampleDesc.Quality = 0;	// クオリティを0に設定
 
-	if (!pTexture->Init(pDevice, pPool, &desc, false))
+	if (!pTexture->Init(pDevice, pPool, &desc, false, false))
 	{
 		MessageBox(nullptr, "ダミーテクスチャの初期化に失敗しました", "エラー", MB_OK | MB_ICONERROR);
 		pTexture->Term();
@@ -139,7 +139,9 @@ bool Material::SetTexture(size_t index, TEXTURE_USAGE usage, const std::wstring&
 		return false;	// メモリ確保失敗
 	}
 
-	if (!pTexture->Init(m_pDevice, m_pPool, path.c_str(), batch))
+	bool isSRGB = (usage == TEXTURE_USAGE_DIFFUSE);	// ディフューズマップの場合はsRGBカラー空間を使用
+
+	if (!pTexture->Init(m_pDevice, m_pPool, path.c_str(), isSRGB, batch))
 	{
 		MessageBox(nullptr, "テクスチャの初期化に失敗しました", "エラー", MB_OK | MB_ICONERROR);
 		pTexture->Term();	// テクスチャの終了処理

@@ -971,7 +971,8 @@ bool App::OnInit()
 	if (!m_texture.Init(
 		m_pDevice.Get(),					// デバイス
 		m_pPools[POOL_TYPE_RES],			// リソース用のディスクリプタプール
-		L"Assets/Texture/hdr014.hdr",		// テクスチャファイル名
+		L"Assets/hdr014.hdr",				// テクスチャファイル名
+		false,								// sRGBカラー空間を使用しない
 		batch))								// リソースアップロードバッチ
 	{
 		MessageBox(nullptr, "テクスチャの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
