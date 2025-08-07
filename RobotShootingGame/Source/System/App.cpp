@@ -753,6 +753,15 @@ bool App::OnInit()
 	// テクスチャ設定
 
 	// ハードコーディングする
+	m_material.SetTexture(0, TU_BASE_COLOR, L"Assets/material_test/wall_bc.dds", batch);
+	m_material.SetTexture(0, TU_METALLIC, L"Assets/material_test/wall_m.dds", batch);
+	m_material.SetTexture(0, TU_ROUGHNESS, L"Assets/material_test/wall_r.dds", batch);
+	m_material.SetTexture(0, TU_NORMAL, L"Assets/material_test/wall_n.dds", batch);
+
+	m_material.SetTexture(1, TU_BASE_COLOR, L"Assets/material_test/matball_bc.dds", batch);
+	m_material.SetTexture(1, TU_METALLIC, L"Assets/material_test/matball_m.dds", batch);
+	m_material.SetTexture(1, TU_ROUGHNESS, L"Assets/material_test/matball_r.dds", batch);
+	m_material.SetTexture(1, TU_NORMAL, L"Assets/material_test/matball_n.dds", batch);
 
 	// バッチ終了
 	auto future = batch.End(m_pQueue.Get()); // リソースアップロードバッチを終了
@@ -763,157 +772,108 @@ bool App::OnInit()
 	// ==============================
 	//	ライトバッファの設定
 	// ==============================
-	auto pCB = new (std::nothrow) ConstantBuffer();
-	if (!pCB)
+	for (size_t i = 0; i < FrameCount; ++i)
 	{
-		MessageBox(nullptr, "ライトバッファのメモリ確保に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
+		if (!m_LightCB[i].Init(
+			m_pDevice.Get(),					// デバイス
+			m_pPools[POOL_TYPE_RES],			// リソース用のディスクリプタプール
+			sizeof(CbLight)))					// 定数バッファのサイズ
+		{
+			MessageBox(nullptr, "ライト定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return false; // エラー終了
+		}
+
+		auto ptr = m_LightCB[i].GetPtr<CbLight>(); // 定数バッファのポインタを取得
+		*ptr = ComputePointLight(DirectX::SimpleMath::Vector3(0.0f, 1.0f, 1.5f), 1.0f, DirectX::SimpleMath::Vector3(1.0f, 0.5f, 0.0f), 10.0f);
 	}
 
-	if (!pCB->Init(
-		m_pDevice.Get(),			// デバイス
-		m_pPools[POOL_TYPE_RES],	// リソース用のディスクリプタプール
-		sizeof(LightBuffer)			// バッファサイズ
+	// ==============================
+	//	カメラバッファの設定
+	// ==============================
+	for (size_t i = 0; i < FrameCount; ++i)
+	{
+		if (!m_CameraCB[i].Init(
+			m_pDevice.Get(),					// デバイス
+			m_pPools[POOL_TYPE_RES],			// リソース用のディスクリプタプール
+			sizeof(CbCamera)))					// 定数バッファのサイズ
+		{
+			MessageBox(nullptr, "カメラ定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return false; // エラー終了
+		}
+	}
+
+	// ==============================
+	//	シーン用カラーターゲットの生成
+	// ==============================
+	float clearColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+
+	if (!m_SceneColorTarget.Init(
+		m_pDevice.Get(),				// デバイス
+		m_pPools[POOL_TYPE_RTV],		// レンダーターゲットビュー用のディスクリプタプール
+		m_pPools[POOL_TYPE_RES],		// リソース用のディスクリプタプール
+		m_unWidth,						// 幅
+		m_unHeight,						// 高さ
+		DXGI_FORMAT_R10G10B10A2_UNORM,	// フォーマット
+		clearColor						// クリアカラー
 	))
 	{
-		delete pCB; // メモリ解放
-		MessageBox(nullptr, "ライトバッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		MessageBox(nullptr, "シーン用カラーターゲットの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
-	auto ptr = pCB->GetPtr<LightBuffer>(); // ライトバッファのポインタを取得
-	ptr->LightPosition = DirectX::SimpleMath::Vector4(0.0f, 50.0f, 100.0f, 1.0f); // ライトの位置を設定
-	ptr->LightColor = DirectX::SimpleMath::Color(1.0f, 1.0f, 1.0f, 0.0f); // ライトの色を設定
-	ptr->CameraPosition = DirectX::SimpleMath::Vector4(0.0f, 1.0f, 2.0f, 1.0f); // カメラの位置を設定
-
-	m_pLight = pCB; // ライトバッファのポインタを保存
-
 	// ==============================
-	//	ルートシグネチャの生成
+	//	シーン用深度ターゲットの生成
 	// ==============================
-	auto flag = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT; // 入力アセンブラ入力レイアウトを許可
-	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS; // ドメインシェーダーのルートアクセスを拒否
-	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS; // ハルシェーダーのルートアクセスを拒否
-	flag |= D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS; // ジオメトリシェーダーのルートアクセスを拒否
-
-	// ディスクリプタレンジを設定
-	D3D12_DESCRIPTOR_RANGE range{};
-	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // シェーダーリソースビューのタイプ
-	range.NumDescriptors = 1; // ディスクリプタの数
-	range.BaseShaderRegister = 0; // ベースシェーダーレジスタ
-	range.RegisterSpace = 0; // レジスタスペース
-	range.OffsetInDescriptorsFromTableStart = 0; // テーブルの開始からのオフセット
-
-#if 0
-	// ルートパラメーターの設定
-	D3D12_ROOT_PARAMETER param[4]{};
-	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
-	param[0].Descriptor.ShaderRegister = 0; // シェーダーレジスタ
-	param[0].Descriptor.RegisterSpace = 0; // レジスタスペース
-	param[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // シェーダーの可視性（頂点シェーダー）
-
-	param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
-	param[1].Descriptor.ShaderRegister = 1; // シェーダーレジスタ
-	param[1].Descriptor.RegisterSpace = 0; // レジスタスペース
-	param[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
-
-	param[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
-	param[2].Descriptor.ShaderRegister = 2; // シェーダーレジスタ
-	param[2].Descriptor.RegisterSpace = 0; // レジスタスペース
-	param[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
-
-	param[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブル
-	param[3].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
-	param[3].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジのポインタ
-	param[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
-
-	// スタティックサンプラーの設定
-	auto sampler = DirectX::CommonStates::StaticLinearWrap(0, D3D12_SHADER_VISIBILITY_PIXEL); // ピクセルシェーダーで使用するスタティックサンプラー
-#endif
-
-	// スタティックサンプラーの設定
-	D3D12_STATIC_SAMPLER_DESC sampler{};
-	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR; // 線形フィルタリング
-	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // U座標のアドレスモード（ラップ）
-	sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // V座標のアドレスモード（ラップ）
-	sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // W座標のアドレスモード（ラップ）
-	sampler.MipLODBias = D3D12_DEFAULT_MIP_LOD_BIAS; // MIPレベルのバイアス（デフォルト）
-	sampler.MaxAnisotropy = 1; // 最大異方性フィルタリングのレベル
-#if 0
-	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS; // 比較関数（常に真）
-#else
-	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER; // 比較関数（常に偽）
-#endif
-	sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK; // ボーダーカラー（透明な黒）
-	sampler.MinLOD = -D3D12_FLOAT32_MAX; // 最小LOD（負の最大値）
-	sampler.MaxLOD = D3D12_FLOAT32_MAX; // 最大LOD（最大値）
-	sampler.ShaderRegister = 0; // シェーダーレジスタ
-	sampler.RegisterSpace = 0; // レジスタスペース
-	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
-
-	// ルートパラメーターの設定
-	D3D12_ROOT_PARAMETER param[2]{};
-	param[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; // 定数バッファビュー
-	param[0].Descriptor.ShaderRegister = 0; // シェーダーレジスタ
-	param[0].Descriptor.RegisterSpace = 0; // レジスタスペース
-	param[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
-
-	param[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // ディスクリプタテーブル
-	param[1].DescriptorTable.NumDescriptorRanges = 1; // ディスクリプタレンジの数
-	param[1].DescriptorTable.pDescriptorRanges = &range; // ディスクリプタレンジのポインタ
-	param[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // シェーダーの可視性（ピクセルシェーダー）
-
-	// ルートシグネチャの設定
-	D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
-	rootSigDesc.NumParameters = _countof(param); // ルートパラメーターの数
-	rootSigDesc.NumStaticSamplers = 1; // スタティックサンプラーの数
-	rootSigDesc.pParameters = param; // ルートパラメーターのポインタ
-	rootSigDesc.pStaticSamplers = &sampler; // スタティックサンプラーのポインタ
-	rootSigDesc.Flags = flag; // ルートシグネチャのフラグ
-
-	ComPtr<ID3DBlob> pBlob; // ルートシグネチャのバイナリデータ
-	ComPtr<ID3DBlob> pErrorBlob; // エラーメッセージ用のバイナリデータ
-
-	// ルートシグネチャをシリアライズ
-	HRESULT hr = D3D12SerializeRootSignature(
-		&rootSigDesc,						// ルートシグネチャの設定
-		D3D_ROOT_SIGNATURE_VERSION_1,		// ルートシグネチャのバージョン
-		pBlob.GetAddressOf(),				// シリアライズされたルートシグネチャのポインタ
-		pErrorBlob.GetAddressOf());			// エラーメッセージのポインタ
-	if (FAILED(hr))
+	if (!m_SceneDepthTarget.Init(
+		m_pDevice.Get(),			// デバイス
+		m_pPools[POOL_TYPE_DSV],	// 深度ステンシルビュー用のディスクリプタプール
+		nullptr,					// 深度ステンシルリソース
+		m_unWidth,					// 幅
+		m_unHeight,					// 高さ
+		DXGI_FORMAT_D32_FLOAT,		// 深度ステンシルフォーマット
+		1.0f,						// 深度クリア値
+		0))							// ステンシルクリア値
 	{
-		// エラーメッセージが存在する場合は表示
-		if (pErrorBlob)
-		{
-			MessageBoxA(nullptr, static_cast<const char*>(pErrorBlob->GetBufferPointer()), "ルートシグネチャのシリアライズに失敗", MB_OK | MB_ICONERROR);
-		}
-		else
-		{
-			MessageBox(nullptr, "ルートシグネチャのシリアライズに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		}
+		MessageBox(nullptr, "シーン用深度ターゲットの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
-	// ルートシグネチャを生成
-	hr = m_pDevice->CreateRootSignature(
-		0,											// ノードマスク（単一ノード）
-		pBlob->GetBufferPointer(),					// ルートシグネチャのバッファポインタ
-		pBlob->GetBufferSize(),						// ルートシグネチャのバッファサイズ
-		IID_PPV_ARGS(m_pRootSig.GetAddressOf()));	// ルートシグネチャのポインタ
-	if (FAILED(hr))
+	// ==============================
+	//	シーン用ルートシグネチャの生成
+	// ==============================
+	RootSignature::Desc desc; // ルートシグネチャの設定
+	desc.Begin(8)
+		.SetCBV(ShaderStage::VS, 0, 0) // 頂点シェーダーで使用する定数バッファビュー
+		.SetCBV(ShaderStage::VS, 1, 1) // 頂点シェーダーで使用する定数バッファビュー
+		.SetCBV(ShaderStage::PS, 2, 2) // ピクセルシェーダーで使用する定数バッファビュー
+		.SetCBV(ShaderStage::PS, 3, 2) // ピクセルシェーダーで使用する定数バッファビュー
+		.SetSRV(ShaderStage::PS, 4, 0) // ピクセルシェーダーで使用するシェーダーリソースビュー
+		.SetSRV(ShaderStage::PS, 5, 1) // ピクセルシェーダーで使用するシェーダーリソースビュー
+		.SetSRV(ShaderStage::PS, 6, 2) // ピクセルシェーダーで使用するシェーダーリソースビュー
+		.SetSRV(ShaderStage::PS, 7, 3) // ピクセルシェーダーで使用するシェーダーリソースビュー
+		.AddStaticSmp(ShaderStage::PS, 0, SamplerState::LinearWrap)	// ピクセルシェーダーで使用するスタティックサンプラー
+		.AddStaticSmp(ShaderStage::PS, 1, SamplerState::LinearWrap)	// ピクセルシェーダーで使用するスタティックサンプラー
+		.AddStaticSmp(ShaderStage::PS, 2, SamplerState::LinearWrap)	// ピクセルシェーダーで使用するスタティックサンプラー
+		.AddStaticSmp(ShaderStage::PS, 3, SamplerState::LinearWrap)	// ピクセルシェーダーで使用するスタティックサンプラー
+		.AllowIL()	// インライン化を許可
+		.End();		// ルートシグネチャの設定を終了
+
+	if (!m_SceneRootSig.Init(
+		m_pDevice.Get(),		// デバイス
+		desc.GetDesc()))		// ルートシグネチャの設定
 	{
-		MessageBox(nullptr, "ルートシグネチャの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		MessageBox(nullptr, "ルートシグネチャの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
 	// ===============================
-	//	パイプラインステートの生成
+	//	シーン用パイプラインステートの生成
 	// ===============================
 	ComPtr<ID3DBlob> pVSBlob = nullptr; // 頂点シェーダーのバイナリデータ
 	ComPtr<ID3DBlob> pPSBlob = nullptr; // ピクセルシェーダーのバイナリデータ
 
 	// 頂点シェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/TonemapVS.cso", pVSBlob.GetAddressOf());
+	HRESULT hr = D3DReadFileToBlob(L"Assets/Shader/BasicVS.cso", pVSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "頂点シェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -921,7 +881,7 @@ bool App::OnInit()
 	}
 
 	// ピクセルシェーダー読み込み
-	hr = D3DReadFileToBlob(L"Assets/Shader/TonemapPS.cso", pPSBlob.GetAddressOf());
+	hr = D3DReadFileToBlob(L"Assets/Shader/BasicPS.cso", pPSBlob.GetAddressOf());
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -929,13 +889,15 @@ bool App::OnInit()
 	}
 
 	D3D12_INPUT_ELEMENT_DESC elements[] = {
-		{ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 	};
 
 	// グラフィックスパイプラインステートを設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
-	psoDesc.InputLayout = { elements , 2 }; // 入力レイアウト
+	psoDesc.InputLayout = { elements , _countof(elements) }; // 入力レイアウト
 	psoDesc.pRootSignature = m_pRootSig.Get(); // ルートシグネチャ
 	psoDesc.VS = { pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize() }; // 頂点シェーダー
 	psoDesc.PS = { pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize() }; // ピクセルシェーダー
@@ -945,18 +907,87 @@ bool App::OnInit()
 	psoDesc.SampleMask = UINT_MAX; // サンプルマスク（全サンプル）
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // プリミティブトポロジタイプ（三角形）
 	psoDesc.NumRenderTargets = 1; // レンダーターゲットの数
-	psoDesc.RTVFormats[0] = m_colorTarget[0].GetViewDesc().Format; // レンダーターゲットのフォーマット
-	psoDesc.DSVFormat = m_depthTarget.GetViewDesc().Format; // 深度ステンシルビューのフォーマット
+	psoDesc.RTVFormats[0] = m_SceneColorTarget.GetRTVDesc().Format; // レンダーターゲットのフォーマット
+	psoDesc.DSVFormat = m_SceneDepthTarget.GetDSVDesc().Format; // 深度ステンシルビューのフォーマット
 	psoDesc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
 	psoDesc.SampleDesc.Quality = 0; // マルチサンプリングの品質
 
 	// パイプラインステートを生成
 	hr = m_pDevice->CreateGraphicsPipelineState(
 		&psoDesc,								// パイプラインステートの設定
-		IID_PPV_ARGS(m_pPSO.GetAddressOf()));	// パイプラインステートのポインタ
+		IID_PPV_ARGS(m_pScenePSO.GetAddressOf()));	// パイプラインステートのポインタ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "パイプラインステートの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// =============================
+	//	トーンマップ用ルートシグネチャの生成
+	// =============================
+	desc.Begin(2)
+		.SetCBV(ShaderStage::PS, 0, 0) // ピクセルシェーダーで使用する定数バッファビュー
+		.SetSRV(ShaderStage::PS, 1, 0) // ピクセルシェーダーで使用するシェーダーリソースビュー
+		.AddStaticSmp(ShaderStage::PS, 0, SamplerState::LinearWrap) // ピクセルシェーダーで使用するスタティックサンプラー
+		.AllowIL() // インライン化を許可
+		.End(); // ルートシグネチャの設定を終了
+
+	if (!m_TonemapRootSig.Init(
+		m_pDevice.Get(),		// デバイス
+		desc.GetDesc()))		// ルートシグネチャの設定
+	{
+		MessageBox(nullptr, "トーンマップ用ルートシグネチャの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// ==============================
+	//	トーンマップ用パイプラインステートの生成
+	// ==============================
+	// 頂点シェーダーを読み込み
+	hr = D3DReadFileToBlob(L"Assets/Shader/TonemapVS.cso", pPSBlob.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "トーンマップ用頂点シェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	// ピクセルシェーダーを読み込み
+	hr = D3DReadFileToBlob(L"Assets/Shader/TonemapPS.cso", pVSBlob.GetAddressOf());
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "トーンマップ用ピクセルシェーダーの読み込みに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false; // エラー終了
+	}
+
+	D3D12_INPUT_ELEMENT_DESC quadElements[] = {
+		{ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+	};
+
+	// グラフィックスパイプラインステートを設定
+	psoDesc = {};
+	psoDesc.InputLayout = { quadElements, _countof(quadElements) }; // 入力レイアウト
+	psoDesc.pRootSignature = m_TonemapRootSig.GetPtr(); // トーンマップ用ルートシグネチャ
+	psoDesc.VS = { pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize() }; // トーンマップ用頂点シェーダー
+	psoDesc.PS = { pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize() }; // トーンマップ用ピクセルシェーダー
+	psoDesc.RasterizerState = DirectX::CommonStates::CullNone; // ラスタライザーステート（カリングなし）
+	psoDesc.BlendState = DirectX::CommonStates::Opaque; // ブレンドステート（不透明）
+	psoDesc.DepthStencilState = DirectX::CommonStates::DepthDefault; // 深度ステンシルステート（デフォルト）
+	psoDesc.SampleMask = UINT_MAX; // サンプルマスク（全サンプル）
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE; // プリミティブトポロジタイプ（三角形）
+	psoDesc.NumRenderTargets = 1; // レンダーターゲットの数
+	psoDesc.RTVFormats[0] = m_colorTarget[0].GetRTVDesc().Format; // レンダーターゲットのフォーマット
+	psoDesc.DSVFormat = m_depthTarget.GetDSVDesc().Format; // 深度ステンシルビューのフォーマット
+	psoDesc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
+	psoDesc.SampleDesc.Quality = 0; // マルチサンプリングの品質
+
+	// パイプラインステートを生成
+	hr = m_pDevice->CreateGraphicsPipelineState(
+		&psoDesc,								// パイプラインステートの設定
+		IID_PPV_ARGS(m_pTonemapPSO.GetAddressOf()));	// パイプラインステートのポインタ
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "トーンマップ用パイプラインステートの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
@@ -970,28 +1001,19 @@ bool App::OnInit()
 		float tx;
 		float ty; // テクスチャ座標
 	};
-
-	if (!m_quadVB.Init<Vertex>(m_pDevice.Get(), 3))
+	
+	if (!m_QuadVB.Init<Vertex>(m_pDevice.Get(), 3))
 	{
 		MessageBox(nullptr, "四角形の頂点バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
 	}
 
-	auto ptr = m_quadVB.Map<Vertex>(); // 頂点バッファのポインタを取得
+	auto ptr = m_QuadVB.Map<Vertex>(); // 頂点バッファのポインタを取得
 	assert(ptr); // ポインタがnullptrでないことを確認
-	ptr[0] = { -1.0f, 1.0f, 0.0f, -1.0f };
-	ptr[1] = { 3.0f, 1.0f, 2.0f, -1.0f };
-	ptr[2] = { -1.0f, -3.0f, 0.0f, 1.0f };
-	m_quadVB.Unmap(); // 頂点バッファのアンマップ
-
-	for (uint32_t i = 0; i < FrameCount; ++i)
-	{
-		if (!m_CB[i].Init(m_pDevice.Get(), m_pPools[POOL_TYPE_RES], sizeof(CbTonemap)))
-		{
-			MessageBox(nullptr, "定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-			return false; // エラー終了
-		}
-	}
+	ptr[0] = { -1.0f, 1.0f, 0.0f, -1.0f }; // 左下の頂点
+	ptr[1] = { 3.0f, 1.0f, 2.0f, -1.0f }; // 右下の頂点
+	ptr[2] = { -1.0f, -3.0f, 0.0f, 1.0f }; // 左上の頂点
+	m_QuadVB.Unmap(); // 頂点バッファのアンマップ
 
 	// ==============================
 	//	テクスチャロード

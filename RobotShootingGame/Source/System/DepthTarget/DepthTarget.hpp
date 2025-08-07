@@ -36,17 +36,23 @@ public:
 	 */
 	~DepthTarget();
 
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPoolDSV, uint32_t width, uint32_t height, DXGI_FORMAT format);
+	bool Init(ID3D12Device* pDevice, DescriptorPool* pPoolDSV, DescriptorPool* pPoolSRV, uint32_t width, uint32_t height, DXGI_FORMAT format, float clearDepth, uint8_t clearStencil);
 
 	void Term();
 
 	inline DescriptorHandle* GetHandleDSV() const { return m_pHandleDSV; }
 
+	inline DescriptorHandle* GetHandleSRV() const { return m_pHandleSRV; }
+
 	inline ID3D12Resource* GetResource() const { return m_pTarget.Get(); }
 
 	D3D12_RESOURCE_DESC GetDesc() const;
 
-	inline D3D12_DEPTH_STENCIL_VIEW_DESC GetViewDesc() const { return m_ViewDesc; }
+	inline D3D12_DEPTH_STENCIL_VIEW_DESC GetDSVDesc() const { return m_DSVDesc; }
+
+	inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSRVDesc() const { return m_SRVDesc; }
+
+	void ClearViews(ID3D12GraphicsCommandList* pCmdList) const;
 
 private:
 	DepthTarget(const DepthTarget&) = delete; // コピーコンストラクタを削除
@@ -54,6 +60,11 @@ private:
 
 	ComPtr<ID3D12Resource> m_pTarget{};	 // 深度ターゲットリソース
 	DescriptorHandle* m_pHandleDSV{}; // 深度ステンシルビューのディスクリプタハンドル
+	DescriptorHandle* m_pHandleSRV{}; // 深度ステンシルビューのSRVディスクリプタハンドル
 	DescriptorPool* m_pPoolDSV{}; // ディスクリプタプール
-	D3D12_DEPTH_STENCIL_VIEW_DESC m_ViewDesc{}; // 深度ステンシルビューの説明
+	DescriptorPool* m_pPoolSRV{}; // SRVディスクリプタプール
+	D3D12_DEPTH_STENCIL_VIEW_DESC m_DSVDesc{}; // 深度ステンシルビューの説明
+	D3D12_SHADER_RESOURCE_VIEW_DESC m_SRVDesc{}; // シェーダーリソースビューの説明
+	float m_ClearDepth{};	// クリア深度値
+	uint8_t m_ClearStencil{}; // クリアステンシル値
 };

@@ -44,7 +44,7 @@ ColorTarget::~ColorTarget()
 	Term();
 }
 
-bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t width, uint32_t height, DXGI_FORMAT format, bool useSRGB)
+bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, DescriptorPool* pPoolSRV, uint32_t width, uint32_t height, DXGI_FORMAT format, float clearColor[4])
 {
 	if (!pDevice || !pPoolRTV || !width || !height) return false;	// 無効な引数チェック
 	
@@ -59,6 +59,20 @@ bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t
 	{
 		MessageBox(nullptr, "レンダーターゲットビューのハンドルの割り当てに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false;	// ハンドルの割り当てに失敗した場合はfalseを返す
+	}
+
+	if (pPoolSRV)
+	{
+		m_pPoolSRV = pPoolSRV;	// シェーダーリソースビューのディスクリプタプールを設定
+		m_pPoolSRV->AddRef();	// プールの参照カウントを増やす
+
+		m_pHandleSRV = pPoolSRV->AllocHandle();	// シェーダーリソースビューのハンドルを割り当て
+
+		if (!m_pHandleSRV)
+		{
+			MessageBox(nullptr, "シェーダーリソースビューのハンドルの割り当てに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return false;	// ハンドルの割り当てに失敗した場合はfalseを返す
+		}
 	}
 
 	D3D12_HEAP_PROPERTIES prop{};
@@ -81,12 +95,18 @@ bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t
 	desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;	// テクスチャレイアウトを不明に設定
 	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;	// リソースフラグをレンダーターゲットとして設定
 
+	// クリア値を設定
+	m_clearColor[0] = clearColor[0];
+	m_clearColor[1] = clearColor[1];
+	m_clearColor[2] = clearColor[2];
+	m_clearColor[3] = clearColor[3];
+
 	D3D12_CLEAR_VALUE clearValue{};
 	clearValue.Format = format;	// クリア値のフォーマットを指定
-	clearValue.Color[0] = 1.0f;	// クリアカラーのR成分を1に設定
-	clearValue.Color[1] = 1.0f;	// クリアカラーのG成分を1に設定
-	clearValue.Color[2] = 1.0f;	// クリアカラーのB成分を1に設定
-	clearValue.Color[3] = 1.0f;	// クリアカラーのA成分を1に設定
+	clearValue.Color[0] = m_clearColor[0];	// クリア値の赤成分を設定
+	clearValue.Color[1] = m_clearColor[1];	// クリア値の緑成分を設定
+	clearValue.Color[2] = m_clearColor[2];	// クリア値の青成分を設定
+	clearValue.Color[3] = m_clearColor[3];	// クリア値のアルファ成分を設定
 
 	HRESULT hr = pDevice->CreateCommittedResource(
 		&prop,	// ヒーププロパティ
@@ -102,23 +122,33 @@ bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t
 		return false;	// レンダーターゲットの作成に失敗した場合はfalseを返す
 	}
 
-	auto view_format = format;	// フォーマットを変数にコピー
-
-	if (useSRGB)	// sRGBを使用する場合
-	{
-		view_format = ConvertToSRGB(format);	// フォーマットをsRGBに変換
-	}
-
-	m_ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;	// レンダーターゲットビューの次元を2Dテクスチャに設定
-	m_ViewDesc.Format = view_format;	// レンダーターゲットビューのフォーマットを指定
-	m_ViewDesc.Texture2D.MipSlice = 0;	// ミップスライスを0に設定
-	m_ViewDesc.Texture2D.PlaneSlice = 0;	// プレーンスライスを0に設定
+	m_RTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;	// レンダーターゲットビューの次元を2Dテクスチャに設定
+	m_RTVDesc.Format = format;	// レンダーターゲットビューのフォーマットを指定
+	m_RTVDesc.Texture2D.MipSlice = 0;	// ミップスライスを0に設定
+	m_RTVDesc.Texture2D.PlaneSlice = 0;	// プレーンスライスを0に設定
 
 	pDevice->CreateRenderTargetView(
 		m_pTarget.Get(),	// レンダーターゲットリソース
-		&m_ViewDesc,	// レンダーターゲットビューの説明
+		&m_RTVDesc,	// レンダーターゲットビューの説明
 		m_pHandleRTV->HandleCPU	// CPUハンドルを取得
 	);
+
+	if (pPoolSRV)
+	{
+		m_SRVDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		m_SRVDesc.Format = format;	// シェーダーリソースビューのフォーマットを指定
+		m_SRVDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;	// シェーダー4コンポーネントマッピングをデフォルトに設定
+		m_SRVDesc.Texture2D.MostDetailedMip = 0;	// 最も詳細なミップを0に設定
+		m_SRVDesc.Texture2D.MipLevels = 1;	// ミップレベルを1に設定
+		m_SRVDesc.Texture2D.PlaneSlice = 0;	// プレーンスライスを0に設定
+		m_SRVDesc.Texture2D.ResourceMinLODClamp = 0.0f;	// リソースの最小LODクランプを0に設定
+
+		pDevice->CreateShaderResourceView(
+			m_pTarget.Get(),	// シェーダーリソースリソース
+			&m_SRVDesc,	// シェーダーリソースビューの説明
+			m_pHandleSRV->HandleCPU	// CPUハンドルを取得
+		);
+	}
 
 	return true;	// 成功した場合はtrueを返す
 }
@@ -157,14 +187,14 @@ bool ColorTarget::InitFromBackBuffer(ID3D12Device* pDevice, DescriptorPool* pPoo
 		format = ConvertToSRGB(format);	// フォーマットをsRGBに変換
 	}
 
-	m_ViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;	// レンダーターゲットビューの次元を2Dテクスチャに設定
-	m_ViewDesc.Format = format;	// レンダーターゲットビューのフォーマットをバックバッファのフォーマットに設定
-	m_ViewDesc.Texture2D.MipSlice = 0;	// ミップスライスを0に設定
-	m_ViewDesc.Texture2D.PlaneSlice = 0;	// プレーンスライスを0に設定
+	m_RTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;	// レンダーターゲットビューの次元を2Dテクスチャに設定
+	m_RTVDesc.Format = format;	// レンダーターゲットビューのフォーマットをバックバッファのフォーマットに設定
+	m_RTVDesc.Texture2D.MipSlice = 0;	// ミップスライスを0に設定
+	m_RTVDesc.Texture2D.PlaneSlice = 0;	// プレーンスライスを0に設定
 
 	pDevice->CreateRenderTargetView(
 		m_pTarget.Get(),	// レンダーターゲットリソース
-		&m_ViewDesc,	// レンダーターゲットビューの説明
+		&m_RTVDesc,	// レンダーターゲットビューの説明
 		m_pHandleRTV->HandleCPU	// CPUハンドルを取得
 	);
 
@@ -186,6 +216,18 @@ void ColorTarget::Term()
 		m_pPoolRTV->Release();	// ディスクリプタプールの参照カウントを減らす
 		m_pPoolRTV = nullptr;	// プールをnullptrに設定
 	}
+
+	if (m_pPoolSRV && m_pHandleSRV)
+	{
+		m_pPoolSRV->FreeHandle(m_pHandleSRV);	// シェーダーリソースビューのハンドルを解放
+		m_pHandleSRV = nullptr;	// ハンドルをnullptrに設定
+	}
+
+	if (m_pPoolSRV)
+	{
+		m_pPoolSRV->Release();	// シェーダーリソースビューのディスクリプタプールの参照カウントを減らす
+		m_pPoolSRV = nullptr;	// プールをnullptrに設定
+	}
 }
 
 D3D12_RESOURCE_DESC ColorTarget::GetDesc() const
@@ -198,4 +240,14 @@ D3D12_RESOURCE_DESC ColorTarget::GetDesc() const
 	{
 		return D3D12_RESOURCE_DESC();	// リソースが存在しない場合は空の説明を返す
 	}
+}
+
+void ColorTarget::ClearView(ID3D12GraphicsCommandList* pCmdList)
+{
+	// レンダーターゲットビューをクリア
+	pCmdList->ClearRenderTargetView(
+		m_pHandleRTV->HandleCPU,	// レンダーターゲットビューのハンドル
+		m_clearColor,	// クリアカラー
+		0, nullptr	// フラグと矩形は使用しない
+	);
 }

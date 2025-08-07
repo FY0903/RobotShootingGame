@@ -41,13 +41,14 @@ public:
 	 * @brief レンダリングターゲットを初期化します。
 	 * @param [pDevice] Direct3D 12 デバイスへのポインタ。
 	 * @param [pPoolRTV] RTV（レンダリングターゲットビュー）ディスクリプタプールへのポインタ。
+	 * @param [pPoolSRV] SRV（シェーダーリソースビュー）ディスクリプタプールへのポインタ。
 	 * @param [width] レンダリングターゲットの幅（ピクセル単位）。
 	 * @param [height] レンダリングターゲットの高さ（ピクセル単位）。
 	 * @param [format] レンダリングターゲットの DXGI フォーマット。
-	 * @param [useSRGB] sRGB カラースペースを使用するかどうか。
+	 * @param [clearColor] クリア値（RGBA）を格納する配列へのポインタ。
 	 * @return 初期化が成功した場合は true、失敗した場合は false を返します。
 	 */
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t width, uint32_t height, DXGI_FORMAT format, bool useSRGB);
+	bool Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, DescriptorPool* pPoolSRV, uint32_t width, uint32_t height, DXGI_FORMAT format, float clearColor[4]);
 
 	/**
 	 * @brief バックバッファから初期化を行います。
@@ -72,6 +73,12 @@ public:
 	inline DescriptorHandle* GetHandleRTV() const { return m_pHandleRTV; }
 
 	/**
+	 * @brief シェーダーリソースビューのハンドルを取得します。
+	 * @return シェーダーリソースビューのハンドルへのポインタ。
+	 */
+	inline DescriptorHandle* GetHandleSRV() const { return m_pHandleSRV; }
+
+	/**
 	 * @brief m_pTarget から ID3D12Resource オブジェクトへのポインタを取得します。
 	 * @return m_pTarget が保持する ID3D12Resource オブジェクトへのポインタ。
 	 */
@@ -87,7 +94,19 @@ public:
 	 * @brief レンダーターゲットビューの記述情報を取得します。
 	 * @return m_ViewDesc メンバーに格納されている D3D12_RENDER_TARGET_VIEW_DESC オブジェクトを返します。
 	 */
-	inline D3D12_RENDER_TARGET_VIEW_DESC GetViewDesc() const { return m_ViewDesc; }
+	inline D3D12_RENDER_TARGET_VIEW_DESC GetRTVDesc() const { return m_RTVDesc; }
+
+	/**
+	 * @brief シェーダーリソースビューの記述情報を取得します。
+	 * @return m_SRVDesc メンバーに格納されている D3D12_SHADER_RESOURCE_VIEW_DESC オブジェクトを返します。
+	 */
+	inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSRVDesc() const { return m_DSVDesc; }
+
+	/**
+	 * @brief レンダーターゲットをクリアします。
+	 * @param [pCmdList] コマンドリストへのポインタ。
+	 */
+	void ClearView(ID3D12GraphicsCommandList* pCmdList);
 
 private:
 	ColorTarget(const ColorTarget&) = delete;	// コピーコンストラクタを禁止
@@ -95,6 +114,10 @@ private:
 
 	ComPtr<ID3D12Resource> m_pTarget{};	// リソースへのポインタ
 	DescriptorHandle* m_pHandleRTV{};	// レンダーターゲットビューのハンドル
+	DescriptorHandle* m_pHandleSRV{}; // シェーダーリソースビューのハンドル
 	DescriptorPool* m_pPoolRTV{};	// ディスクリプタプールへのポインタ
-	D3D12_RENDER_TARGET_VIEW_DESC m_ViewDesc{};	// レンダーターゲットビューの説明
+	DescriptorPool* m_pPoolSRV{}; // ディスクリプタプールへのポインタ
+	D3D12_RENDER_TARGET_VIEW_DESC m_RTVDesc{};	// レンダーターゲットビューの説明
+	D3D12_SHADER_RESOURCE_VIEW_DESC m_DSVDesc{}; // シェーダーリソースビューの説明
+	float m_clearColor[4]{ 0.0f, 0.0f, 0.0f, 1.0f };	// クリアカラー（RGBA）
 };

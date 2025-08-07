@@ -29,6 +29,10 @@ public:
 		TEXTURE_USAGE_SHININESS,	// シニアスマップ
 		TEXTURE_USAGE_NORMAL,	// ノーマルマップ
 
+		TEXTURE_USAGE_COLOR,
+		TEXTURE_USAGE_METALLIC,
+		TEXTURE_USAGE_ROUGHNESS,
+
 		TEXTURE_USAGE_COUNT	// テクスチャの数
 	};
 
@@ -124,3 +128,7 @@ constexpr auto TU_DIFFUSE = Material::TEXTURE_USAGE_DIFFUSE;	// ディフューズマッ
 constexpr auto TU_SPECULAR = Material::TEXTURE_USAGE_SPECULAR;	// スペキュラマップ
 constexpr auto TU_SHININESS = Material::TEXTURE_USAGE_SHININESS;	// シニアスマップ
 constexpr auto TU_NORMAL = Material::TEXTURE_USAGE_NORMAL;	// ノーマルマップ
+
+constexpr auto TU_BASE_COLOR = Material::TEXTURE_USAGE_COLOR;	// ベースカラー
+constexpr auto TU_METALLIC = Material::TEXTURE_USAGE_METALLIC;	// メタリック
+constexpr auto TU_ROUGHNESS = Material::TEXTURE_USAGE_ROUGHNESS;	// ラフネス
