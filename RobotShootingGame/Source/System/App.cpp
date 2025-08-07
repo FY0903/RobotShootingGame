@@ -1008,13 +1008,78 @@ bool App::OnInit()
 		return false; // エラー終了
 	}
 
-	auto ptr = m_QuadVB.Map<Vertex>(); // 頂点バッファのポインタを取得
-	assert(ptr); // ポインタがnullptrでないことを確認
-	ptr[0] = { -1.0f, 1.0f, 0.0f, -1.0f }; // 左下の頂点
-	ptr[1] = { 3.0f, 1.0f, 2.0f, -1.0f }; // 右下の頂点
-	ptr[2] = { -1.0f, -3.0f, 0.0f, 1.0f }; // 左上の頂点
+	Vertex* vertexPtr = m_QuadVB.Map<Vertex>(); // 頂点バッファのポインタを取得
+	assert(vertexPtr); // ポインタがnullptrでないことを確認
+	vertexPtr[0] = { -1.0f, 1.0f, 0.0f, -1.0f }; // 左下の頂点
+	vertexPtr[1] = { 3.0f, 1.0f, 2.0f, -1.0f }; // 右下の頂点
+	vertexPtr[2] = { -1.0f, -3.0f, 0.0f, 1.0f }; // 左上の頂点
 	m_QuadVB.Unmap(); // 頂点バッファのアンマップ
 
+	// ==============================
+	//	壁用頂点バッファの生成
+	// ==============================
+	struct BasicVertex
+	{
+		DirectX::SimpleMath::Vector3 Position; // 頂点位置
+		DirectX::SimpleMath::Vector3 Normal;   // 法線
+		DirectX::SimpleMath::Vector3 TexCoord; // テクスチャ座標
+		DirectX::SimpleMath::Vector3 Tangent; // 接線
+	};
+
+	if (!m_WallVB.Init<BasicVertex>(m_pDevice.Get(), 6))
+	{
+		MessageBox(nullptr, "壁用頂点バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return false;
+	}
+
+	float size = 10.0f;
+	BasicVertex* basicVertexPtr = m_WallVB.Map<BasicVertex>(); // 壁用頂点バッファのポインタを取得
+	assert(basicVertexPtr); // ポインタがnullptrでないことを確認
+
+	basicVertexPtr[0].Position = { size, -size, 0.0f };
+	basicVertexPtr[0].Normal = { 0.0f, 0.0f, 1.0f };
+	basicVertexPtr[0].TexCoord = { 0.0f, 1.0f };
+	basicVertexPtr[0].Tangent = { 1.0f, 0.0f, 0.0f };
+
+	basicVertexPtr[1].Position = { size, size, 0.0f };
+	basicVertexPtr[1].Normal = { 0.0f, 0.0f, 1.0f };
+	basicVertexPtr[1].TexCoord = { 1.0f, 1.0f };
+	basicVertexPtr[1].Tangent = { 1.0f, 0.0f, 0.0f };
+
+	basicVertexPtr[2].Position = { size, -size, 0.0f };
+	basicVertexPtr[2].Normal = { 0.0f, 0.0f, 1.0f };
+	basicVertexPtr[2].TexCoord = { 0.0f, 1.0f };
+	basicVertexPtr[2].Tangent = { 1.0f, 0.0f, 0.0f };
+
+	basicVertexPtr[3].Position = { -size, size, 0.0f };
+	basicVertexPtr[3].Normal = { 0.0f, 0.0f, 1.0f };
+	basicVertexPtr[3].TexCoord = { 0.0f, 1.0f };
+	basicVertexPtr[3].Tangent = { 1.0f, 0.0f, 0.0f };
+
+	basicVertexPtr[4].Position = { size, -size, 0.0f };
+	basicVertexPtr[4].Normal = { 0.0f, 0.0f, 1.0f };
+	basicVertexPtr[4].TexCoord = { 1.0f, 0.0f };
+	basicVertexPtr[4].Tangent = { 1.0f, 0.0f, 0.0f };
+
+	basicVertexPtr[5].Position = { -size, -size, 0.0f };
+	basicVertexPtr[5].Normal = { 0.0f, 0.0f, 1.0f };
+	basicVertexPtr[5].TexCoord = { 0.0f, 0.0f };
+	basicVertexPtr[5].Tangent = { 1.0f, 0.0f, 0.0f };
+
+	m_WallVB.Unmap(); // 壁用頂点バッファのアンマップ
+
+	for (uint32_t i = 0; i < FrameCount; ++i)
+	{
+		if (!m_TonemapCB[i].Init(
+			m_pDevice.Get(),					// デバイス
+			m_pPools[POOL_TYPE_RES],			// リソース用のディスクリプタプール
+			sizeof(CbTonemap)))					// 定数バッファのサイズ
+		{
+			MessageBox(nullptr, "トーンマップ定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return false; // エラー終了
+		}
+	}
+#if 0
 	// ==============================
 	//	テクスチャロード
 	// ==============================
@@ -1039,31 +1104,19 @@ bool App::OnInit()
 	auto future = batch.End(m_pQueue.Get()); // リソースアップロードバッチを終了
 
 	future.wait(); // 非同期処理の完了を待機
-
-#if 0
+#endif
 	// ==============================
 	//	変換行列用の定数バッファの生成
 	// ==============================
-	m_Transform.reserve(FrameCount); // 変換行列の数だけメモリを予約
-
 	for (size_t i = 0; i < FrameCount; ++i)
 	{
-		auto pCB = new (std::nothrow) ConstantBuffer();
-		if (!pCB)
-		{
-			MessageBox(nullptr, "メモリの確保に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-			return false; // エラー終了
-		}
-
-		// 定数バッファ初期化
-		if (!pCB->Init(
+		// 定数バッファの初期化
+		if (!m_TransformCB[i].Init(
 			m_pDevice.Get(),			// デバイス
 			m_pPools[POOL_TYPE_RES],	// リソース用のディスクリプタプール
-			sizeof(Transform) * 2		// 定数バッファのサイズ
-		))
+			sizeof(CbTransform)))		// 定数バッファのサイズ
 		{
-			delete pCB; // メモリ解放
-			MessageBox(nullptr, "定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			MessageBox(nullptr, "変換行列用定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 			return false; // エラー終了
 		}
 
@@ -1077,83 +1130,76 @@ bool App::OnInit()
 		auto aspect = static_cast<float>(m_unWidth) / static_cast<float>(m_unHeight); // アスペクト比
 
 		// 変換行列を設定
-		auto ptr = pCB->GetPtr<Transform>(); // 定数バッファのポインタを取得
-		ptr->World = DirectX::XMMatrixIdentity(); // ワールド行列を単位行列に設定
+		auto ptr = m_TransformCB[i].GetPtr<CbTransform>(); // 定数バッファのポインタを取得
 		ptr->View = DirectX::XMMatrixLookAtLH(eyePos, targetPos, upDir); // ビュー行列を設定
 		ptr->Proj = DirectX::XMMatrixPerspectiveFovLH(fovY, aspect, 1.0f, 100.0f); // プロジェクション行列を設定
-
-		m_Transform.push_back(pCB); // 変換行列をリストに追加
 	}
 
 	m_RotateAngle = DirectX::XMConvertToRadians(-60.0f); // 初期回転角度を設定
-#endif
+
+	// ==============================
+	//	メッシュ用バッファの生成
+	// ==============================
+	for (uint32_t i = 0; i < FrameCount; ++i)
+	{
+		if (!m_MeshCB[i].Init(
+			m_pDevice.Get(),					// デバイス
+			m_pPools[POOL_TYPE_RES],			// リソース用のディスクリプタプール
+			sizeof(CbMesh)))					// 定数バッファのサイズ
+		{
+			MessageBox(nullptr, "メッシュ用定数バッファの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+			return false; // エラー終了
+		}
+
+		auto ptr = m_MeshCB[i].GetPtr<CbMesh>(); // 定数バッファのポインタを取得
+		ptr->World = DirectX::XMMatrixIdentity(); // ワールド行列を単位行列に設定
+	}
+
 	return true; // 正常終了
 }
 
 void App::OnTerm()
 {
-#if 0
+	m_QuadVB.Term(); // 四角形の頂点バッファの解放
+	for (uint32_t i = 0; i < FrameCount; ++i)
+	{
+		m_TonemapCB[i].Term(); // トーンマップ定数バッファの解放
+		m_LightCB[i].Term(); // ライト定数バッファの解放
+		m_CameraCB[i].Term(); // カメラ定数バッファの解放
+		m_TransformCB[i].Term(); // 変換行列用定数バッファの解放
+	}
+
 	// メッシュ破棄
 	for (auto& mesh : m_pMesh)
 	{
 		if (mesh)
 		{
-			mesh->Term(); // メッシュの終了処理
-			delete mesh; // メモリ解放
-			mesh = nullptr; // ポインタをnullptrに設定
+			mesh->Term(); // メッシュの解放
 		}
 	}
-	m_pMesh.clear(); // メッシュのリストをクリア
-	m_pMesh.shrink_to_fit(); // メモリを最適化
+	m_pMesh.clear(); // メッシュのクリア
+	m_pMesh.shrink_to_fit(); // メモリの最適化
 
 	// マテリアル破棄
-	m_material.Term(); // マテリアルの終了処理
+	m_material.Term();
 
-	// ライトバッファ破棄
-	m_pLight->Term(); // ライトバッファの終了処理
-	delete m_pLight; // メモリ解放
-
-	// 変換行列用の定数バッファ破棄
-	for (auto& pCB : m_Transform)
-	{
-		if (pCB)
-		{
-			pCB->Term(); // 定数バッファの終了処理
-			delete pCB; // メモリ解放
-			pCB = nullptr; // ポインタをnullptrに設定
-		}
-	}
-	m_Transform.clear(); // 変換行列のリストをクリア
-	m_Transform.shrink_to_fit(); // メモリを最適化
-#endif
-
-	m_pRootSig.Reset(); // ルートシグネチャのリセット
-	m_pPSO.Reset(); // パイプラインステートのリセット
-	m_quadVB.Term();
 	for (uint32_t i = 0; i < FrameCount; ++i)
 	{
-		m_CB[i].Term();
+		m_MeshCB[i].Term(); // メッシュ用定数バッファの解放
 	}
-	m_texture.Term();
+
+	m_SceneColorTarget.Term(); // シーン用カラーターゲットの解放
+	m_SceneDepthTarget.Term(); // シーン用深度ターゲットの解放
+
+	m_pScenePSO.Reset(); // シーン用パイプラインステートの解放
+	m_SceneRootSig.Term(); // シーン用ルートシグネチャの解放
+
+	m_pTonemapPSO.Reset(); // トーンマップ用パイプラインステートの解放
+	m_TonemapRootSig.Term(); // トーンマップ用ルートシグネチャの解放
 }
 
 void App::OnRender()
 {
-	// ===============================
-	//	更新処理
-	// ===============================
-#if 0
-	m_RotateAngle += 0.025f; // 回転角度を更新
-
-	auto pTransform = m_Transform[m_frameIndex]->GetPtr<Transform>(); // 現在の変換行列を取得
-	pTransform->World = DirectX::XMMatrixRotationY(m_RotateAngle); // ワールド行列を回転行列に設定
-#endif
-	auto ptr = m_CB[m_frameIndex].GetPtr<CbTonemap>();
-	ptr->Type = m_tonemapType;
-	ptr->ColorSpace = m_colorSpace;
-	ptr->BaseLuminance = m_BaseLuminance;
-	ptr->MaxLuminance = m_maxLuminance;
-
 	// コマンドリストの記録を開始
 	auto pCmd = m_commandList.Reset();
 
