@@ -10,7 +10,7 @@ struct VSOutput
 {
     float4 position : SV_POSITION;
     float2 TexCoord : TEXCOORD;
-    float4 WorldPos : WORLD_POS;
+    float3 WorldPos : WORLD_POS;
 #if 0
     float3x3 TangentBasis : TANGENT_BASIS;
 #else
@@ -40,7 +40,7 @@ VSOutput main(VSInput input)
     
     output.position = projPos;
     output.TexCoord = input.TexCoord;
-    output.WorldPos = worldPos;
+    output.WorldPos = worldPos.xyz;
     
     // Šî’êƒxƒNƒgƒ‹
     float3 N = normalize(mul((float3x3) World, input.Normal));

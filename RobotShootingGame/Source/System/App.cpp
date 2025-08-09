@@ -106,7 +106,7 @@ namespace {
 		return result;
 	}
 
-	DirectX::SimpleMath::Vector3 CalocLightColor(float time)
+	DirectX::SimpleMath::Vector3 CalcLightColor(float time)
 	{
 		auto c = fmodf(time, 3.0f);
 		auto result = DirectX::SimpleMath::Vector3(0.25f, 0.25f, 0.25f);
@@ -447,9 +447,12 @@ bool App::InitD3D()
 	if (!m_depthTarget.Init(
 		m_pDevice.Get(),			// デバイス
 		m_pPools[POOL_TYPE_DSV],	// 深度ステンシルビュー用のディスクリプタプール
+		nullptr,					// 深度ステンシルテクスチャ
 		m_unWidth,					// 幅
 		m_unHeight,					// 高さ
-		DXGI_FORMAT_D32_FLOAT))		// 深度ステンシルフォーマット
+		DXGI_FORMAT_D32_FLOAT,		// 深度ステンシルフォーマット
+		1.0f,						// 深度クリア値
+		0))							// ステンシルクリア値
 	{
 		MessageBox(nullptr, "深度ステンシルビューの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return false; // エラー終了
@@ -845,7 +848,7 @@ bool App::OnInit()
 	desc.Begin(8)
 		.SetCBV(ShaderStage::VS, 0, 0) // 頂点シェーダーで使用する定数バッファビュー
 		.SetCBV(ShaderStage::VS, 1, 1) // 頂点シェーダーで使用する定数バッファビュー
-		.SetCBV(ShaderStage::PS, 2, 2) // ピクセルシェーダーで使用する定数バッファビュー
+		.SetCBV(ShaderStage::PS, 2, 1) // ピクセルシェーダーで使用する定数バッファビュー
 		.SetCBV(ShaderStage::PS, 3, 2) // ピクセルシェーダーで使用する定数バッファビュー
 		.SetSRV(ShaderStage::PS, 4, 0) // ピクセルシェーダーで使用するシェーダーリソースビュー
 		.SetSRV(ShaderStage::PS, 5, 1) // ピクセルシェーダーで使用するシェーダーリソースビュー
@@ -898,7 +901,7 @@ bool App::OnInit()
 	// グラフィックスパイプラインステートを設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 	psoDesc.InputLayout = { elements , _countof(elements) }; // 入力レイアウト
-	psoDesc.pRootSignature = m_pRootSig.Get(); // ルートシグネチャ
+	psoDesc.pRootSignature = m_SceneRootSig.GetPtr(); // ルートシグネチャ
 	psoDesc.VS = { pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize() }; // 頂点シェーダー
 	psoDesc.PS = { pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize() }; // ピクセルシェーダー
 	psoDesc.RasterizerState = DirectX::CommonStates::CullNone; // ラスタライザーステート（カリングなし）
@@ -1036,7 +1039,7 @@ bool App::OnInit()
 	BasicVertex* basicVertexPtr = m_WallVB.Map<BasicVertex>(); // 壁用頂点バッファのポインタを取得
 	assert(basicVertexPtr); // ポインタがnullptrでないことを確認
 
-	basicVertexPtr[0].Position = { size, -size, 0.0f };
+	basicVertexPtr[0].Position = { -size, size, 0.0f };
 	basicVertexPtr[0].Normal = { 0.0f, 0.0f, 1.0f };
 	basicVertexPtr[0].TexCoord = { 0.0f, 1.0f };
 	basicVertexPtr[0].Tangent = { 1.0f, 0.0f, 0.0f };
@@ -1048,7 +1051,7 @@ bool App::OnInit()
 
 	basicVertexPtr[2].Position = { size, -size, 0.0f };
 	basicVertexPtr[2].Normal = { 0.0f, 0.0f, 1.0f };
-	basicVertexPtr[2].TexCoord = { 0.0f, 1.0f };
+	basicVertexPtr[2].TexCoord = { 1.0f, 0.0f };
 	basicVertexPtr[2].Tangent = { 1.0f, 0.0f, 0.0f };
 
 	basicVertexPtr[3].Position = { -size, size, 0.0f };
@@ -1079,32 +1082,7 @@ bool App::OnInit()
 			return false; // エラー終了
 		}
 	}
-#if 0
-	// ==============================
-	//	テクスチャロード
-	// ==============================
-	DirectX::ResourceUploadBatch batch(m_pDevice.Get()); // リソースアップロードバッチの生成
 
-	// バッチ開始
-	batch.Begin();
-
-	// テクスチャ初期化
-	if (!m_texture.Init(
-		m_pDevice.Get(),					// デバイス
-		m_pPools[POOL_TYPE_RES],			// リソース用のディスクリプタプール
-		L"Assets/hdr014.dds",				// テクスチャファイル名
-		false,								// sRGBカラー空間を使用しない
-		batch))								// リソースアップロードバッチ
-	{
-		MessageBox(nullptr, "テクスチャの初期化に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
-	}
-
-	// バッチ終了
-	auto future = batch.End(m_pQueue.Get()); // リソースアップロードバッチを終了
-
-	future.wait(); // 非同期処理の完了を待機
-#endif
 	// ==============================
 	//	変換行列用の定数バッファの生成
 	// ==============================
@@ -1155,6 +1133,9 @@ bool App::OnInit()
 		ptr->World = DirectX::XMMatrixIdentity(); // ワールド行列を単位行列に設定
 	}
 
+	// 開始時間を記録
+	m_startTime = std::chrono::system_clock::now(); // 高精度クロックで開始時間を記録
+
 	return true; // 正常終了
 }
 
@@ -1203,78 +1184,70 @@ void App::OnRender()
 	// コマンドリストの記録を開始
 	auto pCmd = m_commandList.Reset();
 
+	ID3D12DescriptorHeap* const pHeaps[] = { m_pPools[POOL_TYPE_RES]->GetHeap() }; // リソース用のディスクリプタヒープを取得
+	
+	pCmd->SetDescriptorHeaps(_countof(pHeaps), pHeaps); // ディスクリプタヒープを設定
+	
+	// ディスクリプタ取得
+	auto handleRTV = m_SceneColorTarget.GetHandleRTV(); // シーン用カラーターゲットのレンダーターゲットビューのハンドルを取得
+	auto handleDSV = m_SceneDepthTarget.GetHandleDSV(); // シーン用深度ステンシルビューのハンドルを取得
+
 	// 書き込み用リソースバリア設定
 	DirectX::TransitionResource(
 		pCmd,										// コマンドリスト
-		m_colorTarget[m_frameIndex].GetResource(),	// レンダーターゲットビュー
-		D3D12_RESOURCE_STATE_PRESENT,				// レンダーターゲット状態
+		m_SceneColorTarget.GetResource(),			// シーン用カラーターゲットのリソース
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,	// ピクセルシェーダーリソース状態
 		D3D12_RESOURCE_STATE_RENDER_TARGET);		// レンダーターゲット状態に変更
-
-	// ディスクリプタ取得
-	auto handleRTV = m_colorTarget[m_frameIndex].GetHandleRTV(); // レンダーターゲットビューのハンドルを取得
-	auto handleDSV = m_depthTarget.GetHandleDSV(); // 深度ステンシルビューのハンドルを取得
 
 	// レンダーターゲットを設定
 	pCmd->OMSetRenderTargets(1, &handleRTV->HandleCPU, FALSE, &handleDSV->HandleCPU); // レンダーターゲットと深度ステンシルビューを設定
 
-	// クリアカラー
-	float clearColor[4] = { 0.25f, 0.25f, 0.25f, 1.0f }; // クリアカラーを黒に設定
-
 	// レンダーターゲットをクリア
-	pCmd->ClearRenderTargetView(handleRTV->HandleCPU, clearColor, 0, nullptr); // レンダーターゲットビューをクリア
+	m_SceneColorTarget.ClearView(pCmd); // シーン用カラーターゲットをクリア
 
 	// 深度ステンシルビューをクリア
-	pCmd->ClearDepthStencilView(handleDSV->HandleCPU, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr); // 深度ステンシルビューをクリア
+	m_SceneDepthTarget.ClearView(pCmd); // シーン用深度ステンシルビューをクリア
 
-	// 描画処理
-	ID3D12DescriptorHeap* ppHeaps[] = { m_pPools[POOL_TYPE_RES]->GetHeap() }; // リソース用のディスクリプタヒープを取得
-#if 0
-	pCmd->SetGraphicsRootSignature(m_pRootSig.Get()); // ルートシグネチャを設定
-	pCmd->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps); // ディスクリプタヒープを設定
-	pCmd->SetGraphicsRootConstantBufferView(0, m_Transform[m_frameIndex]->GetAddress()); // 定数バッファビューを設定
-	pCmd->SetGraphicsRootConstantBufferView(1, m_pLight->GetAddress()); // マテリアル定数バッファビューを設定
-	pCmd->SetPipelineState(m_pPSO.Get()); // パイプラインステートを設定
-	pCmd->RSSetViewports(1, &m_Viewport); // ビューポートを設定
-	pCmd->RSSetScissorRects(1, &m_scissor); // シザー矩形を設定
+	// シーンの描画
+	DrawScene(pCmd); // シーンを描画
 
-	for (size_t i = 0; i < m_pMesh.size(); ++i)
-	{
-		// マテリアルIDを取得
-		auto id = m_pMesh[i]->GetMaterialId();
+	// 書き込み用リソースバリア設定
+	DirectX::TransitionResource(
+		pCmd,										// コマンドリスト
+		m_SceneColorTarget.GetResource(),			// シーン用カラーターゲットのリソース
+		D3D12_RESOURCE_STATE_RENDER_TARGET,			// レンダーターゲット状態
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE); // ピクセルシェーダーリソース状態に変更
 
-		// 定数バッファを設定
-		pCmd->SetGraphicsRootConstantBufferView(
-			2,									// ルートパラメーターのインデックス
-			m_material.GetBufferAddress(i));	// マテリアルの定数バッファのアドレスを設定
+	// ============================
+	//	フレームバッファに描画
+	// ============================
+	// 書き込み用リソースバリア設定
+	DirectX::TransitionResource(
+		pCmd,										// コマンドリスト
+		m_colorTarget[m_frameIndex].GetResource(),	// フレームバッファのレンダーターゲットのリソース
+		D3D12_RESOURCE_STATE_PRESENT,				// プレゼント状態
+		D3D12_RESOURCE_STATE_RENDER_TARGET);		// レンダーターゲット状態に変更
 
-		// テクスチャを設定
-		pCmd->SetGraphicsRootDescriptorTable(
-			3,												// ルートパラメーターのインデックス
-			m_material.GetTextureHandle(id, TU_DIFFUSE));	// テクスチャのハンドルを設定
+	// ディスクリプタ取得
+	handleRTV = m_colorTarget[m_frameIndex].GetHandleRTV(); // フレームバッファのレンダーターゲットビューのハンドルを取得
+	handleDSV = m_depthTarget.GetHandleDSV(); // 深度ステンシルビューのハンドルを取得
 
-		// メッシュを描画
-		m_pMesh[i]->Draw(pCmd);
-	}
-#endif
+	// レンダーターゲットを設定
+	pCmd->OMSetRenderTargets(1, &handleRTV->HandleCPU, FALSE, &handleDSV->HandleCPU); // フレームバッファのレンダーターゲットと深度ステンシルビューを設定
 
-	pCmd->SetGraphicsRootSignature(m_pRootSig.Get()); // ルートシグネチャを設定
-	pCmd->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps); // ディスクリプタヒープを設定
-	pCmd->SetGraphicsRootConstantBufferView(0, m_CB[m_frameIndex].GetAddress());	// トーンマッピング定数バッファを設定
-	pCmd->SetGraphicsRootDescriptorTable(1, m_texture.GetHandleGPU());	// テクスチャのハンドルを設定
+	// レンダーターゲットをクリア
+	m_colorTarget[m_frameIndex].ClearView(pCmd); // フレームバッファのレンダーターゲットをクリア
 
-	pCmd->SetPipelineState(m_pPSO.Get()); // パイプラインステートを設定
-	pCmd->RSSetViewports(1, &m_Viewport);	// ビューポートを設定
-	pCmd->RSSetScissorRects(1, &m_scissor); // シザー矩形を設定
+	// 深度ステンシルビューをクリア
+	m_depthTarget.ClearView(pCmd); // 深度ステンシルビューをクリア
 
-	pCmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジを設定
-	auto vbView = m_quadVB.GetView();	// 頂点バッファビューを取得
-	pCmd->IASetVertexBuffers(0, 1, &vbView);	// 頂点バッファを設定
-	pCmd->DrawInstanced(3, 1, 0, 0); // 四角形を描画
+	// トーンマップを適用
+	DrawTonemap(pCmd);
 
 	// 表示用リソースバリア設定
 	DirectX::TransitionResource(
 		pCmd,										// コマンドリスト
-		m_colorTarget[m_frameIndex].GetResource(),	// レンダーターゲットビュー
+		m_colorTarget[m_frameIndex].GetResource(),	// フレームバッファのレンダーターゲットのリソース
 		D3D12_RESOURCE_STATE_RENDER_TARGET,			// レンダーターゲット状態
 		D3D12_RESOURCE_STATE_PRESENT);				// プレゼント状態に変更
 
@@ -1381,12 +1354,99 @@ void App::ChangeDisplayMode(bool hdr)
 
 void App::DrawScene(ID3D12GraphicsCommandList* pCmdList)
 {
+	auto cameraPos = DirectX::SimpleMath::Vector3(-4.0f, 1.0f, 2.5f); // カメラ位置
+
+	auto currTime = std::chrono::system_clock::now(); // 現在の時間を取得
+	auto dt = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(currTime - m_startTime).count()) / 1000.0f; // 前回の時間との差を計算
+	auto lightColor = CalcLightColor(dt * 0.25f); // ライトの色を計算
+
+	// ============================
+	//	ライトバッファの更新
+	// ============================
+	auto matrix = DirectX::SimpleMath::Matrix::CreateRotationY(m_RotateAngle); // Y軸周りの回転行列を作成
+	auto pos = DirectX::SimpleMath::Vector3::Transform(DirectX::SimpleMath::Vector3(0.0f, 0.0f, 2.0f), matrix); // 回転行列を適用して位置を計算
+
+	auto lightPtr = m_LightCB[m_frameIndex].GetPtr<CbLight>(); // ライト定数バッファのポインタを取得
+	*lightPtr = ComputePointLight(pos, 2.0f, lightColor, 100.0f); // ポイントライトの計算を行い、定数バッファに設定
+
+	m_RotateAngle += 0.025f; // 回転角度を更新
+
+	// ============================
+	//	カメラバッファの更新
+	// ============================
+	auto cameraPtr = m_CameraCB[m_frameIndex].GetPtr<CbCamera>(); // カメラ定数バッファのポインタを取得
+	cameraPtr->CameraPosition = cameraPos; // カメラ位置を設定
+
+	// ============================
+	//	メッシュのワールド行列の更新
+	// ============================
+	auto meshPtr = m_MeshCB[m_frameIndex].GetPtr<CbMesh>(); // メッシュ定数バッファのポインタを取得
+	meshPtr->World = DirectX::SimpleMath::Matrix::Identity; // メッシュのワールド行列を単位行列に設定
+
+	// ============================
+	//	変換パラメーターの更新
+	// ============================
+	auto fovY = DirectX::XMConvertToRadians(37.5f); // 垂直画角を設定
+	auto aspect = static_cast<float>(m_unWidth) / static_cast<float>(m_unHeight); // アスペクト比を計算
+
+	auto transformPtr = m_TransformCB[m_frameIndex].GetPtr<CbTransform>(); // 変換行列定数バッファのポインタを取得
+	transformPtr->View = DirectX::SimpleMath::Matrix::CreateLookAt(cameraPos, DirectX::SimpleMath::Vector3::Zero, DirectX::SimpleMath::Vector3::UnitY); // ビュー行列を設定
+	transformPtr->Proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(fovY, aspect, 1.0f, 1000.0f); // プロジェクション行列を設定
+
+	pCmdList->SetGraphicsRootSignature(m_SceneRootSig.GetPtr()); // シーン用ルートシグネチャを設定
+	pCmdList->SetGraphicsRootDescriptorTable(0, m_TransformCB[m_frameIndex].GetHandleGPU()); // 変換行列定数バッファを設定
+	pCmdList->SetGraphicsRootDescriptorTable(2, m_LightCB[m_frameIndex].GetHandleGPU()); // ライト定数バッファを設定
+	pCmdList->SetGraphicsRootDescriptorTable(3, m_CameraCB[m_frameIndex].GetHandleGPU()); // カメラ定数バッファを設定
+	pCmdList->SetPipelineState(m_pScenePSO.Get()); // シーン用パイプラインステートを設定
+	pCmdList->RSSetViewports(1, &m_Viewport); // ビューポートを設定
+	pCmdList->RSSetScissorRects(1, &m_scissor); // シザー矩形を設定
+
+	// ============================
+	//	オブジェクトを描画
+	// ============================
+	pCmdList->SetGraphicsRootDescriptorTable(1, m_MeshCB[m_frameIndex].GetHandleGPU());
+	DrawMesh(pCmdList); // メッシュを描画
 }
 
 void App::DrawTonemap(ID3D12GraphicsCommandList* pCmdList)
 {
+	// ============================
+	//	定数バッファ更新
+	// ============================
+	auto ptr = m_TonemapCB[m_frameIndex].GetPtr<CbTonemap>(); // トーンマップ定数バッファのポインタを取得
+	ptr->Type = m_tonemapType; // トーンマップのタイプを設定
+	ptr->ColorSpace = m_colorSpace; // カラー空間を設定
+	ptr->BaseLuminance = m_BaseLuminance; // 基本輝度を設定
+	ptr->MaxLuminance = m_MaxLuminance; // 最大輝度を設定
+
+	pCmdList->SetGraphicsRootSignature(m_TonemapRootSig.GetPtr()); // トーンマップ用ルートシグネチャを設定
+	pCmdList->SetGraphicsRootDescriptorTable(0, m_TonemapCB[m_frameIndex].GetHandleGPU()); // トーンマップ定数バッファを設定
+	pCmdList->SetGraphicsRootDescriptorTable(1, m_SceneColorTarget.GetHandleSRV()->HandleGPU); // シーン用カラーターゲットのシェーダーリソースビューを設定
+
+	pCmdList->SetPipelineState(m_pTonemapPSO.Get()); // トーンマップ用パイプラインステートを設定
+	pCmdList->RSSetViewports(1, &m_Viewport); // ビューポートを設定
+	pCmdList->RSSetScissorRects(1, &m_scissor); // シザー矩形を設定
+
+	pCmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // プリミティブトポロジを三角形リストに設定
+	auto view = m_QuadVB.GetView(); // 四角形の頂点バッファビューを取得
+	pCmdList->IASetVertexBuffers(0, 1, &view); // 四角形の頂点バッファを設定
+	pCmdList->DrawInstanced(3, 1, 0, 0); // 四角形を描画
 }
 
 void App::DrawMesh(ID3D12GraphicsCommandList* pCmdList)
 {
+	for (size_t i = 0; i < m_pMesh.size(); ++i)
+	{
+		// マテリアルIDを取得
+		auto id = m_pMesh[i]->GetMaterialId(); // メッシュのマテリアルIDを取得
+
+		// テクスチャを設定
+		pCmdList->SetGraphicsRootDescriptorTable(4, m_material.GetTextureHandle(id, TU_BASE_COLOR)); // ベースカラーのテクスチャを設定
+		pCmdList->SetGraphicsRootDescriptorTable(5, m_material.GetTextureHandle(id, TU_METALLIC)); // メタリックのテクスチャを設定
+		pCmdList->SetGraphicsRootDescriptorTable(6, m_material.GetTextureHandle(id, TU_ROUGHNESS)); // ラフネスのテクスチャを設定
+		pCmdList->SetGraphicsRootDescriptorTable(7, m_material.GetTextureHandle(id, TU_NORMAL)); // 法線のテクスチャを設定
+
+		// メッシュを描画
+		m_pMesh[i]->Draw(pCmdList);
+	}
 }

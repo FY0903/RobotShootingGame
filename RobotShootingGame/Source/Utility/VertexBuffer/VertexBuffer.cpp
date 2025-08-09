@@ -70,7 +70,7 @@ bool VertexBuffer::Init(ID3D12Device* pDevice, size_t size, size_t stride, const
 	
 		memcpy(ptr, pInitData, size); // 初期化データをコピー
 		
-		Unmap(); // アンマップ
+		m_pVB->Unmap(0, nullptr); // マッピングを解除
 	}
 
 	return true; // 成功

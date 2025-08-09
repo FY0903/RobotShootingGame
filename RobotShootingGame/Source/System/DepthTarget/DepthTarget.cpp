@@ -156,7 +156,7 @@ D3D12_RESOURCE_DESC DepthTarget::GetDesc() const
 	return D3D12_RESOURCE_DESC(); // リソースがない場合は空の説明を返す
 }
 
-void DepthTarget::ClearViews(ID3D12GraphicsCommandList* pCmdList) const
+void DepthTarget::ClearView(ID3D12GraphicsCommandList* pCmdList) const
 {
 	// 深度ステンシルビューをクリア
 	pCmdList->ClearDepthStencilView(

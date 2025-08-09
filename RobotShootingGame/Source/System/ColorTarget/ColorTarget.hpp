@@ -100,7 +100,7 @@ public:
 	 * @brief シェーダーリソースビューの記述情報を取得します。
 	 * @return m_SRVDesc メンバーに格納されている D3D12_SHADER_RESOURCE_VIEW_DESC オブジェクトを返します。
 	 */
-	inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSRVDesc() const { return m_DSVDesc; }
+	inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSRVDesc() const { return m_SRVDesc; }
 
 	/**
 	 * @brief レンダーターゲットをクリアします。
@@ -118,6 +118,6 @@ private:
 	DescriptorPool* m_pPoolRTV{};	// ディスクリプタプールへのポインタ
 	DescriptorPool* m_pPoolSRV{}; // ディスクリプタプールへのポインタ
 	D3D12_RENDER_TARGET_VIEW_DESC m_RTVDesc{};	// レンダーターゲットビューの説明
-	D3D12_SHADER_RESOURCE_VIEW_DESC m_DSVDesc{}; // シェーダーリソースビューの説明
+	D3D12_SHADER_RESOURCE_VIEW_DESC m_SRVDesc{}; // シェーダーリソースビューの説明
 	float m_clearColor[4]{ 0.0f, 0.0f, 0.0f, 1.0f };	// クリアカラー（RGBA）
 };

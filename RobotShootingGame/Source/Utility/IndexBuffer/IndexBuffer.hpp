@@ -33,11 +33,11 @@ public:
 	/**
 	 * @brief ID3D12Device を使用して初期化を行います。
 	 * @param [pDevice] 初期化に使用する ID3D12Device へのポインタ。
-	 * @param [size] 初期化するデータのサイズ（バイト単位）。
+	 * @param [count] 初期化する要素数。
 	 * @param [pInitData] 初期データへのポインタ。nullptr の場合はデータなしで初期化されます。
 	 * @return 初期化に成功した場合は true、失敗した場合は false を返します。
 	 */
-	bool Init(ID3D12Device* pDevice, size_t size, const uint32_t* pInitData = nullptr);
+	bool Init(ID3D12Device* pDevice, size_t count, const uint32_t* pInitData = nullptr);
 
 	/**
 	 * @brief 終了処理を実行します。

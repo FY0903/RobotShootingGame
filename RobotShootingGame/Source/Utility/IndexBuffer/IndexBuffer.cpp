@@ -16,7 +16,7 @@ IndexBuffer::~IndexBuffer()
 	Term();	// リソースの解放
 }
 
-bool IndexBuffer::Init(ID3D12Device* pDevice, size_t size, const uint32_t* pInitData)
+bool IndexBuffer::Init(ID3D12Device* pDevice, size_t count, const uint32_t* pInitData)
 {
 	// ヒーププロパティ
 	D3D12_HEAP_PROPERTIES prop{};
@@ -30,7 +30,7 @@ bool IndexBuffer::Init(ID3D12Device* pDevice, size_t size, const uint32_t* pInit
 	D3D12_RESOURCE_DESC desc{};
 	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; // バッファリソース
 	desc.Alignment = 0; // アライメントは0
-	desc.Width = static_cast<UINT64>(size);// バッファの幅（サイズ）
+	desc.Width = static_cast<UINT64>(count * sizeof(uint32_t));// バッファの幅（サイズ）
 	desc.Height = 1; // 高さは1（バッファなので）
 	desc.DepthOrArraySize = 1; // 深さまたは配列サイズは1
 	desc.MipLevels = 1; // ミップレベルは1
@@ -58,7 +58,7 @@ bool IndexBuffer::Init(ID3D12Device* pDevice, size_t size, const uint32_t* pInit
 	// インデックスバッファービューの設定
 	m_view.BufferLocation = m_pIB->GetGPUVirtualAddress();	// GPU仮想アドレスを取得
 	m_view.Format = DXGI_FORMAT_R32_UINT;	// インデックスフォーマットは32ビット整数
-	m_view.SizeInBytes = static_cast<UINT>(size);	// サイズを設定
+	m_view.SizeInBytes = static_cast<UINT>(desc.Width);	// サイズを設定
 
 	// 初期化データがあるなら書き込む
 	if (pInitData)
@@ -66,7 +66,7 @@ bool IndexBuffer::Init(ID3D12Device* pDevice, size_t size, const uint32_t* pInit
 		void* ptr = Map();
 		if (!ptr) return false; // マッピングに失敗したら終了
 
-		memcpy(ptr, pInitData, size); // 初期化データをコピー
+		memcpy(ptr, pInitData, count); // 初期化データをコピー
 
 		m_pIB->Unmap(0, nullptr); // アンマップ
 

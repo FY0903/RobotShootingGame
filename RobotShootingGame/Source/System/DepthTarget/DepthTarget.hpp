@@ -52,7 +52,7 @@ public:
 
 	inline D3D12_SHADER_RESOURCE_VIEW_DESC GetSRVDesc() const { return m_SRVDesc; }
 
-	void ClearViews(ID3D12GraphicsCommandList* pCmdList) const;
+	void ClearView(ID3D12GraphicsCommandList* pCmdList) const;
 
 private:
 	DepthTarget(const DepthTarget&) = delete; // コピーコンストラクタを削除
