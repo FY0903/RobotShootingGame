@@ -45,10 +45,11 @@ public:
 	 * @param [width] レンダリングターゲットの幅（ピクセル単位）。
 	 * @param [height] レンダリングターゲットの高さ（ピクセル単位）。
 	 * @param [format] レンダリングターゲットの DXGI フォーマット。
+	 * @param [state] レンダリングターゲットの初期状態（D3D12_RESOURCE_STATES）。
 	 * @param [clearColor] クリア値（RGBA）を格納する配列へのポインタ。
 	 * @return 初期化が成功した場合は true、失敗した場合は false を返します。
 	 */
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, DescriptorPool* pPoolSRV, uint32_t width, uint32_t height, DXGI_FORMAT format, float clearColor[4]);
+	bool Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, DescriptorPool* pPoolSRV, uint32_t width, uint32_t height, DXGI_FORMAT format, D3D12_RESOURCE_STATES state ,float clearColor[4]);
 
 	/**
 	 * @brief バックバッファから初期化を行います。

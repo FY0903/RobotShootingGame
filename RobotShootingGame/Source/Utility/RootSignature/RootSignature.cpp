@@ -196,14 +196,14 @@ RootSignature::~RootSignature()
 	Term(); // ルートシグネチャの終了処理
 }
 
-bool RootSignature::Init(ID3D12Device* pDevice, const D3D12_ROOT_SIGNATURE_DESC& desc)
+bool RootSignature::Init(ID3D12Device* pDevice, const D3D12_ROOT_SIGNATURE_DESC* pDesc)
 {
 	ComPtr<ID3DBlob> pBlob; // ルートシグネチャのバイナリデータを格納するポインタ
 	ComPtr<ID3DBlob> pErrorBlob; // エラーメッセージを格納するポインタ
 
 	// シリアライズ
 	HRESULT hr = D3D12SerializeRootSignature(
-		&desc, 
+		pDesc, 
 		D3D_ROOT_SIGNATURE_VERSION_1, 
 		pBlob.GetAddressOf(), 
 		pErrorBlob.GetAddressOf()

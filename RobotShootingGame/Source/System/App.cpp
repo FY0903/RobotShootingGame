@@ -817,6 +817,7 @@ bool App::OnInit()
 		m_unWidth,						// 幅
 		m_unHeight,						// 高さ
 		DXGI_FORMAT_R10G10B10A2_UNORM,	// フォーマット
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,	// 初期リソース状態
 		clearColor						// クリアカラー
 	))
 	{
@@ -1364,7 +1365,7 @@ void App::DrawScene(ID3D12GraphicsCommandList* pCmdList)
 	//	ライトバッファの更新
 	// ============================
 	auto matrix = DirectX::SimpleMath::Matrix::CreateRotationY(m_RotateAngle); // Y軸周りの回転行列を作成
-	auto pos = DirectX::SimpleMath::Vector3::Transform(DirectX::SimpleMath::Vector3(0.0f, 0.0f, 2.0f), matrix); // 回転行列を適用して位置を計算
+	auto pos = DirectX::SimpleMath::Vector3::Transform(DirectX::SimpleMath::Vector3(0.0f, 0.25f, 0.75f), matrix); // 回転行列を適用して位置を計算
 
 	auto lightPtr = m_LightCB[m_frameIndex].GetPtr<CbLight>(); // ライト定数バッファのポインタを取得
 	*lightPtr = ComputePointLight(pos, 2.0f, lightColor, 100.0f); // ポイントライトの計算を行い、定数バッファに設定
@@ -1390,7 +1391,7 @@ void App::DrawScene(ID3D12GraphicsCommandList* pCmdList)
 	auto aspect = static_cast<float>(m_unWidth) / static_cast<float>(m_unHeight); // アスペクト比を計算
 
 	auto transformPtr = m_TransformCB[m_frameIndex].GetPtr<CbTransform>(); // 変換行列定数バッファのポインタを取得
-	transformPtr->View = DirectX::SimpleMath::Matrix::CreateLookAt(cameraPos, DirectX::SimpleMath::Vector3::Zero, DirectX::SimpleMath::Vector3::UnitY); // ビュー行列を設定
+	transformPtr->View = DirectX::SimpleMath::Matrix::CreateLookAt(cameraPos, DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f), DirectX::SimpleMath::Vector3(0.0f, 1.0f, 0.0f)); // ビュー行列を設定
 	transformPtr->Proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(fovY, aspect, 1.0f, 1000.0f); // プロジェクション行列を設定
 
 	pCmdList->SetGraphicsRootSignature(m_SceneRootSig.GetPtr()); // シーン用ルートシグネチャを設定

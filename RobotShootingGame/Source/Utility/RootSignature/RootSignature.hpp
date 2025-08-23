@@ -138,9 +138,9 @@ public:
 
 		/**
 		 * @brief ルートシグネチャの記述子を取得します。
-		 * @return ルートシグネチャの記述子（D3D12_ROOT_SIGNATURE_DESC 型）への定数参照。
+		 * @return ルートシグネチャの記述子（D3D12_ROOT_SIGNATURE_DESC 型）へのポインタ。
 		 */
-		inline const D3D12_ROOT_SIGNATURE_DESC& GetDesc() const { return m_desc; }
+		inline const D3D12_ROOT_SIGNATURE_DESC* GetDesc() const { return &m_desc; }
 
 	private:
 		std::vector<D3D12_DESCRIPTOR_RANGE> m_ranges{};			// ディスクリプタレンジの配列
@@ -179,10 +179,10 @@ public:
 	/**
 	 * @brief ID3D12Device オブジェクトとルートシグネチャ記述子を使用して初期化を行います。
 	 * @param [pDevice] 初期化に使用する ID3D12Device へのポインタ。
-	 * @param [desc] ルートシグネチャの設定を指定する D3D12_ROOT_SIGNATURE_DESC 構造体への参照。
+	 * @param [pDesc] ルートシグネチャの設定を含む D3D12_ROOT_SIGNATURE_DESC へのポインタ。
 	 * @return 初期化に成功した場合は true、失敗した場合は false を返します。
 	 */
-	bool Init(ID3D12Device* pDevice, const D3D12_ROOT_SIGNATURE_DESC& desc);
+	bool Init(ID3D12Device* pDevice, const D3D12_ROOT_SIGNATURE_DESC* pDesc);
 
 	/**
 	 * @brief 終了処理を実行します。

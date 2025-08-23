@@ -35,6 +35,7 @@
 #include "../Utility/ConstantBuffer/ConstantBuffer.hpp"
 #include "../Utility/Material/Material.hpp"
 #include "../Utility/RootSignature/RootSignature.hpp"
+#include <chrono>
 
 // ==============================
 //	Linker

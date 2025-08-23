@@ -44,7 +44,7 @@ ColorTarget::~ColorTarget()
 	Term();
 }
 
-bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, DescriptorPool* pPoolSRV, uint32_t width, uint32_t height, DXGI_FORMAT format, float clearColor[4])
+bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, DescriptorPool* pPoolSRV, uint32_t width, uint32_t height, DXGI_FORMAT format, D3D12_RESOURCE_STATES state ,float clearColor[4])
 {
 	if (!pDevice || !pPoolRTV || !width || !height) return false;	// 無効な引数チェック
 	
@@ -112,7 +112,7 @@ bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, Descript
 		&prop,	// ヒーププロパティ
 		D3D12_HEAP_FLAG_NONE,	// ヒープフラグ
 		&desc,	// リソースの説明
-		D3D12_RESOURCE_STATE_RENDER_TARGET,	// 初期状態をレンダーターゲットに設定
+		state,	// 初期状態
 		&clearValue,	// クリア値
 		IID_PPV_ARGS(m_pTarget.GetAddressOf())	// リソースのインターフェースを取得
 	);
