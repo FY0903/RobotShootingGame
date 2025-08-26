@@ -29,8 +29,16 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\System\DepthTarget\DepthTarget.cpp" />
+    <ClCompile Include="Source\System\DirectX\DirectX.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\System\Fence\Fence.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
+    <ClCompile Include="Source\System\Window\Window.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\ConstantBuffer\ConstantBuffer.cpp">
       <SubType>
       </SubType>
@@ -72,7 +80,15 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\System\DepthTarget\DepthTarget.hpp" />
+    <ClInclude Include="Source\System\DirectX\DirectX.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\System\Fence\Fence.hpp" />
+    <ClInclude Include="Source\System\Window\Window.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\ComPtr.h" />
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
       <SubType>
