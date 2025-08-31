@@ -31,6 +31,8 @@ public:
 
 	HRESULT Init(uint32_t width, uint32_t height);
 
+	HWND GetHandle() const { return m_hWnd; }
+
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 

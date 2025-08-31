@@ -36,7 +36,14 @@
 
 HRESULT DirectX::Init(uint32_t width, uint32_t height, HWND wnd)
 {
-		// ==============================
+	// ==============================
+	//	変数初期化
+	// ==============================
+	m_hWnd = wnd;
+	m_unWidth = width;
+	m_unHeight = height;
+
+	// ==============================
 	//	デバックレイヤーの有効化
 	// ==============================
 #if defined(_DEBUG) || defined(DEBUG)
@@ -54,12 +61,7 @@ HRESULT DirectX::Init(uint32_t width, uint32_t height, HWND wnd)
 	// ==============================
 	//	デバイスの生成
 	// ==============================
-	HRESULT hr = D3D12CreateDevice(
-		nullptr,
-		D3D_FEATURE_LEVEL_11_0,						// 使用する機能レベル
-		IID_PPV_ARGS(m_pDevice.GetAddressOf()));	// デバイスのポインタ
-	
-	if (FAILED(hr))
+	if (FAILED(CreateDevice()))
 	{
 		MessageBox(nullptr, "Direct3D 12デバイスの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
@@ -68,14 +70,7 @@ HRESULT DirectX::Init(uint32_t width, uint32_t height, HWND wnd)
 	// ==============================
 	//	コマンドキューの生成
 	// ==============================
-	D3D12_COMMAND_QUEUE_DESC queueDesc{};
-	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT; // コマンドリストのタイプ
-	queueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL; // 優先度
-	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE; // フラグ（なし）
-	queueDesc.NodeMask = 0; // ノードマスク（単一ノード）
-
-	hr = m_pDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(m_pQueue.GetAddressOf()));
-	if (FAILED(hr))
+	if (FAILED(CreateCommandQueue()))
 	{
 		MessageBox(nullptr, "コマンドキューの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
@@ -84,58 +79,11 @@ HRESULT DirectX::Init(uint32_t width, uint32_t height, HWND wnd)
 	// ==============================
 	//	スワップチェーンの生成
 	// ==============================
-	// DXGIファクトリーの生成
-	ComPtr<IDXGIFactory4> pFactory = nullptr;
-	hr = CreateDXGIFactory1(IID_PPV_ARGS(pFactory.GetAddressOf()));
-	if (FAILED(hr))
+	if (FAILED(CreateSwapChain()))
 	{
 		MessageBox(nullptr, "DXGIファクトリーの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
 	}
-
-	// スワップチェーンの設定
-	DXGI_SWAP_CHAIN_DESC swapDesc{};
-	swapDesc.BufferDesc.Width = width;		// スワップチェーンの幅
-	swapDesc.BufferDesc.Height = height;	// スワップチェーンの高さ
-	swapDesc.BufferDesc.RefreshRate.Numerator = 60;	// リフレッシュレートの分子（60Hz）
-	swapDesc.BufferDesc.RefreshRate.Denominator = 1;	// リフレッシュレートの分母
-	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED; // スキャンラインの順序
-	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED; // スケーリングの指定
-	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // バッファのフォーマット
-	swapDesc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
-	swapDesc.SampleDesc.Quality = 0; // マルチサンプリングの品質
-	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // バッファの使用法
-	swapDesc.BufferCount = m_unFrameCount; // バッファの数
-	swapDesc.OutputWindow = wnd; // 出力ウィンドウ
-	swapDesc.Windowed = TRUE; // ウィンドウモード
-	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // スワップ効果
-	swapDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // モードスイッチを許可
-
-	// スワップチェーンの生成
-	ComPtr<IDXGISwapChain> pSwapChain = nullptr;
-	hr = pFactory->CreateSwapChain(
-		m_pQueue.Get(),				// コマンドキュー
-		&swapDesc,					// スワップチェーンの設定
-		pSwapChain.GetAddressOf());				// スワップチェーンのポインタ
-	if (FAILED(hr))
-	{
-		return E_FAIL; // エラー終了
-	}
-
-	// IDXGISwapChain3を取得
-	hr = pSwapChain.As(&m_pSwapChain); // IDXGISwapChain3のスマートポインタにキャスト
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, "IDXGISwapChain3の取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return E_FAIL; // エラー終了
-	}
-
-	// バックバッファ番号を取得
-	m_frameIndex = m_pSwapChain->GetCurrentBackBufferIndex();
-
-	// 不要になったので解放
-	pFactory.Reset(); // DXGIファクトリーのスマートポインタをリセット
-	pSwapChain.Reset(); // IDXGISwapChainのスマートポインタをリセット
 
 	// ==============================
 	//	ディスクリプタプールの生成
@@ -223,4 +171,99 @@ void DirectX::Draw()
 
 void DirectX::UnInit()
 {
+}
+
+HRESULT DirectX::CreateDevice()
+{
+	HRESULT hr = D3D12CreateDevice(
+		nullptr,
+		D3D_FEATURE_LEVEL_11_0,						// 使用する機能レベル
+		IID_PPV_ARGS(m_pDevice.GetAddressOf()));	// デバイスのポインタ
+
+	return hr;
+}
+
+HRESULT DirectX::CreateCommandQueue()
+{
+	D3D12_COMMAND_QUEUE_DESC desc{};
+	desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT; // コマンドリストのタイプ
+	desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL; // 優先度
+	desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE; // フラグ（なし）
+	desc.NodeMask = 0; // ノードマスク（単一ノード）
+
+	HRESULT hr = m_pDevice->CreateCommandQueue(
+		&desc,								// コマンドキューの設定
+		IID_PPV_ARGS(m_pQueue.GetAddressOf())); // コマンドキューのポインタ
+
+	return hr;
+}
+
+HRESULT DirectX::CreateSwapChain()
+{
+	// DXGIファクトリーの生成
+	ComPtr<IDXGIFactory4> pFactory = nullptr;
+	HRESULT hr = CreateDXGIFactory1(IID_PPV_ARGS(pFactory.GetAddressOf()));
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "DXGIファクトリーの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return E_FAIL; // エラー終了
+	}
+
+	// スワップチェーンの設定
+	DXGI_SWAP_CHAIN_DESC desc{};
+	desc.BufferDesc.Width = m_unWidth;		// スワップチェーンの幅
+	desc.BufferDesc.Height = m_unHeight;	// スワップチェーンの高さ
+	desc.BufferDesc.RefreshRate.Numerator = 60;	// リフレッシュレートの分子（60Hz）
+	desc.BufferDesc.RefreshRate.Denominator = 1;	// リフレッシュレートの分母
+	desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED; // スキャンラインの順序
+	desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED; // スケーリングの指定
+	desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // バッファのフォーマット
+	desc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
+	desc.SampleDesc.Quality = 0; // マルチサンプリングの品質
+	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // バッファの使用法
+	desc.BufferCount = m_unFrameCount; // バッファの数
+	desc.OutputWindow = m_hWnd; // 出力ウィンドウ
+	desc.Windowed = TRUE; // ウィンドウモード
+	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // スワップ効果
+	desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // モードスイッチを許可
+
+	// スワップチェーンの生成
+	ComPtr<IDXGISwapChain> pSwapChain = nullptr;
+	hr = pFactory->CreateSwapChain(
+		m_pQueue.Get(),				// コマンドキュー
+		&desc,					// スワップチェーンの設定
+		pSwapChain.GetAddressOf());				// スワップチェーンのポインタ
+	if (FAILED(hr))
+	{
+		pFactory->Release();
+		return E_FAIL; // エラー終了
+	}
+
+	// IDXGISwapChain3を取得
+	hr = pSwapChain.As(&m_pSwapChain); // IDXGISwapChain3のスマートポインタにキャスト
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "IDXGISwapChain3の取得に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return E_FAIL; // エラー終了
+	}
+}
+
+HRESULT DirectX::CreateCommandList()
+{
+	return E_NOTIMPL;
+}
+
+HRESULT DirectX::CreateFence()
+{
+	return E_NOTIMPL;
+}
+
+HRESULT DirectX::CreateViewPort()
+{
+	return E_NOTIMPL;
+}
+
+HRESULT DirectX::CreateScissorRect()
+{
+	return E_NOTIMPL;
 }

@@ -32,7 +32,7 @@ App::App(uint32_t width, uint32_t height)
 	}
 
 	// DirectX‚Ì‰Šú‰»
-	m_DirectX.Init();
+	m_DirectX.Init(width, height, m_Window.GetHandle());
 }
 
 App::~App()
