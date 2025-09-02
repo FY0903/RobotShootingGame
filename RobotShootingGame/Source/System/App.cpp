@@ -31,8 +31,8 @@ App::App(uint32_t width, uint32_t height)
 		exit(-1);
 	}
 
-	// DirectXの初期化
-	m_DirectX.Init(width, height, m_Window.GetHandle());
+	// Engineの初期化
+	m_Engine.Init(width, height, m_Window.GetHandle());
 }
 
 App::~App()
@@ -55,10 +55,10 @@ void App::Run()
 		}
 		else
 		{	
-			// メッセージがなければ更新処理
-			m_DirectX.Update();
-			// メッセージがなければ描画処理
-			m_DirectX.Draw();
+			m_Engine.Update();
+			m_Engine.BeginDraw();
+			m_Engine.Draw();
+			m_Engine.EndDraw();
 		}
 	}
 }

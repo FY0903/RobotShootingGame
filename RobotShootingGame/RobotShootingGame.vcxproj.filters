@@ -58,11 +58,11 @@
     <Filter Include="Source\Utility\ComPtr">
       <UniqueIdentifier>{2fd880d2-b39b-40e8-8aa5-001dcdc46649}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\System\DirectX">
-      <UniqueIdentifier>{bdb91b84-f06f-4d7a-afbc-b84e627fc6ae}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\System\Window">
       <UniqueIdentifier>{af02293c-3b9c-4c5f-a102-da3d471797aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\System\Engine">
+      <UniqueIdentifier>{bdb91b84-f06f-4d7a-afbc-b84e627fc6ae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -105,14 +105,14 @@
     <ClCompile Include="Source\System\ColorTarget\ColorTarget.cpp">
       <Filter>Source\System\ColorTarget</Filter>
     </ClCompile>
-    <ClCompile Include="Source\System\DirectX\DirectX.cpp">
-      <Filter>Source\System\DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="Source\System\Window\Window.cpp">
       <Filter>Source\System\Window</Filter>
     </ClCompile>
     <ClCompile Include="Source\System\App.cpp">
       <Filter>Source\System\App</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\Engine\Engine.cpp">
+      <Filter>Source\System\Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -158,14 +158,14 @@
     <ClInclude Include="Source\Utility\ComPtr.h">
       <Filter>Source\Utility\ComPtr</Filter>
     </ClInclude>
-    <ClInclude Include="Source\System\DirectX\DirectX.hpp">
-      <Filter>Source\System\DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="Source\System\Window\Window.hpp">
       <Filter>Source\System\Window</Filter>
     </ClInclude>
     <ClInclude Include="Source\System\App.hpp">
       <Filter>Source\System\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Engine\Engine.hpp">
+      <Filter>Source\System\Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

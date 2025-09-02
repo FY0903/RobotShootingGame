@@ -17,7 +17,7 @@
 //	include
 // ==============================
 #include "Window/Window.hpp"
-#include "DirectX/DirectX.hpp"
+#include "Engine/Engine.hpp"
 
 class App
 {
@@ -41,5 +41,5 @@ public:
 
 private:
 	Window m_Window{};		// ウィンドウ
-	DirectX m_DirectX{};	// DirectX
+	Engine m_Engine{};	// Engine
 };
