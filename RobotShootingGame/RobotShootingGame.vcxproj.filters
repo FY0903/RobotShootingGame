@@ -64,6 +64,12 @@
     <Filter Include="Source\System\Engine">
       <UniqueIdentifier>{bdb91b84-f06f-4d7a-afbc-b84e627fc6ae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game">
+      <UniqueIdentifier>{d0d192ac-5452-458b-8600-f95a614d0da9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Scene">
+      <UniqueIdentifier>{3f65a216-a47a-4219-8332-805ba9281960}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -113,6 +119,9 @@
     </ClCompile>
     <ClCompile Include="Source\System\Engine\Engine.cpp">
       <Filter>Source\System\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Scene\Scene.cpp">
+      <Filter>Source\Game\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +175,9 @@
     </ClInclude>
     <ClInclude Include="Source\System\Engine\Engine.hpp">
       <Filter>Source\System\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Scene\Scene.hpp">
+      <Filter>Source\Game\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

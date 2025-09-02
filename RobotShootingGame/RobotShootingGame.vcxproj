@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Game\Scene\Scene.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\System\App.cpp" />
     <ClCompile Include="Source\System\ColorTarget\ColorTarget.cpp">
       <SubType>
@@ -67,6 +71,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Game\Scene\Scene.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\System\App.hpp" />
     <ClInclude Include="Source\System\ColorTarget\ColorTarget.hpp">
       <SubType>
