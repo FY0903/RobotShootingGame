@@ -17,6 +17,9 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 
+#include "../../Utility/ComPtr.h"
+#include "../../Utility/Singleton/Singleton.hpp"
+
 // ==============================
 //	Linker
 // ==============================
@@ -25,31 +28,25 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
-using namespace Microsoft::WRL;
+// ==============================
+//	constexpr
+// ==============================
+constexpr size_t FRAME_BUFFER_COUNT = 2; // フレームバッファの数
 
 /**
  * @brief Engineクラス
  */
-class Engine
+class Engine : public Singleton<Engine>
 {
 public:
-	/**
-	 * コンストラクタ
-	 */
-	Engine() = default;
-
-	/**
-	 * デストラクタ
-	 */
-	~Engine() = default;
-
-	HRESULT Init(uint32_t width, uint32_t height, HWND wnd);
-	void Update();
-	void Draw();
-	void UnInit();
+	HRESULT Init(HWND wnd);
 
 	void BeginDraw();
 	void EndDraw();
+
+	ID3D12Device* GetDevice() const { return m_pDevice.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList() const { return m_pCommandList.Get(); }
+	UINT GetCurrentBackBufferIndex() const { return m_CurrentBackBufferIndex; }
 
 private:
 	HRESULT CreateDevice();							
@@ -65,7 +62,7 @@ private:
 
 	void WaitRender();
 
-	uint32_t m_unFrameCount = 2;
+	uint32_t m_unFrameCount = FRAME_BUFFER_COUNT;
 	UINT m_CurrentBackBufferIndex{};
 
 	ComPtr<ID3D12Device> m_pDevice{};					// Direct3D 12デバイス
@@ -90,6 +87,4 @@ private:
 	ID3D12Resource* m_pCurrentRenderTarget{}; // 現在のレンダーターゲット
 
 	HWND m_hWnd{};			// ウィンドウハンドル
-	uint32_t m_unWidth{};	// ウィンドウの幅
-	uint32_t m_unHeight{};	// ウィンドウの高さ
 };

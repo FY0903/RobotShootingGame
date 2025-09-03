@@ -17,7 +17,7 @@ DepthTarget::~DepthTarget()
 	Term();
 }
 
-bool DepthTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolDSV, uint32_t width, uint32_t height, DXGI_FORMAT format)
+bool DepthTarget::Init(ID3D12Device* pDevice, DescriptorHeap* pPoolDSV, uint32_t width, uint32_t height, DXGI_FORMAT format)
 {
 	if (!pDevice || !pPoolDSV || width == 0 || height == 0) return false;
 

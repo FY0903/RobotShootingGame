@@ -11,260 +11,155 @@
 //	include
 // ==============================
 #include "ModelLoader.hpp"
+#include "../SharedStruct/SharedStruct.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <codecvt>
-#include <cassert>
+#include "../../../DirectXTex/d3dx12.h"
 #include <filesystem>
+#include <cassert>
 
 namespace fs = std::filesystem;
 
-// ==============================
-//	defines
-// ==============================
-#define FMT_FLOAT3 DXGI_FORMAT_R32G32B32_FLOAT
-#define FMT_FLOAT2 DXGI_FORMAT_R32G32_FLOAT
-#define APPEND D3D12_APPEND_ALIGNED_ELEMENT
-#define IL_VERTEX D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA
+std::wstring GetDirectoryPath(const std::wstring& filepath)
+{
+	fs::path path = filepath;
 
-// ==============================
-//	const
-// ==============================
-const D3D12_INPUT_ELEMENT_DESC MeshVertex::InputElements[] = {
-	{ "POSITION", 0, FMT_FLOAT3, 0, APPEND, IL_VERTEX, 0 },
-	{ "NORMAL", 0, FMT_FLOAT3, 0, APPEND, IL_VERTEX, 0 },
-	{ "TEXCOORD", 0, FMT_FLOAT2, 0, APPEND, IL_VERTEX, 0 },
-	{ "TANGENT", 0, FMT_FLOAT3, 0, APPEND, IL_VERTEX, 0 }
-};
+	return path.remove_filename().c_str();
+}
 
-const D3D12_INPUT_LAYOUT_DESC MeshVertex::InputLayout = {
-	MeshVertex::InputElements,
-	MeshVertex::InputElementCount
-};
+std::string ToUTF8(const std::wstring& value)
+{
+    auto length = WideCharToMultiByte(CP_UTF8, 0U, value.data(), -1, nullptr, 0, nullptr, nullptr);
+    auto buffer = new char[length];
 
-static_assert(sizeof(MeshVertex) == 44, "Vertex struct/layout mismatch");
+    WideCharToMultiByte(CP_UTF8, 0U, value.data(), -1, buffer, length, nullptr, nullptr);
 
-namespace {
-	/**
-	 * @brief MeshLoaderクラス
-	 */
-	class MeshLoader
+    std::string result(buffer);
+    delete[] buffer;
+    buffer = nullptr;
+
+    return result;
+}
+
+std::wstring ToWideString(const std::string& str)
+{
+    auto num1 = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, str.c_str(), -1, nullptr, 0);
+
+    std::wstring wstr;
+    wstr.resize(num1);
+
+    auto num2 = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, str.c_str(), -1, &wstr[0], num1);
+
+    assert(num1 == num2);
+    return wstr;
+}
+
+bool ModelLoader::Load(const ImportSettings& settings)
+{
+	if (!settings.filename) return false;
+
+	auto& meshes = settings.meshes;
+	auto inverseU = settings.inverseU;
+	auto inverseV = settings.inverseV;
+
+	auto path = ToUTF8(settings.filename);
+
+	Assimp::Importer importer;
+	int flag = 0;
+	flag |= aiProcess_Triangulate;              // 三角形化
+	flag |= aiProcess_PreTransformVertices;     // 変換の適用
+	flag |= aiProcess_CalcTangentSpace;         // 接線空間の計算
+	flag |= aiProcess_GenSmoothNormals;			// スムースシェーディング用の法線を生成
+	flag |= aiProcess_GenUVCoords;				// UV座標の生成
+	flag |= aiProcess_RemoveRedundantMaterials;	// 冗長なマテリアルの削除
+	flag |= aiProcess_OptimizeMeshes;			// メッシュの最適化
+
+	auto scene = importer.ReadFile(path, flag);
+
+	if (!scene)
 	{
-	public:
-		MeshLoader() = default;
-		~MeshLoader() = default;
-
-		/**
-		 * @brief 指定されたファイルからメッシュとマテリアルの情報を読み込みます。
-		 * @param [filename] 読み込むファイルのパスを指す文字列。
-		 * @param [meshes] 読み込まれたメッシュ情報が格納される std::vector<Mesh> への参照。
-		 * @param [materials] 読み込まれたマテリアル情報が格納される std::vector<MaterialData> への参照。
-		 * @return 読み込みが成功した場合は true、失敗した場合は false を返します。
-		 */
-		bool Load(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials);
-
-	private:
-		/**
-		 * @brief aiMesh オブジェクトから情報を抽出し、Mesh オブジェクトに解析結果を格納します。
-		 * @param [dstMesh] 解析結果を格納する MeshData オブジェクトへの参照。
-		 * @param [pSrcMesh] 解析対象となる aiMesh オブジェクトへのポインタ。
-		 */
-		void ParseMesh(MeshData& dstMesh, const aiMesh* pSrcMesh);
-
-		/**
-		 * @brief aiMaterial オブジェクトから情報を抽出し、MaterialData オブジェクトに解析結果を格納します。
-		 * @param [dstMaterial] 解析結果を格納する MaterialData オブジェクトへの参照。
-		 * @param [pSrcMaterial] 解析元となる aiMaterial オブジェクトへのポインタ。
-		 */
-		void ParseMaterial(MaterialData& dstMaterial, const aiMaterial* pSrcMaterial);
-
-		const char* m_filename = nullptr; // 読み込むファイル名
-	};
-	
-	bool MeshLoader::Load(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials)
-	{
-		if (!filename) return false;
-
-		m_filename = filename;	// 読み込むファイル名を保存
-
-		Assimp::Importer importer;
-		int flag = 0;
-		flag |= aiProcess_Triangulate; // 三角形に変換
-		flag |= aiProcess_JoinIdenticalVertices; // 同一頂点の結合
-		flag |= aiProcess_CalcTangentSpace; // 接線空間の計算
-		flag |= aiProcess_GenSmoothNormals; // スムーズ法線の生成
-		flag |= aiProcess_GenUVCoords; // UV座標の生成
-		flag |= aiProcess_RemoveRedundantMaterials;	 // 冗長なマテリアルの削除
-		flag |= aiProcess_OptimizeMeshes; // メッシュの最適化
-
-		// ファイルを読み込む
-		auto pScene = importer.ReadFile(m_filename, flag);
-
-		// 読み込みに失敗した場合
-		if (!pScene || pScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !pScene->mNumMeshes)
-		{
-			return false; // 読み込み失敗
-		}
-
-		// メッシュのメモリを確保
-		meshes.clear();
-		meshes.resize(pScene->mNumMeshes);
-
-		// メッシュデータを変換
-		for (size_t i = 0; i < meshes.size(); ++i)
-		{
-			const auto pMesh = pScene->mMeshes[i];
-			ParseMesh(meshes[i], pMesh);
-		}
-
-		// マテリアルのメモリを確保
-		materials.clear();
-		materials.resize(pScene->mNumMaterials);
-
-		// マテリアルデータを変換
-		for (size_t i = 0; i < materials.size(); ++i)
-		{
-			const auto pMaterial = pScene->mMaterials[i];
-			ParseMaterial(materials[i], pMaterial);
-		}
-
-		// 不要になったのでクリア
-		importer.FreeScene(); // Assimpのシーンを解放
-		pScene = nullptr;
-
-		return true; // 読み込み成功
+		auto error = importer.GetErrorString();
+		OutputDebugStringA(error);
+		return false;
 	}
 
-	void MeshLoader::ParseMesh(MeshData& dstMesh, const aiMesh* pSrcMesh)
+	meshes.clear();
+	meshes.resize(scene->mNumMeshes);
+
+	// メッシュの読み込み
+	for (size_t i = 0; i < meshes.size(); ++i)
 	{
-		// マテリアル番号を設定
-		dstMesh.MaterialId = pSrcMesh->mMaterialIndex;
-
-		aiVector3D zero3D(0.0f, 0.0f, 0.0f);
-
-		// 頂点データのメモリを確保
-		dstMesh.Vertices.resize(pSrcMesh->mNumVertices);
-
-		// 頂点データを変換
-		for (uint32_t i = 0; i < pSrcMesh->mNumVertices; ++i)
-		{
-			auto pPosition = &(pSrcMesh->mVertices[i]);
-			auto oNormal = &(pSrcMesh->mNormals[i]);
-			auto pTexCoord = (pSrcMesh->HasTextureCoords(0)) ? &(pSrcMesh->mTextureCoords[0][i]) : &zero3D;
-			auto pTangent = (pSrcMesh->HasTangentsAndBitangents()) ? &(pSrcMesh->mTangents[i]) : &zero3D;
-
-			dstMesh.Vertices[i] = MeshVertex(
-				DirectX::XMFLOAT3(pPosition->x, pPosition->y, pPosition->z),
-				DirectX::XMFLOAT3(oNormal->x, oNormal->y, oNormal->z),
-				DirectX::XMFLOAT2(pTexCoord->x, pTexCoord->y),
-				DirectX::XMFLOAT3(pTangent->x, pTangent->y, pTangent->z)
-			);
-		}
-
-		// 頂点インデックスのメモリを確保
-		dstMesh.Indices.resize(pSrcMesh->mNumFaces * 3);
-
-		for (uint32_t i = 0; i < pSrcMesh->mNumFaces; ++i)
-		{
-			const auto& face = pSrcMesh->mFaces[i];
-			assert(face.mNumIndices == 3); // Assimpは三角形メッシュを前提としている
-			
-			for (uint32_t j = 0; j < face.mNumIndices; ++j)
-			{
-				dstMesh.Indices[i * 3 + j] = face.mIndices[j];
-			}
-		}
-
+		const auto pMesh = scene->mMeshes[i];
+		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
+		const auto pMaterial = scene->mMaterials[i];
+		LoadTexture(settings.filename, meshes[i], pMaterial);
 	}
 
-	void MeshLoader::ParseMaterial(MaterialData& dstMaterial, const aiMaterial* pSrcMaterial)
+	scene = nullptr;
+
+	return true;
+}
+
+void ModelLoader::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV)
+{
+	aiVector3D zero3D(0.0f, 0.0f, 0.0f);
+	aiColor4D zeroColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+	dst.Vertices.resize(src->mNumVertices);
+
+	for (size_t i = 0; i < src->mNumVertices; ++i)
 	{
-		aiColor3D color(0.0f, 0.0f, 0.0f);
+		auto position = &(src->mVertices[i]);
+		auto normal = &(src->mNormals[i]);
+		auto uv = (src->HasTextureCoords(0)) ? &(src->mTextureCoords[0][i]) : &zero3D;
+		auto tangent = (src->HasTangentsAndBitangents()) ? &(src->mTangents[i]) : &zero3D;
+		auto color = (src->HasVertexColors(0)) ? &(src->mColors[0][i]) : &zeroColor;
 
-		// ==============================
-		//	拡散反射色の取得
-		// ==============================
-		if (pSrcMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS)
+		// 反転オプションが有効であれば反転させる
+		if (inverseU) uv->x = 1.0f - uv->x;
+		if (inverseV) uv->y = 1.0f - uv->y;
+
+		Vertex vertex{};
+		vertex.Position = { position->x, position->y, position->z };
+		vertex.Normal = { normal->x, normal->y, normal->z };
+		vertex.UV = { uv->x, uv->y };
+		vertex.Tangent = { tangent->x, tangent->y, tangent->z };
+		vertex.Color = { color->r, color->g, color->b, color->a };
+
+		dst.Vertices[i] = vertex;
+	}
+
+	dst.Indices.resize(src->mNumFaces * 3);	// 三角形化しているので3倍
+
+	for (size_t i = 0; i < src->mNumFaces; ++i)
+	{
+		auto face = &(src->mFaces[i]);
+		assert(face->mNumIndices == 3);	// 三角形化しているので3であるはず
+
+		for (size_t j = 0; j < face->mNumIndices; ++j)
 		{
-			dstMaterial.Diffuse = DirectX::XMFLOAT3(color.r, color.g, color.b);
-		}
-		else
-		{
-			dstMaterial.Diffuse = DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f); // デフォルト値
-		}
-
-		// ==============================
-		//	鏡面反射色の取得
-		// ==============================
-		color = aiColor3D(0.0f, 0.0f, 0.0f);
-		if (pSrcMaterial->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS)
-		{
-			dstMaterial.Specular = DirectX::XMFLOAT3(color.r, color.g, color.b);
-		}
-		else
-		{
-			dstMaterial.Specular = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f); // デフォルト値
-		}
-
-		// ==============================
-		//	鏡面反射の光沢度の取得
-		// ==============================
-		float shininess = 0.0f;
-		if (pSrcMaterial->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS)
-		{
-			dstMaterial.Shininess = shininess;
-		}
-		else
-		{
-			dstMaterial.Shininess = 0.0f; // デフォルト値
-		}
-
-		// ==============================
-		//	ディフューズマップの取得
-		// ==============================
-		aiString path;
-		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
-		{
-			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
-
-			dstMaterial.DiffuseMap = fullPath;
-		}
-
-		// ==============================
-		//	スペキュラーマップの取得
-		// ==============================
-		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SPECULAR(0), path) == AI_SUCCESS)
-		{
-			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
-
-			dstMaterial.SpecularMap = fullPath;
-		}
-
-		// ==============================
-		//	光沢度マップの取得
-		// ==============================
-		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_SHININESS(0), path) == AI_SUCCESS)
-		{
-			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
-
-			dstMaterial.ShininessMap = fullPath;
-		}
-
-		// ==============================
-		//	法線マップの取得
-		// ==============================
-		if (pSrcMaterial->Get(AI_MATKEY_TEXTURE_NORMALS(0), path) == AI_SUCCESS)
-		{
-			auto fullPath = fs::path(m_filename).parent_path() / path.C_Str();
-
-			dstMaterial.NormalMap = fullPath;
+			dst.Indices[i * 3 + j] = face->mIndices[j];
 		}
 	}
 }
 
-bool LoadMesh(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials)
+void ModelLoader::LoadTexture(const wchar_t* filename, Mesh& dst, const aiMaterial* src)
 {
-	MeshLoader loader;
-	return loader.Load(filename, meshes, materials);
+	aiString path;
+	if (src->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
+	{
+		auto dir = GetDirectoryPath(filename);
+		auto file = std::string(path.C_Str());
+		size_t idx = file.find_last_of('\\');
+		if (idx != std::wstring::npos)
+		{
+			file = file.substr(idx + 1);
+			dst.DiffuseMap = dir + ToWideString(file);
+		}
+	}
+	else
+	{
+		dst.DiffuseMap.clear();
+	}
 }

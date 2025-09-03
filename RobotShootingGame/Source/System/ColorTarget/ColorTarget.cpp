@@ -17,7 +17,7 @@ ColorTarget::~ColorTarget()
 	Term();
 }
 
-bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t width, uint32_t height, DXGI_FORMAT format)
+bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorHeap* pPoolRTV, uint32_t width, uint32_t height, DXGI_FORMAT format)
 {
 	if (!pDevice || !pPoolRTV || !width || !height) return false;	// 無効な引数チェック
 	
@@ -89,7 +89,7 @@ bool ColorTarget::Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t
 	return true;	// 成功した場合はtrueを返す
 }
 
-bool ColorTarget::InitFromBackBuffer(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t index, IDXGISwapChain* pSwapChain)
+bool ColorTarget::InitFromBackBuffer(ID3D12Device* pDevice, DescriptorHeap* pPoolRTV, uint32_t index, IDXGISwapChain* pSwapChain)
 {
 	if (!pDevice || !pPoolRTV || !pSwapChain) return false;	// 無効な引数チェック
 

@@ -18,7 +18,7 @@
 //	前方宣言
 // ==============================
 class DescriptorHandle;
-class DescriptorPool;
+class DescriptorHeap;
 
 /**
  * @brief DepthTargetクラス
@@ -36,7 +36,7 @@ public:
 	 */
 	~DepthTarget();
 
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPoolDSV, uint32_t width, uint32_t height, DXGI_FORMAT format);
+	bool Init(ID3D12Device* pDevice, DescriptorHeap* pPoolDSV, uint32_t width, uint32_t height, DXGI_FORMAT format);
 
 	void Term();
 
@@ -54,6 +54,6 @@ private:
 
 	ComPtr<ID3D12Resource> m_pTarget{};	 // 深度ターゲットリソース
 	DescriptorHandle* m_pHandleDSV{}; // 深度ステンシルビューのディスクリプタハンドル
-	DescriptorPool* m_pPoolDSV{}; // ディスクリプタプール
+	DescriptorHeap* m_pPoolDSV{}; // ディスクリプタプール
 	D3D12_DEPTH_STENCIL_VIEW_DESC m_ViewDesc{}; // 深度ステンシルビューの説明
 };

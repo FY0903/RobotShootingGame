@@ -10,30 +10,15 @@
 // ==============================
 //	include
 // ==============================
-
-// ==============================
-//	define
-// ==============================
-
-// ==============================
-//	構造体定義
-// ==============================
-
-// ==============================
-//	列挙型定義
-// ==============================
-
-// ==============================
-//	プロトタイプ宣言
-// ==============================
-
-// ==============================
-//	定数定義
-// ==============================
-
-// ==============================
-//	グローバル変数宣言
-// ==============================
+#include "../../System/Engine/Engine.hpp"
+#include "../../Utility/VertexBuffer/VertexBuffer.hpp"
+#include "../../Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "../../Utility/RootSignature/RootSignature.hpp"
+#include "../../Utility/PipelineState/PipelineState.hpp"
+#include "../../Utility/IndexBuffer/IndexBuffer.hpp"
+#include "../../Utility/SharedStruct/SharedStruct.hpp"
+#include "../../Utility/ModelLoader/ModelLoader.hpp"
+#include "../../Utility/DescriptorHeap/DescriptorHeap.hpp"
 
 /**
  * @brief Sceneクラス
@@ -55,4 +40,14 @@ public:
 	void Update();
 	void Draw();
 	void UnInit();
+
+private:
+	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
+	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
+	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	RootSignature* m_pRootSignature{};	// ルートシグネチャ
+	PipelineState* m_pPipelineState{};	// パイプラインステート
+	std::vector<Mesh> m_Meshes{};		// メッシュデータ
+	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
 };

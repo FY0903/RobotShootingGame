@@ -1,18 +1,14 @@
 struct VSOutput
 {
-    float4 position : SV_POSITION;
+    float4 svpos : SV_POSITION;
     float4 color : COLOR;
+    float2 uv : TEXCOORD;
 };
 
-struct PSOutput
-{
-    float4 Color : SV_TARGET0;
-};
+SamplerState smp : register(s0);
+Texture2D tex : register(t0);
 
-PSOutput main(VSOutput input)
+float4 main(VSOutput input) : SV_TARGET
 {
-    PSOutput output = (PSOutput)0;
-    output.Color = input.color;
-    
-    return output;
+    return tex.Sample(smp, input.uv);
 }

@@ -16,16 +16,27 @@
 //	include
 // ==============================
 #include "App.hpp"
+#include "../Utility/Singleton/Singleton.hpp"
+
+// ==============================
+//	constexpr
+// ==============================
+constexpr uint32_t WINDOW_WIDTH = 960;	// ウィンドウの幅
+constexpr uint32_t WINDOW_HEIGHT = 540;	// ウィンドウの高さ
 
 int main()
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	// _CrtSetBreakAlloc(13134);
 #endif
 
 	// アプリケーションを実行
-	App app(960, 540);
+	App app(WINDOW_WIDTH, WINDOW_HEIGHT);
 	app.Run();
+
+	// シングルトンの終了処理
+	SingletonFinalizer::Finalize();
 
 	return 0;
 }

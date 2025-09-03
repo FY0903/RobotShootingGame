@@ -10,15 +10,14 @@
 // ==============================
 #include "Engine.hpp"
 #include "../../../DirectXTex/d3dx12.h"
+#include "../Window/Window.hpp"
 
-HRESULT Engine::Init(uint32_t width, uint32_t height, HWND wnd)
+HRESULT Engine::Init(HWND wnd)
 {
 	// ==============================
 	//	変数初期化
 	// ==============================
 	m_hWnd = wnd;
-	m_unWidth = width;
-	m_unHeight = height;
 
 	// ==============================
 	//	デバックレイヤーの有効化
@@ -109,18 +108,6 @@ HRESULT Engine::Init(uint32_t width, uint32_t height, HWND wnd)
 	CreateScissorRect();
 
 	return S_OK; // 正常終了
-}
-
-void Engine::Update()
-{
-}
-
-void Engine::Draw()
-{
-}
-
-void Engine::UnInit()
-{
 }
 
 void Engine::BeginDraw()
@@ -227,8 +214,8 @@ HRESULT Engine::CreateSwapChain()
 
 	// スワップチェーンの設定
 	DXGI_SWAP_CHAIN_DESC desc{};
-	desc.BufferDesc.Width = m_unWidth;		// スワップチェーンの幅
-	desc.BufferDesc.Height = m_unHeight;	// スワップチェーンの高さ
+	desc.BufferDesc.Width = Window::GetInstance().GetWidth();		// スワップチェーンの幅
+	desc.BufferDesc.Height = Window::GetInstance().GetHeight();	// スワップチェーンの高さ
 	desc.BufferDesc.RefreshRate.Numerator = 60;	// リフレッシュレートの分子（60Hz）
 	desc.BufferDesc.RefreshRate.Denominator = 1;	// リフレッシュレートの分母
 	desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED; // スキャンラインの順序
@@ -348,20 +335,20 @@ HRESULT Engine::CreateFence()
 
 void Engine::CreateViewPort()
 {
-	m_Viewport.TopLeftX = 0.0f;							// ビューポートの左上X座標
-	m_Viewport.TopLeftY = 0.0f;							// ビューポートの左上Y座標
-	m_Viewport.Width = static_cast<float>(m_unWidth);	// ビューポートの幅
-	m_Viewport.Height = static_cast<float>(m_unHeight);	// ビューポートの高さ
-	m_Viewport.MinDepth = 0.0f;							// ビューポートの最小深度
-	m_Viewport.MaxDepth = 1.0f;							// ビューポートの最大深度
+	m_Viewport.TopLeftX = 0.0f;													// ビューポートの左上X座標
+	m_Viewport.TopLeftY = 0.0f;													// ビューポートの左上Y座標
+	m_Viewport.Width = static_cast<float>(Window::GetInstance().GetWidth());	// ビューポートの幅
+	m_Viewport.Height = static_cast<float>(Window::GetInstance().GetHeight());	// ビューポートの高さ
+	m_Viewport.MinDepth = 0.0f;													// ビューポートの最小深度
+	m_Viewport.MaxDepth = 1.0f;													// ビューポートの最大深度
 }
 
 void Engine::CreateScissorRect()
 {
-	m_scissor.left = 0;				// シザー矩形の左端
-	m_scissor.right = m_unWidth;	// シザー矩形の右端
-	m_scissor.top = 0;				// シザー矩形の上端
-	m_scissor.bottom = m_unHeight;	// シザー矩形の下端
+	m_scissor.left = 0;										// シザー矩形の左端
+	m_scissor.right = Window::GetInstance().GetWidth();		// シザー矩形の右端
+	m_scissor.top = 0;										// シザー矩形の上端
+	m_scissor.bottom = Window::GetInstance().GetHeight();	// シザー矩形の下端
 }
 
 HRESULT Engine::CreateRenderTargetView()
@@ -440,8 +427,8 @@ HRESULT Engine::CreateDepthStencilView()
 	CD3DX12_RESOURCE_DESC resc(
 		D3D12_RESOURCE_DIMENSION_TEXTURE2D, // リソースの設定
 		0,									// アライメント
-		m_unWidth,							// 幅
-		m_unHeight,							// 高さ
+		Window::GetInstance().GetWidth(),	// 幅
+		Window::GetInstance().GetHeight(),	// 高さ
 		1,									// 深さ
 		1,									// ミップ数
 		DXGI_FORMAT_D32_FLOAT,				// フォーマット

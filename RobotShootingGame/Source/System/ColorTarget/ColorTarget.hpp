@@ -19,7 +19,7 @@
 //	前方宣言
 // ==============================
 class DescriptorHandle;
-class DescriptorPool;
+class DescriptorHeap;
 
 /**
  * @brief ColorTargetクラス
@@ -37,9 +37,9 @@ public:
 	 */
 	~ColorTarget();
 
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t width, uint32_t height, DXGI_FORMAT format);
+	bool Init(ID3D12Device* pDevice, DescriptorHeap* pPoolRTV, uint32_t width, uint32_t height, DXGI_FORMAT format);
 
-	bool InitFromBackBuffer(ID3D12Device* pDevice, DescriptorPool* pPoolRTV, uint32_t index, IDXGISwapChain* pSwapChain);
+	bool InitFromBackBuffer(ID3D12Device* pDevice, DescriptorHeap* pPoolRTV, uint32_t index, IDXGISwapChain* pSwapChain);
 
 	void Term();
 
@@ -57,6 +57,6 @@ private:
 
 	ComPtr<ID3D12Resource> m_pTarget{};	// リソースへのポインタ
 	DescriptorHandle* m_pHandleRTV{};	// レンダーターゲットビューのハンドル
-	DescriptorPool* m_pPoolRTV{};	// ディスクリプタプールへのポインタ
+	DescriptorHeap* m_pPoolRTV{};	// ディスクリプタプールへのポインタ
 	D3D12_RENDER_TARGET_VIEW_DESC m_ViewDesc{};	// レンダーターゲットビューの説明
 };

@@ -17,7 +17,7 @@
 //	前方宣言
 // ==============================
 class DescriptorHandle;
-class DescriptorPool;
+class DescriptorHeap;
 
 /**
  * @brief Textureクラス
@@ -43,7 +43,7 @@ public:
 	 * @param [uploadBatch] DirectX::ResourceUploadBatchへの参照。リソースのアップロードに使用されます。
 	 * @return 初期化が成功した場合はtrue、失敗した場合はfalseを返します。
 	 */
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* filename, DirectX::ResourceUploadBatch& uploadBatch);
+	bool Init(ID3D12Device* pDevice, DescriptorHeap* pPool, const wchar_t* filename, DirectX::ResourceUploadBatch& uploadBatch);
 
 	/**
 	 * @brief ID3D12Device、DiscriptorPool、およびリソース記述を使用して初期化を行います。
@@ -53,7 +53,7 @@ public:
 	 * @param [isCube] リソースがキューブマップかどうかを示す真偽値。
 	 * @return 初期化が成功した場合はtrue、失敗した場合はfalseを返します。
 	 */
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isCube);
+	bool Init(ID3D12Device* pDevice, DescriptorHeap* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isCube);
 
 	/**
 	 * @brief 終了処理を実行します。
@@ -85,5 +85,5 @@ private:
 
 	ComPtr<ID3D12Resource> m_pTex{};	// テクスチャリソース
 	DescriptorHandle* m_pHandle{};	// ディスクリプタハンドル
-	DescriptorPool* m_pPool{};		// ディスクリプタプール
+	DescriptorHeap* m_pPool{};		// ディスクリプタプール
 };

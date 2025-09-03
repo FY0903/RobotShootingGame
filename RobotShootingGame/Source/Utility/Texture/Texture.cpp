@@ -17,7 +17,7 @@ Texture::~Texture()
 	Term();
 }
 
-bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* filename, DirectX::ResourceUploadBatch& uploadBatch)
+bool Texture::Init(ID3D12Device* pDevice, DescriptorHeap* pPool, const wchar_t* filename, DirectX::ResourceUploadBatch& uploadBatch)
 {
 	// 引数チェック
 	if (!pDevice || !pPool || !filename) return false;	// pDevice, pPool, filenameのいずれかがnullptrならfalseを返す
@@ -61,7 +61,7 @@ bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* 
 	return true;	// 成功したらtrueを返す
 }
 
-bool Texture::Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isCube)
+bool Texture::Init(ID3D12Device* pDevice, DescriptorHeap* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isCube)
 {
 	if (!pDevice || !pPool || !pDesc) return false;	// 引数チェック
 

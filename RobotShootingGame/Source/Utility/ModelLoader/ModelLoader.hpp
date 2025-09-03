@@ -7,6 +7,7 @@
 			  /07/26 14:36 ファイル名の変更
 ===================================================================+*/
 #pragma once
+#define NOMINMAX
 
 // ==============================
 //	include
@@ -15,76 +16,31 @@
 #include <DirectXMath.h>
 #include <string>
 #include <vector>
+#include "../Singleton/Singleton.hpp"
 
-/**
- * @brief MeshVertexクラス
- */
-class MeshVertex
+// ==============================
+//	前方宣言
+// ==============================
+struct Mesh;
+struct Vertex;
+
+struct aiMesh;
+struct aiMaterial;
+
+struct ImportSettings
+{
+	const wchar_t* filename = nullptr;	// ファイルパス
+	std::vector<Mesh>& meshes;			// メッシュデータの格納先
+	bool inverseU = false;				// U座標を反転するか
+	bool inverseV = false;				// V座標を反転するか
+};
+
+class ModelLoader : public Singleton<ModelLoader>
 {
 public:
-	/**
-	 * @brief コンストラクタ
-	 */
-	MeshVertex() = default;
-
-	/**
-	 * @brief メッシュの頂点データを初期化します。
-	 * @param [position] 頂点の位置ベクトル。
-	 * @param [normal] 頂点の法線ベクトル。
-	 * @param [texcoord] 頂点のテクスチャ座標。
-	 * @param [tangent] 頂点の接線ベクトル。
-	 */
-	MeshVertex(DirectX::XMFLOAT3 const& position, DirectX::XMFLOAT3 const& normal, DirectX::XMFLOAT2 const& texcoord, DirectX::XMFLOAT3 const& tangent)
-		: Position(position), Normal(normal), TexCoord(texcoord), Tangent(tangent){};
-
-	static const D3D12_INPUT_LAYOUT_DESC InputLayout;
-
-	DirectX::XMFLOAT3 Position{};
-	DirectX::XMFLOAT3 Normal{};
-	DirectX::XMFLOAT2 TexCoord{};
-	DirectX::XMFLOAT3 Tangent{};
+	bool Load(const ImportSettings& settings);	// モデルの読み込み
 
 private:
-	static const int InputElementCount = 4;
-	static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
+	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
+	void LoadTexture(const wchar_t* filename, Mesh& dst, const aiMaterial* src);
 };
-
-// ==============================
-//	structs
-// ==============================
-/**
- * @brief マテリアルの物理的特性とテクスチャ情報を表す構造体です。
- */
-struct MaterialData
-{
-	DirectX::XMFLOAT3 Diffuse{};	// 拡散反射色
-	DirectX::XMFLOAT3 Specular{};	// 鏡面反射色
-	float Alpha{};					// アルファ値
-	float Shininess{};				// 光沢度
-	std::wstring DiffuseMap{};		// 拡散反射マップのファイル名
-	std::wstring SpecularMap{};		// 鏡面反射マップのファイル名
-	std::wstring ShininessMap{};	// 光沢度マップのファイル名
-	std::wstring NormalMap{};		// 法線マップのファイル名
-};
-
-/**
- * @brief メッシュデータを表す構造体です。
- */
-struct MeshData
-{
-	std::vector<MeshVertex> Vertices{};	// 頂点データ
-	std::vector<uint32_t> Indices{};	// インデックスデータ
-	uint32_t MaterialId{};				// マテリアルID
-};
-
-// ==============================
-//	プロトタイプ宣言
-// ==============================
-/**
- * @brief 指定されたファイルからメッシュとマテリアルを読み込みます。
- * @param [filename] 読み込むメッシュファイルのパス。
- * @param [meshes] 読み込まれたメッシュ情報を格納する std::vector<MeshData> への参照。
- * @param [materials] 読み込まれたマテリアル情報を格納する std::vector<MaterialData> への参照。
- * @return メッシュとマテリアルの読み込みに成功した場合は true、失敗した場合は false を返します。
- */
-bool LoadMesh(const char* filename, std::vector<MeshData>& meshes, std::vector<MaterialData>& materials);

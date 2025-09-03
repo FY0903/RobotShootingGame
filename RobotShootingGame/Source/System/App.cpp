@@ -25,19 +25,23 @@
 App::App(uint32_t width, uint32_t height)
 {
 	// ウィンドウの初期化
-	if (FAILED(m_Window.Init(width, height)))
+	if (FAILED(Window::GetInstance().Init(width, height)))
 	{
 		MessageBox(nullptr, "ウィンドウの初期化に失敗しました", "エラー", MB_OK);
 		exit(-1);
 	}
 
 	// Engineの初期化
-	m_Engine.Init(width, height, m_Window.GetHandle());
+	Engine::GetInstance().Init(Window::GetInstance().GetHandle());
+
+	// Sceneの初期化
+	m_Scene.Init();
 }
 
 App::~App()
 {
-
+	// Sceneの終了処理
+	m_Scene.UnInit();
 }
 
 void App::Run()
@@ -54,11 +58,11 @@ void App::Run()
 			DispatchMessage(&msg);
 		}
 		else
-		{	
-			m_Engine.Update();
-			m_Engine.BeginDraw();
-			m_Engine.Draw();
-			m_Engine.EndDraw();
+		{
+			m_Scene.Update();
+			Engine::GetInstance().BeginDraw();
+			m_Scene.Draw();
+			Engine::GetInstance().EndDraw();
 		}
 	}
 }

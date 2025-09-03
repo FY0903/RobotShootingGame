@@ -13,25 +13,19 @@
 #include <Windows.h>
 #include <cstdint>
 
+#include "../../Utility/Singleton/Singleton.hpp"
+
 /**
  * @brief Windowクラス
  */
-class Window
+class Window : public Singleton<Window>
 {
 public:
-	/**
-	 * コンストラクタ
-	 */
-	Window() = default;
-
-	/**
-	 * デストラクタ
-	 */
-	~Window() = default;
-
 	HRESULT Init(uint32_t width, uint32_t height);
 
 	HWND GetHandle() const { return m_hWnd; }
+	uint32_t GetWidth() const { return m_unWidth; }
+	uint32_t GetHeight() const { return m_unHeight; }
 
 private:
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);

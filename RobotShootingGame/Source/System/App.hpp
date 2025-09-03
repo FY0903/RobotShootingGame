@@ -19,6 +19,8 @@
 #include "Window/Window.hpp"
 #include "Engine/Engine.hpp"
 
+#include "../Game/Scene/Scene.hpp"
+
 class App
 {
 public:
@@ -40,6 +42,5 @@ public:
 	void Run();
 
 private:
-	Window m_Window{};		// ウィンドウ
-	Engine m_Engine{};	// Engine
+	Scene m_Scene{};	// Scene
 };

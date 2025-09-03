@@ -16,15 +16,6 @@
     <Filter Include="Source\Utility">
       <UniqueIdentifier>{23655bf2-d6b8-49f6-a669-f2090bef667f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\Pool">
-      <UniqueIdentifier>{ba26a58a-dfe6-42a0-8c3e-cd0181861211}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility\Texture">
-      <UniqueIdentifier>{b34f0686-eb72-4e29-9fb5-94c08168170e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility\Pool\DescriptorPool">
-      <UniqueIdentifier>{6a833e9d-796b-467f-87fb-d6e4188663e2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Utility\ConstantBuffer">
       <UniqueIdentifier>{68136f5c-7fcc-48ab-8a89-a381a1bca890}</UniqueIdentifier>
     </Filter>
@@ -36,24 +27,6 @@
     </Filter>
     <Filter Include="Source\Utility\ModelLoader">
       <UniqueIdentifier>{82a5fe1c-1cc9-48a6-bab6-5874dcc341da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility\Mesh">
-      <UniqueIdentifier>{b6766288-cbe3-462a-b46c-209303177b68}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility\Material">
-      <UniqueIdentifier>{c00adb00-06ab-407e-b5cc-ee58cc8b4574}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\System\DepthTarget">
-      <UniqueIdentifier>{4e8da8ad-bdea-4f1c-bddb-ad2432adb3f3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\System\Fence">
-      <UniqueIdentifier>{440a8008-66c1-4239-b822-dd74e3bac60c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\System\CommandList">
-      <UniqueIdentifier>{e123c447-9d99-4f1c-bba2-85eb00d83196}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\System\ColorTarget">
-      <UniqueIdentifier>{f708071e-2c59-4847-81f9-78e4719bab81}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Utility\ComPtr">
       <UniqueIdentifier>{2fd880d2-b39b-40e8-8aa5-001dcdc46649}</UniqueIdentifier>
@@ -70,16 +43,28 @@
     <Filter Include="Source\Game\Scene">
       <UniqueIdentifier>{3f65a216-a47a-4219-8332-805ba9281960}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\SharedStruct">
+      <UniqueIdentifier>{83565e4b-999c-43da-b2f6-a803ca0d1c5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Singleton">
+      <UniqueIdentifier>{e84186fb-6ce4-4153-b647-42da73f62603}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\RootSignature">
+      <UniqueIdentifier>{10a00f14-cb76-4dd4-b9b7-a06d7c0e73c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\PipelineState">
+      <UniqueIdentifier>{1150c765-5e44-4bfa-a0de-f18f72599681}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\DescriptorHeap">
+      <UniqueIdentifier>{ba26a58a-dfe6-42a0-8c3e-cd0181861211}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Texture2D">
+      <UniqueIdentifier>{34d5198d-2681-4ff1-b64f-3958f2abcc7b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
       <Filter>Source\System</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.cpp">
-      <Filter>Source\Utility\Pool\DescriptorPool</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\Texture\Texture.cpp">
-      <Filter>Source\Utility\Texture</Filter>
     </ClCompile>
     <ClCompile Include="Source\Utility\ConstantBuffer\ConstantBuffer.cpp">
       <Filter>Source\Utility\ConstantBuffer</Filter>
@@ -93,24 +78,6 @@
     <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp">
       <Filter>Source\Utility\ModelLoader</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Mesh\Mesh.cpp">
-      <Filter>Source\Utility\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\Material\Material.cpp">
-      <Filter>Source\Utility\Material</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\DepthTarget\DepthTarget.cpp">
-      <Filter>Source\System\DepthTarget</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\Fence\Fence.cpp">
-      <Filter>Source\System\Fence</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\CommandList\CommandList.cpp">
-      <Filter>Source\System\CommandList</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\ColorTarget\ColorTarget.cpp">
-      <Filter>Source\System\ColorTarget</Filter>
-    </ClCompile>
     <ClCompile Include="Source\System\Window\Window.cpp">
       <Filter>Source\System\Window</Filter>
     </ClCompile>
@@ -123,17 +90,26 @@
     <ClCompile Include="Source\Game\Scene\Scene.cpp">
       <Filter>Source\Game\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Singleton\Singleton.cpp">
+      <Filter>Source\Utility\Singleton</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp">
+      <Filter>Source\Utility\RootSignature</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\SharedStruct\SharedStruct.cpp">
+      <Filter>Source\Utility\SharedStruct</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\PipelineState\PipelineState.cpp">
+      <Filter>Source\Utility\PipelineState</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\DescriptorHeap\DescriptorHeap.cpp">
+      <Filter>Source\Utility\DescriptorHeap</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Texture2D\Texture2D.cpp">
+      <Filter>Source\Utility\Texture2D</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Utility\Pool\Pool.hpp">
-      <Filter>Source\Utility\Pool</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\Pool\DescriptorPool\DescriptorPool.hpp">
-      <Filter>Source\Utility\Pool\DescriptorPool</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\Texture\Texture.hpp">
-      <Filter>Source\Utility\Texture</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
       <Filter>Source\Utility\ConstantBuffer</Filter>
     </ClInclude>
@@ -145,24 +121,6 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp">
       <Filter>Source\Utility\ModelLoader</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\Mesh\Mesh.hpp">
-      <Filter>Source\Utility\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\Material\Material.hpp">
-      <Filter>Source\Utility\Material</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\DepthTarget\DepthTarget.hpp">
-      <Filter>Source\System\DepthTarget</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\Fence\Fence.hpp">
-      <Filter>Source\System\Fence</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\CommandList\CommandList.hpp">
-      <Filter>Source\System\CommandList</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\ColorTarget\ColorTarget.hpp">
-      <Filter>Source\System\ColorTarget</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\ComPtr.h">
       <Filter>Source\Utility\ComPtr</Filter>
@@ -179,24 +137,30 @@
     <ClInclude Include="Source\Game\Scene\Scene.hpp">
       <Filter>Source\Game\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp">
+      <Filter>Source\Utility\SharedStruct</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Singleton\Singleton.hpp">
+      <Filter>Source\Utility\Singleton</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp">
+      <Filter>Source\Utility\RootSignature</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\PipelineState\PipelineState.hpp">
+      <Filter>Source\Utility\PipelineState</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\DescriptorHeap\DescriptorHeap.hpp">
+      <Filter>Source\Utility\DescriptorHeap</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Texture2D\Texture2D.hpp">
+      <Filter>Source\Utility\Texture2D</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\SimpleVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SimpleTexPS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SimpleTexVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\LambertVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\LambertPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>
