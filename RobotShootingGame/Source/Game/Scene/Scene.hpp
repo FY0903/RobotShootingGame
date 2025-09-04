@@ -45,6 +45,7 @@ public:
 	void UnInit();
 
 private:
+#if 0
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
 	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
@@ -53,6 +54,7 @@ private:
 	std::vector<Mesh> m_Meshes{};		// メッシュデータ
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
+#endif
 
 	Object* m_pObject{}; // Object
 	Camera* m_pCamera{}; // カメラ

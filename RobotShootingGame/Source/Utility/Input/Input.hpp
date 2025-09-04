@@ -23,6 +23,8 @@ namespace Input
 
 	void UpdateRelativeMousePos(LPARAM In_Lparam);
 
+	void UpdateMouseWheel(short wheelDelta);
+
 	void EndUpdateInput();
 
 	bool IsKeyPress(BYTE key);

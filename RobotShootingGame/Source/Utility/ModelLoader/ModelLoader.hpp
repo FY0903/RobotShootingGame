@@ -41,6 +41,17 @@ public:
 	bool Load(const ImportSettings& settings);	// モデルの読み込み
 
 private:
+	friend class Singleton<ModelLoader>;
+	/**
+	 * @brief コンストラクタ
+	 */
+	ModelLoader() = default;
+
+	/**
+	 * @brief デストラクタ
+	 */
+	~ModelLoader() = default;
+
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
 	void LoadTexture(const wchar_t* filename, Mesh& dst, const aiMaterial* src);
 };

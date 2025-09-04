@@ -23,12 +23,6 @@
 // ==============================
 #pragma comment(lib, "winmm.lib")
 
-App::~App()
-{
-	// Sceneの終了処理
-	m_Scene.UnInit();
-}
-
 void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdShow)
 {
 	// ウィンドウの初期化
@@ -45,7 +39,13 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 	Input::Init();
 
 	// Sceneの初期化
-	m_Scene.Init();
+	//m_Scene.Init();
+}
+
+void App::UnInit()
+{
+	// Sceneの終了処理
+	//m_Scene.UnInit();
 }
 
 void App::Run()
@@ -73,9 +73,9 @@ void App::Run()
 			Input::Update();
 
 			// シーンの更新と描画
-			m_Scene.Update();
+			//m_Scene.Update();
 			Engine::GetInstance().BeginDraw();
-			m_Scene.Draw();
+			//m_Scene.Draw();
 			Engine::GetInstance().EndDraw();
 
 			Input::EndUpdateInput();

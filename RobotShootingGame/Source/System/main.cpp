@@ -17,6 +17,7 @@
 // ==============================
 #include "App.hpp"
 #include "../Utility/Singleton/Singleton.hpp"
+#include "../System/Engine/Engine.hpp"
 
 // ==============================
 //	constexpr
@@ -32,9 +33,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 	// _CrtSetBreakAlloc(13134);
 #endif
 
+	App App;
+
 	// アプリケーションを実行
-	App::GetInstance().Init(WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nCmdShow);
-	App::GetInstance().Run();
+	App.Init(WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nCmdShow);
+	App.Run();
+	App.UnInit();
 
 	// シングルトンの終了処理
 	SingletonFinalizer::Finalize();

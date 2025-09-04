@@ -23,6 +23,7 @@ namespace Input
 		POINT g_MousePos;			// マウス座標
 		POINT g_MouseSavePos;		// マウスの保存用座標
 		POINTS g_MouseRelativePos;	// マウスポインタのウィンドウ上の相対座標
+		short g_MouseWheelData;		// マウスホイールの入力情報
 	}
 
 	HRESULT Init()
@@ -55,6 +56,11 @@ namespace Input
 	{
 		// マウスのウィンドウ上の相対座標を取得
 		g_MouseRelativePos = MAKEPOINTS(In_Lparam);
+	}
+
+	void UpdateMouseWheel(short wheelDelta)
+	{
+		g_MouseWheelData = wheelDelta;
 	}
 
 	void EndUpdateInput()
@@ -119,6 +125,6 @@ namespace Input
 
 	int GetMouseWheelInput()
 	{
-		return GetMouseWheelData();
+		return g_MouseWheelData;
 	}
 }

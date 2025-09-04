@@ -10,6 +10,7 @@
 //	include
 // ==============================
 #include "Window.hpp"
+#include "../../Utility/Input/Input.hpp"
 
 // ==============================
 //	constexpr
@@ -102,8 +103,13 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		return 0;
 
-	case WM_KEYDOWN: return 0; // キーが押された
-	case WM_KEYUP: return 0; // キーが離された
+	case WM_MOUSEHWHEEL:
+		Input::UpdateMouseWheel(GET_WHEEL_DELTA_WPARAM(wp));
+		break;
+
+	case WM_MOUSEMOVE:
+		Input::UpdateRelativeMousePos(lp);
+		break;
 
 	case WM_DESTROY:
 		PostQuitMessage(0); // アプリケーションの終了

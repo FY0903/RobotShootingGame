@@ -134,7 +134,7 @@ void Engine::BeginDraw()
 
 	// RTVが使用可能になるまで待つ
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_pCurrentRenderTarget,
+		m_pCurrentRenderTarget.Get(),
 		D3D12_RESOURCE_STATE_PRESENT,			// 変換前のリソース状態
 		D3D12_RESOURCE_STATE_RENDER_TARGET);	// 変換後のリソース状態
 	m_pCommandList->ResourceBarrier(1, &barrier);
@@ -154,7 +154,7 @@ void Engine::EndDraw()
 {
 	// RTVに書きこみが終わるので待つ
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		m_pCurrentRenderTarget,
+		m_pCurrentRenderTarget.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,		// 変換前のリソース状態
 		D3D12_RESOURCE_STATE_PRESENT);			// 変換後のリソース状態
 	m_pCommandList->ResourceBarrier(1, &barrier);
@@ -167,7 +167,7 @@ void Engine::EndDraw()
 	m_pQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
 	// スワップチェーンの画面表示
-	m_pSwapChain->Present(1, 0);
+	m_pSwapChain->Present(0, 0);
 
 	// 描画完了を待つ
 	WaitRender();
@@ -176,12 +176,34 @@ void Engine::EndDraw()
 	m_CurrentBackBufferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 }
 
+Engine::~Engine()
+{
+#ifdef _DEBUG
+	ComPtr<ID3D12DebugDevice> debugDevice;
+	HRESULT hr = m_pDevice.As(&debugDevice);	// ID3D12DebugDeviceの取得
+
+	if (SUCCEEDED(hr))
+	{
+		debugDevice->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL); // ライブオブジェクトの詳細をレポート
+	}
+
+#endif
+
+	if (m_hFenceEvent)
+	{
+		CloseHandle(m_hFenceEvent);
+		m_hFenceEvent = nullptr;
+	}
+}
+
 HRESULT Engine::CreateDevice()
 {
 	HRESULT hr = D3D12CreateDevice(
 		nullptr,
 		D3D_FEATURE_LEVEL_11_0,						// 使用する機能レベル
 		IID_PPV_ARGS(m_pDevice.GetAddressOf()));	// デバイスのポインタ
+
+	m_pDevice->SetName(L"Device");
 
 	return hr;
 }
@@ -197,6 +219,8 @@ HRESULT Engine::CreateCommandQueue()
 	HRESULT hr = m_pDevice->CreateCommandQueue(
 		&desc,								// コマンドキューの設定
 		IID_PPV_ARGS(m_pQueue.GetAddressOf())); // コマンドキューのポインタ
+
+	m_pQueue->SetName(L"CommandQueue");
 
 	return hr;
 }
@@ -277,6 +301,8 @@ HRESULT Engine::CreateCommandList()
 			MessageBox(nullptr, "コマンドアロケーターの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 			return E_FAIL; // エラー終了
 		}
+
+		m_pAllocator[i]->SetName(L"CommandAllocator");
 	}
 
 	// ==============================
@@ -294,6 +320,8 @@ HRESULT Engine::CreateCommandList()
 		MessageBox(nullptr, "コマンドリストの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
 	}
+
+	m_pCommandList->SetName(L"CommandList");
 
 	// コマンドリストは生成直後に記録状態になるので、閉じておく
 	hr = m_pCommandList->Close();
@@ -313,6 +341,8 @@ HRESULT Engine::CreateFence()
 		MessageBox(nullptr, "フェンスの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
 	}
+
+	m_pFence->SetName(L"Fence");
 
 	m_fenceValue[m_CurrentBackBufferIndex]++; // フェンスの値をインクリメント
 
@@ -368,6 +398,9 @@ HRESULT Engine::CreateRenderTargetView()
 		MessageBox(nullptr, "RTVディスクリプタヒープの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
 	}
+
+	m_pRtvHeap->SetName(L"RTVHeap");
+
 	m_rtvDescriptorSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); // RTVディスクリプタサイズを取得
 
 	// ==============================
@@ -413,6 +446,9 @@ HRESULT Engine::CreateDepthStencilView()
 		MessageBox(nullptr, "DSVディスクリプタヒープの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
 	}
+
+	m_pDsvHeap->SetName(L"DSVHeap");
+
 	m_dsvDescriptorSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV); // DSVディスクリプタサイズを取得
 
 	D3D12_CLEAR_VALUE clearValue{};
@@ -443,6 +479,8 @@ HRESULT Engine::CreateDepthStencilView()
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,	// リソースの初期状態
 		&clearValue,						// 最適化されたクリア値
 		IID_PPV_ARGS(m_pDepthStencil.ReleaseAndGetAddressOf())); // 深度ステンシルバッファのポインタ
+
+	m_pDepthStencil->SetName(L"DepthStencilBuffer");
 
 	if (FAILED(hr))
 	{

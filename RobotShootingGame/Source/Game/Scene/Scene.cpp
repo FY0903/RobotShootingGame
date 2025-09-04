@@ -16,6 +16,7 @@
 
 void Scene::Init()
 {
+#if 0
 	ImportSettings inportSetting =
 	{
 		L"Assets/Model/spot/spot.fbx",
@@ -26,7 +27,6 @@ void Scene::Init()
 
 	if (!ModelLoader::GetInstance().Load(inportSetting)) return;
 
-#if 0
 	Vertex vertices[4]{};
 
 	vertices[0].Position = { -1.0f, 1.0f, 0.0f };
@@ -61,8 +61,6 @@ void Scene::Init()
 	m_Meshes.shrink_to_fit();	// メモリを解放
 	m_Meshes.push_back(mesh);	// メッシュデータを追加
 
-#endif
-
 	// メッシュの数だけ頂点バッファを用意する
 	m_pVertexBuffers.reserve(m_Meshes.size());
 	for (size_t i = 0; i < m_Meshes.size(); ++i)
@@ -87,12 +85,6 @@ void Scene::Init()
 
 		m_pIndexBuffers.push_back(pIB);
 	}
-
-	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(0.0f, 5.0f, 5.0f, 0.0f);
-	DirectX::XMVECTOR targetPos = DirectX::XMVectorZero();
-	DirectX::XMVECTOR upVec = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	float fov = DirectX::XMConvertToRadians(45.0f);
-	float aspect = static_cast<float>(Window::GetInstance().GetWidth()) / static_cast<float>(Window::GetInstance().GetHeight());
 
 	// 定数バッファの生成
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
@@ -132,6 +124,13 @@ void Scene::Init()
 	m_pPipelineState->SetVS(L"Assets/Shader/SimpleVS.cso");
 	m_pPipelineState->SetPS(L"Assets/Shader/SimplePS.cso");
 	m_pPipelineState->Create();
+#endif
+
+	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(0.0f, 5.0f, 5.0f, 0.0f);
+	DirectX::XMVECTOR targetPos = DirectX::XMVectorZero();
+	DirectX::XMVECTOR upVec = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	float fov = DirectX::XMConvertToRadians(45.0f);
+	float aspect = static_cast<float>(Window::GetInstance().GetWidth()) / static_cast<float>(Window::GetInstance().GetHeight());
 
 	// Cameraの生成
 	m_pCamera = new Camera(eyePos, targetPos, upVec, fov, aspect);
@@ -198,6 +197,7 @@ void Scene::UnInit()
 	delete m_pCamera;
 	m_pCamera = nullptr;
 
+#if 0
 	for (auto& vb : m_pVertexBuffers)
 	{
 		delete vb;
@@ -230,4 +230,5 @@ void Scene::UnInit()
 
 	m_pMaterialHandles.clear();
 	m_pMaterialHandles.shrink_to_fit();
+#endif
 }

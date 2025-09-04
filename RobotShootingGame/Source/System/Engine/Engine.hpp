@@ -58,7 +58,7 @@ private:
 	/**
 	 * @brief デストラクタ
 	 */
-	~Engine() = default;
+	~Engine();
 
 	HRESULT CreateDevice();							
 	HRESULT CreateCommandQueue();
@@ -95,7 +95,7 @@ private:
 	ComPtr<ID3D12DescriptorHeap> m_pDsvHeap{};		// DSVディスクリプタヒープ
 	ComPtr<ID3D12Resource> m_pDepthStencil{};		// 深度ステンシルバッファ
 
-	ID3D12Resource* m_pCurrentRenderTarget{}; // 現在のレンダーターゲット
+	ComPtr<ID3D12Resource> m_pCurrentRenderTarget{}; // 現在のレンダーターゲット
 
 	HWND m_hWnd{};			// ウィンドウハンドル
 };
