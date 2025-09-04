@@ -49,6 +49,17 @@ public:
 	UINT GetCurrentBackBufferIndex() const { return m_CurrentBackBufferIndex; }
 
 private:
+	friend class Singleton<Engine>;
+	/**
+	 * @brief コンストラクタ
+	 */
+	Engine() = default;
+
+	/**
+	 * @brief デストラクタ
+	 */
+	~Engine() = default;
+
 	HRESULT CreateDevice();							
 	HRESULT CreateCommandQueue();
 	HRESULT CreateSwapChain();

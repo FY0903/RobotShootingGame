@@ -21,13 +21,23 @@
 class Window : public Singleton<Window>
 {
 public:
-	HRESULT Init(uint32_t width, uint32_t height);
+	HRESULT Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdShow);
 
 	HWND GetHandle() const { return m_hWnd; }
 	uint32_t GetWidth() const { return m_unWidth; }
 	uint32_t GetHeight() const { return m_unHeight; }
 
 private:
+	friend class Singleton<Window>;
+	/**
+	 * @brief コンストラクタ
+	 */
+	Window() = default;
+	/**
+	 * @brief デストラクタ
+	 */
+	~Window() = default;
+
 	static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	HINSTANCE m_hInst{};	// インスタンスハンドル

@@ -61,6 +61,15 @@
     <Filter Include="Source\Utility\Texture2D">
       <UniqueIdentifier>{34d5198d-2681-4ff1-b64f-3958f2abcc7b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game\Object">
+      <UniqueIdentifier>{2085f1d7-3a9b-4bba-97f7-ab56a360796d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Camera">
+      <UniqueIdentifier>{b5e335e4-d8e8-4be0-b57a-f4474bb93418}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Input">
+      <UniqueIdentifier>{56a60273-c18b-411e-8c63-fcfaa2d10958}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -107,6 +116,15 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Texture2D\Texture2D.cpp">
       <Filter>Source\Utility\Texture2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Object\Object.cpp">
+      <Filter>Source\Game\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Camera\Camera.cpp">
+      <Filter>Source\Game\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Input\Input.cpp">
+      <Filter>Source\Utility\Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -155,12 +173,24 @@
     <ClInclude Include="Source\Utility\Texture2D\Texture2D.hpp">
       <Filter>Source\Utility\Texture2D</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Game\Object\Object.hpp">
+      <Filter>Source\Game\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Camera\Camera.hpp">
+      <Filter>Source\Game\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Input\Input.hpp">
+      <Filter>Source\Utility\Input</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\SimpleVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DebugPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

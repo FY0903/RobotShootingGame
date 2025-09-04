@@ -19,7 +19,7 @@ namespace
 	constexpr LPCSTR ClassName = "RobotShootingGameWindowClass"; // ウィンドウクラス名
 }
 
-HRESULT Window::Init(uint32_t width, uint32_t height)
+HRESULT Window::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdShow)
 {
 	m_unWidth = width;
 	m_unHeight = height;

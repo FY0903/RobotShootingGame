@@ -16,16 +16,23 @@
 //	include
 // ==============================
 #include "App.hpp"
+#include "../Utility/Input/Input.hpp"
 
 // ==============================
 //	lib
 // ==============================
 #pragma comment(lib, "winmm.lib")
 
-App::App(uint32_t width, uint32_t height)
+App::~App()
+{
+	// Sceneの終了処理
+	m_Scene.UnInit();
+}
+
+void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdShow)
 {
 	// ウィンドウの初期化
-	if (FAILED(Window::GetInstance().Init(width, height)))
+	if (FAILED(Window::GetInstance().Init(width, height, hInstance, nCmdShow)))
 	{
 		MessageBox(nullptr, "ウィンドウの初期化に失敗しました", "エラー", MB_OK);
 		exit(-1);
@@ -34,18 +41,21 @@ App::App(uint32_t width, uint32_t height)
 	// Engineの初期化
 	Engine::GetInstance().Init(Window::GetInstance().GetHandle());
 
+	// Inputの初期化
+	Input::Init();
+
 	// Sceneの初期化
 	m_Scene.Init();
 }
 
-App::~App()
-{
-	// Sceneの終了処理
-	m_Scene.UnInit();
-}
-
 void App::Run()
 {
+#ifdef _DEBUG
+	DWORD fpsCount = 0;    // FPSカウント
+	DWORD FPS = 0;        // 直近のFPS
+	DWORD fpsTime = timeGetTime(); // FPS計測用の時間
+#endif // _DEBUG
+
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (msg.message != WM_QUIT)
@@ -59,10 +69,37 @@ void App::Run()
 		}
 		else
 		{
+			// キー入力の更新
+			Input::Update();
+
+			// シーンの更新と描画
 			m_Scene.Update();
 			Engine::GetInstance().BeginDraw();
 			m_Scene.Draw();
 			Engine::GetInstance().EndDraw();
+
+			Input::EndUpdateInput();
+
+#ifdef _DEBUG
+
+			++fpsCount;// 処理回数をカウント
+
+			// ------------------------------
+			//    FPSの計測
+			// ------------------------------
+			if (timeGetTime() - fpsTime >= 1000)    // 1000ms経過したら
+			{
+				// 整数型から文字列へ変換
+				std::string mes;
+				mes = "fps:" + std::to_string(fpsCount);
+
+				SetWindowText(Window::GetInstance().GetHandle(), mes.c_str());    // FPSの表示
+
+				// 次の計測の準備
+				fpsCount = 0;
+				fpsTime = timeGetTime();
+			}
+#endif // _DEBUG
 		}
 	}
 }

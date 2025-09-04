@@ -18,29 +18,33 @@
 // ==============================
 #include "Window/Window.hpp"
 #include "Engine/Engine.hpp"
+#include "../Utility/Singleton/Singleton.hpp"
 
 #include "../Game/Scene/Scene.hpp"
+#include "../Game/Object/Object.hpp"
 
-class App
+class App : public Singleton<App>
 {
 public:
-	/**
-	 * @brief コンストラクタ
-	 * @param width ウィンドウの幅
-	 * @param height ウィンドウの高さ
-	 */
-	App(uint32_t width, uint32_t height);
+	void Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdShow);
 
-	/**
-	 * @brief デストラクタ
-	 */
-	~App();
-	
 	/**
 	 * @brief アプリケーションを実行
 	 */
 	void Run();
 
 private:
+	friend class Singleton<App>;
+
+	/**
+	 * @brief コンストラクタ
+	 */
+	App() = default;
+
+	/**
+	 * @brief デストラクタ
+	 */
+	~App();
+
 	Scene m_Scene{};	// Scene
 };

@@ -24,7 +24,8 @@
 constexpr uint32_t WINDOW_WIDTH = 960;	// ウィンドウの幅
 constexpr uint32_t WINDOW_HEIGHT = 540;	// ウィンドウの高さ
 
-int main()
+_Use_decl_annotations_
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -32,8 +33,8 @@ int main()
 #endif
 
 	// アプリケーションを実行
-	App app(WINDOW_WIDTH, WINDOW_HEIGHT);
-	app.Run();
+	App::GetInstance().Init(WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nCmdShow);
+	App::GetInstance().Run();
 
 	// シングルトンの終了処理
 	SingletonFinalizer::Finalize();

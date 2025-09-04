@@ -1,8 +1,8 @@
 /*+===================================================================
-	File: Scene.hpp
+	File: Object.hpp
 	Summary: （このファイルで何をするか記載する）
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/09/02 14:54:10 初回作成
+	Date: 2025/09/04 10:24:12 初回作成
 	（これ以降下に更新日時と更新内容を書く）
 ===================================================================+*/
 #pragma once
@@ -11,49 +11,42 @@
 //	include
 // ==============================
 #include "../../System/Engine/Engine.hpp"
+#include "../../Utility/SharedStruct/SharedStruct.hpp"
 #include "../../Utility/VertexBuffer/VertexBuffer.hpp"
+#include "../../Utility/IndexBuffer/IndexBuffer.hpp"
 #include "../../Utility/ConstantBuffer/ConstantBuffer.hpp"
 #include "../../Utility/RootSignature/RootSignature.hpp"
 #include "../../Utility/PipelineState/PipelineState.hpp"
-#include "../../Utility/IndexBuffer/IndexBuffer.hpp"
-#include "../../Utility/SharedStruct/SharedStruct.hpp"
-#include "../../Utility/ModelLoader/ModelLoader.hpp"
-#include "../../Utility/DescriptorHeap/DescriptorHeap.hpp"
+#include <vector>
 
-#include "../Object/Object.hpp"
 #include "../Camera/Camera.hpp"
 
 /**
- * @brief Sceneクラス
+ * @brief Objectクラス
  */
-class Scene
+class Object
 {
 public:
 	/**
 	 * コンストラクタ
 	 */
-	Scene() = default;
+	Object(Camera& camera);
 
 	/**
 	 * デストラクタ
 	 */
-	~Scene() = default;
+	~Object();
 
-	void Init();
 	void Update();
 	void Draw();
-	void UnInit();
 
 private:
-	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
-	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
+	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
+	IndexBuffer* m_pIndexBuffer{};	// インデックスバッファ
 	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	RootSignature* m_pRootSignature{};	// ルートシグネチャ
 	PipelineState* m_pPipelineState{};	// パイプラインステート
 	std::vector<Mesh> m_Meshes{};		// メッシュデータ
-	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
 
-	Object* m_pObject{}; // Object
-	Camera* m_pCamera{}; // カメラ
+	Camera& m_Camera; // カメラ
 };

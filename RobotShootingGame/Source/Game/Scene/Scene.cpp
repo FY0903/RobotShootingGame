@@ -88,12 +88,13 @@ void Scene::Init()
 		m_pIndexBuffers.push_back(pIB);
 	}
 
-	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f);
+	DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(0.0f, 5.0f, 5.0f, 0.0f);
 	DirectX::XMVECTOR targetPos = DirectX::XMVectorZero();
 	DirectX::XMVECTOR upVec = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	float fov = DirectX::XMConvertToRadians(37.5f);
+	float fov = DirectX::XMConvertToRadians(45.0f);
 	float aspect = static_cast<float>(Window::GetInstance().GetWidth()) / static_cast<float>(Window::GetInstance().GetHeight());
 
+	// 定数バッファの生成
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
 		m_pConstantBuffer[i] = new ConstantBuffer(sizeof(Transform));
@@ -105,6 +106,7 @@ void Scene::Init()
 		ptr->Proj = DirectX::XMMatrixPerspectiveFovLH(fov, aspect, 0.1f, 1000.0f);
 	}
 
+	// マテリアル用のディスクリプタヒープを生成
 	m_pDescriptorHeap = new DescriptorHeap();
 	m_pMaterialHandles.clear();
 	for (size_t i = 0; i < m_Meshes.size(); ++i)
@@ -115,15 +117,27 @@ void Scene::Init()
 		m_pMaterialHandles.push_back(handle);
 	}
 
+	// ルートシグネチャの生成
 	m_pRootSignature = new RootSignature();
 	assert(m_pRootSignature);	// nullptrチェック
+	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_ALL); // 定数バッファ
+	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, D3D12_SHADER_VISIBILITY_PIXEL); // テクスチャ
+	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
+	m_pRootSignature->Create();
 
+	// パイプラインステートの生成
 	m_pPipelineState = new PipelineState();
 	m_pPipelineState->SetInputLayout(Vertex::InputLayout);
 	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
 	m_pPipelineState->SetVS(L"Assets/Shader/SimpleVS.cso");
 	m_pPipelineState->SetPS(L"Assets/Shader/SimplePS.cso");
 	m_pPipelineState->Create();
+
+	// Cameraの生成
+	m_pCamera = new Camera(eyePos, targetPos, upVec, fov, aspect);
+
+	// Objectの生成
+	m_pObject = new Object(*m_pCamera);
 }
 
 void Scene::Update()
@@ -139,10 +153,16 @@ void Scene::Update()
 	}
 	ptr->World = DirectX::XMMatrixRotationY(angle);
 #endif
+	// Cameraの更新
+	m_pCamera->Update();
+
+	// Objectの更新
+	m_pObject->Update();
 }
 
 void Scene::Draw()
 {
+#if 0
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
 	auto materialHeap = m_pDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
@@ -165,10 +185,19 @@ void Scene::Draw()
 
 		commandList->DrawIndexedInstanced(static_cast<UINT>(m_Meshes[i].Indices.size()), 1, 0, 0, 0);	// 描画
 	}
+#endif
+	// Objectの描画
+	m_pObject->Draw();
 }
 
 void Scene::UnInit()
 {
+	delete m_pObject;
+	m_pObject = nullptr;
+
+	delete m_pCamera;
+	m_pCamera = nullptr;
+
 	for (auto& vb : m_pVertexBuffers)
 	{
 		delete vb;
