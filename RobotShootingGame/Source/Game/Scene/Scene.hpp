@@ -22,6 +22,7 @@
 
 #include "../Object/Object.hpp"
 #include "../Camera/Camera.hpp"
+#include "../../Utility/Sprite/Sprite.hpp"
 
 /**
  * @brief Sceneクラス
@@ -58,4 +59,5 @@ private:
 
 	Object* m_pObject{}; // Object
 	Camera* m_pCamera{}; // カメラ
+	Sprite* m_pSprite{}; // スプライト
 };

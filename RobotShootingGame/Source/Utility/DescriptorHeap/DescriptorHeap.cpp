@@ -87,3 +87,28 @@ DescriptorHandle* DescriptorHeap::Register(Texture2D* texture)
 	m_pHandles.push_back(pHandle);
 	return pHandle;
 }
+
+DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc)
+{
+	auto count = m_pHandles.size();
+	if (count >= HANDLE_MAX) return nullptr;
+
+	DescriptorHandle* pHandle = new DescriptorHandle();
+
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = m_pHeap->GetCPUDescriptorHandleForHeapStart();	// ヒープの先頭ハンドルを取得
+	cpuHandle.ptr += m_IncrementSize * count;	// 登録されている数だけオフセット
+
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = m_pHeap->GetGPUDescriptorHandleForHeapStart();	// ヒープの先頭ハンドルを取得
+	gpuHandle.ptr += m_IncrementSize * count;	// 登録されている数だけオフセット
+
+	pHandle->HandleCPU = cpuHandle;
+	pHandle->HandleGPU = gpuHandle;
+
+	Engine::GetInstance().GetDevice()->CreateShaderResourceView(
+		resource,				// テクスチャ
+		&desc,					// SRVの設定（デフォルト）
+		pHandle->HandleCPU);	// CPUディスクリプタハンドル
+
+	m_pHandles.push_back(pHandle);
+	return pHandle;
+}

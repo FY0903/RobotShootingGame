@@ -126,6 +126,8 @@
     <ClCompile Include="Source\Utility\Input\Input.cpp">
       <Filter>Source\Utility\Input</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Sprite\Sprite.cpp" />
+    <ClCompile Include="Source\Utility\Texture\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
@@ -182,6 +184,8 @@
     <ClInclude Include="Source\Utility\Input\Input.hpp">
       <Filter>Source\Utility\Input</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Sprite\Sprite.hpp" />
+    <ClInclude Include="Source\Utility\Texture\Texture.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -191,6 +195,12 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\DebugPS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SpritePS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SpriteVS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

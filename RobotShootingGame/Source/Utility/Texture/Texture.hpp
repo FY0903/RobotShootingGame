@@ -10,30 +10,9 @@
 // ==============================
 //	include
 // ==============================
-
-// ==============================
-//	define
-// ==============================
-
-// ==============================
-//	構造体定義
-// ==============================
-
-// ==============================
-//	列挙型定義
-// ==============================
-
-// ==============================
-//	プロトタイプ宣言
-// ==============================
-
-// ==============================
-//	定数定義
-// ==============================
-
-// ==============================
-//	グローバル変数宣言
-// ==============================
+#include "../../../DirectXTex/d3dx12.h"
+#include "../ComPtr.h"
+#include <string>
 
 /**
  * @brief Textureクラス
@@ -50,4 +29,18 @@ public:
 	 * デストラクタ
 	 */
 	~Texture() = default;
+
+	HRESULT Load(const std::string& FileName);
+
+	UINT Width() const { return m_Width; }
+	UINT Height() const { return m_Height; }
+
+	ID3D12Resource* Resource() const { return m_pResource.Get(); }
+	D3D12_SHADER_RESOURCE_VIEW_DESC ViewDesc() const { return m_ViewDesc; }
+
+private:
+	UINT m_Width{};		// テクスチャの幅
+	UINT m_Height{};	// テクスチャの高さ
+	ComPtr<ID3D12Resource> m_pResource{};			// テクスチャリソース
+	D3D12_SHADER_RESOURCE_VIEW_DESC m_ViewDesc{};	// シェーダーリソースビューの設定
 };

@@ -22,7 +22,7 @@
 //	‘O•ûéŒ¾
 // ==============================
 struct Mesh;
-struct Vertex;
+struct MeshVertex;
 
 struct aiMesh;
 struct aiMaterial;

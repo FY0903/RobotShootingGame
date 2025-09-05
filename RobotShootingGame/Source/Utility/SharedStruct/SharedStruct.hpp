@@ -2,10 +2,26 @@
 
 #include <d3d12.h>
 #include <DirectXMath.h>
+#include <SimpleMath.h>
 #include <vector>
 #include <string>
 
-struct Vertex
+namespace Vertex
+{
+	struct Sprite
+	{
+		DirectX::SimpleMath::Vector3 Position;	// 頂点座標
+		DirectX::SimpleMath::Vector2 UV;		// UV座標
+
+		static const D3D12_INPUT_LAYOUT_DESC InputLayout;
+
+	private:
+		static const int InputElementCount = 2;
+		static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
+	};
+}
+
+struct MeshVertex
 {
 	DirectX::XMFLOAT3 Position;	// 頂点座標
 	DirectX::XMFLOAT3 Normal;	// 法線ベクトル
@@ -29,7 +45,7 @@ struct alignas(256) Transform
 
 struct Mesh
 {
-	std::vector<Vertex> Vertices;	// 頂点データ
+	std::vector<MeshVertex> Vertices;	// 頂点データ
 	std::vector<uint32_t> Indices;	// インデックスデータ
 	std::wstring DiffuseMap;		// ディフューズマップのファイルパス
 };

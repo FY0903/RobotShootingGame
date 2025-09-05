@@ -120,7 +120,7 @@ void ModelLoader::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inv
 		if (inverseU) uv->x = 1.0f - uv->x;
 		if (inverseV) uv->y = 1.0f - uv->y;
 
-		Vertex vertex{};
+		MeshVertex vertex{};
 		vertex.Position = { position->x, position->y, position->z };
 		vertex.Normal = { normal->x, normal->y, normal->z };
 		vertex.UV = { uv->x, uv->y };

@@ -12,7 +12,9 @@
 #include "Scene.hpp"
 #include "../../System/Window/Window.hpp"
 #include "../../Utility/Texture2D/Texture2D.hpp"
+#include "../../Utility/Texture/Texture.hpp"
 #include <iterator>
+#include <memory>
 
 void Scene::Init()
 {
@@ -137,6 +139,11 @@ void Scene::Init()
 
 	// Objectの生成
 	m_pObject = new Object(*m_pCamera);
+
+	// Spriteの生成
+	std::shared_ptr<Texture> texture = std::make_shared<Texture>();
+	texture->Load("Assets/Texture/ADC_COW.png");
+	m_pSprite = new Sprite(texture, *m_pCamera);
 }
 
 void Scene::Update()
@@ -156,7 +163,10 @@ void Scene::Update()
 	m_pCamera->Update();
 
 	// Objectの更新
-	m_pObject->Update();
+	//m_pObject->Update();
+
+	// Spriteの更新
+	m_pSprite->Update();
 }
 
 void Scene::Draw()
@@ -186,11 +196,17 @@ void Scene::Draw()
 	}
 #endif
 	// Objectの描画
-	m_pObject->Draw();
+	//m_pObject->Draw();
+
+	// Spriteの描画
+	m_pSprite->Draw();
 }
 
 void Scene::UnInit()
 {
+	delete m_pSprite;
+	m_pSprite = nullptr;
+
 	delete m_pObject;
 	m_pObject = nullptr;
 

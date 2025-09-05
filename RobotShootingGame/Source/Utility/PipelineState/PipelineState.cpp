@@ -20,10 +20,23 @@
 
 PipelineState::PipelineState()
 {
+	// ブレンドステートの設定
+	D3D12_BLEND_DESC desc{};
+	desc.AlphaToCoverageEnable = FALSE;											// アルファトゥカバレッジを無効
+	desc.IndependentBlendEnable = FALSE;										// レンダーターゲットごとのブレンドステートを無効
+	desc.RenderTarget[0].BlendEnable = TRUE;									// ブレンドを有効
+	desc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;						// ソースのブレンド係数
+	desc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;					// デストのブレンド係数
+	desc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;							// ブレンドの演算
+	desc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;						// ソースのアルファブレンド係数
+	desc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;						// デストのアルファブレンド係数
+	desc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;						// アルファブレンドの演算
+	desc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	// RGBA全てのチャンネルを描画
+
 	// パイプラインステートの設定
 	m_Desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);		// ラスタライザーステートの設定
 	m_Desc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;					// カリングしない
-	m_Desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);					// ブレンドステートの設定
+	m_Desc.BlendState = desc;												// ブレンドステートの設定
 	m_Desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);	// 深度ステンシルステートの設定
 	m_Desc.SampleMask = UINT_MAX;											// サンプルマスク
 	m_Desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;	// プリミティブトポロジーの設定（三角形リスト）
