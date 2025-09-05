@@ -57,6 +57,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Texture\Texture.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\VertexBuffer\VertexBuffer.cpp">
       <SubType>
       </SubType>
@@ -98,6 +102,10 @@
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp" />
     <ClInclude Include="Source\Utility\Singleton\Singleton.hpp" />
     <ClInclude Include="Source\Utility\Texture2D\Texture2D.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Texture\Texture.hpp">
       <SubType>
       </SubType>
     </ClInclude>

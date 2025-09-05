@@ -46,5 +46,5 @@ public:
 
 private:
 
-	//Scene m_Scene{};	// Scene
+	Scene m_Scene{};	// Scene
 };
