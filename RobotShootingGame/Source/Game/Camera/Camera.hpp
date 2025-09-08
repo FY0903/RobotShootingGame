@@ -21,7 +21,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	Camera(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR upVec, float fov, float aspect);
+	Camera(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR upVec, float radius, float fov, float aspect);
 
 	/**
 	 * デストラクタ
@@ -43,11 +43,13 @@ public:
 private:
 	void KeyMove();
 	void MouseMove();
+	void Zoom();
 
 	DirectX::XMVECTOR m_EyePos{};
 	DirectX::XMVECTOR m_TargetPos{};
 	DirectX::XMVECTOR m_UpVec{};
 
+	float m_Radius{}; // 半径
 	float m_RadXZ{}; // XZ平面でのラジアン
 	float m_RadY{};  // Y軸でのラジアン
 

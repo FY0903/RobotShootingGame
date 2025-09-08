@@ -57,6 +57,10 @@
     <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp" />
     <ClCompile Include="Source\Utility\SharedStruct\SharedStruct.cpp" />
     <ClCompile Include="Source\Utility\Singleton\Singleton.cpp" />
+    <ClCompile Include="Source\Utility\Sound\Sound.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Sprite\Sprite.cpp">
       <SubType>
       </SubType>
@@ -109,6 +113,10 @@
     <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp" />
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp" />
     <ClInclude Include="Source\Utility\Singleton\Singleton.hpp" />
+    <ClInclude Include="Source\Utility\Sound\Sound.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\Sprite\Sprite.hpp">
       <SubType>
       </SubType>

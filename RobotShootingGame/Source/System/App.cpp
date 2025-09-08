@@ -17,6 +17,7 @@
 // ==============================
 #include "App.hpp"
 #include "../Utility/Input/Input.hpp"
+#include "../Utility/Sound/Sound.hpp"
 
 // ==============================
 //	lib
@@ -38,6 +39,13 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 	// Inputの初期化
 	Input::Init();
 
+	// Soundの初期化
+	if (FAILED(Sound::GetInstance().Init()))
+	{
+		MessageBox(nullptr, "サウンドの初期化に失敗しました", "エラー", MB_OK);
+		exit(-1);
+	}
+
 	// Sceneの初期化
 	m_Scene.Init();
 }
@@ -46,6 +54,9 @@ void App::UnInit()
 {
 	// Sceneの終了処理
 	m_Scene.UnInit();
+
+	// Soundの終了処理
+	Sound::GetInstance().Uninit();
 }
 
 void App::Run()

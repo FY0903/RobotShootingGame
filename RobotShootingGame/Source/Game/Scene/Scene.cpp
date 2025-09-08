@@ -13,6 +13,7 @@
 #include "../../System/Window/Window.hpp"
 #include "../../Utility/Texture/Texture.hpp"
 #include "../../Utility/ModelLoader/ModelLoader.hpp"
+#include "../../Utility/Sound/Sound.hpp"
 #include <iterator>
 #include <memory>
 
@@ -25,7 +26,7 @@ void Scene::Init()
 	float aspect = static_cast<float>(Window::GetInstance().GetWidth()) / static_cast<float>(Window::GetInstance().GetHeight());
 
 	// CameraÇÃê∂ê¨
-	m_pCamera = new Camera(eyePos, targetPos, upVec, fov, aspect);
+	m_pCamera = new Camera(eyePos, targetPos, upVec, 10.0f, fov, aspect);
 
 	// ObjectÇÃê∂ê¨
 	m_pObject = new Object(*m_pCamera);
@@ -38,6 +39,11 @@ void Scene::Init()
 	// ModelÇÃê∂ê¨
 	std::vector<Mesh> meshes = ModelLoader::GetInstance().Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, true);
 	m_pModel = new Model(meshes, *m_pCamera);
+
+	// BGMÇÃì«Ç›çûÇ›Ç∆çƒê∂
+	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/TestBGM.mp3", false, true);
+	Sound::GetInstance().Play("BGM");
+	Sound::GetInstance().SetBGMVolume(0.5f);
 }
 
 void Scene::Update()

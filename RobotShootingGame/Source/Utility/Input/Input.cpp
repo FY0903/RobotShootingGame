@@ -65,6 +65,8 @@ namespace Input
 
 	void EndUpdateInput()
 	{
+		g_MouseWheelData = 0; // マウスホイールの入力情報をリセット
+
 		// マウス座標の保存
 		g_MouseSavePos = g_MousePos;
 	}

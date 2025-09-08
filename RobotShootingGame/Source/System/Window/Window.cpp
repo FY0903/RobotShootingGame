@@ -103,7 +103,7 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		return 0;
 
-	case WM_MOUSEHWHEEL:
+	case WM_MOUSEWHEEL:
 		Input::UpdateMouseWheel(GET_WHEEL_DELTA_WPARAM(wp));
 		break;
 
