@@ -21,91 +21,11 @@
 
 namespace fs = std::filesystem;
 
-std::wstring GetDirectoryPath(const std::wstring& filepath)
-{
-	fs::path path = filepath;
-
-	return path.remove_filename().c_str();
-}
-
 std::string GetDirectoryPath(const std::string& filepath)
 {
 	fs::path path = filepath;
 
 	return path.remove_filename().string();
-}
-
-std::string ToUTF8(const std::wstring& value)
-{
-    auto length = WideCharToMultiByte(CP_UTF8, 0U, value.data(), -1, nullptr, 0, nullptr, nullptr);
-    auto buffer = new char[length];
-
-    WideCharToMultiByte(CP_UTF8, 0U, value.data(), -1, buffer, length, nullptr, nullptr);
-
-    std::string result(buffer);
-    delete[] buffer;
-    buffer = nullptr;
-
-    return result;
-}
-
-std::wstring ToWideString(const std::string& str)
-{
-    auto num1 = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, str.c_str(), -1, nullptr, 0);
-
-    std::wstring wstr;
-    wstr.resize(num1);
-
-    auto num2 = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, str.c_str(), -1, &wstr[0], num1);
-
-    assert(num1 == num2);
-    return wstr;
-}
-
-bool ModelLoader::Load(const ImportSettings& settings)
-{
-	if (!settings.filename) return false;
-
-	auto& meshes = settings.meshes;
-	auto inverseU = settings.inverseU;
-	auto inverseV = settings.inverseV;
-
-	auto path = ToUTF8(settings.filename);
-
-	Assimp::Importer importer;
-	int flag = 0;
-	flag |= aiProcess_Triangulate;              // 三角形化
-	flag |= aiProcess_PreTransformVertices;     // 変換の適用
-	flag |= aiProcess_CalcTangentSpace;         // 接線空間の計算
-	flag |= aiProcess_GenSmoothNormals;			// スムースシェーディング用の法線を生成
-	flag |= aiProcess_GenUVCoords;				// UV座標の生成
-	flag |= aiProcess_RemoveRedundantMaterials;	// 冗長なマテリアルの削除
-	flag |= aiProcess_OptimizeMeshes;			// メッシュの最適化
-
-	auto scene = importer.ReadFile(path, flag);
-
-	if (!scene)
-	{
-		auto error = importer.GetErrorString();
-		OutputDebugStringA(error);
-		return false;
-	}
-
-	meshes.clear();
-	meshes.resize(scene->mNumMeshes);
-
-	// メッシュの読み込み
-	for (size_t i = 0; i < meshes.size(); ++i)
-	{
-		const auto pMesh = scene->mMeshes[i];
-		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
-		const auto pMaterial = scene->mMaterials[i];
-		LoadTexture(settings.filename, meshes[i], pMaterial);
-	}
-
-	scene = nullptr;
-
-	return true;
 }
 
 std::vector<Mesh> ModelLoader::Load(const std::string& FileName, bool inverseU, bool inverseV)
@@ -188,26 +108,6 @@ void ModelLoader::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inv
 		{
 			dst.Indices[i * 3 + j] = face->mIndices[j];
 		}
-	}
-}
-
-void ModelLoader::LoadTexture(const wchar_t* filename, Mesh& dst, const aiMaterial* src)
-{
-	aiString path;
-	if (src->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
-	{
-		auto dir = GetDirectoryPath(filename);
-		auto file = std::string(path.C_Str());
-		size_t idx = file.find_last_of('\\');
-		if (idx != std::wstring::npos)
-		{
-			file = file.substr(idx + 1);
-			//dst.DiffuseMap = dir + ToWideString(file);
-		}
-	}
-	else
-	{
-		dst.DiffuseMap.clear();
 	}
 }
 

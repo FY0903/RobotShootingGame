@@ -47,13 +47,10 @@ public:
 	~DescriptorHeap();
 
 	ID3D12DescriptorHeap* GetHeap() const { return m_pHeap.Get(); }
-	DescriptorHandle* Register(Texture2D* texture);
 	DescriptorHandle* Register(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
 
 private:
 	UINT m_IncrementSize{};	// ディスクリプタサイズ
 	ComPtr<ID3D12DescriptorHeap> m_pHeap{};	// ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_pHandles{};	// ディスクリプタハンドル
-
-	Texture2D* m_pTexture{};	// 破棄する用
 };

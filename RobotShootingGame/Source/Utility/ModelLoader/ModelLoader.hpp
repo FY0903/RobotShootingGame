@@ -22,23 +22,13 @@
 //	前方宣言
 // ==============================
 struct Mesh;
-struct MeshVertex;
 
 struct aiMesh;
 struct aiMaterial;
 
-struct ImportSettings
-{
-	const wchar_t* filename = nullptr;	// ファイルパス
-	std::vector<Mesh>& meshes;			// メッシュデータの格納先
-	bool inverseU = false;				// U座標を反転するか
-	bool inverseV = false;				// V座標を反転するか
-};
-
 class ModelLoader : public Singleton<ModelLoader>
 {
 public:
-	bool Load(const ImportSettings& settings);	// モデルの読み込み
 	std::vector<Mesh> Load(const std::string& FileName, bool inverseU, bool inverseV);
 
 private:
@@ -54,6 +44,5 @@ private:
 	~ModelLoader() = default;
 
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
-	void LoadTexture(const wchar_t* filename, Mesh& dst, const aiMaterial* src);
 	void LoadTexture(std::string FileName, Mesh& dst, const aiMaterial* src);
 };
