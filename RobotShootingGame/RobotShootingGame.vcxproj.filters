@@ -79,6 +79,12 @@
     <Filter Include="Source\Utility\Model">
       <UniqueIdentifier>{91094cef-3f23-48b9-9551-cba064f04d17}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Line">
+      <UniqueIdentifier>{a0a99dcf-0315-4af9-a26f-de34e58bc7fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Sound">
+      <UniqueIdentifier>{f6c38b53-ad91-434f-bd1a-acbbc511482e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -123,9 +129,6 @@
     <ClCompile Include="Source\Utility\DescriptorHeap\DescriptorHeap.cpp">
       <Filter>Source\Utility\DescriptorHeap</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Texture2D\Texture2D.cpp">
-      <Filter>Source\Utility\Texture2D</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Game\Object\Object.cpp">
       <Filter>Source\Game\Object</Filter>
     </ClCompile>
@@ -143,6 +146,12 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Model\Model.cpp">
       <Filter>Source\Utility\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Sound\Sound.cpp">
+      <Filter>Source\Utility\Sound</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Line\Line.cpp">
+      <Filter>Source\Utility\Line</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -188,9 +197,6 @@
     <ClInclude Include="Source\Utility\DescriptorHeap\DescriptorHeap.hpp">
       <Filter>Source\Utility\DescriptorHeap</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\Texture2D\Texture2D.hpp">
-      <Filter>Source\Utility\Texture2D</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Game\Object\Object.hpp">
       <Filter>Source\Game\Object</Filter>
     </ClInclude>
@@ -209,6 +215,12 @@
     <ClInclude Include="Source\Utility\Model\Model.hpp">
       <Filter>Source\Utility\Model</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Sound\Sound.hpp">
+      <Filter>Source\Utility\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Line\Line.hpp">
+      <Filter>Source\Utility\Line</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -224,25 +236,6 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\SpriteVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\PhongPS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\BumpVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\BumpPS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\CookTorrancePS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\GGXPS.hlsl" />
-    <FxCompile Include="Resource\TonemapVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\TonemapPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

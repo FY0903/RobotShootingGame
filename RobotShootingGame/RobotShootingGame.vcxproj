@@ -48,6 +48,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Utility\Input\Input.cpp" />
+    <ClCompile Include="Source\Utility\Line\Line.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp" />
     <ClCompile Include="Source\Utility\Model\Model.cpp">
       <SubType>
@@ -104,6 +108,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Input\Input.hpp" />
+    <ClInclude Include="Source\Utility\Line\Line.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp" />
     <ClInclude Include="Source\Utility\Model\Model.hpp">
       <SubType>
