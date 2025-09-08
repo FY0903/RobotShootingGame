@@ -10,127 +10,44 @@
 //	include
 // ==============================
 #include "ConstantBuffer.hpp"
-#include "../Pool/DescriptorPool/DescriptorPool.hpp"
+#include "../../../DirectXTex/d3dx12.h"
+#include "../../System/Engine/Engine.hpp"
 
-ConstantBuffer::~ConstantBuffer()
+ConstantBuffer::ConstantBuffer(size_t size)
 {
-	Term();
-}
+	size_t align = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
+	UINT64 sizeAligned = (size + (align - 1)) & ~(align - 1);	// 256バイトアライメントに調整
 
-bool ConstantBuffer::Init(ID3D12Device* pDevice, DescriptorPool* pPool, size_t size)
-{
-	if (!pDevice || !pPool || size == 0) return false;
-
-	assert(!m_pPool);	// 既に初期化されている場合はエラー
-	assert(!m_pHandle);	// 既にハンドルが割り当てられている場合はエラー
-
-	m_pPool = pPool;
-	m_pPool->AddRef();	// プールの参照カウントを増やす
-
-	size_t align = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;	// 定数バッファのアライメント
-	UINT64 sizeAligned = (size + (align - 1)) & ~(align - 1);	// アライメントされたサイズ
-
-	// ヒーププロパティ
-	D3D12_HEAP_PROPERTIES prop{};
-	prop.Type = D3D12_HEAP_TYPE_UPLOAD;	// ヒープのタイプ（アップロード用）
-	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;	// CPUページプロパティ（不明）
-	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;	// メモリプールの優先度（不明）
-	prop.CreationNodeMask = 1;	// 作成ノードマスク（単一ノード）
-	prop.VisibleNodeMask = 1;	// 可視ノードマスク（単一ノード）
-
-	// リソースの設定
-	D3D12_RESOURCE_DESC desc{};
-	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;	// リソースの次元（バッファ）
-	desc.Alignment = 0;	// アライメント（0ならデフォルト）
-	desc.Width = sizeAligned;	// リソースの幅（アライメントされたサイズ）
-	desc.Height = 1;	// 高さ（1なら1Dバッファ）
-	desc.DepthOrArraySize = 1;	// 深度または配列サイズ（1なら1Dバッファ）
-	desc.MipLevels = 1;	// ミップレベル（1ならミップマップなし）
-	desc.Format = DXGI_FORMAT_UNKNOWN;	// フォーマット（バッファなので不明）
-	desc.SampleDesc.Count = 1;	// サンプル数（1ならマルチサンプリングなし）
-	desc.SampleDesc.Quality = 0;	// サンプル品質（0ならデフォルト）
-	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;	// レイアウト（行メジャー）
-	desc.Flags = D3D12_RESOURCE_FLAG_NONE;	// リソースフラグ（なし）
+	CD3DX12_HEAP_PROPERTIES prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD); // ヒープのプロパティ
+	CD3DX12_RESOURCE_DESC resc = CD3DX12_RESOURCE_DESC::Buffer(sizeAligned); // リソースの設定
 
 	// リソースを生成
-	HRESULT hr = pDevice->CreateCommittedResource(
-		&prop,								// ヒーププロパティ
-		D3D12_HEAP_FLAG_NONE,				// ヒープフラグ（なし）
-		&desc,								// リソースの設定
-		D3D12_RESOURCE_STATE_GENERIC_READ,	// 初期状態（汎用読み取り）
-		nullptr,							// クリア値（なし）
-		IID_PPV_ARGS(m_pCB.GetAddressOf())); // リソースのポインタ
+	HRESULT hr = Engine::GetInstance().GetDevice()->CreateCommittedResource(
+		&prop,								// ヒープのプロパティ
+		D3D12_HEAP_FLAG_NONE,				// ヒープのフラグ
+		&resc,								// リソースの設定
+		D3D12_RESOURCE_STATE_GENERIC_READ,	// リソースの初期状態
+		nullptr,							// 最適化されたクリア値
+		IID_PPV_ARGS(m_pBuffer.ReleaseAndGetAddressOf())); // バッファのポインタ
+
 	if (FAILED(hr))
 	{
-		MessageBox(nullptr, "定数バッファの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
+		MessageBox(nullptr, "ConstantBufferの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return; // エラー終了
 	}
 
-	// マッピング
-	hr = m_pCB->Map(0, nullptr, &m_pMappedPtr);
-	if (FAILED(hr) || !m_pMappedPtr)
+	// 定数バッファビューの設定
+	m_Desc.BufferLocation = m_pBuffer->GetGPUVirtualAddress();	// バッファの仮想アドレス
+	m_Desc.SizeInBytes = static_cast<UINT>(sizeAligned);		// バッファのサイズ
+
+	// マッピング(書き込み)
+	hr = m_pBuffer->Map(0, nullptr, &m_pMappedPtr);
+	if (FAILED(hr))
 	{
-		MessageBox(nullptr, "定数バッファのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
-		return false; // エラー終了
+		MessageBox(nullptr, "ConstantBufferのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return; // エラー終了
 	}
 
-	m_Desc.BufferLocation = m_pCB->GetGPUVirtualAddress(); // GPU仮想アドレスを取得
-	m_Desc.SizeInBytes = static_cast<UINT>(sizeAligned); // サイズを設定
-	m_pHandle = m_pPool->AllocHandle(); // ディスクリプタハンドルをプールから取得
-
-	pDevice->CreateConstantBufferView(
-		&m_Desc,					// 定数バッファビューの設定
-		m_pHandle->HandleCPU);		// CPUディスクリプタハンドル
-
-	return true; // 初期化成功
-}
-
-void ConstantBuffer::Term()
-{
-	// メモリマッピングを解除して、定数バッファを解放
-	if (m_pCB)
-	{
-		m_pCB->Unmap(0, nullptr); // マッピングを解除
-		m_pCB.Reset(); // リソースをリセット
-	}
-
-	// ビューを破棄
-	if (m_pPool)
-	{
-		m_pPool->FreeHandle(m_pHandle); // ディスクリプタハンドルをプールに返す
-		m_pHandle = nullptr;	// ハンドルポインタをリセット
-	}
-
-	// ディスクリプタプールを解放
-	if (m_pPool)
-	{
-		m_pPool->Release(); // プールの参照カウントを減らす
-		m_pPool = nullptr; // プールポインタをリセット
-	}
-
-	m_pMappedPtr = nullptr; // マッピングされたポインタをリセット
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE ConstantBuffer::GetHandleCPU() const
-{
-	if (m_pHandle)
-	{
-		return m_pHandle->HandleCPU; // CPUディスクリプタハンドルを返す
-	}
-	else
-	{
-		return D3D12_CPU_DESCRIPTOR_HANDLE(); // ハンドルがない場合は空のハンドルを返す
-	}
-}
-
-D3D12_GPU_DESCRIPTOR_HANDLE ConstantBuffer::GetHandleGPU() const
-{
-	if (m_pHandle)
-	{
-		return m_pHandle->HandleGPU; // GPUディスクリプタハンドルを返す
-	}
-	else
-	{
-		return D3D12_GPU_DESCRIPTOR_HANDLE(); // ハンドルがない場合は空のハンドルを返す
-	}
+	// 頂点データと異なり、マッピング解除しない
+	// 理由：定数バッファは頻繁に更新されるため、マッピング状態を維持することでパフォーマンスが向上するため
 }

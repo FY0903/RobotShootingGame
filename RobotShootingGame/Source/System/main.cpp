@@ -16,18 +16,32 @@
 //	include
 // ==============================
 #include "App.hpp"
+#include "../Utility/Singleton/Singleton.hpp"
+#include "../System/Engine/Engine.hpp"
 
-int main()
+// ==============================
+//	constexpr
+// ==============================
+constexpr uint32_t WINDOW_WIDTH = 960;	// ウィンドウの幅
+constexpr uint32_t WINDOW_HEIGHT = 540;	// ウィンドウの高さ
+
+_Use_decl_annotations_
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	// _CrtSetBreakAlloc(13134);
 #endif
 
-	//_CrtSetBreakAlloc(396); // メモリリークの検出を有効化（必要に応じて行番号を変更）
+	App App;
 
 	// アプリケーションを実行
-	App app(960, 540, DXGI_FORMAT_R10G10B10A2_UNORM);
-	app.Run();
+	App.Init(WINDOW_WIDTH, WINDOW_HEIGHT, hInstance, nCmdShow);
+	App.Run();
+	App.UnInit();
+
+	// シングルトンの終了処理
+	SingletonFinalizer::Finalize();
 
 	return 0;
 }

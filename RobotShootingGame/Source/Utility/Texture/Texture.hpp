@@ -1,23 +1,18 @@
 /*+===================================================================
 	File: Texture.hpp
-	Summary: テクスチャクラスのヘッダファイル
+	Summary: （このファイルで何をするか記載する）
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/07/24 16:30 初回作成
+	Date: 2025/09/05 9:36:05 初回作成
+	（これ以降下に更新日時と更新内容を書く）
 ===================================================================+*/
 #pragma once
 
 // ==============================
 //	include
 // ==============================
-#include <d3d12.h>
+#include "../../../DirectXTex/d3dx12.h"
 #include "../ComPtr.h"
-#include <ResourceUploadBatch.h>
-
-// ==============================
-//	前方宣言
-// ==============================
-class DescriptorHandle;
-class DescriptorPool;
+#include <string>
 
 /**
  * @brief Textureクラス
@@ -33,59 +28,19 @@ public:
 	/**
 	 * デストラクタ
 	 */
-	~Texture();
+	~Texture() = default;
 
-	/**
-	 * @brief 指定されたデバイス、ディスクリプタプール、ファイル名、およびリソースアップロードバッチを使用して初期化を行います。
-	 * @param [pDevice] 初期化に使用するID3D12Deviceへのポインタ。
-	 * @param [pPool] ディスクリプタプールへのポインタ。
-	 * @param [filename] 初期化に使用するファイル名（ワイド文字列）。
-	 * @param [isSRGB] sRGBカラー空間を使用するかどうかを示す真偽値。
-	 * @param [uploadBatch] DirectX::ResourceUploadBatchへの参照。リソースのアップロードに使用されます。
-	 * @return 初期化が成功した場合はtrue、失敗した場合はfalseを返します。
-	 */
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const wchar_t* filename, bool isSRGB, DirectX::ResourceUploadBatch& uploadBatch);
+	HRESULT Load(const std::string& FileName);
 
-	/**
-	 * @brief ID3D12Device、DiscriptorPool、およびリソース記述を使用して初期化を行います。
-	 * @param [pDevice] 初期化に使用するID3D12Deviceへのポインタ。
-	 * @param [pPool] ディスクリプタプールへのポインタ。
-	 * @param [pDesc] リソースの記述を示すD3D12_RESOURCE_DESC構造体へのポインタ。
-	 * @param [isSRGB] sRGBカラー空間を使用するかどうかを示す真偽値。
-	 * @param [isCube] リソースがキューブマップかどうかを示す真偽値。
-	 * @return 初期化が成功した場合はtrue、失敗した場合はfalseを返します。
-	 */
-	bool Init(ID3D12Device* pDevice, DescriptorPool* pPool, const D3D12_RESOURCE_DESC* pDesc, bool isSRGB, bool isCube);
+	UINT Width() const { return m_Width; }
+	UINT Height() const { return m_Height; }
 
-	/**
-	 * @brief 終了処理を実行します。
-	 */
-	void Term();
-
-	/**
-	 * @brief CPU ディスクリプタ ハンドルを取得します。
-	 * @return D3D12_CPU_DESCRIPTOR_HANDLE 型の CPU ディスクリプタ ハンドルを返します。
-	 */
-	D3D12_CPU_DESCRIPTOR_HANDLE GetHandleCPU() const;
-
-	/**
-	 * @brief GPU ディスクリプタ ハンドルを取得します。
-	 * @return D3D12_GPU_DESCRIPTOR_HANDLE 型の GPU ディスクリプタ ハンドルを返します。
-	 */
-	D3D12_GPU_DESCRIPTOR_HANDLE GetHandleGPU() const;
+	ID3D12Resource* Resource() const { return m_pResource.Get(); }
+	D3D12_SHADER_RESOURCE_VIEW_DESC ViewDesc() const { return m_ViewDesc; }
 
 private:
-	/**
-	 * @brief キューブマップかどうかに応じた D3D12 シェーダーリソースビューの記述子を取得します。
-	 * @param [isCube] キューブマップの場合は true、そうでない場合は false を指定します。
-	 * @return 指定された条件に基づく D3D12_SHADER_RESOURCE_VIEW_DESC 構造体を返します。
-	 */
-	D3D12_SHADER_RESOURCE_VIEW_DESC GetViewDesc(bool isCube);
-
-	Texture(const Texture&) = delete; // コピーコンストラクタを削除
-	void operator=(const Texture&) = delete; // コピー代入演算子を削除
-
-	ComPtr<ID3D12Resource> m_pTex{};	// テクスチャリソース
-	DescriptorHandle* m_pHandle{};	// ディスクリプタハンドル
-	DescriptorPool* m_pPool{};		// ディスクリプタプール
+	UINT m_Width{};		// テクスチャの幅
+	UINT m_Height{};	// テクスチャの高さ
+	ComPtr<ID3D12Resource> m_pResource{};			// テクスチャリソース
+	D3D12_SHADER_RESOURCE_VIEW_DESC m_ViewDesc{};	// シェーダーリソースビューの設定
 };
