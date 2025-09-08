@@ -24,6 +24,7 @@ namespace Input
 		POINT g_MouseSavePos;		// マウスの保存用座標
 		POINTS g_MouseRelativePos;	// マウスポインタのウィンドウ上の相対座標
 		short g_MouseWheelData;		// マウスホイールの入力情報
+		bool g_MiddleButton;		// マウスの中ボタンの入力情報
 	}
 
 	HRESULT Init()
@@ -61,6 +62,11 @@ namespace Input
 	void UpdateMouseWheel(short wheelDelta)
 	{
 		g_MouseWheelData = wheelDelta;
+	}
+
+	void UpdateMiddleButton(bool pressed)
+	{
+		g_MiddleButton = pressed;
 	}
 
 	void EndUpdateInput()
@@ -128,5 +134,9 @@ namespace Input
 	int GetMouseWheelInput()
 	{
 		return g_MouseWheelData;
+	}
+	bool IsMiddleButtonPress()
+	{
+		return g_MiddleButton;
 	}
 }

@@ -25,6 +25,8 @@ namespace Input
 
 	void UpdateMouseWheel(short wheelDelta);
 
+	void UpdateMiddleButton(bool pressed);
+
 	void EndUpdateInput();
 
 	bool IsKeyPress(BYTE key);
@@ -44,4 +46,6 @@ namespace Input
 	POINTS GetMouseRelativePos();
 
 	int GetMouseWheelInput();
+
+	bool IsMiddleButtonPress();
 }

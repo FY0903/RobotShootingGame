@@ -107,6 +107,14 @@ LRESULT CALLBACK Window::WndProc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		Input::UpdateMouseWheel(GET_WHEEL_DELTA_WPARAM(wp));
 		break;
 
+	case WM_MBUTTONUP:
+		Input::UpdateMiddleButton(false);
+		break;
+
+	case WM_MBUTTONDOWN:
+		Input::UpdateMiddleButton(true);
+		break;
+
 	case WM_MOUSEMOVE:
 		Input::UpdateRelativeMousePos(lp);
 		break;

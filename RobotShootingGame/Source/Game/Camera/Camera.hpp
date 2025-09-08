@@ -44,6 +44,7 @@ private:
 	void KeyMove();
 	void MouseMove();
 	void Zoom();
+	void MoveTarget();
 
 	DirectX::XMVECTOR m_EyePos{};
 	DirectX::XMVECTOR m_TargetPos{};
