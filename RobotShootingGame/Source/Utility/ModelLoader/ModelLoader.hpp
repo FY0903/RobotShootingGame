@@ -39,6 +39,7 @@ class ModelLoader : public Singleton<ModelLoader>
 {
 public:
 	bool Load(const ImportSettings& settings);	// ƒ‚ƒfƒ‹‚Ì“Ç‚İ‚İ
+	std::vector<Mesh> Load(const std::string& FileName, bool inverseU, bool inverseV);
 
 private:
 	friend class Singleton<ModelLoader>;
@@ -54,4 +55,5 @@ private:
 
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
 	void LoadTexture(const wchar_t* filename, Mesh& dst, const aiMaterial* src);
+	void LoadTexture(std::string FileName, Mesh& dst, const aiMaterial* src);
 };

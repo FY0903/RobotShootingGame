@@ -11,6 +11,7 @@
 // ==============================
 #include "Sprite.hpp"
 #include "../SharedStruct/SharedStruct.hpp"
+#include "../../Game/Camera/Camera.hpp"
 
 Sprite::Sprite(std::shared_ptr<Texture> texture, Camera& camera)
 	: m_pTexture(texture), m_Camera(camera)
@@ -48,6 +49,7 @@ Sprite::Sprite(std::shared_ptr<Texture> texture, Camera& camera)
 	m_pMaterialHandle = m_pDescriptorHeap->Register(m_pTexture->Resource(), m_pTexture->ViewDesc());
 	assert(m_pMaterialHandle);	// nullptrチェック
 
+	// 定数バッファの生成
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
 		m_pConstantBuffer[i] = new ConstantBuffer(sizeof(Transform));

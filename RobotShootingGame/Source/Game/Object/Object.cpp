@@ -16,7 +16,7 @@ Object::Object(Camera& camera)
 	: m_Camera(camera)
 {
 	// 頂点バッファの生成
-	MeshVertex vertices[4 * 6]{};
+	Vertex::Mesh vertices[4 * 6]{};
 
 	// +Z面
 	vertices[0].Position = { -1.0f, 1.0f, 1.0f };
@@ -91,8 +91,8 @@ Object::Object(Camera& camera)
 	}
 
 	// 頂点バッファの生成
-	auto vertexSize = std::size(vertices) * sizeof(MeshVertex);
-	auto vertexStride = sizeof(MeshVertex);
+	auto vertexSize = std::size(vertices) * sizeof(Vertex::Mesh);
+	auto vertexStride = sizeof(Vertex::Mesh);
 	m_pVertexBuffer = new VertexBuffer(vertexSize, vertexStride, vertices);
 	assert(m_pVertexBuffer);	// nullptrチェック
 
@@ -124,7 +124,7 @@ Object::Object(Camera& camera)
 	assert(m_pIndexBuffer);	// nullptrチェック
 
 	Mesh mesh{};
-	mesh.Vertices = std::vector<MeshVertex>(std::begin(vertices), std::end(vertices));
+	mesh.Vertices = std::vector<Vertex::Mesh>(std::begin(vertices), std::end(vertices));
 	mesh.Indices = std::vector<uint32_t>(std::begin(indices), std::end(indices));
 	m_Meshes.push_back(mesh);
 
@@ -149,7 +149,7 @@ Object::Object(Camera& camera)
 	// パイプラインステートの生成
 	m_pPipelineState = new PipelineState();
 	assert(m_pPipelineState);	// nullptrチェック
-	m_pPipelineState->SetInputLayout(MeshVertex::InputLayout);
+	m_pPipelineState->SetInputLayout(Vertex::Mesh::InputLayout);
 	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
 	m_pPipelineState->SetVS(L"Assets/Shader/SimpleVS.cso");
 	m_pPipelineState->SetPS(L"Assets/Shader/DebugPS.cso");

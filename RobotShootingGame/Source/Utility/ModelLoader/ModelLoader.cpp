@@ -28,6 +28,13 @@ std::wstring GetDirectoryPath(const std::wstring& filepath)
 	return path.remove_filename().c_str();
 }
 
+std::string GetDirectoryPath(const std::string& filepath)
+{
+	fs::path path = filepath;
+
+	return path.remove_filename().string();
+}
+
 std::string ToUTF8(const std::wstring& value)
 {
     auto length = WideCharToMultiByte(CP_UTF8, 0U, value.data(), -1, nullptr, 0, nullptr, nullptr);
@@ -101,6 +108,46 @@ bool ModelLoader::Load(const ImportSettings& settings)
 	return true;
 }
 
+std::vector<Mesh> ModelLoader::Load(const std::string& FileName, bool inverseU, bool inverseV)
+{
+	Assimp::Importer importer;
+	int flag = 0;
+	flag |= aiProcess_Triangulate;              // 三角形化
+	flag |= aiProcess_PreTransformVertices;     // 変換の適用
+	flag |= aiProcess_CalcTangentSpace;         // 接線空間の計算
+	flag |= aiProcess_GenSmoothNormals;			// スムースシェーディング用の法線を生成
+	flag |= aiProcess_GenUVCoords;				// UV座標の生成
+	flag |= aiProcess_RemoveRedundantMaterials;	// 冗長なマテリアルの削除
+	flag |= aiProcess_OptimizeMeshes;			// メッシュの最適化
+
+	auto scene = importer.ReadFile(FileName, flag);
+
+	if (!scene)
+	{
+		auto error = importer.GetErrorString();
+		OutputDebugStringA(error);
+		assert(0 && "モデルの読み込みに失敗");
+	}
+
+	std::vector<Mesh> meshes;
+
+	meshes.clear();
+	meshes.resize(scene->mNumMeshes);
+
+	// メッシュの読み込み
+	for (size_t i = 0; i < meshes.size(); ++i)
+	{
+		const auto pMesh = scene->mMeshes[i];
+		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
+		const auto pMaterial = scene->mMaterials[i];
+		LoadTexture(FileName, meshes[i], pMaterial);
+	}
+
+	scene = nullptr;
+
+	return meshes;
+}
+
 void ModelLoader::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV)
 {
 	aiVector3D zero3D(0.0f, 0.0f, 0.0f);
@@ -120,7 +167,7 @@ void ModelLoader::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inv
 		if (inverseU) uv->x = 1.0f - uv->x;
 		if (inverseV) uv->y = 1.0f - uv->y;
 
-		MeshVertex vertex{};
+		Vertex::Mesh vertex{};
 		vertex.Position = { position->x, position->y, position->z };
 		vertex.Normal = { normal->x, normal->y, normal->z };
 		vertex.UV = { uv->x, uv->y };
@@ -155,7 +202,27 @@ void ModelLoader::LoadTexture(const wchar_t* filename, Mesh& dst, const aiMateri
 		if (idx != std::wstring::npos)
 		{
 			file = file.substr(idx + 1);
-			dst.DiffuseMap = dir + ToWideString(file);
+			//dst.DiffuseMap = dir + ToWideString(file);
+		}
+	}
+	else
+	{
+		dst.DiffuseMap.clear();
+	}
+}
+
+void ModelLoader::LoadTexture(std::string FileName, Mesh& dst, const aiMaterial* src)
+{
+	aiString path;
+	if (src->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
+	{
+		auto dir = GetDirectoryPath(FileName);	// ディレクトリ名
+		auto file = std::string(path.C_Str());	// ファイル名
+		size_t idx = file.find_last_of('\\');	// 区切り文字を探す
+		if (idx != std::string::npos)
+		{
+			file = file.substr(idx + 1);	// 区切り文字以降を取得
+			dst.DiffuseMap = dir + file;	// フルパスを設定
 		}
 	}
 	else

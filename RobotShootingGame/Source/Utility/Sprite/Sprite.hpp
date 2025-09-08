@@ -18,8 +18,12 @@
 #include "../DescriptorHeap/DescriptorHeap.hpp"
 #include "../RootSignature/RootSignature.hpp"
 #include "../PipelineState/PipelineState.hpp"
-#include "../../Game/Camera/Camera.hpp"
 #include <memory>
+
+// ==============================
+//	‘O•ûéŒ¾
+// ==============================
+class Camera;
 
 /**
  * @brief SpriteƒNƒ‰ƒX

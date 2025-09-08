@@ -70,6 +70,15 @@
     <Filter Include="Source\Utility\Input">
       <UniqueIdentifier>{56a60273-c18b-411e-8c63-fcfaa2d10958}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Sprite">
+      <UniqueIdentifier>{8c2ef2ce-19b6-47e1-a63f-7ef4f5052c8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Texture">
+      <UniqueIdentifier>{a3da4029-11b6-49df-a96f-0813f0a6254e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Model">
+      <UniqueIdentifier>{91094cef-3f23-48b9-9551-cba064f04d17}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -126,8 +135,15 @@
     <ClCompile Include="Source\Utility\Input\Input.cpp">
       <Filter>Source\Utility\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Sprite\Sprite.cpp" />
-    <ClCompile Include="Source\Utility\Texture\Texture.cpp" />
+    <ClCompile Include="Source\Utility\Sprite\Sprite.cpp">
+      <Filter>Source\Utility\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Texture\Texture.cpp">
+      <Filter>Source\Utility\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Model\Model.cpp">
+      <Filter>Source\Utility\Model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
@@ -184,8 +200,15 @@
     <ClInclude Include="Source\Utility\Input\Input.hpp">
       <Filter>Source\Utility\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\Sprite\Sprite.hpp" />
-    <ClInclude Include="Source\Utility\Texture\Texture.hpp" />
+    <ClInclude Include="Source\Utility\Sprite\Sprite.hpp">
+      <Filter>Source\Utility\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Texture\Texture.hpp">
+      <Filter>Source\Utility\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Model\Model.hpp">
+      <Filter>Source\Utility\Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">

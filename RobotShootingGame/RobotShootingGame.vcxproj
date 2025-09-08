@@ -49,6 +49,10 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Input\Input.cpp" />
     <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp" />
+    <ClCompile Include="Source\Utility\Model\Model.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\PipelineState\PipelineState.cpp" />
     <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp" />
     <ClCompile Include="Source\Utility\SharedStruct\SharedStruct.cpp" />
@@ -101,6 +105,10 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Input\Input.hpp" />
     <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp" />
+    <ClInclude Include="Source\Utility\Model\Model.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\PipelineState\PipelineState.hpp" />
     <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp" />
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp" />

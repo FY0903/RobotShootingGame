@@ -10,19 +10,10 @@
 // ==============================
 //	include
 // ==============================
-#include "../../System/Engine/Engine.hpp"
-#include "../../Utility/VertexBuffer/VertexBuffer.hpp"
-#include "../../Utility/ConstantBuffer/ConstantBuffer.hpp"
-#include "../../Utility/RootSignature/RootSignature.hpp"
-#include "../../Utility/PipelineState/PipelineState.hpp"
-#include "../../Utility/IndexBuffer/IndexBuffer.hpp"
-#include "../../Utility/SharedStruct/SharedStruct.hpp"
-#include "../../Utility/ModelLoader/ModelLoader.hpp"
-#include "../../Utility/DescriptorHeap/DescriptorHeap.hpp"
-
 #include "../Object/Object.hpp"
 #include "../Camera/Camera.hpp"
 #include "../../Utility/Sprite/Sprite.hpp"
+#include "../../Utility/Model/Model.hpp"
 
 /**
  * @brief Sceneクラス
@@ -46,18 +37,8 @@ public:
 	void UnInit();
 
 private:
-#if 0
-	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
-	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
-	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	RootSignature* m_pRootSignature{};	// ルートシグネチャ
-	PipelineState* m_pPipelineState{};	// パイプラインステート
-	std::vector<Mesh> m_Meshes{};		// メッシュデータ
-	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
-#endif
-
 	Object* m_pObject{}; // Object
 	Camera* m_pCamera{}; // カメラ
 	Sprite* m_pSprite{}; // スプライト
+	Model* m_pModel{}; // モデル
 };
