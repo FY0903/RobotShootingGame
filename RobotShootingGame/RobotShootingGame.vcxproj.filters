@@ -238,6 +238,12 @@
     <FxCompile Include="Resource\SpriteVS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
+    <FxCompile Include="Resource\LinePS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\LineVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

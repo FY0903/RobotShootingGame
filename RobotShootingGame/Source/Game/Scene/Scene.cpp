@@ -40,6 +40,13 @@ void Scene::Init()
 	std::vector<Mesh> meshes = ModelLoader::GetInstance().Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, true);
 	m_pModel = new Model(meshes, *m_pCamera);
 
+	// Lineの生成
+	m_pLine = new Line(*m_pCamera);
+	m_pLine->AddPoint({ -10.0f, 0.0f, 0.0f }, { 10.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }); // X軸
+	m_pLine->AddPoint({ 0.0f, -10.0f, 0.0f }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }); // Y軸
+	m_pLine->AddPoint({ 0.0f, 0.0f, -10.0f }, { 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }); // Z軸
+	m_pLine->Create();
+
 	// BGMの読み込みと再生
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/TestBGM.mp3", false, true);
 	Sound::GetInstance().Play("BGM");
@@ -51,6 +58,9 @@ void Scene::Update()
 	// Cameraの更新
 	m_pCamera->Update();
 
+	// Lineの更新
+	m_pLine->Update();
+
 	// Objectの更新
 	//m_pObject->Update();
 
@@ -58,11 +68,14 @@ void Scene::Update()
 	//m_pSprite->Update();
 
 	// Modelの更新
-	m_pModel->Update();
+	//m_pModel->Update();
 }
 
 void Scene::Draw()
 {
+	// Lineの描画
+	m_pLine->Draw();
+
 	// Objectの描画
 	//m_pObject->Draw();
 
@@ -70,11 +83,14 @@ void Scene::Draw()
 	//m_pSprite->Draw();
 
 	// Modelの描画
-	m_pModel->Draw();
+	//m_pModel->Draw();
 }
 
 void Scene::UnInit()
 {
+	delete m_pLine;
+	m_pLine = nullptr;
+
 	delete m_pModel;
 	m_pModel = nullptr;
 

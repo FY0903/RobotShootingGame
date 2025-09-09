@@ -19,7 +19,6 @@ constexpr float CAMERA_MOVE_SPEED = 0.04f;	// カメラの移動速度
 constexpr float CAMERA_MOUSE_SENSITIVITY = 0.005f; // カメラのマウス感度
 constexpr float CAMERA_ZOOM_SPEED = 0.5f; // カメラのズーム速度
 constexpr float CAMERA_LIMIT_ZOOM_IN = 1.0f; // カメラのズームイン限界
-constexpr float CAMERA_LIMIT_ZOOM_OUT = 15.0f; // カメラのズームアウト限界
 constexpr float CAMERA_MIDDLE_BUTTON_SENSITIVITY = 0.001f; // カメラのマウス中ボタン感度
 
 Camera::Camera(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR upVec, float radius, float fov, float aspect)
@@ -87,10 +86,7 @@ void Camera::Zoom()
 	// マウスホイールが下にスクロールされた場合
 	if (Input::GetMouseWheelInput() < 0)
 	{
-		if (CAMERA_LIMIT_ZOOM_OUT > m_Radius)
-		{
-			m_Radius += CAMERA_ZOOM_SPEED;
-		}
+		m_Radius += CAMERA_ZOOM_SPEED;
 	}
 }
 

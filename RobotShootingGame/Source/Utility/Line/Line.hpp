@@ -10,6 +10,20 @@
 // ==============================
 //	include
 // ==============================
+#include "../../System/Engine/Engine.hpp"
+#include "../../Utility/SharedStruct/SharedStruct.hpp"
+#include "../../Utility/VertexBuffer/VertexBuffer.hpp"
+#include "../../Utility/IndexBuffer/IndexBuffer.hpp"
+#include "../../Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "../../Utility/RootSignature/RootSignature.hpp"
+#include "../../Utility/PipelineState/PipelineState.hpp"
+#include <vector>
+#include <SimpleMath.h>
+
+// ==============================
+//	前方宣言
+// ==============================
+class Camera;
 
 /**
  * @brief Lineクラス
@@ -20,10 +34,25 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	Line() = default;
+	Line(Camera& camera);
 
 	/**
 	 * デストラクタ
 	 */
-	~Line() = default;
+	~Line();
+
+	void Update();
+	void Draw();
+
+	void AddPoint(DirectX::SimpleMath::Vector3 start, DirectX::SimpleMath::Vector3 end, DirectX::SimpleMath::Vector4 color);
+	void Create();
+
+private:
+	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
+	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	RootSignature* m_pRootSignature{};	// ルートシグネチャ
+	PipelineState* m_pPipelineState{};	// パイプラインステート
+	std::vector<Vertex::Line> m_Lines{}; // 線の頂点データ
+
+	Camera& m_Camera; // カメラ
 };
