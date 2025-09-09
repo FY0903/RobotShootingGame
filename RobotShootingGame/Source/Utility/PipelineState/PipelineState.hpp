@@ -31,6 +31,7 @@ public:
 
 	void SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout);
 	void SetRootSignature(ID3D12RootSignature* pRootSignature);
+	void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
 	void SetVS(std::wstring filepath);
 	void SetPS(std::wstring filepath);
 	void Create();

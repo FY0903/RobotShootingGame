@@ -97,6 +97,7 @@ void Line::Create()
 	assert(m_pPipelineState);	// nullptrチェック
 	m_pPipelineState->SetInputLayout(Vertex::Line::InputLayout);
 	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
+	m_pPipelineState->SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 	m_pPipelineState->SetVS(L"Assets/Shader/LineVS.cso");
 	m_pPipelineState->SetPS(L"Assets/Shader/LinePS.cso");
 	m_pPipelineState->Create();

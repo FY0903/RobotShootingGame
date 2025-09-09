@@ -68,7 +68,7 @@ void Scene::Update()
 	//m_pSprite->Update();
 
 	// Model‚ÌXV
-	//m_pModel->Update();
+	m_pModel->Update();
 }
 
 void Scene::Draw()
@@ -83,7 +83,7 @@ void Scene::Draw()
 	//m_pSprite->Draw();
 
 	// Model‚Ì•`‰æ
-	//m_pModel->Draw();
+	m_pModel->Draw();
 }
 
 void Scene::UnInit()

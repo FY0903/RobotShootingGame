@@ -57,6 +57,11 @@ void PipelineState::SetRootSignature(ID3D12RootSignature* pRootSignature)
 	m_Desc.pRootSignature = pRootSignature;
 }
 
+void PipelineState::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type)
+{
+	m_Desc.PrimitiveTopologyType = type;
+}
+
 void PipelineState::SetVS(std::wstring filepath)
 {
 	HRESULT hr = D3DReadFileToBlob(filepath.c_str(), m_pVSBlob.GetAddressOf());
