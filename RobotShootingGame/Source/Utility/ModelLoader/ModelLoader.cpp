@@ -12,9 +12,6 @@
 // ==============================
 #include "ModelLoader.hpp"
 #include "../SharedStruct/SharedStruct.hpp"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include "../../../DirectXTex/d3dx12.h"
 #include <filesystem>
 #include <cassert>
@@ -129,4 +126,8 @@ void ModelLoader::LoadTexture(std::string FileName, Mesh& dst, const aiMaterial*
 	{
 		dst.DiffuseMap.clear();
 	}
+}
+
+void ModelLoader::CreateBone(aiNode* node)
+{
 }
