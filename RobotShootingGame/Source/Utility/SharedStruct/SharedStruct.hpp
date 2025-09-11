@@ -53,9 +53,7 @@ struct alignas(256) Transform
 	DirectX::XMMATRIX Proj{};		// 射影行列
 };
 
-struct Mesh
+struct alignas(256) BoneTransform
 {
-	std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
-	std::vector<uint32_t> Indices{};	// インデックスデータ
-	std::string DiffuseMap{};	// ディフューズマップのファイルパス
+	DirectX::XMMATRIX Matrix[4]{}; // ボーンの変形行列
 };

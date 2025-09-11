@@ -21,43 +21,89 @@
 #include <vector>
 #include <unordered_map>
 #include "../Singleton/Singleton.hpp"
+#include "../SharedStruct/SharedStruct.hpp"
 
-// ==============================
-//	前方宣言
-// ==============================
-struct Mesh;
+/**
+ * @brief 頂点の変形情報を格納する構造体です。
+ */
+struct DeformVertex
+{
+	aiVector3D Position{};		// 頂点座標
+	aiVector3D Normal{};		// 法線ベクトル
+	int BoneNum{};				// ボーンの数
+	std::string BoneName[4]{};	// ボーン名
+	float BoneWeight[4]{};		// ボーンの影響度
+};
 
-struct aiMesh;
-struct aiMaterial;
+/**
+ * @brief ボーンの変形、アニメーション、オフセット行列を保持する構造体です。
+ */
+struct Bone
+{
+	aiMatrix4x4 Matrix{}; // ボーンの変形行列
+	aiMatrix4x4 AnimationMatrix{}; // アニメーションの変形行列
+	aiMatrix4x4 OffsetMatrix{}; // ボーンのオフセット行列
+
+	std::string ChildBoneName{}; // 子ボーンの名前
+	size_t NumChildren{}; // 子ボーンの数
+};
+
+/**
+ * @brief 3Dメッシュのデータを格納する構造体です。
+ */
+struct Mesh
+{
+	std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
+	std::vector<uint32_t> Indices{};	// インデックスデータ
+	std::string DiffuseMap{};	// ディフューズマップのファイルパス
+
+	std::vector<DeformVertex> DeformVertices{}; // 変形頂点データ
+};
+
+/**
+ * @brief 3Dアニメーションのキーフレームを表す構造体です。
+ */
+struct KeyFrame
+{
+	aiVector3D Position{}; // 位置
+	aiQuaternion Rotation{}; // 回転
+	aiVector3D Scaling{}; // スケーリング
+};
+
+/**
+ * @brief ボーン名とキーフレームのリストを保持するチャンネル構造体です。
+ */
+struct Channel
+{
+	std::string BoneName{};				// ボーン名
+	std::vector<KeyFrame> KeyFrames{};	// キーフレームのリスト
+};
+
+/**
+ * @brief アニメーションのチャンネルと長さを表す構造体です。
+ */
+struct Animation
+{
+	std::vector<Channel> Channels{};	// チャンネルのリスト
+};
+
+/**
+ * @brief 3Dモデルのメッシュとボーンデータを格納する構造体です。
+ */
+struct ModelData
+{
+	std::vector<Mesh> Meshes{}; // メッシュデータ
+	std::unordered_map<std::string, Bone> Bones{}; // ボーンデータ
+	std::unordered_map<std::string, Animation> Animations{}; // アニメーションデータ
+	std::string RootNode{}; // ルートノード名
+};
 
 class ModelLoader : public Singleton<ModelLoader>
 {
 public:
-	std::vector<Mesh> Load(const std::string& FileName, bool inverseU, bool inverseV);
-
+	ModelData Load(const std::string& FileName, bool inverseU, bool inverseV);
+	HRESULT LoadAnimation(const std::string& FileName, ModelData& modelData, std::string name);
 private:
-	/**
-	 * @brief 頂点の変形情報を格納する構造体です。
-	 */
-	struct DeformVertex
-	{
-		aiVector3D Position{};		// 頂点座標
-		aiVector3D Normal{};		// 法線ベクトル
-		int BoneNum{};				// ボーンの数
-		std::string BoneName[4]{};	// ボーン名
-		float BoneWeight[4]{};		// ボーンの影響度
-	};
-
-	/**
-	 * @brief ボーンの変形、アニメーション、オフセット行列を保持する構造体です。
-	 */
-	struct Bone
-	{
-		aiMatrix4x4 Matrix{}; // ボーンの変形行列
-		aiMatrix4x4 AnimationMatrix{}; // アニメーションの変形行列
-		aiMatrix4x4 OffsetMatrix{}; // ボーンのオフセット行列
-	};
-
 	friend class Singleton<ModelLoader>;
 	/**
 	 * @brief コンストラクタ
@@ -70,7 +116,8 @@ private:
 	~ModelLoader() = default;
 
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
+	void LoadDeformVertex(Mesh& dst, const aiMesh* src);
+	void LoadBone(Mesh& dst, const aiMesh* src, std::unordered_map<std::string, Bone>& bones);
 	void LoadTexture(std::string FileName, Mesh& dst, const aiMaterial* src);
-	void CreateBone(aiNode* node);
-
+	void CreateBone(aiNode* node, std::unordered_map<std::string, Bone>& bones);
 };

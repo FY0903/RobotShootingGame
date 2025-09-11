@@ -36,7 +36,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	Model(std::vector<Mesh> Meshes, Camera& Camera);
+	Model(ModelData ModelData, Camera& Camera);
 
 	/**
 	 * デストラクタ
@@ -44,16 +44,20 @@ public:
 	~Model();
 
 	void Update();
+	void Update(std::string AnimationName_1, int frame_1, std::string AnimationName_2, int frame_2, float blendRate);
 	void Draw();
 
 private:
-	std::vector<Mesh> m_Meshes{};	// メッシュデータ
+	void UpdateBoneMatrix(std::string rootBone, aiMatrix4x4 matrix);
+
+	ModelData m_ModelData;		// モデルデータ
 	Camera& m_Camera;				// カメラ
 	std::vector<Texture*> m_pTextures{}; // テクスチャ
 
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
-	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	ConstantBuffer* m_pTransformBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	ConstantBuffer* m_pBoneBuffer[FRAME_BUFFER_COUNT]{};	// ボーン用定数バッファ
 	RootSignature* m_pRootSignature{};	// ルートシグネチャ
 	PipelineState* m_pPipelineState{};	// パイプラインステート
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ

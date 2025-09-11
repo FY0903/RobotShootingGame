@@ -37,8 +37,10 @@ void Scene::Init()
 	m_pSprite = new Sprite(texture, *m_pCamera);
 
 	// ModelÇÃê∂ê¨
-	std::vector<Mesh> meshes = ModelLoader::GetInstance().Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, true);
-	m_pModel = new Model(meshes, *m_pCamera);
+	ModelData model = ModelLoader::GetInstance().Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false);
+	ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/taiki_mae.fbx", model, "Idle");
+	ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/walk.fbx", model, "Walk");
+	m_pModel = new Model(model, *m_pCamera);
 
 	// LineÇÃê∂ê¨
 	m_pLine = new Line(*m_pCamera);
@@ -50,7 +52,7 @@ void Scene::Init()
 	// BGMÇÃì«Ç›çûÇ›Ç∆çƒê∂
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/TestBGM.mp3", false, true);
 	Sound::GetInstance().Play("BGM");
-	Sound::GetInstance().SetBGMVolume(0.5f);
+	Sound::GetInstance().SetBGMVolume(0.1f);
 }
 
 void Scene::Update()
@@ -69,6 +71,7 @@ void Scene::Update()
 
 	// ModelÇÃçXêV
 	m_pModel->Update();
+	//m_pModel->Update("Idle", 0, "Walk", 0, 0.0f);
 }
 
 void Scene::Draw()

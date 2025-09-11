@@ -24,8 +24,8 @@ Line::~Line()
 
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		delete m_pConstantBuffer[i];
-		m_pConstantBuffer[i] = nullptr;
+		delete m_pTransformBuffer[i];
+		m_pTransformBuffer[i] = nullptr;
 	}
 
 	delete m_pRootSignature;
@@ -38,7 +38,7 @@ Line::~Line()
 void Line::Update()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
-	Transform* ptr = m_pConstantBuffer[currentIndex]->GetPtr<Transform>();	// 定数バッファのポインタを取得
+	Transform* ptr = m_pTransformBuffer[currentIndex]->GetPtr<Transform>();	// 定数バッファのポインタを取得
 
 	ptr->View = m_Camera.GetViewMatrix();
 	ptr->Proj = m_Camera.GetProjectionMatrix();
@@ -53,7 +53,7 @@ void Line::Draw()
 	
 	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
 	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
-	commandList->SetGraphicsRootConstantBufferView(0, m_pConstantBuffer[currentIndex]->GetAddress());	// 定数バッファを設定
+	commandList->SetGraphicsRootConstantBufferView(0, m_pTransformBuffer[currentIndex]->GetAddress());	// 定数バッファを設定
 	
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);	// プリミティブトポロジーを設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);							// 頂点バッファを設定
@@ -78,9 +78,9 @@ void Line::Create()
 	// 定数バッファの生成
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pConstantBuffer[i] = new ConstantBuffer(sizeof(Transform));
-		assert(m_pConstantBuffer[i]);	// nullptrチェック
-		Transform* ptr = m_pConstantBuffer[i]->GetPtr<Transform>();
+		m_pTransformBuffer[i] = new ConstantBuffer(sizeof(Transform));
+		assert(m_pTransformBuffer[i]);	// nullptrチェック
+		Transform* ptr = m_pTransformBuffer[i]->GetPtr<Transform>();
 		ptr->World = DirectX::XMMatrixIdentity();
 		ptr->View = m_Camera.GetViewMatrix();
 		ptr->Proj = m_Camera.GetProjectionMatrix();

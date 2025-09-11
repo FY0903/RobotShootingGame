@@ -17,6 +17,7 @@
 #include "../../Utility/ConstantBuffer/ConstantBuffer.hpp"
 #include "../../Utility/RootSignature/RootSignature.hpp"
 #include "../../Utility/PipelineState/PipelineState.hpp"
+#include "../../Utility/ModelLoader/ModelLoader.hpp"
 #include <vector>
 
 #include "../Camera/Camera.hpp"
@@ -43,7 +44,7 @@ public:
 private:
 	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};	// インデックスバッファ
-	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	ConstantBuffer* m_pTransformBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	RootSignature* m_pRootSignature{};	// ルートシグネチャ
 	PipelineState* m_pPipelineState{};	// パイプラインステート
 	std::vector<Mesh> m_Meshes{};		// メッシュデータ
