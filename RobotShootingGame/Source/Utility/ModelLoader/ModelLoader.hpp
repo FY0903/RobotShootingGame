@@ -36,16 +36,17 @@ struct DeformVertex
 };
 
 /**
- * @brief ボーンの変形、アニメーション、オフセット行列を保持する構造体です。
+ * @brief ボーンの情報を保持する構造体です。
  */
 struct Bone
 {
+	std::string Name{}; // ボーン名
+	int ParentIndex{};	// 親ボーンのインデックス
+	std::vector<int> ChildIndices{};	// 子ボーンのインデックスリスト
+
 	aiMatrix4x4 Matrix{}; // ボーンの変形行列
 	aiMatrix4x4 AnimationMatrix{}; // アニメーションの変形行列
 	aiMatrix4x4 OffsetMatrix{}; // ボーンのオフセット行列
-
-	std::string ChildBoneName{}; // 子ボーンの名前
-	size_t NumChildren{}; // 子ボーンの数
 };
 
 /**
@@ -56,6 +57,8 @@ struct Mesh
 	std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
 	std::vector<uint32_t> Indices{};	// インデックスデータ
 	std::string DiffuseMap{};	// ディフューズマップのファイルパス
+	std::string NormalMap{};	// 法線マップのファイルパス
+	std::string SpecularMap{};	// スペキュラマップのファイルパス
 
 	std::vector<DeformVertex> DeformVertices{}; // 変形頂点データ
 };
@@ -93,9 +96,8 @@ struct Animation
 struct ModelData
 {
 	std::vector<Mesh> Meshes{}; // メッシュデータ
-	std::unordered_map<std::string, Bone> Bones{}; // ボーンデータ
+	std::vector<Bone> Bones{}; // ボーンデータ
 	std::unordered_map<std::string, Animation> Animations{}; // アニメーションデータ
-	std::string RootNode{}; // ルートノード名
 };
 
 class ModelLoader : public Singleton<ModelLoader>
@@ -115,9 +117,10 @@ private:
 	 */
 	~ModelLoader() = default;
 
+	void MakeBoneHierarchy(aiNode* node, int parentIndex, std::vector<Bone>& bones);
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
 	void LoadDeformVertex(Mesh& dst, const aiMesh* src);
-	void LoadBone(Mesh& dst, const aiMesh* src, std::unordered_map<std::string, Bone>& bones);
+	void LoadBone(Mesh& dst, const aiMesh* src, std::vector<Bone>& bones);
+	void LoadBone(aiNode* node, int parent, std::vector<Bone>& bones);
 	void LoadTexture(std::string FileName, Mesh& dst, const aiMaterial* src);
-	void CreateBone(aiNode* node, std::unordered_map<std::string, Bone>& bones);
 };

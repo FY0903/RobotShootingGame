@@ -46,11 +46,13 @@ ModelData ModelLoader::Load(const std::string& FileName, bool inverseU, bool inv
 
 	auto& meshes = model.Meshes;
 	auto& bones = model.Bones;
-	model.RootNode = scene->mRootNode->mName.C_Str();
 	meshes.resize(scene->mNumMeshes);
 
-	// ボーンの生成
-	CreateBone(scene->mRootNode, bones);
+	// ボーンの読み込み
+	if (scene->mRootNode)
+	{
+		LoadBone(scene->mRootNode, -1, bones);
+	}
 
 	// メッシュの読み込み
 	for (size_t i = 0; i < meshes.size(); ++i)
@@ -58,7 +60,7 @@ ModelData ModelLoader::Load(const std::string& FileName, bool inverseU, bool inv
 		const auto pMesh = scene->mMeshes[i];
 		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
 		LoadDeformVertex(meshes[i], pMesh);
-		LoadBone(meshes[i], pMesh, bones);
+		//LoadBone(meshes[i], pMesh, bones);
 		const auto pMaterial = scene->mMaterials[i];
 		LoadTexture(FileName, meshes[i], pMaterial);
 	}
@@ -114,6 +116,25 @@ HRESULT ModelLoader::LoadAnimation(const std::string& FileName, ModelData& model
 			}
 			modelData.Animations[name].Channels.push_back(animChannel);
 		}
+	}
+}
+
+void ModelLoader::MakeBoneHierarchy(aiNode* node, int parentIndex, std::vector<Bone>& bones)
+{
+	// ボーンの追加
+	Bone bone{};
+	bone.Name = node->mName.C_Str();
+	bone.ParentIndex = parentIndex;
+	bone.ChildIndices.resize(node->mNumChildren);
+	bones.push_back(bone);
+
+	int myIndex = static_cast<int>(bones.size()) - 1;
+	
+	// 子ノードの処理
+	for (size_t i = 0; i < node->mNumChildren; ++i)
+	{
+		bones[myIndex].ChildIndices[i] = static_cast<int>(bones.size());
+		MakeBoneHierarchy(node->mChildren[i], myIndex, bones);	// 再帰呼び出し
 	}
 }
 
@@ -183,37 +204,55 @@ void ModelLoader::LoadDeformVertex(Mesh& dst, const aiMesh* src)
 	}
 }
 
-void ModelLoader::LoadBone(Mesh& dst, const aiMesh* src, std::unordered_map<std::string, Bone>& bones)
+void ModelLoader::LoadBone(Mesh& dst, const aiMesh* src, std::vector<Bone>& bones)
 {
 	// ボーンの数だけループ
-	for (size_t i = 0; i < src->mNumBones; ++i)
+	//for (size_t i = 0; i < src->mNumBones; ++i)
+	//{
+	//	// ボーンデータの取得
+	//	auto bone = src->mBones[i];				// ボーン
+	//	auto boneName = bone->mName.C_Str();	// ボーン名
+
+	//	// ボーンのオフセット行列を格納
+	//	if (bones.find(boneName) != bones.end())
+	//	{
+	//		bones[boneName].OffsetMatrix = bone->mOffsetMatrix;
+	//	}
+
+	//	// ボーンの影響度を格納
+	//	for (size_t j = 0; j < bone->mNumWeights; ++j)
+	//	{
+	//		auto weight = bone->mWeights[j];					// ボーンの影響度
+	//		auto vertexId = weight.mVertexId;					// 頂点番号
+	//		auto vertexWeight = weight.mWeight;					// 頂点の影響度
+	//		int boneNum = dst.DeformVertices[vertexId].BoneNum;	// ボーンの数
+
+	//		// 4つまでしか格納できない
+	//		if (boneNum < 4)
+	//		{
+	//			dst.DeformVertices[vertexId].BoneName[boneNum] = boneName;
+	//			dst.DeformVertices[vertexId].BoneWeight[boneNum] = vertexWeight;
+	//			dst.DeformVertices[vertexId].BoneNum++;
+	//		}
+	//	}
+	//}
+}
+
+void ModelLoader::LoadBone(aiNode* node, int parent, std::vector<Bone>& bones)
+{
+	Bone bone{};
+	bone.Name = node->mName.C_Str();
+	bone.ParentIndex = parent;
+	bone.ChildIndices.resize(node->mNumChildren);
+
+	bones.push_back(bone);
+
+	int myIndex = static_cast<int>(bones.size() - 1);
+
+	for (size_t i = 0; i < node->mNumChildren; ++i)
 	{
-		// ボーンデータの取得
-		auto bone = src->mBones[i];				// ボーン
-		auto boneName = bone->mName.C_Str();	// ボーン名
-
-		// ボーンのオフセット行列を格納
-		if (bones.find(boneName) != bones.end())
-		{
-			bones[boneName].OffsetMatrix = bone->mOffsetMatrix;
-		}
-
-		// ボーンの影響度を格納
-		for (size_t j = 0; j < bone->mNumWeights; ++j)
-		{
-			auto weight = bone->mWeights[j];					// ボーンの影響度
-			auto vertexId = weight.mVertexId;					// 頂点番号
-			auto vertexWeight = weight.mWeight;					// 頂点の影響度
-			int boneNum = dst.DeformVertices[vertexId].BoneNum;	// ボーンの数
-
-			// 4つまでしか格納できない
-			if (boneNum < 4)
-			{
-				dst.DeformVertices[vertexId].BoneName[boneNum] = boneName;
-				dst.DeformVertices[vertexId].BoneWeight[boneNum] = vertexWeight;
-				dst.DeformVertices[vertexId].BoneNum++;
-			}
-		}
+		bones[myIndex].ChildIndices[i] = static_cast<int>(bones.size());
+		LoadBone(node->mChildren[i], myIndex, bones);
 	}
 }
 
@@ -235,18 +274,36 @@ void ModelLoader::LoadTexture(std::string FileName, Mesh& dst, const aiMaterial*
 	{
 		dst.DiffuseMap.clear();
 	}
-}
 
-void ModelLoader::CreateBone(aiNode* node, std::unordered_map<std::string, Bone>& bones)
-{
-	Bone bone{};
-	bones[node->mName.C_Str()] = bone;	// ボーンの追加
-	bones[node->mName.C_Str()].NumChildren = node->mNumChildren; // 子ボーンの数を格納
-
-	// 子ノードの探索
-	for (size_t i = 0; i < node->mNumChildren; ++i)
+	if (src->Get(AI_MATKEY_TEXTURE_NORMALS(0), path) == AI_SUCCESS)
 	{
-		bones[node->mName.C_Str()].ChildBoneName = node->mChildren[i]->mName.C_Str(); // 子ボーンの名前を格納
-		CreateBone(node->mChildren[i], bones);	// 再帰呼び出し
+		auto dir = GetDirectoryPath(FileName);	// ディレクトリ名
+		auto file = std::string(path.C_Str());	// ファイル名
+		size_t idx = file.find_last_of('\\');	// 区切り文字を探す
+		if (idx != std::string::npos)
+		{
+			file = file.substr(idx + 1);	// 区切り文字以降を取得
+			dst.NormalMap = dir + file;	// フルパスを設定
+		}
+	}
+	else
+	{
+		dst.NormalMap.clear();
+	}
+
+	if (src->Get(AI_MATKEY_TEXTURE_SPECULAR(0), path) == AI_SUCCESS)
+	{
+		auto dir = GetDirectoryPath(FileName);	// ディレクトリ名
+		auto file = std::string(path.C_Str());	// ファイル名
+		size_t idx = file.find_last_of('\\');	// 区切り文字を探す
+		if (idx != std::string::npos)
+		{
+			file = file.substr(idx + 1);	// 区切り文字以降を取得
+			dst.SpecularMap = dir + file;	// フルパスを設定
+		}
+	}
+	else
+	{
+		dst.SpecularMap.clear();
 	}
 }

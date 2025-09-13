@@ -15,6 +15,11 @@
 
 HRESULT Texture::Load(const std::string& FileName)
 {
+	if (FileName.empty())
+	{
+		return E_FAIL;
+	}
+
 	HRESULT hr = S_OK;
 
 	// マルチバイト文字列をワイド文字列に変換

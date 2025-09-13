@@ -52,9 +52,11 @@ Model::Model(ModelData ModelData, Camera& Camera)
 		m_pTextures[i] = new Texture();
 		assert(m_pTextures[i]);	// nullptrチェック
 
-		m_pTextures[i]->Load(meshes[i].DiffuseMap);
-		auto handle = m_pDescriptorHeap->Register(m_pTextures[i]->Resource(), m_pTextures[i]->ViewDesc());
-		m_pMaterialHandles.push_back(handle);
+		if (m_pTextures[i]->Load(meshes[i].DiffuseMap) == S_OK)
+		{
+			auto handle = m_pDescriptorHeap->Register(m_pTextures[i]->Resource(), m_pTextures[i]->ViewDesc());
+			m_pMaterialHandles.push_back(handle);
+		}
 	}
 
 	// 定数バッファの生成
@@ -163,125 +165,125 @@ void Model::Update()
 
 void Model::Update(std::string AnimationName_1, int frame_1, std::string AnimationName_2, int frame_2, float blendRate)
 {
-	if (m_ModelData.Animations.empty()) return;
-	if (m_ModelData.Animations.find(AnimationName_1) == m_ModelData.Animations.end()) return;
-	if (m_ModelData.Animations.find(AnimationName_2) == m_ModelData.Animations.end()) return;
+	//if (m_ModelData.Animations.empty()) return;
+	//if (m_ModelData.Animations.find(AnimationName_1) == m_ModelData.Animations.end()) return;
+	//if (m_ModelData.Animations.find(AnimationName_2) == m_ModelData.Animations.end()) return;
 
-	int flame;
-	aiVector3D pos_1, pos_2;
-	aiQuaternion rot_1, rot_2;
-	aiVector3D pos;
-	aiQuaternion rot;
+	//int flame;
+	//aiVector3D pos_1, pos_2;
+	//aiQuaternion rot_1, rot_2;
+	//aiVector3D pos;
+	//aiQuaternion rot;
 
-	// ボーンの数だけループ
-	for (auto& pair : m_ModelData.Bones)
-	{
-		// ボーンの名前からボーンを取得
-		Bone& bone = m_ModelData.Bones[pair.first];
+	//// ボーンの数だけループ
+	//for (auto& pair : m_ModelData.Bones)
+	//{
+	//	// ボーンの名前からボーンを取得
+	//	Bone& bone = m_ModelData.Bones[pair.first];
 
-		auto animation_1 = m_ModelData.Animations[AnimationName_1];
-		auto animation_2 = m_ModelData.Animations[AnimationName_2];
-		Channel* nodeAnim_1 = nullptr;
-		Channel* nodeAnim_2 = nullptr; 
+	//	auto animation_1 = m_ModelData.Animations[AnimationName_1];
+	//	auto animation_2 = m_ModelData.Animations[AnimationName_2];
+	//	Channel* nodeAnim_1 = nullptr;
+	//	Channel* nodeAnim_2 = nullptr; 
 
-		for (size_t i = 0; i < animation_1.Channels.size(); ++i)
-		{
-			if (animation_1.Channels[i].BoneName == aiString(pair.first).C_Str())
-			{
-				nodeAnim_1 = &animation_1.Channels[i];
-				break;
-			}
-		}
+	//	for (size_t i = 0; i < animation_1.Channels.size(); ++i)
+	//	{
+	//		if (animation_1.Channels[i].BoneName == aiString(pair.first).C_Str())
+	//		{
+	//			nodeAnim_1 = &animation_1.Channels[i];
+	//			break;
+	//		}
+	//	}
 
-		for (size_t i = 0; i < animation_2.Channels.size(); ++i)
-		{
-			if (animation_2.Channels[i].BoneName == aiString(pair.first).C_Str())
-			{
-				nodeAnim_2 = &animation_2.Channels[i];
-				break;
-			}
-		}
+	//	for (size_t i = 0; i < animation_2.Channels.size(); ++i)
+	//	{
+	//		if (animation_2.Channels[i].BoneName == aiString(pair.first).C_Str())
+	//		{
+	//			nodeAnim_2 = &animation_2.Channels[i];
+	//			break;
+	//		}
+	//	}
 
-		if (nodeAnim_1)
-		{
-			// キーフレームの数を取得
-			size_t keyFrameCount_1 = nodeAnim_1->KeyFrames.size();
-			// フレーム数をキーフレームの数で割った余りを取得
-			flame = frame_1 % static_cast<int>(keyFrameCount_1);
-			// キーフレームの位置と回転を取得
-			pos_1 = nodeAnim_1->KeyFrames[flame].Position;
-			rot_1 = nodeAnim_1->KeyFrames[flame].Rotation;
-		}
+	//	if (nodeAnim_1)
+	//	{
+	//		// キーフレームの数を取得
+	//		size_t keyFrameCount_1 = nodeAnim_1->KeyFrames.size();
+	//		// フレーム数をキーフレームの数で割った余りを取得
+	//		flame = frame_1 % static_cast<int>(keyFrameCount_1);
+	//		// キーフレームの位置と回転を取得
+	//		pos_1 = nodeAnim_1->KeyFrames[flame].Position;
+	//		rot_1 = nodeAnim_1->KeyFrames[flame].Rotation;
+	//	}
 
-		if (nodeAnim_2)
-		{
-			// キーフレームの数を取得
-			size_t keyFrameCount_2 = nodeAnim_2->KeyFrames.size();
-			// フレーム数をキーフレームの数で割った余りを取得
-			flame = frame_2 % static_cast<int>(keyFrameCount_2);
-			// キーフレームの位置と回転を取得
-			pos_2 = nodeAnim_2->KeyFrames[flame].Position;
-			rot_2 = nodeAnim_2->KeyFrames[flame].Rotation;
-		}
+	//	if (nodeAnim_2)
+	//	{
+	//		// キーフレームの数を取得
+	//		size_t keyFrameCount_2 = nodeAnim_2->KeyFrames.size();
+	//		// フレーム数をキーフレームの数で割った余りを取得
+	//		flame = frame_2 % static_cast<int>(keyFrameCount_2);
+	//		// キーフレームの位置と回転を取得
+	//		pos_2 = nodeAnim_2->KeyFrames[flame].Position;
+	//		rot_2 = nodeAnim_2->KeyFrames[flame].Rotation;
+	//	}
 
-		// 位置と回転を補間
-		pos = pos_1 * (1.0f - blendRate) + pos_2 * blendRate;		// 線形補間
-		aiQuaternion::Interpolate(rot, rot_1, rot_2, blendRate);	// 球面線形補間
+	//	// 位置と回転を補間
+	//	pos = pos_1 * (1.0f - blendRate) + pos_2 * blendRate;		// 線形補間
+	//	aiQuaternion::Interpolate(rot, rot_1, rot_2, blendRate);	// 球面線形補間
 
-		// アニメーション行列を計算
-		bone.AnimationMatrix = aiMatrix4x4(aiVector3D(1.0f, 1.0f, 1.0f), rot, pos);
-	}
+	//	// アニメーション行列を計算
+	//	bone.AnimationMatrix = aiMatrix4x4(aiVector3D(1.0f, 1.0f, 1.0f), rot, pos);
+	//}
 
-	// ルートノードから順にボーン行列を更新
-	aiMatrix4x4 rootMatrix = aiMatrix4x4(aiVector3D(1.0f, 1.0f, 1.0f), aiQuaternion(static_cast<float>(AI_MATH_PI), 0.0f, 0.0f), aiVector3D(0.0f, 0.0f, 0.0f));
-	UpdateBoneMatrix(m_ModelData.RootNode, rootMatrix);
+	//// ルートノードから順にボーン行列を更新
+	//aiMatrix4x4 rootMatrix = aiMatrix4x4(aiVector3D(1.0f, 1.0f, 1.0f), aiQuaternion(static_cast<float>(AI_MATH_PI), 0.0f, 0.0f), aiVector3D(0.0f, 0.0f, 0.0f));
+	//UpdateBoneMatrix(m_ModelData.RootNode, rootMatrix);
 
-	for (size_t i = 0; i < m_ModelData.Meshes.size(); ++i)
-	{
-		for (size_t j = 0; j < m_ModelData.Meshes[i].DeformVertices.size(); ++j)
-		{
-			DeformVertex& deformVertex = m_ModelData.Meshes[i].DeformVertices[j];
+	//for (size_t i = 0; i < m_ModelData.Meshes.size(); ++i)
+	//{
+	//	for (size_t j = 0; j < m_ModelData.Meshes[i].DeformVertices.size(); ++j)
+	//	{
+	//		DeformVertex& deformVertex = m_ModelData.Meshes[i].DeformVertices[j];
 
-			aiMatrix4x4 matrix[4];
-			aiMatrix4x4 finalMatrix = aiMatrix4x4();
-			matrix[0] = m_ModelData.Bones[deformVertex.BoneName[0]].Matrix;
-			matrix[1] = m_ModelData.Bones[deformVertex.BoneName[1]].Matrix;
-			matrix[2] = m_ModelData.Bones[deformVertex.BoneName[2]].Matrix;
-			matrix[3] = m_ModelData.Bones[deformVertex.BoneName[3]].Matrix;
+	//		aiMatrix4x4 matrix[4];
+	//		aiMatrix4x4 finalMatrix = aiMatrix4x4();
+	//		matrix[0] = m_ModelData.Bones[deformVertex.BoneName[0]].Matrix;
+	//		matrix[1] = m_ModelData.Bones[deformVertex.BoneName[1]].Matrix;
+	//		matrix[2] = m_ModelData.Bones[deformVertex.BoneName[2]].Matrix;
+	//		matrix[3] = m_ModelData.Bones[deformVertex.BoneName[3]].Matrix;
 
-			finalMatrix.a1 = matrix[0].a1 * deformVertex.BoneWeight[0] + matrix[1].a1 * deformVertex.BoneWeight[1] + matrix[2].a1 * deformVertex.BoneWeight[2] + matrix[3].a1 * deformVertex.BoneWeight[3];
-			finalMatrix.a2 = matrix[0].a2 * deformVertex.BoneWeight[0] + matrix[1].a2 * deformVertex.BoneWeight[1] + matrix[2].a2 * deformVertex.BoneWeight[2] + matrix[3].a2 * deformVertex.BoneWeight[3];
-			finalMatrix.a3 = matrix[0].a3 * deformVertex.BoneWeight[0] + matrix[1].a3 * deformVertex.BoneWeight[1] + matrix[2].a3 * deformVertex.BoneWeight[2] + matrix[3].a3 * deformVertex.BoneWeight[3];
-			finalMatrix.a4 = matrix[0].a4 * deformVertex.BoneWeight[0] + matrix[1].a4 * deformVertex.BoneWeight[1] + matrix[2].a4 * deformVertex.BoneWeight[2] + matrix[3].a4 * deformVertex.BoneWeight[3];
+	//		finalMatrix.a1 = matrix[0].a1 * deformVertex.BoneWeight[0] + matrix[1].a1 * deformVertex.BoneWeight[1] + matrix[2].a1 * deformVertex.BoneWeight[2] + matrix[3].a1 * deformVertex.BoneWeight[3];
+	//		finalMatrix.a2 = matrix[0].a2 * deformVertex.BoneWeight[0] + matrix[1].a2 * deformVertex.BoneWeight[1] + matrix[2].a2 * deformVertex.BoneWeight[2] + matrix[3].a2 * deformVertex.BoneWeight[3];
+	//		finalMatrix.a3 = matrix[0].a3 * deformVertex.BoneWeight[0] + matrix[1].a3 * deformVertex.BoneWeight[1] + matrix[2].a3 * deformVertex.BoneWeight[2] + matrix[3].a3 * deformVertex.BoneWeight[3];
+	//		finalMatrix.a4 = matrix[0].a4 * deformVertex.BoneWeight[0] + matrix[1].a4 * deformVertex.BoneWeight[1] + matrix[2].a4 * deformVertex.BoneWeight[2] + matrix[3].a4 * deformVertex.BoneWeight[3];
 
-			finalMatrix.b1 = matrix[0].b1 * deformVertex.BoneWeight[0] + matrix[1].b1 * deformVertex.BoneWeight[1] + matrix[2].b1 * deformVertex.BoneWeight[2] + matrix[3].b1 * deformVertex.BoneWeight[3];
-			finalMatrix.b2 = matrix[0].b2 * deformVertex.BoneWeight[0] + matrix[1].b2 * deformVertex.BoneWeight[1] + matrix[2].b2 * deformVertex.BoneWeight[2] + matrix[3].b2 * deformVertex.BoneWeight[3];
-			finalMatrix.b3 = matrix[0].b3 * deformVertex.BoneWeight[0] + matrix[1].b3 * deformVertex.BoneWeight[1] + matrix[2].b3 * deformVertex.BoneWeight[2] + matrix[3].b3 * deformVertex.BoneWeight[3];
-			finalMatrix.b4 = matrix[0].b4 * deformVertex.BoneWeight[0] + matrix[1].b4 * deformVertex.BoneWeight[1] + matrix[2].b4 * deformVertex.BoneWeight[2] + matrix[3].b4 * deformVertex.BoneWeight[3];
+	//		finalMatrix.b1 = matrix[0].b1 * deformVertex.BoneWeight[0] + matrix[1].b1 * deformVertex.BoneWeight[1] + matrix[2].b1 * deformVertex.BoneWeight[2] + matrix[3].b1 * deformVertex.BoneWeight[3];
+	//		finalMatrix.b2 = matrix[0].b2 * deformVertex.BoneWeight[0] + matrix[1].b2 * deformVertex.BoneWeight[1] + matrix[2].b2 * deformVertex.BoneWeight[2] + matrix[3].b2 * deformVertex.BoneWeight[3];
+	//		finalMatrix.b3 = matrix[0].b3 * deformVertex.BoneWeight[0] + matrix[1].b3 * deformVertex.BoneWeight[1] + matrix[2].b3 * deformVertex.BoneWeight[2] + matrix[3].b3 * deformVertex.BoneWeight[3];
+	//		finalMatrix.b4 = matrix[0].b4 * deformVertex.BoneWeight[0] + matrix[1].b4 * deformVertex.BoneWeight[1] + matrix[2].b4 * deformVertex.BoneWeight[2] + matrix[3].b4 * deformVertex.BoneWeight[3];
 
-			finalMatrix.c1 = matrix[0].c1 * deformVertex.BoneWeight[0] + matrix[1].c1 * deformVertex.BoneWeight[1] + matrix[2].c1 * deformVertex.BoneWeight[2] + matrix[3].c1 * deformVertex.BoneWeight[3];
-			finalMatrix.c2 = matrix[0].c2 * deformVertex.BoneWeight[0] + matrix[1].c2 * deformVertex.BoneWeight[1] + matrix[2].c2 * deformVertex.BoneWeight[2] + matrix[3].c2 * deformVertex.BoneWeight[3];
-			finalMatrix.c3 = matrix[0].c3 * deformVertex.BoneWeight[0] + matrix[1].c3 * deformVertex.BoneWeight[1] + matrix[2].c3 * deformVertex.BoneWeight[2] + matrix[3].c3 * deformVertex.BoneWeight[3];
-			finalMatrix.c4 = matrix[0].c4 * deformVertex.BoneWeight[0] + matrix[1].c4 * deformVertex.BoneWeight[1] + matrix[2].c4 * deformVertex.BoneWeight[2] + matrix[3].c4 * deformVertex.BoneWeight[3];
+	//		finalMatrix.c1 = matrix[0].c1 * deformVertex.BoneWeight[0] + matrix[1].c1 * deformVertex.BoneWeight[1] + matrix[2].c1 * deformVertex.BoneWeight[2] + matrix[3].c1 * deformVertex.BoneWeight[3];
+	//		finalMatrix.c2 = matrix[0].c2 * deformVertex.BoneWeight[0] + matrix[1].c2 * deformVertex.BoneWeight[1] + matrix[2].c2 * deformVertex.BoneWeight[2] + matrix[3].c2 * deformVertex.BoneWeight[3];
+	//		finalMatrix.c3 = matrix[0].c3 * deformVertex.BoneWeight[0] + matrix[1].c3 * deformVertex.BoneWeight[1] + matrix[2].c3 * deformVertex.BoneWeight[2] + matrix[3].c3 * deformVertex.BoneWeight[3];
+	//		finalMatrix.c4 = matrix[0].c4 * deformVertex.BoneWeight[0] + matrix[1].c4 * deformVertex.BoneWeight[1] + matrix[2].c4 * deformVertex.BoneWeight[2] + matrix[3].c4 * deformVertex.BoneWeight[3];
 
-			finalMatrix.d1 = matrix[0].d1 * deformVertex.BoneWeight[0] + matrix[1].d1 * deformVertex.BoneWeight[1] + matrix[2].d1 * deformVertex.BoneWeight[2] + matrix[3].d1 * deformVertex.BoneWeight[3];
-			finalMatrix.d2 = matrix[0].d2 * deformVertex.BoneWeight[0] + matrix[1].d2 * deformVertex.BoneWeight[1] + matrix[2].d2 * deformVertex.BoneWeight[2] + matrix[3].d2 * deformVertex.BoneWeight[3];
-			finalMatrix.d3 = matrix[0].d3 * deformVertex.BoneWeight[0] + matrix[1].d3 * deformVertex.BoneWeight[1] + matrix[2].d3 * deformVertex.BoneWeight[2] + matrix[3].d3 * deformVertex.BoneWeight[3];
-			finalMatrix.d4 = matrix[0].d4 * deformVertex.BoneWeight[0] + matrix[1].d4 * deformVertex.BoneWeight[1] + matrix[2].d4 * deformVertex.BoneWeight[2] + matrix[3].d4 * deformVertex.BoneWeight[3];
-			
-			deformVertex.Position *= finalMatrix;
+	//		finalMatrix.d1 = matrix[0].d1 * deformVertex.BoneWeight[0] + matrix[1].d1 * deformVertex.BoneWeight[1] + matrix[2].d1 * deformVertex.BoneWeight[2] + matrix[3].d1 * deformVertex.BoneWeight[3];
+	//		finalMatrix.d2 = matrix[0].d2 * deformVertex.BoneWeight[0] + matrix[1].d2 * deformVertex.BoneWeight[1] + matrix[2].d2 * deformVertex.BoneWeight[2] + matrix[3].d2 * deformVertex.BoneWeight[3];
+	//		finalMatrix.d3 = matrix[0].d3 * deformVertex.BoneWeight[0] + matrix[1].d3 * deformVertex.BoneWeight[1] + matrix[2].d3 * deformVertex.BoneWeight[2] + matrix[3].d3 * deformVertex.BoneWeight[3];
+	//		finalMatrix.d4 = matrix[0].d4 * deformVertex.BoneWeight[0] + matrix[1].d4 * deformVertex.BoneWeight[1] + matrix[2].d4 * deformVertex.BoneWeight[2] + matrix[3].d4 * deformVertex.BoneWeight[3];
+	//		
+	//		deformVertex.Position *= finalMatrix;
 
-			finalMatrix.a4 = 0.0f;
-			finalMatrix.b4 = 0.0f;
-			finalMatrix.c4 = 0.0f;
+	//		finalMatrix.a4 = 0.0f;
+	//		finalMatrix.b4 = 0.0f;
+	//		finalMatrix.c4 = 0.0f;
 
-			deformVertex.Normal *= finalMatrix;
+	//		deformVertex.Normal *= finalMatrix;
 
-			// 頂点データの更新
-			m_ModelData.Meshes[i].Vertices[j].Position = { deformVertex.Position.x, deformVertex.Position.y, deformVertex.Position.z };
-			m_ModelData.Meshes[i].Vertices[j].Normal = { deformVertex.Normal.x, deformVertex.Normal.y, deformVertex.Normal.z };
-		}
-	}
+	//		// 頂点データの更新
+	//		m_ModelData.Meshes[i].Vertices[j].Position = { deformVertex.Position.x, deformVertex.Position.y, deformVertex.Position.z };
+	//		m_ModelData.Meshes[i].Vertices[j].Normal = { deformVertex.Normal.x, deformVertex.Normal.y, deformVertex.Normal.z };
+	//	}
+	//}
 }
 
 void Model::Draw()
@@ -312,20 +314,20 @@ void Model::Draw()
 
 void Model::UpdateBoneMatrix(std::string rootBone, aiMatrix4x4 matrix)
 {
-	Bone& bone = m_ModelData.Bones[rootBone];
+	//Bone& bone = m_ModelData.Bones[rootBone];
 
-	// 親の行列と自身の行列を掛け合わせる
-	aiMatrix4x4 worldMatrix;
+	//// 親の行列と自身の行列を掛け合わせる
+	//aiMatrix4x4 worldMatrix;
 
-	worldMatrix *= matrix;					// 親の行列
-	worldMatrix *= bone.AnimationMatrix;	// 自身の行列
+	//worldMatrix *= matrix;					// 親の行列
+	//worldMatrix *= bone.AnimationMatrix;	// 自身の行列
 
-	bone.Matrix = worldMatrix;				// ボーンの行列を更新
-	bone.Matrix *= bone.OffsetMatrix;		// オフセット行列を掛け合わせる
+	//bone.Matrix = worldMatrix;				// ボーンの行列を更新
+	//bone.Matrix *= bone.OffsetMatrix;		// オフセット行列を掛け合わせる
 
-	// 子ノードに対して再帰的に処理を行う
-	for (size_t i = 0; i < bone.NumChildren; ++i)
-	{
-		UpdateBoneMatrix(bone.ChildBoneName, worldMatrix);
-	}
+	//// 子ノードに対して再帰的に処理を行う
+	//for (size_t i = 0; i < bone.NumChildren; ++i)
+	//{
+	//	UpdateBoneMatrix(bone.ChildBoneName, worldMatrix);
+	//}
 }

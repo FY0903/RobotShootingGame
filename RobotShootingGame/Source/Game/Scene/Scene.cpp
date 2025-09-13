@@ -37,9 +37,9 @@ void Scene::Init()
 	m_pSprite = new Sprite(texture, *m_pCamera);
 
 	// ModelÇÃê∂ê¨
-	ModelData model = ModelLoader::GetInstance().Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false);
-	ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/taiki_mae.fbx", model, "Idle");
-	ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/walk.fbx", model, "Walk");
+	ModelData model = ModelLoader::GetInstance().Load("Assets/Model/DORO/Doro.fbx", false, false);
+	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/taiki_mae.fbx", model, "Idle");
+	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/walk.fbx", model, "Walk");
 	m_pModel = new Model(model, *m_pCamera);
 
 	// LineÇÃê∂ê¨
