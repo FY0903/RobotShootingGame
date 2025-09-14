@@ -37,7 +37,7 @@ void Scene::Init()
 	m_pSprite = new Sprite(texture, *m_pCamera);
 
 	// Model‚Ì¶¬
-	ModelData model = ModelLoader::GetInstance().Load("Assets/Model/DORO/Doro.fbx", false, false);
+	ModelData model = ModelLoader::GetInstance().Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false);
 	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/taiki_mae.fbx", model, "Idle");
 	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/walk.fbx", model, "Walk");
 	m_pModel = new Model(model, *m_pCamera);
@@ -64,10 +64,10 @@ void Scene::Update()
 	m_pLine->Update();
 
 	// Object‚ÌXV
-	//m_pObject->Update();
+	m_pObject->Update();
 
 	// Sprite‚ÌXV
-	//m_pSprite->Update();
+	m_pSprite->Update();
 
 	// Model‚ÌXV
 	m_pModel->Update();
@@ -80,10 +80,10 @@ void Scene::Draw()
 	m_pLine->Draw();
 
 	// Object‚Ì•`‰æ
-	//m_pObject->Draw();
+	m_pObject->Draw();
 
 	// Sprite‚Ì•`‰æ
-	//m_pSprite->Draw();
+	m_pSprite->Draw();
 
 	// Model‚Ì•`‰æ
 	m_pModel->Draw();

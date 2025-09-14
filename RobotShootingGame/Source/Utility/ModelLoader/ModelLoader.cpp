@@ -51,7 +51,7 @@ ModelData ModelLoader::Load(const std::string& FileName, bool inverseU, bool inv
 	// ボーンの読み込み
 	if (scene->mRootNode)
 	{
-		LoadBone(scene->mRootNode, -1, bones);
+		MakeBoneHierarchy(scene->mRootNode, -1, bones);
 	}
 
 	// メッシュの読み込み
