@@ -45,10 +45,13 @@ public:
 
 	void Update();
 	void Update(std::string AnimationName_1, int frame_1, std::string AnimationName_2, int frame_2, float blendRate);
+	void Update(std::string AnimationName, int frame);
 	void Draw();
 
+	void AddAnimation(const aiScene* Scene, const std::string& AnimationName);
+
 private:
-	void UpdateBoneMatrix(std::string rootBone, aiMatrix4x4 matrix);
+	void UpdateBoneMatrix(aiNode* node, aiMatrix4x4 matrix);
 
 	ModelData m_ModelData;		// モデルデータ
 	Camera& m_Camera;				// カメラ
@@ -62,4 +65,6 @@ private:
 	PipelineState* m_pPipelineState{};	// パイプラインステート
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
+
+	std::unordered_map<std::string, const aiScene*> m_Animations{}; // アニメーションデータ
 };

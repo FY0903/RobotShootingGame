@@ -37,10 +37,15 @@ void Scene::Init()
 	m_pSprite = new Sprite(texture, *m_pCamera);
 
 	// Model‚Ì¶¬
-	ModelData model = ModelLoader::GetInstance().Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false);
+	ModelData model = ModelLoader::GetInstance().Load("Assets/Model/demo/FBX_Demo_Idle.fbx", false, false);
 	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/taiki_mae.fbx", model, "Idle");
 	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/walk.fbx", model, "Walk");
+	ModelLoader::GetInstance().LoadAnimation("Assets/Model/demo/FBX_Demo_Idle.fbx", "Idle");
+	ModelLoader::GetInstance().LoadAnimation("Assets/Model/demo/FBX_Demo_WalkFront.fbx", "Walk");
+
 	m_pModel = new Model(model, *m_pCamera);
+	m_pModel->AddAnimation(ModelLoader::GetInstance().GetAnimation("Idle"), "Idle");
+	m_pModel->AddAnimation(ModelLoader::GetInstance().GetAnimation("Walk"), "Walk");
 
 	// Line‚Ì¶¬
 	m_pLine = new Line(*m_pCamera);
@@ -57,6 +62,8 @@ void Scene::Init()
 
 void Scene::Update()
 {
+	static int flame = 0;
+
 	// Camera‚ÌXV
 	m_pCamera->Update();
 
@@ -70,8 +77,11 @@ void Scene::Update()
 	m_pSprite->Update();
 
 	// Model‚ÌXV
-	m_pModel->Update();
-	//m_pModel->Update("Idle", 0, "Walk", 0, 0.0f);
+	//m_pModel->Update();
+	//m_pModel->Update("Idle", flame, "Walk", flame, 0.0f);
+	m_pModel->Update("Idle", flame);
+
+	++flame;
 }
 
 void Scene::Draw()
@@ -80,10 +90,10 @@ void Scene::Draw()
 	m_pLine->Draw();
 
 	// Object‚Ì•`‰æ
-	m_pObject->Draw();
+	//m_pObject->Draw();
 
 	// Sprite‚Ì•`‰æ
-	m_pSprite->Draw();
+	//m_pSprite->Draw();
 
 	// Model‚Ì•`‰æ
 	m_pModel->Draw();

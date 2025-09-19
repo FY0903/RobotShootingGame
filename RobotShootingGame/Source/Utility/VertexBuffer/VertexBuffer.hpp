@@ -27,6 +27,8 @@ public:
 	 */
 	~VertexBuffer() = default;
 
+	void Update(size_t size, const void* pData);
+
 	D3D12_VERTEX_BUFFER_VIEW GetView() const { return m_View; }
 
 private:

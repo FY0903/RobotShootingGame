@@ -19,6 +19,7 @@
 #include <assimp/postprocess.h>
 #include <string>
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include "../Singleton/Singleton.hpp"
 #include "../SharedStruct/SharedStruct.hpp"
@@ -82,12 +83,28 @@ struct Channel
 	std::vector<KeyFrame> KeyFrames{};	// キーフレームのリスト
 };
 
+struct AnimePlayInfo
+{
+	float NowTime{};	// 現在の再生時間
+	float TotalTime{};	// アニメーションの総時間
+	float Speed{};		// 再生速度
+	bool IsLoop{};		// ループ再生するかどうか
+};
+
+struct AnimeChannel
+{
+	int Node{};				// 対応するボーンのインデックス
+	std::map<float, AnimeTransform> AnimeTransform{}; // キーフレームのリスト（時間、変形情報）
+};
+
 /**
  * @brief アニメーションのチャンネルと長さを表す構造体です。
  */
 struct Animation
 {
-	std::vector<Channel> Channels{};	// チャンネルのリスト
+	//std::vector<Channel> Channels{};	// チャンネルのリスト
+	AnimePlayInfo Info{};		// アニメーションの再生情報
+	std::vector<AnimeChannel> Channels{}; // アニメーションチャンネルのリスト
 };
 
 /**
@@ -97,7 +114,8 @@ struct ModelData
 {
 	std::vector<Mesh> Meshes{}; // メッシュデータ
 	std::vector<Bone> Bones{}; // ボーンデータ
-	std::unordered_map<std::string, Animation> Animations{}; // アニメーションデータ
+	std::unordered_map<std::string, Bone> BoneMap{}; // ボーン名とボーンデータのマップ
+	const aiScene* AiScene{}; // Assimpのシーンデータへのポインタ
 };
 
 class ModelLoader : public Singleton<ModelLoader>
@@ -105,6 +123,15 @@ class ModelLoader : public Singleton<ModelLoader>
 public:
 	ModelData Load(const std::string& FileName, bool inverseU, bool inverseV);
 	HRESULT LoadAnimation(const std::string& FileName, ModelData& modelData, std::string name);
+	HRESULT LoadAnimation(const std::string& FileName, std::string name);
+	const aiScene* GetAnimation(const std::string& name)
+	{
+		if (m_Animations.find(name) == m_Animations.end())
+		{
+			return nullptr;
+		}
+		return m_Animations[name];
+	}
 private:
 	friend class Singleton<ModelLoader>;
 	/**
@@ -115,12 +142,17 @@ private:
 	/**
 	 * @brief デストラクタ
 	 */
-	~ModelLoader() = default;
+	~ModelLoader();
 
 	void MakeBoneHierarchy(aiNode* node, int parentIndex, std::vector<Bone>& bones);
+	void MakeBoneHierarchy(aiNode* node, std::unordered_map<std::string, Bone>& bones);
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
 	void LoadDeformVertex(Mesh& dst, const aiMesh* src);
 	void LoadBone(Mesh& dst, const aiMesh* src, std::vector<Bone>& bones);
-	void LoadBone(aiNode* node, int parent, std::vector<Bone>& bones);
+	void LoadBone(Mesh& dst, const aiMesh* src, std::unordered_map<std::string, Bone>& bones);
 	void LoadTexture(std::string FileName, Mesh& dst, const aiMaterial* src);
+
+
+	std::unordered_map<std::string, Assimp::Importer*> m_Importers{}; // インポーター
+	std::unordered_map<std::string, const aiScene*> m_Animations{}; // アニメーションデータ
 };

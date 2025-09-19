@@ -56,3 +56,20 @@ VertexBuffer::VertexBuffer(size_t size, size_t stride, const void* pInitData)
 		m_pBuffer->Unmap(0, nullptr);
 	}
 }
+
+void VertexBuffer::Update(size_t size, const void* pData)
+{
+	if (!pData) return;
+	// マッピング(書き込み)
+	void* ptr = nullptr;
+	HRESULT hr = m_pBuffer->Map(0, nullptr, &ptr);
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "VertexBufferのマッピングに失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return; // エラー終了
+	}
+	// 頂点データをマッピング先に設定
+	memcpy(ptr, pData, size);
+	// マッピング解除
+	m_pBuffer->Unmap(0, nullptr);
+}

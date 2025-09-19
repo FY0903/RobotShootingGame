@@ -26,17 +26,19 @@ std::string GetDirectoryPath(const std::string& filepath)
 
 ModelData ModelLoader::Load(const std::string& FileName, bool inverseU, bool inverseV)
 {
-	Assimp::Importer importer;
+	Assimp::Importer* importer;
 	int flag = 0;
 	flag |= aiProcess_Triangulate;		// 三角形化
 	flag |= aiProcess_FlipUVs;			// UV反転
 	flag |= aiProcess_MakeLeftHanded;	// 左手座標系
 
-	auto scene = importer.ReadFile(FileName, flag);
+	importer = new Assimp::Importer();
+	auto scene = importer->ReadFile(FileName, flag);
+	m_Importers[FileName] = importer; // インポーターを保存
 
 	if (!scene)
 	{
-		auto error = importer.GetErrorString();
+		auto error = importer->GetErrorString();
 		OutputDebugStringA(error);
 		MessageBox(NULL, error, "モデルの読み込みに失敗", MB_OK | MB_ICONERROR);
 		return ModelData{};	// 空のモデルデータを返す
@@ -45,13 +47,16 @@ ModelData ModelLoader::Load(const std::string& FileName, bool inverseU, bool inv
 	ModelData model{};
 
 	auto& meshes = model.Meshes;
-	auto& bones = model.Bones;
+	auto& bones = model.BoneMap;
+	model.AiScene = scene; // シーンを保存
+	aiNode* rootNode = scene->mRootNode;
 	meshes.resize(scene->mNumMeshes);
 
 	// ボーンの読み込み
 	if (scene->mRootNode)
 	{
-		MakeBoneHierarchy(scene->mRootNode, -1, bones);
+		//MakeBoneHierarchy(scene->mRootNode, -1, bones);
+		MakeBoneHierarchy(scene->mRootNode, model.BoneMap);
 	}
 
 	// メッシュの読み込み
@@ -60,9 +65,9 @@ ModelData ModelLoader::Load(const std::string& FileName, bool inverseU, bool inv
 		const auto pMesh = scene->mMeshes[i];
 		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
 		LoadDeformVertex(meshes[i], pMesh);
-		//LoadBone(meshes[i], pMesh, bones);
+		LoadBone(meshes[i], pMesh, bones);
 		const auto pMaterial = scene->mMaterials[i];
-		LoadTexture(FileName, meshes[i], pMaterial);
+		if (i < scene->mNumMaterials) LoadTexture(FileName, meshes[i], pMaterial);
 	}
 
 	scene = nullptr;
@@ -96,7 +101,7 @@ HRESULT ModelLoader::LoadAnimation(const std::string& FileName, ModelData& model
 		for (size_t j = 0; j < animation->mNumChannels; ++j)
 		{
 			auto channel = animation->mChannels[j];
-			
+
 			Channel animChannel{};
 			animChannel.BoneName = channel->mNodeName.C_Str();
 			animChannel.KeyFrames.resize(channel->mNumPositionKeys);
@@ -107,16 +112,49 @@ HRESULT ModelLoader::LoadAnimation(const std::string& FileName, ModelData& model
 				auto positionKey = channel->mPositionKeys[k];
 				auto rotationKey = channel->mRotationKeys[k];
 				auto scalingKey = channel->mScalingKeys[k];
-			
+
 				KeyFrame keyFrame{};
 				keyFrame.Position = positionKey.mValue;
 				keyFrame.Rotation = rotationKey.mValue;
 				keyFrame.Scaling = scalingKey.mValue;
 				animChannel.KeyFrames[k] = keyFrame;
 			}
-			modelData.Animations[name].Channels.push_back(animChannel);
+			//modelData.Animations[name].Channels.push_back(animChannel);
 		}
 	}
+}
+
+HRESULT ModelLoader::LoadAnimation(const std::string& FileName, std::string name)
+{
+	Assimp::Importer* importer;
+	int flag = 0;
+	flag |= aiProcess_Triangulate;		// 三角形化
+	flag |= aiProcess_FlipUVs;			// UV反転
+	flag |= aiProcess_MakeLeftHanded;	// 左手座標系
+	importer = new Assimp::Importer();
+
+	// アニメーションの読み込み
+	// TODO: めんどいから一旦ポインタごと保存
+	m_Animations[name] = importer->ReadFile(FileName, flag);
+	m_Importers[name] = importer;
+	if (!m_Animations[name])
+	{
+		auto error = importer->GetErrorString();
+		OutputDebugStringA(error);
+		MessageBox(NULL, error, "アニメーションの読み込みに失敗", MB_OK | MB_ICONERROR);
+		return E_FAIL;
+	}
+}
+
+ModelLoader::~ModelLoader()
+{
+	for (auto& importer : m_Importers)
+	{
+		importer.second->FreeScene();	// シーンの解放
+		delete importer.second;			// インポーターの解放
+	}
+	m_Importers.clear();
+	m_Animations.clear();
 }
 
 void ModelLoader::MakeBoneHierarchy(aiNode* node, int parentIndex, std::vector<Bone>& bones)
@@ -129,12 +167,28 @@ void ModelLoader::MakeBoneHierarchy(aiNode* node, int parentIndex, std::vector<B
 	bones.push_back(bone);
 
 	int myIndex = static_cast<int>(bones.size()) - 1;
-	
+
 	// 子ノードの処理
 	for (size_t i = 0; i < node->mNumChildren; ++i)
 	{
 		bones[myIndex].ChildIndices[i] = static_cast<int>(bones.size());
 		MakeBoneHierarchy(node->mChildren[i], myIndex, bones);	// 再帰呼び出し
+	}
+}
+
+void ModelLoader::MakeBoneHierarchy(aiNode* node, std::unordered_map<std::string, Bone>& bones)
+{
+	Bone bone{};
+
+	// ボーンの追加
+	bone.Name = node->mName.C_Str();
+	bone.Matrix = node->mTransformation;
+	bones[bone.Name] = bone;
+
+	// 子ノードの処理
+	for (size_t i = 0; i < node->mNumChildren; ++i)
+	{
+		MakeBoneHierarchy(node->mChildren[i], bones);	// 再帰呼び出し
 	}
 }
 
@@ -238,21 +292,34 @@ void ModelLoader::LoadBone(Mesh& dst, const aiMesh* src, std::vector<Bone>& bone
 	//}
 }
 
-void ModelLoader::LoadBone(aiNode* node, int parent, std::vector<Bone>& bones)
+void ModelLoader::LoadBone(Mesh& dst, const aiMesh* src, std::unordered_map<std::string, Bone>& bones)
 {
-	Bone bone{};
-	bone.Name = node->mName.C_Str();
-	bone.ParentIndex = parent;
-	bone.ChildIndices.resize(node->mNumChildren);
-
-	bones.push_back(bone);
-
-	int myIndex = static_cast<int>(bones.size() - 1);
-
-	for (size_t i = 0; i < node->mNumChildren; ++i)
+	for (size_t i = 0; i < src->mNumBones; ++i)
 	{
-		bones[myIndex].ChildIndices[i] = static_cast<int>(bones.size());
-		LoadBone(node->mChildren[i], myIndex, bones);
+		// ボーンデータの取得
+		auto bone = src->mBones[i];				// ボーン
+		auto boneName = bone->mName.C_Str();	// ボーン名
+
+		// ボーンのオフセット行列を格納
+		bones[boneName].OffsetMatrix = bone->mOffsetMatrix;
+
+		for (size_t j = 0; j < bone->mNumWeights; ++j)
+		{
+			// 自身のボーンの影響度を取得
+			auto weight = bone->mWeights[j];					// ボーンの影響度
+			auto vertexId = weight.mVertexId;					// 頂点番号
+			auto vertexWeight = weight.mWeight;					// 頂点の影響度
+			int boneNum = dst.DeformVertices[vertexId].BoneNum;	// ボーンの数
+
+			// 4つまでしか格納できない
+			if (boneNum < 4)
+			{
+				// 影響を及ぼすボーン名と影響度を格納
+				dst.DeformVertices[vertexId].BoneName[boneNum] = boneName;			// ボーン名
+				dst.DeformVertices[vertexId].BoneWeight[boneNum] = vertexWeight;	// ボーンの影響度
+				dst.DeformVertices[vertexId].BoneNum++;
+			}
+		}
 	}
 }
 
