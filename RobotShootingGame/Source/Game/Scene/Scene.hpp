@@ -13,7 +13,7 @@
 #include "../Object/Object.hpp"
 #include "../Camera/Camera.hpp"
 #include "../../Utility/Sprite/Sprite.hpp"
-#include "../../Utility/Model/Model.hpp"
+//#include "../../Utility/Model/Model.hpp"
 #include "../../Utility/Line/Line.hpp"
 
 /**
@@ -41,6 +41,6 @@ private:
 	Object* m_pObject{}; // Object
 	Camera* m_pCamera{}; // カメラ
 	Sprite* m_pSprite{}; // スプライト
-	Model* m_pModel{}; // モデル
+	//Model* m_pModel{}; // モデル
 	Line* m_pLine{}; // ライン
 };

@@ -37,15 +37,17 @@ void Scene::Init()
 	m_pSprite = new Sprite(texture, *m_pCamera);
 
 	// Model‚Ì¶¬
-	ModelData model = ModelLoader::GetInstance().Load("Assets/Model/demo/FBX_Demo_Idle.fbx", false, false);
-	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/taiki_mae.fbx", model, "Idle");
-	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/walk.fbx", model, "Walk");
-	ModelLoader::GetInstance().LoadAnimation("Assets/Model/demo/FBX_Demo_Idle.fbx", "Idle");
-	ModelLoader::GetInstance().LoadAnimation("Assets/Model/demo/FBX_Demo_WalkFront.fbx", "Walk");
+	//ModelData model = ModelLoader::GetInstance().Load("Assets/Model/demo/FBX_Demo_Idle.fbx", false, false);
+	////ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/taiki_mae.fbx", model, "Idle");
+	////ModelLoader::GetInstance().LoadAnimation("Assets/Model/character/walk.fbx", model, "Walk");
+	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/demo/FBX_Demo_Idle.fbx", "Idle");
+	//ModelLoader::GetInstance().LoadAnimation("Assets/Model/demo/FBX_Demo_WalkFront.fbx", "Walk");
 
-	m_pModel = new Model(model, *m_pCamera);
-	m_pModel->AddAnimation(ModelLoader::GetInstance().GetAnimation("Idle"), "Idle");
-	m_pModel->AddAnimation(ModelLoader::GetInstance().GetAnimation("Walk"), "Walk");
+	//m_pModel = new Model(model, *m_pCamera);
+	//m_pModel->AddAnimation(ModelLoader::GetInstance().GetAnimation("Idle"), "Idle");
+	//m_pModel->AddAnimation(ModelLoader::GetInstance().GetAnimation("Walk"), "Walk");
+
+	ModelLoader::GetInstance().Load("Assets/Model/demo/FBX_Demo_Idle.fbx");
 
 	// Line‚Ì¶¬
 	m_pLine = new Line(*m_pCamera);
@@ -79,7 +81,7 @@ void Scene::Update()
 	// Model‚ÌXV
 	//m_pModel->Update();
 	//m_pModel->Update("Idle", flame, "Walk", flame, 0.0f);
-	m_pModel->Update("Idle", flame);
+	//m_pModel->Update("Idle", flame);
 
 	++flame;
 }
@@ -96,7 +98,7 @@ void Scene::Draw()
 	//m_pSprite->Draw();
 
 	// Model‚Ì•`‰æ
-	m_pModel->Draw();
+	//m_pModel->Draw();
 }
 
 void Scene::UnInit()
@@ -104,8 +106,8 @@ void Scene::UnInit()
 	delete m_pLine;
 	m_pLine = nullptr;
 
-	delete m_pModel;
-	m_pModel = nullptr;
+	//delete m_pModel;
+	//m_pModel = nullptr;
 
 	delete m_pSprite;
 	m_pSprite = nullptr;

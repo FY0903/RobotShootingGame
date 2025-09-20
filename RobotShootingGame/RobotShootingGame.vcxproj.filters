@@ -99,9 +99,6 @@
     <ClCompile Include="Source\Utility\VertexBuffer\VertexBuffer.cpp">
       <Filter>Source\Utility\VertexBuffer</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp">
-      <Filter>Source\Utility\ModelLoader</Filter>
-    </ClCompile>
     <ClCompile Include="Source\System\Window\Window.cpp">
       <Filter>Source\System\Window</Filter>
     </ClCompile>
@@ -144,14 +141,14 @@
     <ClCompile Include="Source\Utility\Texture\Texture.cpp">
       <Filter>Source\Utility\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Model\Model.cpp">
-      <Filter>Source\Utility\Model</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Utility\Sound\Sound.cpp">
       <Filter>Source\Utility\Sound</Filter>
     </ClCompile>
     <ClCompile Include="Source\Utility\Line\Line.cpp">
       <Filter>Source\Utility\Line</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp">
+      <Filter>Source\Utility\ModelLoader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,9 +160,6 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\VertexBuffer\VertexBuffer.hpp">
       <Filter>Source\Utility\VertexBuffer</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp">
-      <Filter>Source\Utility\ModelLoader</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\ComPtr.h">
       <Filter>Source\Utility\ComPtr</Filter>
@@ -212,14 +206,14 @@
     <ClInclude Include="Source\Utility\Texture\Texture.hpp">
       <Filter>Source\Utility\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\Model\Model.hpp">
-      <Filter>Source\Utility\Model</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Utility\Sound\Sound.hpp">
       <Filter>Source\Utility\Sound</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\Line\Line.hpp">
       <Filter>Source\Utility\Line</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp">
+      <Filter>Source\Utility\ModelLoader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
