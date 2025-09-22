@@ -53,6 +53,7 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp" />
+    <ClCompile Include="Source\Utility\Model\Model.cpp" />
     <ClCompile Include="Source\Utility\PipelineState\PipelineState.cpp" />
     <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp" />
     <ClCompile Include="Source\Utility\SharedStruct\SharedStruct.cpp" />
@@ -109,6 +110,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp" />
+    <ClInclude Include="Source\Utility\Model\Model.hpp" />
     <ClInclude Include="Source\Utility\PipelineState\PipelineState.hpp" />
     <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp" />
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp" />
@@ -145,6 +147,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Resource\ModelPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Resource\ModelVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Resource\SimplePS.hlsl">

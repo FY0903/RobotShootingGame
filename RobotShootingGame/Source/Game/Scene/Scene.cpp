@@ -47,7 +47,11 @@ void Scene::Init()
 	//m_pModel->AddAnimation(ModelLoader::GetInstance().GetAnimation("Idle"), "Idle");
 	//m_pModel->AddAnimation(ModelLoader::GetInstance().GetAnimation("Walk"), "Walk");
 
-	ModelLoader::GetInstance().Load("Assets/Model/demo/FBX_Demo_Idle.fbx");
+	ModelData model{};
+	std::vector<Animation> animations{};
+	ModelLoader::GetInstance().Load("Assets/Model/demo/FBX_Demo_Idle.fbx", model);
+	ModelLoader::GetInstance().LoadAnimation("Assets/Model/demo/FBX_Demo_Idle.fbx", animations);
+	m_pModel = new Model(model, animations, *m_pCamera);
 
 	// Line‚Ì¶¬
 	m_pLine = new Line(*m_pCamera);
@@ -79,7 +83,7 @@ void Scene::Update()
 	m_pSprite->Update();
 
 	// Model‚ÌXV
-	//m_pModel->Update();
+	m_pModel->Update();
 	//m_pModel->Update("Idle", flame, "Walk", flame, 0.0f);
 	//m_pModel->Update("Idle", flame);
 
@@ -98,7 +102,7 @@ void Scene::Draw()
 	//m_pSprite->Draw();
 
 	// Model‚Ì•`‰æ
-	//m_pModel->Draw();
+	m_pModel->Draw();
 }
 
 void Scene::UnInit()
@@ -106,8 +110,8 @@ void Scene::UnInit()
 	delete m_pLine;
 	m_pLine = nullptr;
 
-	//delete m_pModel;
-	//m_pModel = nullptr;
+	delete m_pModel;
+	m_pModel = nullptr;
 
 	delete m_pSprite;
 	m_pSprite = nullptr;

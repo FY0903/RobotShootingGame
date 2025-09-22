@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 
+#define MAX_BONES (64)
+
 namespace Vertex
 {
 	struct Sprite
@@ -27,11 +29,12 @@ namespace Vertex
 		DirectX::XMFLOAT2 UV{};		// UV座標
 		DirectX::XMFLOAT3 Tangent{};	// 接線ベクトル
 		DirectX::XMFLOAT4 Color{};	// 頂点カラー
-
+		int BoneIndices[4]{};		// ボーンのインデックス
+		float BoneWeights[4]{};		// ボーンの重み
 		static const D3D12_INPUT_LAYOUT_DESC InputLayout;
 
 	private:
-		static const int InputElementCount = 5;
+		static const int InputElementCount = 7;
 		static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
 	};
 
@@ -55,5 +58,5 @@ struct alignas(256) Transform
 
 struct alignas(256) BoneTransform
 {
-	DirectX::XMMATRIX Matrix[4]{}; // ボーンの変形行列
+	DirectX::SimpleMath::Matrix BoneMatrices[MAX_BONES]{}; // ボーンの変形行列
 };

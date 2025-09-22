@@ -150,6 +150,9 @@
     <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp">
       <Filter>Source\Utility\ModelLoader</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Model\Model.cpp">
+      <Filter>Source\Utility\Model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
@@ -215,6 +218,9 @@
     <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp">
       <Filter>Source\Utility\ModelLoader</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Model\Model.hpp">
+      <Filter>Source\Utility\Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -236,6 +242,12 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\LineVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ModelVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ModelPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

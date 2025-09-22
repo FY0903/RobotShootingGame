@@ -19,7 +19,6 @@
 #include "../../Utility/SharedStruct/SharedStruct.hpp"
 #include "../../Utility/ModelLoader/ModelLoader.hpp"
 #include "../../Utility/DescriptorHeap/DescriptorHeap.hpp"
-#include "../../Utility/Texture/Texture.hpp"
 #include <vector>
 
 // ==============================
@@ -36,7 +35,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	Model(ModelData ModelData, Camera& Camera);
+	Model(ModelData ModelData, std::vector<Animation> animations, Camera& Camera);
 
 	/**
 	 * デストラクタ
@@ -44,18 +43,22 @@ public:
 	~Model();
 
 	void Update();
-	void Update(std::string AnimationName_1, int frame_1, std::string AnimationName_2, int frame_2, float blendRate);
-	void Update(std::string AnimationName, int frame);
+	void Update(int AnimeNo, float flame);
+	//void Update(std::string AnimationName_1, int frame_1, std::string AnimationName_2, int frame_2, float blendRate);
+	//void Update(std::string AnimationName, int frame);
 	void Draw();
 
-	void AddAnimation(const aiScene* Scene, const std::string& AnimationName);
+	//void AddAnimation(const aiScene* Scene, const std::string& AnimationName);
 
 private:
-	void UpdateBoneMatrix(aiNode* node, aiMatrix4x4 matrix);
+	//void UpdateBoneMatrix(aiNode* node, aiMatrix4x4 matrix);
+	int FindBoneIndexByName(const std::string& BoneName) const;
+	KeyFrame InterpolateKeyFrame(const BoneAnimation& BoneAnim, float flame);
+	void UpdateBoneBuffer(const std::vector<DirectX::SimpleMath::Matrix>& boneTransforms);
 
 	ModelData m_ModelData;		// モデルデータ
+	std::vector<Animation> m_AnimationsData; // アニメーションデータ
 	Camera& m_Camera;				// カメラ
-	std::vector<Texture*> m_pTextures{}; // テクスチャ
 
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
@@ -65,6 +68,4 @@ private:
 	PipelineState* m_pPipelineState{};	// パイプラインステート
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
-
-	std::unordered_map<std::string, const aiScene*> m_Animations{}; // アニメーションデータ
 };
