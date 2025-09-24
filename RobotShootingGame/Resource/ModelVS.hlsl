@@ -32,6 +32,28 @@ cbuffer BoneMatrices : register(b1)
 
 VSOutput main(VSInput input)
 {
+#if 0
+    float4 skinnedPos = float4(0, 0, 0, 0);
+    float3 skinnedNormal = float3(0, 0, 0);
+
+    // スキニング
+    for (int i = 0; i < 4; i++)
+    {
+        float4x4 boneMat = BoneMatrix[input.boneIndex[i]];
+        skinnedPos += mul(boneMat, float4(input.pos, 1.0f)) * input.boneWeight[i];
+        skinnedNormal += mul((float3x3) boneMat, input.normal) * input.boneWeight[i];
+    }
+
+    // ワールド・ビュー・プロジェクション変換
+    float4 worldPos = mul(World, skinnedPos);
+    float4 viewPos = mul(View, worldPos);
+    float4 projPos = mul(Proj, viewPos);
+
+    VSOutput output;
+    output.svpos = projPos;
+    output.color = input.color;
+    output.uv = input.uv;
+#else
     VSOutput output = (VSOutput) 0;
 
     float4 localPos = float4(input.pos, 1.0f); // 頂点座標
@@ -42,6 +64,7 @@ VSOutput main(VSInput input)
     output.svpos = projPos;
     output.color = input.color;
     output.uv = input.uv;
+#endif
 
     return output;
 }

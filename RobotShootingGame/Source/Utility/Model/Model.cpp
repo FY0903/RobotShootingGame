@@ -49,8 +49,6 @@ Model::Model(ModelData ModelData, std::vector<Animation> animations, Camera& Cam
 	m_pMaterialHandles.clear();
 	for (size_t i = 0; i < ModelData.Meshes.size(); ++i)
 	{
-		if (ModelData.Meshes[i].DiffuseMap == "") continue; // テクスチャがなければスキップ
-
 		auto texture = new Texture();
 		assert(texture);	// nullptrチェック
 
@@ -58,6 +56,13 @@ Model::Model(ModelData ModelData, std::vector<Animation> animations, Camera& Cam
 		{
 			auto handle = m_pDescriptorHeap->Register(texture->Resource(), texture->ViewDesc());
 			m_pMaterialHandles.push_back(handle);
+			m_pTextures.push_back(texture);
+		}
+		else
+		{
+			m_pMaterialHandles.push_back(nullptr);
+			delete texture;
+			texture = nullptr;
 		}
 	}
 
@@ -122,6 +127,13 @@ Model::~Model()
 	{
 		delete m_pBoneBuffer[i];
 		m_pBoneBuffer[i] = nullptr;
+	}
+
+	// テクスチャの解放
+	for (auto tex : m_pTextures)
+	{
+		delete tex;
+		tex = nullptr;
 	}
 
 	// ルートシグネチャの解放
@@ -466,10 +478,10 @@ void Model::Draw()
 		commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
 		commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
 
-		if (m_ModelData.Meshes[i].DiffuseMap != "")
+		if (m_pMaterialHandles[i])
 		{
 			commandList->SetDescriptorHeaps(1, &materialHeap);									// ディスクリプタヒープを設定
-			commandList->SetGraphicsRootDescriptorTable(1, m_pMaterialHandles[i]->HandleGPU);	// ディスクリプタテーブルを設定
+			commandList->SetGraphicsRootDescriptorTable(2, m_pMaterialHandles[i]->HandleGPU);	// ディスクリプタテーブルを設定
 		}
 		commandList->DrawIndexedInstanced(static_cast<UINT>(m_ModelData.Meshes[i].Indices.size()), 1, 0, 0, 0);	// 描画
 	}

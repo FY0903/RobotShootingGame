@@ -83,11 +83,11 @@ void Scene::Update()
 	m_pSprite->Update();
 
 	// Model‚ÌXV
-	m_pModel->Update();
+	m_pModel->Update(1, flame);
 	//m_pModel->Update("Idle", flame, "Walk", flame, 0.0f);
 	//m_pModel->Update("Idle", flame);
 
-	++flame;
+	//++flame;
 }
 
 void Scene::Draw()

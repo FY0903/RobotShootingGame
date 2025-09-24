@@ -19,6 +19,7 @@
 #include "../../Utility/SharedStruct/SharedStruct.hpp"
 #include "../../Utility/ModelLoader/ModelLoader.hpp"
 #include "../../Utility/DescriptorHeap/DescriptorHeap.hpp"
+#include "../../Utility/Texture/Texture.hpp"
 #include <vector>
 
 // ==============================
@@ -58,6 +59,7 @@ private:
 
 	ModelData m_ModelData;		// モデルデータ
 	std::vector<Animation> m_AnimationsData; // アニメーションデータ
+	std::vector<Texture*> m_pTextures{}; // テクスチャ
 	Camera& m_Camera;				// カメラ
 
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
