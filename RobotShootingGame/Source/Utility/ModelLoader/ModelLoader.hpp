@@ -47,6 +47,7 @@ struct Bone
 {
 	std::string Name{}; // ボーン名
 	int ParentID{};		// 親ボーンのインデックス
+	std::vector<int> ChildIDs{}; // 子ボーンのインデックス配列
 	DirectX::SimpleMath::Matrix InverseBindPose{}; // 逆バインドポーズ行列
 };
 

@@ -46,6 +46,7 @@ public:
 
 	void AddPoint(DirectX::SimpleMath::Vector3 start, DirectX::SimpleMath::Vector3 end, DirectX::SimpleMath::Vector4 color);
 	void Create();
+	void Clear();
 
 private:
 	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ

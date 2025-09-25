@@ -20,6 +20,7 @@
 #include "../../Utility/ModelLoader/ModelLoader.hpp"
 #include "../../Utility/DescriptorHeap/DescriptorHeap.hpp"
 #include "../../Utility/Texture/Texture.hpp"
+#include "../../Utility/Line/Line.hpp"
 #include <vector>
 
 // ==============================
@@ -56,11 +57,13 @@ private:
 	int FindBoneIndexByName(const std::string& BoneName) const;
 	KeyFrame InterpolateKeyFrame(const BoneAnimation& BoneAnim, float flame);
 	void UpdateBoneBuffer(const std::vector<DirectX::SimpleMath::Matrix>& boneTransforms);
+	void VertexSkinning(std::vector<DirectX::SimpleMath::Matrix> boneMat);
 
 	ModelData m_ModelData;		// モデルデータ
 	std::vector<Animation> m_AnimationsData; // アニメーションデータ
 	std::vector<Texture*> m_pTextures{}; // テクスチャ
 	Camera& m_Camera;				// カメラ
+	Line* m_pLine{};				// ライン
 
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ

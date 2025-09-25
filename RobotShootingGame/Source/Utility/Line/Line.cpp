@@ -50,14 +50,14 @@ void Line::Draw()
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
 
 	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
-	
+
 	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
 	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
 	commandList->SetGraphicsRootConstantBufferView(0, m_pTransformBuffer[currentIndex]->GetAddress());	// 定数バッファを設定
-	
+
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);	// プリミティブトポロジーを設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);							// 頂点バッファを設定
-	
+
 	commandList->DrawInstanced(static_cast<UINT>(m_Lines.size()), 1, 0, 0);	// 描画
 }
 
@@ -101,4 +101,9 @@ void Line::Create()
 	m_pPipelineState->SetVS(L"Assets/Shader/LineVS.cso");
 	m_pPipelineState->SetPS(L"Assets/Shader/LinePS.cso");
 	m_pPipelineState->Create();
+}
+
+void Line::Clear()
+{
+	m_Lines.clear();
 }

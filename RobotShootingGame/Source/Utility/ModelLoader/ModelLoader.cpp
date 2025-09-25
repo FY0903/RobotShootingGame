@@ -182,7 +182,11 @@ void ModelLoader::ProcessBones(const aiScene* scene, ModelData& model)
 		bone.InverseBindPose = DirectX::SimpleMath::Matrix::Identity; // 後で aiBone から取得
 		int idx = static_cast<int>(model.Bones.size());
 		boneNameToIndex[bone.Name] = idx;
+		if (parentIdx >= 0)
+			model.Bones[parentIdx].ChildIDs.push_back(idx); // 親ボーンに子ボーンのインデックスを追加
 		model.Bones.push_back(bone);
+
+		// 子ノードを再帰的に処理
 		for (unsigned i = 0; i < node->mNumChildren; ++i)
 			traverse(node->mChildren[i], idx);
 	};
@@ -191,14 +195,20 @@ void ModelLoader::ProcessBones(const aiScene* scene, ModelData& model)
 	traverse(scene->mRootNode, -1);
 
 	// aiBone から逆バインドポーズ行列を取得
-	for (unsigned m = 0; m < scene->mNumMeshes; ++m) {
+	for (unsigned m = 0; m < scene->mNumMeshes; ++m)
+	{
 		aiMesh* mesh = scene->mMeshes[m];
-		for (unsigned b = 0; b < mesh->mNumBones; ++b) {
+
+		for (unsigned b = 0; b < mesh->mNumBones; ++b)
+		{
 			aiBone* aiBone = mesh->mBones[b];
+
+			// ボーン名からインデックスを取得
 			auto it = boneNameToIndex.find(aiBone->mName.C_Str());
-			if (it != boneNameToIndex.end()) {
+			if (it != boneNameToIndex.end())
+			{
 				DirectX::SimpleMath::Matrix mat;
-				memcpy(&mat, &aiBone->mOffsetMatrix, sizeof(mat));
+				memcpy(&mat, &aiBone->mOffsetMatrix, sizeof(mat));	// aiMatrix4x4 から SimpleMath::Matrix へコピー
 				model.Bones[it->second].InverseBindPose = mat;
 			}
 
@@ -206,11 +216,15 @@ void ModelLoader::ProcessBones(const aiScene* scene, ModelData& model)
 			int boneIdx = it != boneNameToIndex.end() ? it->second : -1;
 			if (boneIdx < 0) continue; // 見つからなければスキップ
 
-			for (unsigned w = 0; w < aiBone->mNumWeights; ++w) {
+			for (unsigned w = 0; w < aiBone->mNumWeights; ++w)
+			{
 				unsigned vIdx = aiBone->mWeights[w].mVertexId;
 				float weight = aiBone->mWeights[w].mWeight;
-				for (int k = 0; k < 4; ++k) {
-					if (model.Meshes[m].Vertices[vIdx].BoneWeights[k] == 0.0f) {
+
+				for (int k = 0; k < 4; ++k)
+				{
+					if (model.Meshes[m].Vertices[vIdx].BoneWeights[k] == 0.0f)
+					{
 						model.Meshes[m].Vertices[vIdx].BoneIndices[k] = boneIdx;
 						model.Meshes[m].Vertices[vIdx].BoneWeights[k] = weight;
 						break;
