@@ -10,8 +10,8 @@
 //	include
 // ==============================
 #include "IndexBuffer.hpp"
-#include "../../../DirectXTex/d3dx12.h"
-#include "../../System/Engine/Engine.hpp"
+#include "../DirectXTex/d3dx12.h"
+#include "System/Engine/Engine.hpp"
 
 IndexBuffer::IndexBuffer(size_t size, const uint32_t* pInitData)
 {

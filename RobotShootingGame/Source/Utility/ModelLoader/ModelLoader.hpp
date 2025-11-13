@@ -16,7 +16,7 @@
 #include <DirectXMath.h>
 #include <string>
 #include <vector>
-#include "../Singleton/Singleton.hpp"
+#include "Utility/Singleton/Singleton.hpp"
 
 // ==============================
 //	‘O•ûéŒ¾

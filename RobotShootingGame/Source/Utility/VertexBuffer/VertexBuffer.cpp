@@ -10,8 +10,8 @@
 //	include
 // ==============================
 #include "VertexBuffer.hpp"
-#include "../../System/Engine/Engine.hpp"
-#include "../../../DirectXTex/d3dx12.h"
+#include "System/Engine/Engine.hpp"
+#include "../DirectXTex/d3dx12.h"
 
 VertexBuffer::VertexBuffer(size_t size, size_t stride, const void* pInitData)
 {

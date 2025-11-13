@@ -10,7 +10,7 @@
 //	include
 // ==============================
 #include "Line.hpp"
-#include "../../Game/Camera/Camera.hpp"
+#include "Game/Camera/Camera.hpp"
 
 Line::Line(Camera& camera)
 	: m_Camera(camera)

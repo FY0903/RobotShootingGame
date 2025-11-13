@@ -10,7 +10,7 @@
 //	include
 // ==============================
 #include "Object.hpp"
-#include "../../System/Window/Window.hpp"
+#include "System/Window/Window.hpp"
 
 Object::Object(Camera& camera)
 	: m_Camera(camera)

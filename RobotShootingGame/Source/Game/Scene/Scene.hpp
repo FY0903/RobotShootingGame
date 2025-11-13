@@ -10,11 +10,11 @@
 // ==============================
 //	include
 // ==============================
-#include "../Object/Object.hpp"
-#include "../Camera/Camera.hpp"
-#include "../../Utility/Sprite/Sprite.hpp"
-#include "../../Utility/Model/Model.hpp"
-#include "../../Utility/Line/Line.hpp"
+#include "Game/Object/Object.hpp"
+#include "Game/Camera/Camera.hpp"
+#include "Utility/Sprite/Sprite.hpp"
+#include "Utility/Model/Model.hpp"
+#include "Utility/Line/Line.hpp"
 
 /**
  * @brief SceneƒNƒ‰ƒX

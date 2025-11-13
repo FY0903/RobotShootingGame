@@ -9,8 +9,8 @@
 //	include
 // ==============================
 #include "Engine.hpp"
-#include "../../../DirectXTex/d3dx12.h"
-#include "../Window/Window.hpp"
+#include "../DirectXTex/d3dx12.h"
+#include "System/Window/Window.hpp"
 
 HRESULT Engine::Init(HWND wnd)
 {

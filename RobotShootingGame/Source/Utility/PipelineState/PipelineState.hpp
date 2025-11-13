@@ -10,8 +10,8 @@
 // ==============================
 //	include
 // ==============================
-#include "../ComPtr.h"
-#include "../../../DirectXTex/d3dx12.h"
+#include "Utility/ComPtr.h"
+#include "../DirectXTex/d3dx12.h"
 
 /**
  * @brief PipelineStateƒNƒ‰ƒX

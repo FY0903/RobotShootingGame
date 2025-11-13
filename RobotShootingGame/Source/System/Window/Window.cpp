@@ -10,7 +10,7 @@
 //	include
 // ==============================
 #include "Window.hpp"
-#include "../../Utility/Input/Input.hpp"
+#include "Utility/Input/Input.hpp"
 
 // ==============================
 //	constexpr

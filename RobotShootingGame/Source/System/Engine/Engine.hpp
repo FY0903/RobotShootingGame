@@ -17,8 +17,8 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 
-#include "../../Utility/ComPtr.h"
-#include "../../Utility/Singleton/Singleton.hpp"
+#include "Utility/ComPtr.h"
+#include "Utility/Singleton/Singleton.hpp"
 
 // ==============================
 //	Linker

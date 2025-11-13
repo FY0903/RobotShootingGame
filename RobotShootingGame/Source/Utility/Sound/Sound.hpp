@@ -16,8 +16,8 @@
 #include <Shlwapi.h>
 #include <map>
 #include <unordered_map>
-#include "../Singleton/Singleton.hpp"
-#include "../ComPtr.h"
+#include "Utility/Singleton/Singleton.hpp"
+#include "Utility/ComPtr.h"
 
 // ==============================
 //	lib

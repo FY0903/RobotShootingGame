@@ -10,8 +10,8 @@
 //	include
 // ==============================
 #include "ConstantBuffer.hpp"
-#include "../../../DirectXTex/d3dx12.h"
-#include "../../System/Engine/Engine.hpp"
+#include "../DirectXTex/d3dx12.h"
+#include "System/Engine/Engine.hpp"
 
 ConstantBuffer::ConstantBuffer(size_t size)
 {

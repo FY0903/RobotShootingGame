@@ -10,7 +10,7 @@
 //	include
 // ==============================
 #include "Model.hpp"
-#include "../../Game/Camera/Camera.hpp"
+#include "Game/Camera/Camera.hpp"
 
 Model::Model(std::vector<Mesh> Meshes, Camera& Camera)
 	: m_Meshes(Meshes), m_Camera(Camera)

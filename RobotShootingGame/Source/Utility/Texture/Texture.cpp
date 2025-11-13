@@ -10,8 +10,8 @@
 //	include
 // ==============================
 #include "Texture.hpp"
-#include "../../../DirectXTex/DirectXTex.h"
-#include "../../System/Engine/Engine.hpp"
+#include "../DirectXTex/DirectXTex.h"
+#include "System/Engine/Engine.hpp"
 
 HRESULT Texture::Load(const std::string& FileName)
 {

@@ -10,10 +10,10 @@
 //	include
 // ==============================
 #include "Scene.hpp"
-#include "../../System/Window/Window.hpp"
-#include "../../Utility/Texture/Texture.hpp"
-#include "../../Utility/ModelLoader/ModelLoader.hpp"
-#include "../../Utility/Sound/Sound.hpp"
+#include "System/Window/Window.hpp"
+#include "Utility/Texture/Texture.hpp"
+#include "Utility/ModelLoader/ModelLoader.hpp"
+#include "Utility/Sound/Sound.hpp"
 #include <iterator>
 #include <memory>
 

@@ -19,8 +19,8 @@
 #include "Window/Window.hpp"
 #include "Engine/Engine.hpp"
 
-#include "../Game/Scene/Scene.hpp"
-#include "../Game/Object/Object.hpp"
+#include "Game/Scene/Scene.hpp"
+#include "Game/Object/Object.hpp"
 
 class App
 {

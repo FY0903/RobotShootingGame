@@ -16,8 +16,8 @@
 //	include
 // ==============================
 #include "App.hpp"
-#include "../Utility/Input/Input.hpp"
-#include "../Utility/Sound/Sound.hpp"
+#include "Utility/Input/Input.hpp"
+#include "Utility/Sound/Sound.hpp"
 
 // ==============================
 //	lib

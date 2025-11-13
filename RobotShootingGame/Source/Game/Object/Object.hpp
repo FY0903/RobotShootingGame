@@ -10,16 +10,16 @@
 // ==============================
 //	include
 // ==============================
-#include "../../System/Engine/Engine.hpp"
-#include "../../Utility/SharedStruct/SharedStruct.hpp"
-#include "../../Utility/VertexBuffer/VertexBuffer.hpp"
-#include "../../Utility/IndexBuffer/IndexBuffer.hpp"
-#include "../../Utility/ConstantBuffer/ConstantBuffer.hpp"
-#include "../../Utility/RootSignature/RootSignature.hpp"
-#include "../../Utility/PipelineState/PipelineState.hpp"
+#include "System/Engine/Engine.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/VertexBuffer/VertexBuffer.hpp"
+#include "Utility/IndexBuffer/IndexBuffer.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "Utility/RootSignature/RootSignature.hpp"
+#include "Utility/PipelineState/PipelineState.hpp"
 #include <vector>
 
-#include "../Camera/Camera.hpp"
+#include "Game/Camera/Camera.hpp"
 
 /**
  * @brief ObjectƒNƒ‰ƒX

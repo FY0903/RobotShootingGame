@@ -13,7 +13,7 @@
 #include <Windows.h>
 #include <cstdint>
 
-#include "../../Utility/Singleton/Singleton.hpp"
+#include "Utility/Singleton/Singleton.hpp"
 
 /**
  * @brief WindowƒNƒ‰ƒX

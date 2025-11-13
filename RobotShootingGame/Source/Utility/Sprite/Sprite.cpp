@@ -10,8 +10,8 @@
 //	include
 // ==============================
 #include "Sprite.hpp"
-#include "../SharedStruct/SharedStruct.hpp"
-#include "../../Game/Camera/Camera.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Game/Camera/Camera.hpp"
 
 Sprite::Sprite(std::shared_ptr<Texture> texture, Camera& camera)
 	: m_pTexture(texture), m_Camera(camera)
