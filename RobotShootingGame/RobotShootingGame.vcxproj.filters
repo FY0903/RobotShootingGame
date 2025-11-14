@@ -58,9 +58,6 @@
     <Filter Include="Source\Utility\DescriptorHeap">
       <UniqueIdentifier>{ba26a58a-dfe6-42a0-8c3e-cd0181861211}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\Texture2D">
-      <UniqueIdentifier>{34d5198d-2681-4ff1-b64f-3958f2abcc7b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Game\Object">
       <UniqueIdentifier>{2085f1d7-3a9b-4bba-97f7-ab56a360796d}</UniqueIdentifier>
     </Filter>
@@ -84,6 +81,21 @@
     </Filter>
     <Filter Include="Source\Utility\Sound">
       <UniqueIdentifier>{f6c38b53-ad91-434f-bd1a-acbbc511482e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Transform">
+      <UniqueIdentifier>{f7392ca6-973f-459e-bff9-1957aabeaaaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Actor">
+      <UniqueIdentifier>{bcd9ac80-98c1-49e2-b8f6-40769170380f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Compornent">
+      <UniqueIdentifier>{e81d8d46-014d-4960-afed-958ac456a6d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Compornent\MeshRenderer">
+      <UniqueIdentifier>{adf96f0a-f9c5-41c2-a3a4-062a2eaae115}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Compornent\SpriteRenderer">
+      <UniqueIdentifier>{c30740a4-3e92-4b85-a01b-35a8f24e19fb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +165,18 @@
     <ClCompile Include="Source\Utility\Line\Line.cpp">
       <Filter>Source\Utility\Line</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Actor.cpp">
+      <Filter>Source\Game\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\Component.cpp">
+      <Filter>Source\Utility\Compornent</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\MeshRenderer\MeshRenderer.cpp">
+      <Filter>Source\Utility\Compornent\MeshRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\SpriteRenderer\SpriteRenderer.cpp">
+      <Filter>Source\Utility\Compornent\SpriteRenderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
@@ -220,6 +244,21 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Line\Line.hpp">
       <Filter>Source\Utility\Line</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Transform\Transform.hpp">
+      <Filter>Source\Utility\Transform</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Actor.hpp">
+      <Filter>Source\Game\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\Component.hpp">
+      <Filter>Source\Utility\Compornent</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\MeshRenderer\MeshRenderer.hpp">
+      <Filter>Source\Utility\Compornent\MeshRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\SpriteRenderer\SpriteRenderer.hpp">
+      <Filter>Source\Utility\Compornent\SpriteRenderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

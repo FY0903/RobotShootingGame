@@ -10,30 +10,9 @@
 // ==============================
 //	include
 // ==============================
-
-// ==============================
-//	define
-// ==============================
-
-// ==============================
-//	構造体定義
-// ==============================
-
-// ==============================
-//	列挙型定義
-// ==============================
-
-// ==============================
-//	プロトタイプ宣言
-// ==============================
-
-// ==============================
-//	定数定義
-// ==============================
-
-// ==============================
-//	グローバル変数宣言
-// ==============================
+#include "Utility/Transform/Transform.hpp"
+#include "Utility/Compornent/Component.hpp"
+#include <list>
 
 /**
  * @brief Actorクラス
@@ -41,13 +20,60 @@
 class Actor
 {
 public:
+	enum Tags
+	{
+		None,
+		Player,
+		Enemy,
+		Max,
+	};
+
 	/**
 	 * コンストラクタ
 	 */
-	Actor() = default;
+	Actor();
 
 	/**
 	 * デストラクタ
 	 */
-	~Actor() = default;
+	virtual ~Actor();
+
+	virtual void Init() = 0;
+	virtual void Update();
+	virtual void Draw();
+	virtual void Uninit() = 0;
+
+	template<typename T = Component>
+	inline T* AddComponent()
+	{
+		T* component = new T(this);
+		m_Components.emplace_back(component);
+		
+		static_cast<Component*>(component)->Init();
+
+		return component;
+	}
+
+	template<typename T = Component>
+	inline T* GetComponent()
+	{
+		for (Component* component : m_Components)
+		{
+			T* castedComponent = dynamic_cast<T*>(component);
+			if (castedComponent)
+			{
+				return castedComponent;
+			}
+		}
+		return nullptr;
+	}
+
+	inline const Transform& GetTransform() { return m_Transform; }
+	inline const Tags& GetTag() { return m_Tag; }
+
+protected:
+	std::list<Component*> m_Components{};
+
+	Transform m_Transform{};
+	Tags m_Tag{};
 };

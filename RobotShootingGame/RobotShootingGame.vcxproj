@@ -42,6 +42,18 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\Component.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\MeshRenderer\MeshRenderer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\SpriteRenderer\SpriteRenderer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\ConstantBuffer\ConstantBuffer.cpp">
       <SubType>
       </SubType>
@@ -105,6 +117,18 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\Component.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\MeshRenderer\MeshRenderer.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\SpriteRenderer\SpriteRenderer.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\ComPtr.h" />
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
       <SubType>
@@ -141,6 +165,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Transform\Transform.hpp" />
     <ClInclude Include="Source\Utility\VertexBuffer\VertexBuffer.hpp">
       <SubType>
       </SubType>

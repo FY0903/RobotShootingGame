@@ -11,26 +11,37 @@
 // ==============================
 #include "Actor.hpp"
 
-// ==============================
-//	define
-// ==============================
+Actor::Actor()
+	: m_Tag(Tags::None)
+{
+	for (auto& component : m_Components)
+	{
+		component->Init();
+	}
+}
 
-// ==============================
-//	構造体定義
-// ==============================
+Actor::~Actor()
+{
+	for (auto& component : m_Components)
+	{
+		component->Uninit();
+		delete component;
+	}
+	m_Components.clear();
+}
 
-// ==============================
-//	列挙型定義
-// ==============================
+void Actor::Update()
+{
+	for (auto& component : m_Components)
+	{
+		component->Update();
+	}
+}
 
-// ==============================
-//	プロトタイプ宣言
-// ==============================
-
-// ==============================
-//	定数定義
-// ==============================
-
-// ==============================
-//	グローバル変数宣言
-// ==============================
+void Actor::Draw()
+{
+	for (auto& component : m_Components)
+	{
+		component->Draw();
+	}
+}
