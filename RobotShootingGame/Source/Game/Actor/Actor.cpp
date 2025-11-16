@@ -11,15 +11,6 @@
 // ==============================
 #include "Actor.hpp"
 
-Actor::Actor()
-	: m_Tag(Tags::None)
-{
-	for (auto& component : m_Components)
-	{
-		component->Init();
-	}
-}
-
 Actor::~Actor()
 {
 	for (auto& component : m_Components)

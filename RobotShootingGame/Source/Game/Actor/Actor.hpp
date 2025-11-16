@@ -31,7 +31,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	Actor();
+	Actor() = default;
 
 	/**
 	 * デストラクタ

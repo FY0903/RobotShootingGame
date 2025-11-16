@@ -10,7 +10,15 @@
 // ==============================
 //	include
 // ==============================
+#include "System/Engine/Engine.hpp"
 #include "Utility/Compornent/Component.hpp"
+#include "Utility/Texture/Texture.hpp"
+#include "Utility/VertexBuffer/VertexBuffer.hpp"
+#include "Utility/IndexBuffer/IndexBuffer.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "Utility/DescriptorHeap/DescriptorHeap.hpp"
+#include "Utility/RootSignature/RootSignature.hpp"
+#include "Utility/PipelineState/PipelineState.hpp"
 
 /**
  * @brief SpriteRendererクラス
@@ -24,4 +32,17 @@ public:
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;
+
+	inline void SetTexture(Texture* pTexture) { m_pTexture = pTexture; }
+
+private:
+	Texture* m_pTexture{}; // テクスチャ
+
+	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
+	IndexBuffer* m_pIndexBuffer{};	// インデックスバッファ
+	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
+	DescriptorHandle* m_pMaterialHandle{}; // ディスクリプタハンドル
+	RootSignature* m_pRootSignature{};	// ルートシグネチャ
+	PipelineState* m_pPipelineState{};	// パイプラインステート
 };
