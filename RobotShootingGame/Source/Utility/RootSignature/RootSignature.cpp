@@ -88,7 +88,7 @@ void RootSignature::AddDescriptorRange(UINT shaderRegiser, D3D12_DESCRIPTOR_RANG
 	m_DescriptorRanges.push_back(range);
 
 	CD3DX12_ROOT_PARAMETER param{};
-	param.InitAsDescriptorTable(static_cast<UINT>(m_DescriptorRanges.size()), m_DescriptorRanges.data(), visibility);
+	param.InitAsDescriptorTable(1, &m_DescriptorRanges.back(), visibility);
 	m_RootParams.push_back(param);
 }
 
