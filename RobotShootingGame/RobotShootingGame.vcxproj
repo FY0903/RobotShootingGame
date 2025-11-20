@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -23,10 +23,6 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Game\Camera\Camera.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="Source\Game\Object\Object.cpp">
       <SubType>
       </SubType>
@@ -39,6 +35,10 @@
     <ClCompile Include="Source\System\Engine\Engine.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
     <ClCompile Include="Source\System\Window\Window.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\Camera\Camera.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -99,10 +99,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Source\Game\Camera\Camera.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="Source\Game\Object\Object.hpp">
       <SubType>
       </SubType>
@@ -113,7 +109,12 @@
     </ClInclude>
     <ClInclude Include="Source\System\App.hpp" />
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
+    <ClInclude Include="Source\System\main.hpp" />
     <ClInclude Include="Source\System\Window\Window.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\Camera\Camera.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -219,6 +220,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Resource\Common.hlsli" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -15,15 +15,10 @@
 // ==============================
 //	include
 // ==============================
+#include "main.hpp"
 #include "App.hpp"
 #include "../Utility/Singleton/Singleton.hpp"
 #include "../System/Engine/Engine.hpp"
-
-// ==============================
-//	constexpr
-// ==============================
-constexpr uint32_t WINDOW_WIDTH = 960;	// ウィンドウの幅
-constexpr uint32_t WINDOW_HEIGHT = 540;	// ウィンドウの高さ
 
 _Use_decl_annotations_
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
