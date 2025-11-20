@@ -61,9 +61,6 @@
     <Filter Include="Source\Game\Object">
       <UniqueIdentifier>{2085f1d7-3a9b-4bba-97f7-ab56a360796d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Game\Camera">
-      <UniqueIdentifier>{b5e335e4-d8e8-4be0-b57a-f4474bb93418}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Utility\Input">
       <UniqueIdentifier>{56a60273-c18b-411e-8c63-fcfaa2d10958}</UniqueIdentifier>
     </Filter>
@@ -96,6 +93,9 @@
     </Filter>
     <Filter Include="Source\Utility\Compornent\SpriteRenderer">
       <UniqueIdentifier>{c30740a4-3e92-4b85-a01b-35a8f24e19fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Compornent\Camera">
+      <UniqueIdentifier>{b6d0cc61-b1e8-47e0-8399-204136ff4cab}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -144,9 +144,6 @@
     <ClCompile Include="Source\Game\Object\Object.cpp">
       <Filter>Source\Game\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Game\Camera\Camera.cpp">
-      <Filter>Source\Game\Camera</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Utility\Input\Input.cpp">
       <Filter>Source\Utility\Input</Filter>
     </ClCompile>
@@ -176,6 +173,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Compornent\SpriteRenderer\SpriteRenderer.cpp">
       <Filter>Source\Utility\Compornent\SpriteRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\Camera\Camera.cpp">
+      <Filter>Source\Utility\Compornent\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -224,9 +224,6 @@
     <ClInclude Include="Source\Game\Object\Object.hpp">
       <Filter>Source\Game\Object</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Camera\Camera.hpp">
-      <Filter>Source\Game\Camera</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Utility\Input\Input.hpp">
       <Filter>Source\Utility\Input</Filter>
     </ClInclude>
@@ -260,6 +257,12 @@
     <ClInclude Include="Source\Utility\Compornent\SpriteRenderer\SpriteRenderer.hpp">
       <Filter>Source\Utility\Compornent\SpriteRenderer</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\Camera\Camera.hpp">
+      <Filter>Source\Utility\Compornent\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\main.hpp">
+      <Filter>Source\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -286,5 +289,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Resource\Common.hlsli">
+      <Filter>Resource</Filter>
+    </None>
   </ItemGroup>
 </Project>

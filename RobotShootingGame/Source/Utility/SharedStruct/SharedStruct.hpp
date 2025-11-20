@@ -46,9 +46,13 @@ namespace Vertex
 	};
 }
 
-struct alignas(256) Transform
+struct alignas(256) World
 {
 	DirectX::XMMATRIX World{};	// ワールド行列
+};
+
+struct alignas(256) VP
+{
 	DirectX::XMMATRIX View{};		// ビュー行列
 	DirectX::XMMATRIX Proj{};		// 射影行列
 };

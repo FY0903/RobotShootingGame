@@ -11,6 +11,7 @@
 // ==============================
 #include "Camera.hpp"
 #include "Utility/Input/Input.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
 
 // ==============================
 //	constexpr
@@ -31,6 +32,15 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 	// ビュー行列とプロジェクション行列の計算
 	m_VP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
 	m_VP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
+
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		m_pCB[i] = new ConstantBuffer(sizeof(WVP));
+		assert(m_pCB[i]);	// nullptrチェック
+		WVP* ptr = m_pCB[i]->GetPtr<WVP>();
+		ptr->View = m_VP[0];
+		ptr->Proj = m_VP[1];
+	}
 }
 
 void Camera::Update()
@@ -72,6 +82,11 @@ void Camera::Update()
 	// ビュー行列とプロジェクション行列の計算
 	m_VP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
 	m_VP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
+
+	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
+	VP* ptr = m_pCB[currentIndex]->GetPtr<VP>();
+	ptr->View = m_VP[0];
+	ptr->Proj = m_VP[1];
 }
 
 void Camera::Draw()

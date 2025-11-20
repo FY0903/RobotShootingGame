@@ -1,7 +1,10 @@
-// WVP
-cbuffer Transform : register(b0)
+cbuffer World : register(b0)
 {
-    float4x4 World : packoffset(c0);
-    float4x4 View : packoffset(c4);
-    float4x4 Proj : packoffset(c8);
+    Matrix World : packoffset(c0);
+}
+
+cbuffer VP : register(b1)
+{
+    Matrix View : packoffset(c0);
+    Matrix Projection : packoffset(c4);
 }
