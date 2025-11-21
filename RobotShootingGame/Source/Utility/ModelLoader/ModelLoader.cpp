@@ -28,7 +28,7 @@ std::string GetDirectoryPath(const std::string& filepath)
 	return path.remove_filename().string();
 }
 
-std::vector<Mesh> ModelLoader::Load(const std::string& FileName, bool inverseU, bool inverseV)
+std::vector<CB::Mesh> ModelLoader::Load(const std::string& FileName, bool inverseU, bool inverseV)
 {
 	Assimp::Importer importer;
 	int flag = 0;
@@ -49,7 +49,7 @@ std::vector<Mesh> ModelLoader::Load(const std::string& FileName, bool inverseU, 
 		assert(0 && "ÉÇÉfÉãÇÃì«Ç›çûÇ›Ç…é∏îs");
 	}
 
-	std::vector<Mesh> meshes;
+	std::vector<CB::Mesh> meshes;
 
 	meshes.clear();
 	meshes.resize(scene->mNumMeshes);
@@ -68,7 +68,7 @@ std::vector<Mesh> ModelLoader::Load(const std::string& FileName, bool inverseU, 
 	return meshes;
 }
 
-void ModelLoader::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV)
+void ModelLoader::LoadMesh(CB::Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV)
 {
 	aiVector3D zero3D(0.0f, 0.0f, 0.0f);
 	aiColor4D zeroColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -111,7 +111,7 @@ void ModelLoader::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inv
 	}
 }
 
-void ModelLoader::LoadTexture(std::string FileName, Mesh& dst, const aiMaterial* src)
+void ModelLoader::LoadTexture(std::string FileName, CB::Mesh& dst, const aiMaterial* src)
 {
 	aiString path;
 	if (src->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)

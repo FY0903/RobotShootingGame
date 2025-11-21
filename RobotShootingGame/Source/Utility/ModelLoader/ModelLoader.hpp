@@ -17,19 +17,18 @@
 #include <string>
 #include <vector>
 #include "Utility/Singleton/Singleton.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
 
 // ==============================
 //	‘O•ûéŒ¾
 // ==============================
-struct Mesh;
-
 struct aiMesh;
 struct aiMaterial;
 
 class ModelLoader : public Singleton<ModelLoader>
 {
 public:
-	std::vector<Mesh> Load(const std::string& FileName, bool inverseU, bool inverseV);
+	std::vector<CB::Mesh> Load(const std::string& FileName, bool inverseU, bool inverseV);
 
 private:
 	friend class Singleton<ModelLoader>;
@@ -43,6 +42,6 @@ private:
 	 */
 	~ModelLoader() = default;
 
-	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
-	void LoadTexture(std::string FileName, Mesh& dst, const aiMaterial* src);
+	void LoadMesh(CB::Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
+	void LoadTexture(std::string FileName, CB::Mesh& dst, const aiMaterial* src);
 };

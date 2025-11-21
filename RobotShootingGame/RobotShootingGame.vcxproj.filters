@@ -103,6 +103,9 @@
     <Filter Include="Source\Game\Scene\SceneGame">
       <UniqueIdentifier>{1233e52a-2ce4-45ba-a6a2-af293ee8c673}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game\Actor\MainCamera">
+      <UniqueIdentifier>{353a281f-4844-4cb3-8b43-6554e643fd04}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -116,9 +119,6 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\VertexBuffer\VertexBuffer.cpp">
       <Filter>Source\Utility\VertexBuffer</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp">
-      <Filter>Source\Utility\ModelLoader</Filter>
     </ClCompile>
     <ClCompile Include="Source\System\Window\Window.cpp">
       <Filter>Source\System\Window</Filter>
@@ -144,26 +144,14 @@
     <ClCompile Include="Source\Utility\DescriptorHeap\DescriptorHeap.cpp">
       <Filter>Source\Utility\DescriptorHeap</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Game\Object\Object.cpp">
-      <Filter>Source\Game\Object</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Utility\Input\Input.cpp">
       <Filter>Source\Utility\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\Sprite\Sprite.cpp">
-      <Filter>Source\Utility\Sprite</Filter>
     </ClCompile>
     <ClCompile Include="Source\Utility\Texture\Texture.cpp">
       <Filter>Source\Utility\Texture</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\Model\Model.cpp">
-      <Filter>Source\Utility\Model</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Utility\Sound\Sound.cpp">
       <Filter>Source\Utility\Sound</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\Line\Line.cpp">
-      <Filter>Source\Utility\Line</Filter>
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\Actor.cpp">
       <Filter>Source\Game\Actor</Filter>
@@ -186,6 +174,9 @@
     <ClCompile Include="Source\Game\Scene\SceneGame\SceneGame.cpp">
       <Filter>Source\Game\Scene\SceneGame</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Game\Actor\MainCamera\MainCamera.cpp">
+      <Filter>Source\Game\Actor\MainCamera</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
@@ -196,9 +187,6 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\VertexBuffer\VertexBuffer.hpp">
       <Filter>Source\Utility\VertexBuffer</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp">
-      <Filter>Source\Utility\ModelLoader</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\ComPtr.h">
       <Filter>Source\Utility\ComPtr</Filter>
@@ -227,26 +215,14 @@
     <ClInclude Include="Source\Utility\DescriptorHeap\DescriptorHeap.hpp">
       <Filter>Source\Utility\DescriptorHeap</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Object\Object.hpp">
-      <Filter>Source\Game\Object</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Utility\Input\Input.hpp">
       <Filter>Source\Utility\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\Sprite\Sprite.hpp">
-      <Filter>Source\Utility\Sprite</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\Texture\Texture.hpp">
       <Filter>Source\Utility\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\Model\Model.hpp">
-      <Filter>Source\Utility\Model</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Utility\Sound\Sound.hpp">
       <Filter>Source\Utility\Sound</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\Line\Line.hpp">
-      <Filter>Source\Utility\Line</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\Transform\Transform.hpp">
       <Filter>Source\Utility\Transform</Filter>
@@ -274,6 +250,9 @@
     </ClInclude>
     <ClInclude Include="Source\Game\Scene\SceneGame\SceneGame.hpp">
       <Filter>Source\Game\Scene\SceneGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\MainCamera\MainCamera.hpp">
+      <Filter>Source\Game\Actor\MainCamera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -51,8 +51,6 @@ public:
 	{
 		T* component = new T(this);
 		m_Components.emplace_back(component);
-		
-		static_cast<Component*>(component)->Init();
 
 		return component;
 	}
@@ -71,6 +69,13 @@ public:
 		return nullptr;
 	}
 
+	template<typename T = Component>
+	inline void RemoveComponent(T* component)
+	{
+		m_Components.remove_if([component](Component* comp) { return comp == component; });
+		delete component;
+	}
+
 	inline const Transform& GetTransform() { return m_Transform; }
 	inline const Tags& GetTag() { return m_Tag; }
 
@@ -84,5 +89,4 @@ protected:
 
 private:
 	ConstantBuffer* m_pWorldCB[FRAME_BUFFER_COUNT]{};	// ワールド行列用定数バッファ
-	DirectX::XMMATRIX m_World{};	// ワールド行列
 };

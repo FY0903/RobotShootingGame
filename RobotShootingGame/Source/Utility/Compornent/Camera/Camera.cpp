@@ -33,13 +33,19 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 	m_VP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
 	m_VP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
 
+
+	DirectX::XMFLOAT4X4 VPf[2]{};
+	DirectX::XMStoreFloat4x4(&VPf[0], DirectX::XMMatrixTranspose(m_VP[0]));
+	DirectX::XMStoreFloat4x4(&VPf[1], DirectX::XMMatrixTranspose(m_VP[1]));
+
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
 		m_pCB[i] = new ConstantBuffer(sizeof(CB::VP));
 		assert(m_pCB[i]);	// nullptrチェック
 		CB::VP* ptr = m_pCB[i]->GetPtr<CB::VP>();
-		ptr->View = m_VP[0];
-		ptr->Proj = m_VP[1];
+
+		ptr->ViewMat = VPf[0];
+		ptr->ProjMat = VPf[1];
 	}
 
 	// ルートシグネチャの生成
@@ -51,6 +57,12 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 
 void Camera::Update()
 {
+	if (!m_pCB[0] || !m_pCB[1] || !m_pRootSignature)
+	{
+		assert(false && "メンバ変数が初期化されていません。初期化不備です。");
+		throw std::runtime_error("Camera::Init() が呼ばれてません。必ず呼び出してください。");
+	}
+
 	// 入力処理
 	if (Input::IsKeyPress(VK_LEFT))
 	{
@@ -89,10 +101,14 @@ void Camera::Update()
 	m_VP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
 	m_VP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
 
+	DirectX::XMFLOAT4X4 VPf[2]{};
+	DirectX::XMStoreFloat4x4(&VPf[0], DirectX::XMMatrixTranspose(m_VP[0]));
+	DirectX::XMStoreFloat4x4(&VPf[1], DirectX::XMMatrixTranspose(m_VP[1]));
+
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	CB::VP* ptr = m_pCB[currentIndex]->GetPtr<CB::VP>();
-	ptr->View = m_VP[0];
-	ptr->Proj = m_VP[1];
+	ptr->ViewMat = VPf[0];
+	ptr->ProjMat = VPf[1];
 }
 
 void Camera::Draw()

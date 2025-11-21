@@ -47,7 +47,7 @@ public:
 	inline T* AddGameObject(Layer layer = Layer::DEFAULT)
 	{
 		T* actor = new T();
-		m_Actors[layer].emplace_back(actor);
+		m_Actors[static_cast<size_t>(layer)].emplace_back(actor);
 		actor->Init();
 		return actor;
 	}

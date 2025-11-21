@@ -18,6 +18,7 @@
 #include "App.hpp"
 #include "Utility/Input/Input.hpp"
 #include "Utility/Sound/Sound.hpp"
+#include "Game/Scene/SceneGame/SceneGame.hpp"
 
 // ==============================
 //	lib
@@ -47,13 +48,16 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 	}
 
 	// Sceneの初期化
-	m_Scene.Init();
+	m_pCurrentScene = new SceneGame();
+	m_pCurrentScene->Init();
 }
 
 void App::UnInit()
 {
 	// Sceneの終了処理
-	m_Scene.UnInit();
+	m_pCurrentScene->Uninit();
+	delete m_pCurrentScene;
+	m_pCurrentScene = nullptr;
 
 	// Soundの終了処理
 	Sound::GetInstance().Uninit();
@@ -84,9 +88,9 @@ void App::Run()
 			Input::Update();
 
 			// シーンの更新と描画
-			m_Scene.Update();
+			m_pCurrentScene->Update();
 			Engine::GetInstance().BeginDraw();
-			m_Scene.Draw();
+			m_pCurrentScene->Draw();
 			Engine::GetInstance().EndDraw();
 
 			Input::EndUpdateInput();

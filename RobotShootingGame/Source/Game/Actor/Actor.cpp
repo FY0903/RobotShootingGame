@@ -20,7 +20,7 @@ Actor::Actor()
 		m_pWorldCB[i] = new ConstantBuffer(sizeof(CB::World));
 		assert(m_pWorldCB[i]);	// nullptrチェック
 		CB::World* ptr = m_pWorldCB[i]->GetPtr<CB::World>();
-		ptr->World = m_World;
+		ptr->WorldMat = m_Transform.GetWorldMatrixFloat4x4();
 	}
 
 	// ルートシグネチャの生成
@@ -59,7 +59,7 @@ void Actor::Update()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
 	CB::World* ptr = m_pWorldCB[currentIndex]->GetPtr<CB::World>();			// 定数バッファのポインタを取得
-	ptr->World = m_Transform.GetWorldMatrix();								// ワールド行列を更新
+	ptr->WorldMat = m_Transform.GetWorldMatrixFloat4x4();					// ワールド行列を更新
 
 	for (auto& component : m_Components)
 	{

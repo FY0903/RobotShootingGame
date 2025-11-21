@@ -23,7 +23,7 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Game\Object\Object.cpp">
+    <ClCompile Include="Source\Game\Actor\MainCamera\MainCamera.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -65,24 +65,11 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Utility\Input\Input.cpp" />
-    <ClCompile Include="Source\Utility\Line\Line.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\ModelLoader\ModelLoader.cpp" />
-    <ClCompile Include="Source\Utility\Model\Model.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="Source\Utility\PipelineState\PipelineState.cpp" />
     <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp" />
     <ClCompile Include="Source\Utility\SharedStruct\SharedStruct.cpp" />
     <ClCompile Include="Source\Utility\Singleton\Singleton.cpp" />
     <ClCompile Include="Source\Utility\Sound\Sound.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="Source\Utility\Sprite\Sprite.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -100,7 +87,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Source\Game\Object\Object.hpp">
+    <ClInclude Include="Source\Game\Actor\MainCamera\MainCamera.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -143,24 +130,11 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Input\Input.hpp" />
-    <ClInclude Include="Source\Utility\Line\Line.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\ModelLoader\ModelLoader.hpp" />
-    <ClInclude Include="Source\Utility\Model\Model.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="Source\Utility\PipelineState\PipelineState.hpp" />
     <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp" />
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp" />
     <ClInclude Include="Source\Utility\Singleton\Singleton.hpp" />
     <ClInclude Include="Source\Utility\Sound\Sound.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\Sprite\Sprite.hpp">
       <SubType>
       </SubType>
     </ClInclude>

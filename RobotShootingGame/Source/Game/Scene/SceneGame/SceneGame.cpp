@@ -10,7 +10,10 @@
 //	include
 // ==============================
 #include "SceneGame.hpp"
+#include "Game/Actor/MainCamera/MainCamera.hpp"
 
 void SceneGame::Init()
 {
+	// ƒƒCƒ“ƒJƒƒ‰‚Ì¶¬
+	AddGameObject<MainCamera>(Layer::DEFAULT);
 }

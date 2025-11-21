@@ -17,8 +17,6 @@ ConstantBuffer::ConstantBuffer(size_t size)
 {
 	size_t align = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 	UINT64 sizeAligned = (size + (align - 1)) & ~(align - 1);	// 256バイトアライメントに調整
-
-	assert(alignof(sizeAligned) == align);	// アライメントの確認
 	assert(sizeAligned % align == 0);		// サイズがアライメントの倍数であることを確認
 
 	CD3DX12_HEAP_PROPERTIES prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD); // ヒープのプロパティ

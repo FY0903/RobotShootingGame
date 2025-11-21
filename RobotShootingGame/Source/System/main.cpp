@@ -25,7 +25,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
 #if defined(_DEBUG) || defined(DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	// _CrtSetBreakAlloc(13134);
+	//_CrtSetBreakAlloc(207);
 #endif
 
 	App App;

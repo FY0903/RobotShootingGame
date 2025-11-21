@@ -1,27 +1,25 @@
 /*+===================================================================
-	File: MeshRenderer.hpp
+	File: MainCamera.cpp
 	Summary: （このファイルで何をするか記載する）
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/14 17:22:58 初回作成
+	Date: 2025/11/21 18:12:36 初回作成
 	（これ以降下に更新日時と更新内容を書く）
 ===================================================================+*/
-#pragma once
 
 // ==============================
 //	include
 // ==============================
-#include "Utility/Compornent/Component.hpp"
-
-/**
- * @brief MeshRendererクラス
- */
-class MeshRenderer : public Component
+#include "MainCamera.hpp"
+#include "Utility/Compornent/Camera/Camera.hpp"
+void MainCamera::Init()
 {
-public:
-	using Component::Component;
+	// ルートシグネチャの生成
+	m_pRootSignature->Create();
 
-	void Init();
-	void Update() override final;
-	void Draw() override final;
-	void Uninit() override final;
-};
+	// カメラコンポーネントの生成と初期化
+	AddComponent<Camera>()->Init();
+}
+
+void MainCamera::Uninit()
+{
+}

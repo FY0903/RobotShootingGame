@@ -57,13 +57,13 @@ namespace CB
 {
 	struct World
 	{
-		DirectX::XMMATRIX World{};	// ワールド行列
+		DirectX::XMFLOAT4X4 WorldMat{};	// ワールド行列
 	};
 
 	struct VP
 	{
-		DirectX::XMMATRIX View{};		// ビュー行列
-		DirectX::XMMATRIX Proj{};		// 射影行列
+		DirectX::XMFLOAT4X4 ViewMat{};		// ビュー行列
+		DirectX::XMFLOAT4X4 ProjMat{};		// 射影行列
 	};
 
 	struct Mesh

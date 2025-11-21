@@ -20,6 +20,7 @@
 #include "Utility/ModelLoader/ModelLoader.hpp"
 #include "Utility/DescriptorHeap/DescriptorHeap.hpp"
 #include "Utility/Texture/Texture.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
 #include <vector>
 
 // ==============================
@@ -36,7 +37,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	Model(std::vector<Mesh> Meshes, Camera& Camera);
+	Model(std::vector<CB::Mesh> Meshes, Camera& Camera);
 
 	/**
 	 * デストラクタ
@@ -47,7 +48,7 @@ public:
 	void Draw();
 
 private:
-	std::vector<Mesh> m_Meshes{};	// メッシュデータ
+	std::vector<CB::Mesh> m_Meshes{};	// メッシュデータ
 	Camera& m_Camera;				// カメラ
 	std::vector<Texture*> m_pTextures{}; // テクスチャ
 

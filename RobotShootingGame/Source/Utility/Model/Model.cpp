@@ -12,7 +12,7 @@
 #include "Model.hpp"
 #include "Game/Camera/Camera.hpp"
 
-Model::Model(std::vector<Mesh> Meshes, Camera& Camera)
+Model::Model(std::vector<CB::Mesh> Meshes, Camera& Camera)
 	: m_Meshes(Meshes), m_Camera(Camera)
 {
 	// メッシュの数だけ頂点バッファを用意する

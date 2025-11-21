@@ -59,4 +59,17 @@ struct Transform
 		DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslation(Position.x, Position.y, Position.z);
 		return scaleMatrix * rotationMatrix * translationMatrix;
 	}
+
+	DirectX::XMFLOAT4X4 GetWorldMatrixFloat4x4(bool transpose = true)
+	{
+		DirectX::XMFLOAT4X4 worldf{};
+		DirectX::XMMATRIX worldMat{};
+
+		if (transpose)
+			DirectX::XMMatrixTranspose(GetWorldMatrix());
+
+		DirectX::XMStoreFloat4x4(&worldf, worldMat);
+
+		return worldf;
+	}
 };
