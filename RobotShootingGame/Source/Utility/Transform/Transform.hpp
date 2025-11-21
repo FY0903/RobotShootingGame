@@ -51,4 +51,12 @@ struct Transform
 		, Scale(scale)
 	{
 	}
+
+	DirectX::XMMATRIX GetWorldMatrix() const
+	{
+		DirectX::XMMATRIX scaleMatrix = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
+		DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(Rotation.x, Rotation.y, Rotation.z);
+		DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslation(Position.x, Position.y, Position.z);
+		return scaleMatrix * rotationMatrix * translationMatrix;
+	}
 };

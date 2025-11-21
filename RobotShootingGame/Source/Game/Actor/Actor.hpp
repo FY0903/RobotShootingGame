@@ -12,6 +12,9 @@
 // ==============================
 #include "Utility/Transform/Transform.hpp"
 #include "Utility/Compornent/Component.hpp"
+#include "System/Engine/Engine.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "Utility/RootSignature/RootSignature.hpp"
 #include <list>
 
 /**
@@ -31,7 +34,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	Actor() = default;
+	Actor();
 
 	/**
 	 * デストラクタ
@@ -76,4 +79,10 @@ protected:
 
 	Transform m_Transform{};
 	Tags m_Tag{};
+
+	RootSignature* m_pRootSignature{};					// ルートシグネチャ
+
+private:
+	ConstantBuffer* m_pWorldCB[FRAME_BUFFER_COUNT]{};	// ワールド行列用定数バッファ
+	DirectX::XMMATRIX m_World{};	// ワールド行列
 };

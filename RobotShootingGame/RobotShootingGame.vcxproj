@@ -27,10 +27,11 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Game\Scene\Scene.cpp">
+    <ClCompile Include="Source\Game\Scene\SceneBase.cpp">
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Game\Scene\SceneGame\SceneGame.cpp" />
     <ClCompile Include="Source\System\App.cpp" />
     <ClCompile Include="Source\System\Engine\Engine.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
@@ -103,10 +104,11 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Source\Game\Scene\Scene.hpp">
+    <ClInclude Include="Source\Game\Scene\SceneBase.hpp">
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Game\Scene\SceneGame\SceneGame.hpp" />
     <ClInclude Include="Source\System\App.hpp" />
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
     <ClInclude Include="Source\System\main.hpp" />

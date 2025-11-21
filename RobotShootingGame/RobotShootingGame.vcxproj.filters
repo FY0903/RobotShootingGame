@@ -61,6 +61,9 @@
     <Filter Include="Source\Game\Object">
       <UniqueIdentifier>{2085f1d7-3a9b-4bba-97f7-ab56a360796d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game\Camera">
+      <UniqueIdentifier>{b5e335e4-d8e8-4be0-b57a-f4474bb93418}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source\Utility\Input">
       <UniqueIdentifier>{56a60273-c18b-411e-8c63-fcfaa2d10958}</UniqueIdentifier>
     </Filter>
@@ -95,7 +98,10 @@
       <UniqueIdentifier>{c30740a4-3e92-4b85-a01b-35a8f24e19fb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Utility\Compornent\Camera">
-      <UniqueIdentifier>{b6d0cc61-b1e8-47e0-8399-204136ff4cab}</UniqueIdentifier>
+      <UniqueIdentifier>{f2300b1b-6856-4d09-89e8-69836f745cd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Scene\SceneGame">
+      <UniqueIdentifier>{1233e52a-2ce4-45ba-a6a2-af293ee8c673}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -122,9 +128,6 @@
     </ClCompile>
     <ClCompile Include="Source\System\Engine\Engine.cpp">
       <Filter>Source\System\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Game\Scene\Scene.cpp">
-      <Filter>Source\Game\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Source\Utility\Singleton\Singleton.cpp">
       <Filter>Source\Utility\Singleton</Filter>
@@ -177,6 +180,12 @@
     <ClCompile Include="Source\Utility\Compornent\Camera\Camera.cpp">
       <Filter>Source\Utility\Compornent\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Game\Scene\SceneBase.cpp">
+      <Filter>Source\Game\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Scene\SceneGame\SceneGame.cpp">
+      <Filter>Source\Game\Scene\SceneGame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
@@ -202,9 +211,6 @@
     </ClInclude>
     <ClInclude Include="Source\System\Engine\Engine.hpp">
       <Filter>Source\System\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Game\Scene\Scene.hpp">
-      <Filter>Source\Game\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp">
       <Filter>Source\Utility\SharedStruct</Filter>
@@ -262,6 +268,12 @@
     </ClInclude>
     <ClInclude Include="Source\System\main.hpp">
       <Filter>Source\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Scene\SceneBase.hpp">
+      <Filter>Source\Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Scene\SceneGame\SceneGame.hpp">
+      <Filter>Source\Game\Scene\SceneGame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

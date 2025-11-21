@@ -44,6 +44,8 @@ public:
 
 	void Create();
 
+	inline bool IsCreated() const { return m_pRootSignature != nullptr; }
+
 private:
 	ComPtr<ID3D12RootSignature> m_pRootSignature{};	// ルートシグネチャ
 

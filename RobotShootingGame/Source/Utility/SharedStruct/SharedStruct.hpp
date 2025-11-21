@@ -6,6 +6,12 @@
 #include <vector>
 #include <string>
 
+// ==============================
+//	constexpr
+// ==============================
+constexpr std::size_t D3D12_CONSTANT_BUFFER_ALIGNMENT = 256; // 定数バッファのアライメント
+
+// 頂点構造体
 namespace Vertex
 {
 	struct Sprite
@@ -46,20 +52,24 @@ namespace Vertex
 	};
 }
 
-struct alignas(256) World
+// 定数バッファ構造体
+namespace CB
 {
-	DirectX::XMMATRIX World{};	// ワールド行列
-};
+	struct World
+	{
+		DirectX::XMMATRIX World{};	// ワールド行列
+	};
 
-struct alignas(256) VP
-{
-	DirectX::XMMATRIX View{};		// ビュー行列
-	DirectX::XMMATRIX Proj{};		// 射影行列
-};
+	struct VP
+	{
+		DirectX::XMMATRIX View{};		// ビュー行列
+		DirectX::XMMATRIX Proj{};		// 射影行列
+	};
 
-struct Mesh
-{
-	std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
-	std::vector<uint32_t> Indices{};	// インデックスデータ
-	std::string DiffuseMap{};	// ディフューズマップのファイルパス
-};
+	struct Mesh
+	{
+		std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
+		std::vector<uint32_t> Indices{};	// インデックスデータ
+		std::string DiffuseMap{};	// ディフューズマップのファイルパス
+	};
+}

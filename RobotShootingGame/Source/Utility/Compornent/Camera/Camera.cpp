@@ -35,12 +35,18 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pCB[i] = new ConstantBuffer(sizeof(WVP));
+		m_pCB[i] = new ConstantBuffer(sizeof(CB::VP));
 		assert(m_pCB[i]);	// nullptrチェック
-		WVP* ptr = m_pCB[i]->GetPtr<WVP>();
+		CB::VP* ptr = m_pCB[i]->GetPtr<CB::VP>();
 		ptr->View = m_VP[0];
 		ptr->Proj = m_VP[1];
 	}
+
+	// ルートシグネチャの生成
+	m_pRootSignature = new RootSignature();
+	assert(m_pRootSignature);	// nullptrチェック
+	m_pRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_VERTEX);	// 定数バッファビュー
+	m_pRootSignature->Create();
 }
 
 void Camera::Update()
@@ -84,15 +90,33 @@ void Camera::Update()
 	m_VP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
 
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
-	VP* ptr = m_pCB[currentIndex]->GetPtr<VP>();
+	CB::VP* ptr = m_pCB[currentIndex]->GetPtr<CB::VP>();
 	ptr->View = m_VP[0];
 	ptr->Proj = m_VP[1];
 }
 
 void Camera::Draw()
 {
+	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
+	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
+	
+	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
+	commandList->SetGraphicsRootConstantBufferView(0, m_pCB[currentIndex]->GetAddress());	// 定数バッファを設定
 }
 
 void Camera::Uninit()
 {
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		if (m_pCB[i])
+		{
+			delete m_pCB[i];
+			m_pCB[i] = nullptr;
+		}
+	}
+	if (m_pRootSignature)
+	{
+		delete m_pRootSignature;
+		m_pRootSignature = nullptr;
+	}
 }

@@ -15,6 +15,7 @@
 #include "System/main.hpp"
 #include "System/Engine/Engine.hpp"
 #include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "Utility/RootSignature/RootSignature.hpp"
 
 /**
  * @brief Cameraクラス
@@ -59,4 +60,5 @@ private:
 	float m_Aspect{};	// アスペクト比
 
 	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	RootSignature* m_pRootSignature{};				// ルートシグネチャ
 };
