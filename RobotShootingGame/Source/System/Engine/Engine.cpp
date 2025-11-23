@@ -176,6 +176,11 @@ void Engine::EndDraw()
 	m_CurrentBackBufferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 }
 
+void Engine::SetViewProjCB(const ConstantBuffer* ConstantBuffer)
+{
+
+}
+
 Engine::~Engine()
 {
 #ifdef _DEBUG

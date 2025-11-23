@@ -12,6 +12,7 @@
 #include "Camera.hpp"
 #include "Utility/Input/Input.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/RootSignature/RootSignatureManager.hpp"
 
 // ==============================
 //	constexpr
@@ -47,17 +48,11 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 		ptr->ViewMat = VPf[0];
 		ptr->ProjMat = VPf[1];
 	}
-
-	// ルートシグネチャの生成
-	m_pRootSignature = new RootSignature();
-	assert(m_pRootSignature);	// nullptrチェック
-	m_pRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_VERTEX);	// 定数バッファビュー
-	m_pRootSignature->Create();
 }
 
 void Camera::Update()
 {
-	if (!m_pCB[0] || !m_pCB[1] || !m_pRootSignature)
+	if (!m_pCB[0] || !m_pCB[1])
 	{
 		assert(false && "メンバ変数が初期化されていません。初期化不備です。");
 		throw std::runtime_error("Camera::Init() が呼ばれてません。必ず呼び出してください。");
@@ -113,11 +108,6 @@ void Camera::Update()
 
 void Camera::Draw()
 {
-	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
-	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
-	
-	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
-	commandList->SetGraphicsRootConstantBufferView(0, m_pCB[currentIndex]->GetAddress());	// 定数バッファを設定
 }
 
 void Camera::Uninit()
@@ -129,10 +119,5 @@ void Camera::Uninit()
 			delete m_pCB[i];
 			m_pCB[i] = nullptr;
 		}
-	}
-	if (m_pRootSignature)
-	{
-		delete m_pRootSignature;
-		m_pRootSignature = nullptr;
 	}
 }

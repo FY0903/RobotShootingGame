@@ -19,6 +19,7 @@
 
 #include "Utility/ComPtr.h"
 #include "Utility/Singleton/Singleton.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
 
 // ==============================
 //	Linker
@@ -47,6 +48,8 @@ public:
 	ID3D12Device* GetDevice() const { return m_pDevice.Get(); }
 	ID3D12GraphicsCommandList* GetCommandList() const { return m_pCommandList.Get(); }
 	UINT GetCurrentBackBufferIndex() const { return m_CurrentBackBufferIndex; }
+
+	void SetViewProjCB(const ConstantBuffer* ConstantBuffer);
 
 private:
 	friend class Singleton<Engine>;
@@ -98,4 +101,6 @@ private:
 	ComPtr<ID3D12Resource> m_pCurrentRenderTarget{}; // 現在のレンダーターゲット
 
 	HWND m_hWnd{};			// ウィンドウハンドル
+
+	ConstantBuffer* m_pViewProjCB[FRAME_BUFFER_COUNT]{}; // ビュー・プロジェクション行列用定数バッファ
 };

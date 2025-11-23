@@ -43,8 +43,8 @@ namespace Vertex
 
 	struct Line
 	{
-		DirectX::SimpleMath::Vector3 Position{};	// 頂点座標
-		DirectX::SimpleMath::Vector4 Color{};	// 頂点カラー
+		DirectX::XMFLOAT3 Position{};	// 頂点座標
+		DirectX::XMFLOAT4 Color{};	// 頂点カラー
 		static const D3D12_INPUT_LAYOUT_DESC InputLayout;
 	private:
 		static const int InputElementCount = 2;

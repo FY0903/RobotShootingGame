@@ -60,5 +60,4 @@ private:
 	float m_Aspect{};	// アスペクト比
 
 	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	RootSignature* m_pRootSignature{};				// ルートシグネチャ
 };

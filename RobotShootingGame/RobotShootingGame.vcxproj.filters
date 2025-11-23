@@ -25,9 +25,6 @@
     <Filter Include="Source\Utility\VertexBuffer">
       <UniqueIdentifier>{2eb73504-b42c-4ec4-a455-f15555527d21}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\ModelLoader">
-      <UniqueIdentifier>{82a5fe1c-1cc9-48a6-bab6-5874dcc341da}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Utility\ComPtr">
       <UniqueIdentifier>{2fd880d2-b39b-40e8-8aa5-001dcdc46649}</UniqueIdentifier>
     </Filter>
@@ -58,26 +55,11 @@
     <Filter Include="Source\Utility\DescriptorHeap">
       <UniqueIdentifier>{ba26a58a-dfe6-42a0-8c3e-cd0181861211}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Game\Object">
-      <UniqueIdentifier>{2085f1d7-3a9b-4bba-97f7-ab56a360796d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Game\Camera">
-      <UniqueIdentifier>{b5e335e4-d8e8-4be0-b57a-f4474bb93418}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Utility\Input">
       <UniqueIdentifier>{56a60273-c18b-411e-8c63-fcfaa2d10958}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\Sprite">
-      <UniqueIdentifier>{8c2ef2ce-19b6-47e1-a63f-7ef4f5052c8b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Utility\Texture">
       <UniqueIdentifier>{a3da4029-11b6-49df-a96f-0813f0a6254e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility\Model">
-      <UniqueIdentifier>{91094cef-3f23-48b9-9551-cba064f04d17}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Utility\Line">
-      <UniqueIdentifier>{a0a99dcf-0315-4af9-a26f-de34e58bc7fc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Utility\Sound">
       <UniqueIdentifier>{f6c38b53-ad91-434f-bd1a-acbbc511482e}</UniqueIdentifier>
@@ -105,6 +87,12 @@
     </Filter>
     <Filter Include="Source\Game\Actor\MainCamera">
       <UniqueIdentifier>{353a281f-4844-4cb3-8b43-6554e643fd04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Actor\Grid">
+      <UniqueIdentifier>{7658827e-c514-4b14-9578-7d2e2c855fd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Compornent\Line">
+      <UniqueIdentifier>{8d2d5eec-55fb-4bd9-900c-0781ffc920dd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -176,6 +164,15 @@
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\MainCamera\MainCamera.cpp">
       <Filter>Source\Game\Actor\MainCamera</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Grid\Grid.cpp">
+      <Filter>Source\Game\Actor\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\Line\Line.cpp">
+      <Filter>Source\Utility\Compornent\Line</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\RootSignature\RootSignatureManager.cpp">
+      <Filter>Source\Utility\RootSignature</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -253,6 +250,15 @@
     </ClInclude>
     <ClInclude Include="Source\Game\Actor\MainCamera\MainCamera.hpp">
       <Filter>Source\Game\Actor\MainCamera</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Grid\Grid.hpp">
+      <Filter>Source\Game\Actor\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\Line\Line.hpp">
+      <Filter>Source\Utility\Compornent\Line</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\RootSignature\RootSignatureManager.hpp">
+      <Filter>Source\Utility\RootSignature</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
