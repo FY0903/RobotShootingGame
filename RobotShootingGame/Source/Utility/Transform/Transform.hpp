@@ -52,7 +52,7 @@ struct Transform
 	{
 	}
 
-	DirectX::XMMATRIX GetWorldMatrix() const
+	DirectX::XMMATRIX GetWorldMatrix()
 	{
 		DirectX::XMMATRIX scaleMatrix = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
 		DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(Rotation.x, Rotation.y, Rotation.z);
@@ -63,10 +63,10 @@ struct Transform
 	DirectX::XMFLOAT4X4 GetWorldMatrixFloat4x4(bool transpose = true)
 	{
 		DirectX::XMFLOAT4X4 worldf{};
-		DirectX::XMMATRIX worldMat{};
+		DirectX::XMMATRIX worldMat = GetWorldMatrix();
 
 		if (transpose)
-			DirectX::XMMatrixTranspose(GetWorldMatrix());
+			worldMat = DirectX::XMMatrixTranspose(worldMat);
 
 		DirectX::XMStoreFloat4x4(&worldf, worldMat);
 

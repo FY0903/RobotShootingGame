@@ -2,7 +2,7 @@
 	File: Model.hpp
 	Summary: （このファイルで何をするか記載する）
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/09/08 9:11:08 初回作成
+	Date: 2025/11/24 10:31:21 初回作成
 	（これ以降下に更新日時と更新内容を書く）
 ===================================================================+*/
 #pragma once
@@ -10,23 +10,16 @@
 // ==============================
 //	include
 // ==============================
-#include "System/Engine/Engine.hpp"
-#include "Utility/VertexBuffer/VertexBuffer.hpp"
-#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
-#include "Utility/RootSignature/RootSignature.hpp"
-#include "Utility/PipelineState/PipelineState.hpp"
-#include "Utility/IndexBuffer/IndexBuffer.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
-#include "Utility/ModelLoader/ModelLoader.hpp"
-#include "Utility/DescriptorHeap/DescriptorHeap.hpp"
 #include "Utility/Texture/Texture.hpp"
-#include "Utility/SharedStruct/SharedStruct.hpp"
 #include <vector>
+#include <string>
 
 // ==============================
 //	前方宣言
 // ==============================
-class Camera;
+struct aiMesh;
+struct aiMaterial;
 
 /**
  * @brief Modelクラス
@@ -34,29 +27,30 @@ class Camera;
 class Model
 {
 public:
+	struct Mesh
+	{
+		std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
+		std::vector<uint32_t> Indices{};		// インデックスデータ
+		Texture* DiffuseMap{};					// ディフューズマップ
+	};
+
 	/**
 	 * コンストラクタ
 	 */
-	Model(std::vector<CB::Mesh> Meshes, Camera& Camera);
+	Model() = default;
 
 	/**
 	 * デストラクタ
 	 */
 	~Model();
 
-	void Update();
-	void Draw();
+	HRESULT Load(const std::string& fileName, bool inverseU, bool inverseV);
+
+	inline const std::vector<Mesh>& GetMeshes() const { return m_Meshes; }
 
 private:
-	std::vector<CB::Mesh> m_Meshes{};	// メッシュデータ
-	Camera& m_Camera;				// カメラ
-	std::vector<Texture*> m_pTextures{}; // テクスチャ
+	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
+	void LoadTexture(const std::string& fineName, Mesh& dst, const aiMaterial* src);
 
-	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
-	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
-	ConstantBuffer* m_pConstantBuffer[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	RootSignature* m_pRootSignature{};	// ルートシグネチャ
-	PipelineState* m_pPipelineState{};	// パイプラインステート
-	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
+	std::vector<Mesh> m_Meshes{};
 };

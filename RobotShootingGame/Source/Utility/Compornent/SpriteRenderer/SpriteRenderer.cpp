@@ -11,8 +11,10 @@
 // ==============================
 #include "SpriteRenderer.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/CameraManager/CameraManager.hpp"
+#include "Game/Actor/Actor.hpp"
 
-void SpriteRenderer::Init()
+void SpriteRenderer::Init(Texture* pTexture)
 {
 	Vertex::Sprite vertices[4]{};
 
@@ -44,12 +46,24 @@ void SpriteRenderer::Init()
 	assert(m_pDescriptorHeap);	// nullptrチェック
 
 	// ディスクリプタハンドルの生成
-	m_pMaterialHandle = m_pDescriptorHeap->Register(m_pTexture->Resource(), m_pTexture->ViewDesc());
+	m_pMaterialHandle = m_pDescriptorHeap->Register(pTexture->Resource(), pTexture->ViewDesc());
 	assert(m_pMaterialHandle);	// nullptrチェック
+
+	// 定数バッファの生成
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		m_pCB[i] = new ConstantBuffer(sizeof(CB::WVP));
+		assert(m_pCB[i]);	// nullptrチェック
+		CB::WVP* ptr = m_pCB[i]->GetPtr<CB::WVP>();
+		ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
+		ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->GetViewMatrixFloat4x4(false);
+		ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->GetProjectionMatrixFloat4x4(false);
+	}
 
 	// ルートシグネチャの生成
 	m_pRootSignature = new RootSignature();
 	assert(m_pRootSignature);	// nullptrチェック
+	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
 	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, D3D12_SHADER_VISIBILITY_PIXEL); // テクスチャ
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
 	m_pRootSignature->Create();
@@ -66,6 +80,12 @@ void SpriteRenderer::Init()
 
 void SpriteRenderer::Update()
 {
+	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
+	CB::WVP* ptr = m_pCB[currentIndex]->GetPtr<CB::WVP>();
+
+	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
+	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->GetViewMatrixFloat4x4(false);
+	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->GetProjectionMatrixFloat4x4(false);
 }
 
 void SpriteRenderer::Draw()
@@ -79,6 +99,7 @@ void SpriteRenderer::Draw()
 
 	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
 	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
+	commandList->SetGraphicsRootConstantBufferView(0, m_pCB[currentIndex]->GetAddress()); // 定数バッファを設定
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
@@ -97,22 +118,36 @@ void SpriteRenderer::Uninit()
 		delete m_pVertexBuffer;
 		m_pVertexBuffer = nullptr;
 	}
+
 	if (m_pIndexBuffer)
 	{
 		delete m_pIndexBuffer;
 		m_pIndexBuffer = nullptr;
 	}
+
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		if (m_pCB[i])
+		{
+			delete m_pCB[i];
+			m_pCB[i] = nullptr;
+		}
+	}
+
 	if (m_pDescriptorHeap)
 	{
 		delete m_pDescriptorHeap;
 		m_pDescriptorHeap = nullptr;
 	}
+
 	m_pMaterialHandle = nullptr;
+
 	if (m_pRootSignature)
 	{
 		delete m_pRootSignature;
 		m_pRootSignature = nullptr;
 	}
+
 	if (m_pPipelineState)
 	{
 		delete m_pPipelineState;

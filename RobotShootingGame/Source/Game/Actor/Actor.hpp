@@ -41,10 +41,10 @@ public:
 	 */
 	virtual ~Actor();
 
-	virtual void Init() = 0;
-	virtual void Update();
-	virtual void Draw();
-	virtual void Uninit() = 0;
+	void Init();
+	void Update();
+	void Draw();
+	void Uninit();
 
 	template<typename T = Component>
 	inline T* AddComponent()
@@ -76,17 +76,15 @@ public:
 		delete component;
 	}
 
-	inline const Transform& GetTransform() { return m_Transform; }
+	inline Transform& GetTransform() { return m_Transform; }
 	inline const Tags& GetTag() { return m_Tag; }
 
 protected:
+	virtual void OnInit() = 0;
+	virtual void OnUninit() = 0;
+
 	std::list<Component*> m_Components{};
 
 	Transform m_Transform{};
 	Tags m_Tag{};
-
-	RootSignature* m_pRootSignature{};					// ルートシグネチャ
-
-private:
-	ConstantBuffer* m_pWorldCB[FRAME_BUFFER_COUNT]{};	// ワールド行列用定数バッファ
 };

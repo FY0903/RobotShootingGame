@@ -11,6 +11,15 @@
 //	include
 // ==============================
 #include "Utility/Compornent/Component.hpp"
+#include "Utility/Model/Model.hpp"
+#include "System/Engine/Engine.hpp"
+#include "Utility/VertexBuffer/VertexBuffer.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "Utility/RootSignature/RootSignature.hpp"
+#include "Utility/PipelineState/PipelineState.hpp"
+#include "Utility/IndexBuffer/IndexBuffer.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/DescriptorHeap/DescriptorHeap.hpp"
 
 /**
  * @brief MeshRendererクラス
@@ -20,8 +29,19 @@ class MeshRenderer : public Component
 public:
 	using Component::Component;
 
-	void Init();
+	void Init(Model* pModel);
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;
+
+private:
+	Model* m_pModel{};	// モデルデータ
+
+	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
+	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
+	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	RootSignature* m_pRootSignature{};	// ルートシグネチャ
+	PipelineState* m_pPipelineState{};	// パイプラインステート
+	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
 };

@@ -38,12 +38,16 @@ public:
 	void Init(DirectX::XMVECTOR eyePos = DirectX::XMVectorSet(0.0f, 5.0f, 5.0f, 0.0f),
 		DirectX::XMVECTOR targetPos = DirectX::XMVectorZero(),
 		DirectX::XMVECTOR upVec = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f),
-		float radius = 15.0f,
-		float fov = DirectX::XMConvertToRadians(45.0f),
-		float aspect = static_cast<float>(WINDOW_WIDTH / WINDOW_HEIGHT));
+		float radius = 10.0f,
+		float fov = DirectX::XMConvertToRadians(60.0f),
+		float aspect = 16.0f / 9.0f);
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;
+
+	const DirectX::XMFLOAT4X4 GetViewMatrixFloat4x4(bool transpose = true);
+
+	const DirectX::XMFLOAT4X4 GetProjectionMatrixFloat4x4(bool transpose = true);
 
 private:
 	DirectX::XMMATRIX m_VP[2]{}; // ビュー/プロジェクション行列
@@ -58,6 +62,4 @@ private:
 
 	float m_Fov{};		// 視野角
 	float m_Aspect{};	// アスペクト比
-
-	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 };

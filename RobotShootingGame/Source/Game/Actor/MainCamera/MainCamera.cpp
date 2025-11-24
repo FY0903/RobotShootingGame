@@ -11,15 +11,18 @@
 // ==============================
 #include "MainCamera.hpp"
 #include "Utility/Compornent/Camera/Camera.hpp"
-void MainCamera::Init()
-{
-	// ルートシグネチャの生成
-	m_pRootSignature->Create();
+#include "Utility/CameraManager/CameraManager.hpp"
 
+void MainCamera::OnInit()
+{
 	// カメラコンポーネントの生成と初期化
-	AddComponent<Camera>()->Init();
+	Camera* camera = AddComponent<Camera>();
+	camera->Init();
+
+	// カメラマネージャーに登録
+	CameraManager::GetInstance().RegisterCamera("Camera01", camera);
 }
 
-void MainCamera::Uninit()
+void MainCamera::OnUninit()
 {
 }

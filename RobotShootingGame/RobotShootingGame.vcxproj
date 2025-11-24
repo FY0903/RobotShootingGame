@@ -31,6 +31,14 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Object\Object.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Sprite\Sprite.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Game\Scene\SceneBase.cpp">
       <SubType>
       </SubType>
@@ -40,6 +48,10 @@
     <ClCompile Include="Source\System\Engine\Engine.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
     <ClCompile Include="Source\System\Window\Window.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\CameraManager\CameraManager.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -73,6 +85,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Utility\Input\Input.cpp" />
+    <ClCompile Include="Source\Utility\Model\Model.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\PipelineState\PipelineState.cpp" />
     <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp" />
     <ClCompile Include="Source\Utility\RootSignature\RootSignatureManager.cpp">
@@ -107,6 +123,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Object\Object.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Sprite\Sprite.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Game\Scene\SceneBase.hpp">
       <SubType>
       </SubType>
@@ -116,6 +140,10 @@
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
     <ClInclude Include="Source\System\main.hpp" />
     <ClInclude Include="Source\System\Window\Window.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\CameraManager\CameraManager.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -150,6 +178,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Input\Input.hpp" />
+    <ClInclude Include="Source\Utility\Model\Model.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\PipelineState\PipelineState.hpp" />
     <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp" />
     <ClInclude Include="Source\Utility\RootSignature\RootSignatureManager.hpp">

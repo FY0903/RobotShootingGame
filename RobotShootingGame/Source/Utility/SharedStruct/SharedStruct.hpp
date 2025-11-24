@@ -55,21 +55,10 @@ namespace Vertex
 // 定数バッファ構造体
 namespace CB
 {
-	struct World
+	struct WVP
 	{
-		DirectX::XMFLOAT4X4 WorldMat{};	// ワールド行列
-	};
-
-	struct VP
-	{
+		DirectX::XMFLOAT4X4 WorldMat{};		// ワールド行列
 		DirectX::XMFLOAT4X4 ViewMat{};		// ビュー行列
 		DirectX::XMFLOAT4X4 ProjMat{};		// 射影行列
-	};
-
-	struct Mesh
-	{
-		std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
-		std::vector<uint32_t> Indices{};	// インデックスデータ
-		std::string DiffuseMap{};	// ディフューズマップのファイルパス
 	};
 }

@@ -28,6 +28,7 @@ public:
 	 */
 	~Grid() = default;
 
-	void Init() override final;
-	void Uninit() override final;
+private:
+	void OnInit() override final;
+	void OnUninit() override final;
 };

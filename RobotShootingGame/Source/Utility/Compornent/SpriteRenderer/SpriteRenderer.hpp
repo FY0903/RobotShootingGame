@@ -28,18 +28,16 @@ class SpriteRenderer : public Component
 public:
 	using Component::Component;
 
-	void Init();
+	void Init(Texture* pTexture);
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;
 
-	inline void SetTexture(Texture* pTexture) { m_pTexture = pTexture; }
-
 private:
-	Texture* m_pTexture{}; // テクスチャ
 
 	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};	// インデックスバッファ
+	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
 	DescriptorHandle* m_pMaterialHandle{}; // ディスクリプタハンドル
 	RootSignature* m_pRootSignature{};	// ルートシグネチャ

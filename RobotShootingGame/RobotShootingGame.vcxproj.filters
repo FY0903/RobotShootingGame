@@ -94,6 +94,18 @@
     <Filter Include="Source\Utility\Compornent\Line">
       <UniqueIdentifier>{8d2d5eec-55fb-4bd9-900c-0781ffc920dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\CameraManager">
+      <UniqueIdentifier>{83912790-4132-4724-80e2-6bae82a42f25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Actor\Sprite">
+      <UniqueIdentifier>{dc072d78-2755-4ee5-8cf0-0e9726793d46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\Model">
+      <UniqueIdentifier>{a35780f2-7d24-4529-a642-7e35664a9516}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Actor\Object">
+      <UniqueIdentifier>{74c92707-cc75-44fb-a2e9-ce39cebc5c7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -173,6 +185,18 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\RootSignature\RootSignatureManager.cpp">
       <Filter>Source\Utility\RootSignature</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\CameraManager\CameraManager.cpp">
+      <Filter>Source\Utility\CameraManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Sprite\Sprite.cpp">
+      <Filter>Source\Game\Actor\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Model\Model.cpp">
+      <Filter>Source\Utility\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Object\Object.cpp">
+      <Filter>Source\Game\Actor\Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -259,6 +283,18 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\RootSignature\RootSignatureManager.hpp">
       <Filter>Source\Utility\RootSignature</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\CameraManager\CameraManager.hpp">
+      <Filter>Source\Utility\CameraManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Sprite\Sprite.hpp">
+      <Filter>Source\Game\Actor\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Model\Model.hpp">
+      <Filter>Source\Utility\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Object\Object.hpp">
+      <Filter>Source\Game\Actor\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

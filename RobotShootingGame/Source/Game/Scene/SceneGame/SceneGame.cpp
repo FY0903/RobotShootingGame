@@ -11,9 +11,33 @@
 // ==============================
 #include "SceneGame.hpp"
 #include "Game/Actor/MainCamera/MainCamera.hpp"
+#include "Game/Actor/Grid/Grid.hpp"
+#include "Game/Actor/Sprite/Sprite.hpp"
+#include "Game/Actor/Object/Object.hpp"
 
-void SceneGame::Init()
+void SceneGame::OnInit()
 {
 	// メインカメラの生成
 	AddGameObject<MainCamera>(Layer::DEFAULT);
+
+	// グリッドの生成
+	AddGameObject<Grid>(Layer::DEFAULT);
+
+	// スプライトの生成
+	//AddGameObject<Sprite>(Layer::DEFAULT);
+
+	// オブジェクトの生成
+	AddGameObject<Object>(Layer::DEFAULT);
+}
+
+void SceneGame::OnUpdate()
+{
+}
+
+void SceneGame::OnDraw()
+{
+}
+
+void SceneGame::OnUninit()
+{
 }

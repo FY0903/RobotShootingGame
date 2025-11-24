@@ -38,10 +38,10 @@ public:
 	 */
 	virtual ~SceneBase() = default;
 
-	virtual void Init() = 0;
-	virtual void Update();
-	virtual void Draw();
-	virtual void Uninit();
+	void Init();
+	void Update();
+	void Draw();
+	void Uninit();
 
 	template<typename T = Actor>
 	inline T* AddGameObject(Layer layer = Layer::DEFAULT)
@@ -70,5 +70,10 @@ public:
 	}
 
 protected:
+	virtual void OnInit() = 0;
+	virtual void OnUpdate() = 0;
+	virtual void OnDraw() = 0;
+	virtual void OnUninit() = 0;
+
 	std::array<std::list<Actor*>, static_cast<size_t>(Layer::MAX)> m_Actors{}; // アクターコンテナ
 };

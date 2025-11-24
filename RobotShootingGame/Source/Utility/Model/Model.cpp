@@ -2,7 +2,7 @@
 	File: Model.cpp
 	Summary: （このファイルで何をするか記載する）
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/09/08 9:11:08 初回作成
+	Date: 2025/11/24 10:31:21 初回作成
 	（これ以降下に更新日時と更新内容を書く）
 ===================================================================+*/
 
@@ -10,167 +10,142 @@
 //	include
 // ==============================
 #include "Model.hpp"
-#include "Game/Camera/Camera.hpp"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <filesystem>
 
-Model::Model(std::vector<CB::Mesh> Meshes, Camera& Camera)
-	: m_Meshes(Meshes), m_Camera(Camera)
+namespace fs = std::filesystem;
+
+std::string GetDirectoryPath(const std::string& filepath)
 {
-	// メッシュの数だけ頂点バッファを用意する
-	m_pVertexBuffers.reserve(m_Meshes.size());
-	for (size_t i = 0; i < m_Meshes.size(); ++i)
-	{
-		auto size = sizeof(Vertex::Mesh) * m_Meshes[i].Vertices.size();
-		auto stride = sizeof(Vertex::Mesh);
-		auto vertices = m_Meshes[i].Vertices.data();
-		auto pVB = new VertexBuffer(size, stride, vertices);
-		assert(pVB);	// nullptrチェック
+	fs::path path = filepath;
 
-		m_pVertexBuffers.push_back(pVB);
-	}
-
-	// メッシュの数だけインデックスバッファを用意する
-	m_pIndexBuffers.reserve(m_Meshes.size());
-	for (size_t i = 0; i < m_Meshes.size(); ++i)
-	{
-		auto size = sizeof(uint32_t) * m_Meshes[i].Indices.size();
-		auto indices = m_Meshes[i].Indices.data();
-		auto pIB = new IndexBuffer(size, indices);
-		assert(pIB);	// nullptrチェック
-
-		m_pIndexBuffers.push_back(pIB);
-	}
-
-	// マテリアル用のディスクリプタヒープを生成
-	m_pDescriptorHeap = new DescriptorHeap();
-	m_pMaterialHandles.clear();
-	m_pTextures.resize(m_Meshes.size());
-	for (size_t i = 0; i < m_Meshes.size(); ++i)
-	{
-		m_pTextures[i] = new Texture();
-		assert(m_pTextures[i]);	// nullptrチェック
-
-		m_pTextures[i]->Load(m_Meshes[i].DiffuseMap);
-		auto handle = m_pDescriptorHeap->Register(m_pTextures[i]->Resource(), m_pTextures[i]->ViewDesc());
-		m_pMaterialHandles.push_back(handle);
-	}
-
-	// 定数バッファの生成
-	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-	{
-		m_pConstantBuffer[i] = new ConstantBuffer(sizeof(Transform));
-		assert(m_pConstantBuffer[i]);	// nullptrチェック
-
-		Transform* ptr = m_pConstantBuffer[i]->GetPtr<Transform>();
-		ptr->World = DirectX::XMMatrixIdentity();
-		ptr->View = m_Camera.GetViewMatrix();
-		ptr->Proj = m_Camera.GetProjectionMatrix();
-	}
-
-	// ルートシグネチャの生成
-	m_pRootSignature = new RootSignature();
-	assert(m_pRootSignature);	// nullptrチェック
-	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_ALL); // 定数バッファ
-	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, D3D12_SHADER_VISIBILITY_PIXEL); // テクスチャ
-	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
-	m_pRootSignature->Create();
-
-	// パイプラインステートの生成
-	m_pPipelineState = new PipelineState();
-	assert(m_pPipelineState);	// nullptrチェック
-	m_pPipelineState->SetInputLayout(Vertex::Mesh::InputLayout);
-	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
-	m_pPipelineState->SetVS(L"Assets/Shader/SimpleVS.cso");
-	m_pPipelineState->SetPS(L"Assets/Shader/SimplePS.cso");
-	m_pPipelineState->Create();
+	return path.remove_filename().string();
 }
 
 Model::~Model()
 {
-	// 頂点バッファの解放
-	for (auto vb : m_pVertexBuffers)
+	for (auto& mesh : m_Meshes)
 	{
-		delete vb;
-	}
-	m_pVertexBuffers.clear();
-
-	// インデックスバッファの解放
-	for (auto ib : m_pIndexBuffers)
-	{
-		delete ib;
-	}
-	m_pIndexBuffers.clear();
-
-	// テクスチャの解放
-	for (auto tex : m_pTextures)
-	{
-		delete tex;
-	}
-	m_pTextures.clear();
-
-	// 定数バッファの解放
-	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-	{
-		delete m_pConstantBuffer[i];
-		m_pConstantBuffer[i] = nullptr;
+		if (mesh.DiffuseMap)
+		{
+			delete mesh.DiffuseMap;
+			mesh.DiffuseMap = nullptr;
+		}
 	}
 
-	// ルートシグネチャの解放
-	if (m_pRootSignature)
-	{
-		delete m_pRootSignature;
-		m_pRootSignature = nullptr;
-	}
-
-	// パイプラインステートの解放
-	if (m_pPipelineState)
-	{
-		delete m_pPipelineState;
-		m_pPipelineState = nullptr;
-	}
-
-	// ディスクリプタヒープの解放
-	if (m_pDescriptorHeap)
-	{
-		delete m_pDescriptorHeap;
-		m_pDescriptorHeap = nullptr;
-	}
-
-	// ディスクリプタハンドルの解放
-	m_pMaterialHandles.clear();
-	m_pMaterialHandles.shrink_to_fit();
+	m_Meshes.clear();
 }
 
-void Model::Update()
+HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 {
-	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
-	Transform* ptr = m_pConstantBuffer[currentIndex]->GetPtr<Transform>();	// 定数バッファのポインタを取得
+	Assimp::Importer importer;
+	int flag = 0;
+	flag |= aiProcess_Triangulate;              // 三角形化
+	flag |= aiProcess_PreTransformVertices;     // 変換の適用
+	flag |= aiProcess_CalcTangentSpace;         // 接線空間の計算
+	flag |= aiProcess_GenSmoothNormals;			// スムースシェーディング用の法線を生成
+	flag |= aiProcess_GenUVCoords;				// UV座標の生成
+	flag |= aiProcess_RemoveRedundantMaterials;	// 冗長なマテリアルの削除
+	flag |= aiProcess_OptimizeMeshes;			// メッシュの最適化
 
-	ptr->View = m_Camera.GetViewMatrix();
-	ptr->Proj = m_Camera.GetProjectionMatrix();
+	auto scene = importer.ReadFile(fileName, flag);
+
+	if (!scene)
+	{
+		auto error = importer.GetErrorString();
+		OutputDebugStringA(error);
+		assert(0 && "モデルの読み込みに失敗");
+		return E_FAIL;
+	}
+
+	std::vector<Mesh> meshes;
+
+	meshes.clear();
+	meshes.resize(scene->mNumMeshes);
+
+	// メッシュの読み込み
+	for (size_t i = 0; i < meshes.size(); ++i)
+	{
+		const auto pMesh = scene->mMeshes[i];
+		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
+		const auto pMaterial = scene->mMaterials[i];
+		LoadTexture(fileName, meshes[i], pMaterial);
+	}
+
+	scene = nullptr;
+
+	m_Meshes = meshes;
+
+	return S_OK;
 }
 
-void Model::Draw()
+void Model::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV)
 {
-	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
-	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
-	auto materialHeap = m_pDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
+	aiVector3D zero3D(0.0f, 0.0f, 0.0f);
+	aiColor4D zeroColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-	for (size_t i = 0; i < m_Meshes.size(); ++i)
+	dst.Vertices.resize(src->mNumVertices);
+
+	for (size_t i = 0; i < src->mNumVertices; ++i)
 	{
-		auto vbView = m_pVertexBuffers[i]->GetView();	// 頂点バッファビューを取得
-		auto ibView = m_pIndexBuffers[i]->GetView();	// インデックスバッファビューを取得
+		auto position = &(src->mVertices[i]);
+		auto normal = &(src->mNormals[i]);
+		auto uv = (src->HasTextureCoords(0)) ? &(src->mTextureCoords[0][i]) : &zero3D;
+		auto tangent = (src->HasTangentsAndBitangents()) ? &(src->mTangents[i]) : &zero3D;
+		auto color = (src->HasVertexColors(0)) ? &(src->mColors[0][i]) : &zeroColor;
 
-		commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
-		commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
-		commandList->SetGraphicsRootConstantBufferView(0, m_pConstantBuffer[currentIndex]->GetAddress());	// 定数バッファを設定
+		// 反転オプションが有効であれば反転させる
+		if (inverseU) uv->x = 1.0f - uv->x;
+		if (inverseV) uv->y = 1.0f - uv->y;
 
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
-		commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
-		commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
+		Vertex::Mesh vertex{};
+		vertex.Position = { position->x, position->y, position->z };
+		vertex.Normal = { normal->x, normal->y, normal->z };
+		vertex.UV = { uv->x, uv->y };
+		vertex.Tangent = { tangent->x, tangent->y, tangent->z };
+		vertex.Color = { color->r, color->g, color->b, color->a };
 
-		commandList->SetDescriptorHeaps(1, &materialHeap);									// ディスクリプタヒープを設定
-		commandList->SetGraphicsRootDescriptorTable(1, m_pMaterialHandles[i]->HandleGPU);	// ディスクリプタテーブルを設定
+		dst.Vertices[i] = vertex;
+	}
 
-		commandList->DrawIndexedInstanced(static_cast<UINT>(m_Meshes[i].Indices.size()), 1, 0, 0, 0);	// 描画
+	dst.Indices.resize(src->mNumFaces * 3);	// 三角形化しているので3倍
+
+	for (size_t i = 0; i < src->mNumFaces; ++i)
+	{
+		auto face = &(src->mFaces[i]);
+		assert(face->mNumIndices == 3);	// 三角形化しているので3であるはず
+
+		for (size_t j = 0; j < face->mNumIndices; ++j)
+		{
+			dst.Indices[i * 3 + j] = face->mIndices[j];
+		}
+	}
+}
+
+void Model::LoadTexture(const std::string& fineName, Mesh& dst, const aiMaterial* src)
+{
+	aiString path{};
+	if (src->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
+	{
+		auto dir = GetDirectoryPath(fineName);	// ディレクトリ名
+		auto file = std::string(path.C_Str());	// ファイル名
+		size_t idx = file.find_last_of('\\');	// 区切り文字を探す
+		if (idx != std::string::npos)
+		{
+			file = file.substr(idx + 1);	// 区切り文字以降を取得
+
+			dst.DiffuseMap = new Texture();
+			if (FAILED(dst.DiffuseMap->Load(dir + file)))	// フルパスを設定
+			{
+				delete dst.DiffuseMap;
+				dst.DiffuseMap = nullptr;
+			}
+		}
+	}
+	else
+	{
+		dst.DiffuseMap = nullptr;
 	}
 }
