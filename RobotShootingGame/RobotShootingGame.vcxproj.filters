@@ -319,9 +319,5 @@
     <None Include="Resource\Common.hlsli">
       <Filter>Resource</Filter>
     </None>
-    <None Include="ClassDiagram.cd" />
-    <None Include="ClassDiagram1.cd" />
-    <None Include="ClassDiagram2.cd" />
-    <None Include="ClassDiagram3.cd" />
   </ItemGroup>
 </Project>
