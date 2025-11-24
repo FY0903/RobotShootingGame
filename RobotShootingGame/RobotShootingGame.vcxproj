@@ -91,10 +91,6 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\PipelineState\PipelineState.cpp" />
     <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp" />
-    <ClCompile Include="Source\Utility\RootSignature\RootSignatureManager.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="Source\Utility\SharedStruct\SharedStruct.cpp" />
     <ClCompile Include="Source\Utility\Singleton\Singleton.cpp" />
     <ClCompile Include="Source\Utility\Sound\Sound.cpp">
@@ -184,10 +180,6 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\PipelineState\PipelineState.hpp" />
     <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp" />
-    <ClInclude Include="Source\Utility\RootSignature\RootSignatureManager.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp" />
     <ClInclude Include="Source\Utility\Singleton\Singleton.hpp" />
     <ClInclude Include="Source\Utility\Sound\Sound.hpp">
@@ -251,6 +243,10 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="ClassDiagram3.cd" />
     <None Include="packages.config" />
     <None Include="Resource\Common.hlsli" />
   </ItemGroup>

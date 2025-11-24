@@ -183,9 +183,6 @@
     <ClCompile Include="Source\Utility\Compornent\Line\Line.cpp">
       <Filter>Source\Utility\Compornent\Line</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\RootSignature\RootSignatureManager.cpp">
-      <Filter>Source\Utility\RootSignature</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Utility\CameraManager\CameraManager.cpp">
       <Filter>Source\Utility\CameraManager</Filter>
     </ClCompile>
@@ -281,9 +278,6 @@
     <ClInclude Include="Source\Utility\Compornent\Line\Line.hpp">
       <Filter>Source\Utility\Compornent\Line</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\RootSignature\RootSignatureManager.hpp">
-      <Filter>Source\Utility\RootSignature</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Utility\CameraManager\CameraManager.hpp">
       <Filter>Source\Utility\CameraManager</Filter>
     </ClInclude>
@@ -325,5 +319,9 @@
     <None Include="Resource\Common.hlsli">
       <Filter>Resource</Filter>
     </None>
+    <None Include="ClassDiagram.cd" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="ClassDiagram3.cd" />
   </ItemGroup>
 </Project>
