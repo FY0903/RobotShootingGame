@@ -60,6 +60,8 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 		return E_FAIL;
 	}
 
+	CreateBone(scene->mRootNode);
+
 	std::vector<Mesh> meshes;
 
 	meshes.clear();
@@ -147,5 +149,16 @@ void Model::LoadTexture(const std::string& fineName, Mesh& dst, const aiMaterial
 	else
 	{
 		dst.DiffuseMap = nullptr;
+	}
+}
+
+void Model::CreateBone(aiNode* node)
+{
+	Bone bone{};
+	m_Bones[node->mName.C_Str()] = bone;
+
+	for (size_t i = 0; i < node->mNumChildren; ++i)
+	{
+		CreateBone(node->mChildren[i]);
 	}
 }

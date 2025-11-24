@@ -14,12 +14,14 @@
 #include "Utility/Texture/Texture.hpp"
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 // ==============================
 //	前方宣言
 // ==============================
 struct aiMesh;
 struct aiMaterial;
+struct aiNode;
 
 /**
  * @brief Modelクラス
@@ -32,6 +34,11 @@ public:
 		std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
 		std::vector<uint32_t> Indices{};		// インデックスデータ
 		Texture* DiffuseMap{};					// ディフューズマップ
+	};
+
+	struct Bone
+	{
+
 	};
 
 	/**
@@ -52,5 +59,8 @@ private:
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
 	void LoadTexture(const std::string& fineName, Mesh& dst, const aiMaterial* src);
 
+	void CreateBone(aiNode* node);
+
 	std::vector<Mesh> m_Meshes{};
+	std::unordered_map<std::string, Bone> m_Bones{};
 };
