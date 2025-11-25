@@ -12,7 +12,6 @@
 #include "Camera.hpp"
 #include "Utility/Input/Input.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
-#include "Utility/RootSignature/RootSignatureManager.hpp"
 
 // ==============================
 //	constexpr
