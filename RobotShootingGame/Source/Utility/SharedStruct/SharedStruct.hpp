@@ -64,4 +64,9 @@ namespace CB
 		DirectX::XMFLOAT4X4 ViewMat{};		// ビュー行列
 		DirectX::XMFLOAT4X4 ProjMat{};		// 射影行列
 	};
+
+	struct BoneMatrix
+	{
+		DirectX::XMMATRIX BoneMat[400];		// ボーン行列配列
+	};
 }

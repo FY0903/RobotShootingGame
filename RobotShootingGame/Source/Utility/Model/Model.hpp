@@ -52,11 +52,11 @@ public:
 	{
 		std::string BoneName{};				// ボーン名
 		int index{};						// ボーンインデックス
-		DirectX::XMMATRIX Matrix{};
-		DirectX::XMMATRIX OffsetMatrix{};
-		DirectX::XMMATRIX AnimationMatrix{};
-		DirectX::XMMATRIX Blend1{};
-		DirectX::XMMATRIX Blend2{};
+		DirectX::XMMATRIX Matrix = DirectX::XMMatrixIdentity();
+		DirectX::XMMATRIX OffsetMatrix = DirectX::XMMatrixIdentity();
+		DirectX::XMMATRIX AnimationMatrix = DirectX::XMMatrixIdentity();
+		DirectX::XMMATRIX Blend1 = DirectX::XMMatrixIdentity();
+		DirectX::XMMATRIX Blend2 = DirectX::XMMatrixIdentity();
 		std::vector<Weight> Weights{};	// ウェイト情報
 	};
 

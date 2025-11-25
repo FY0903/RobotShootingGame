@@ -22,12 +22,14 @@ void Object::OnInit()
 	}
 
 	m_pAnimation = new Animation();
-	if (FAILED(m_pAnimation->Load("Assets/Model/character/taiki_mae.fbx")))
+	if (FAILED(m_pAnimation->Load("Assets/Model/character/Animation/taiki_mae.fbx")))
 	{
 		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
 	}
 
-	AddComponent<MeshRenderer>()->Init(m_pModel);
+	auto meshRenderer = AddComponent<MeshRenderer>();
+	meshRenderer->Init(m_pModel);
+	//meshRenderer->SetAnimationData(m_pAnimation);
 }
 
 void Object::OnUninit()
@@ -36,5 +38,11 @@ void Object::OnUninit()
 	{
 		delete m_pModel;
 		m_pModel = nullptr;
+	}
+
+	if (m_pAnimation)
+	{
+		delete m_pAnimation;
+		m_pAnimation = nullptr;
 	}
 }
