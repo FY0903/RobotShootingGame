@@ -10,6 +10,7 @@
 //	include
 // ==============================
 #include "MeshRenderer.hpp"
+#include <SimpleMath.h>
 #include "Game/Actor/Actor.hpp"
 #include "Utility/CameraManager/CameraManager.hpp"
 
@@ -79,6 +80,43 @@ void MeshRenderer::Init(Model* pModel)
 
 void MeshRenderer::Update()
 {
+	if (!m_pAnimation) return;
+
+	int animeTime{};
+
+	DirectX::XMMATRIX rootMat{};
+	Transform transform{};
+
+	rootMat *= transform.GetWorldMatrix();
+
+	aiAnimation* pAnimation = m_pAnimation->GetAnimation(0);
+	std::unordered_map<std::string, Model::Bone>& bones = m_pModel->GetBones();
+
+	for (unsigned int i = 0; i < pAnimation->mNumChannels; ++i)
+	{
+		aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+
+		Model::Bone& pBone = bones[pNodeAnim->mNodeName.C_Str()];
+
+		int frame{};
+
+		frame = animeTime % pNodeAnim->mNumScalingKeys;
+		aiVector3D pos = pNodeAnim->mPositionKeys[frame].mValue;
+
+		frame = animeTime % pNodeAnim->mNumPositionKeys;
+		aiQuaternion rotation = pNodeAnim->mRotationKeys[frame].mValue;
+
+		DirectX::SimpleMath::Vector3 posVec{ pos.x, pos.y, pos.z };
+		DirectX::SimpleMath::Quaternion rotQuat{ rotation.x, rotation.y, rotation.z, rotation.w };
+		Transform boneTransform{};
+		boneTransform.Position = posVec;
+		boneTransform.Rotation = rotQuat;
+		pBone.AnimationMatrix = boneTransform.GetWorldMatrix();
+	}
+
+	UpdateBoneMatrix(m_pModel->GetScene()->mRootNode, rootMat);
+
+	animeTime++;
 }
 
 void MeshRenderer::Draw()
@@ -146,4 +184,21 @@ void MeshRenderer::Uninit()
 	m_pPipelineState = nullptr;
 
 	m_pModel = nullptr;
+}
+
+void MeshRenderer::UpdateBoneMatrix(const aiNode* node, DirectX::XMMATRIX matrix)
+{
+	Model::Bone& bone = m_pModel->GetBones()[node->mName.C_Str()];
+
+	bone.Matrix = bone.OffsetMatrix * bone.AnimationMatrix * matrix;
+
+	for (size_t i = 0; i < node->mNumChildren; ++i)
+	{
+		UpdateBoneMatrix(node->mChildren[i], bone.AnimationMatrix * matrix);
+	}
+}
+
+void MeshRenderer::SetAnimationData(Animation* pAnimation)
+{
+	m_pAnimation = pAnimation;
 }

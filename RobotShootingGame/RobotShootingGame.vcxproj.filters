@@ -106,6 +106,9 @@
     <Filter Include="Source\Game\Actor\Object">
       <UniqueIdentifier>{74c92707-cc75-44fb-a2e9-ce39cebc5c7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Animation">
+      <UniqueIdentifier>{02a33f10-9211-412e-b2b8-f58e6e5af389}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -194,6 +197,9 @@
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\Object\Object.cpp">
       <Filter>Source\Game\Actor\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Animation\Animation.cpp">
+      <Filter>Source\Utility\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -290,6 +296,9 @@
     <ClInclude Include="Source\Game\Actor\Object\Object.hpp">
       <Filter>Source\Game\Actor\Object</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Animation\Animation.hpp">
+      <Filter>Source\Utility\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -311,6 +320,9 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\LineVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SkeletalMeshVS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

@@ -51,6 +51,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Animation\Animation.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\CameraManager\CameraManager.cpp">
       <SubType>
       </SubType>
@@ -136,6 +140,10 @@
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
     <ClInclude Include="Source\System\main.hpp" />
     <ClInclude Include="Source\System\Window\Window.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Animation\Animation.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -231,6 +239,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Resource\SkeletalMeshVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Resource\SpritePS.hlsl">
@@ -382,14 +396,14 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\directxtk12_uwp.2025.7.10.1\build\native\directxtk12_uwp.targets" Condition="Exists('..\packages\directxtk12_uwp.2025.7.10.1\build\native\directxtk12_uwp.targets')" />
     <Import Project="..\packages\assimp-v143.5.4.3\build\native\assimp-v143.targets" Condition="Exists('..\packages\assimp-v143.5.4.3\build\native\assimp-v143.targets')" />
+    <Import Project="..\packages\directxtk12_uwp.2025.10.28.1\build\native\directxtk12_uwp.targets" Condition="Exists('..\packages\directxtk12_uwp.2025.10.28.1\build\native\directxtk12_uwp.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\directxtk12_uwp.2025.7.10.1\build\native\directxtk12_uwp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk12_uwp.2025.7.10.1\build\native\directxtk12_uwp.targets'))" />
     <Error Condition="!Exists('..\packages\assimp-v143.5.4.3\build\native\assimp-v143.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\assimp-v143.5.4.3\build\native\assimp-v143.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtk12_uwp.2025.10.28.1\build\native\directxtk12_uwp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk12_uwp.2025.10.28.1\build\native\directxtk12_uwp.targets'))" />
   </Target>
 </Project>

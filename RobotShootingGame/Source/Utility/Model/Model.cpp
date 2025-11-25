@@ -10,8 +10,6 @@
 //	include
 // ==============================
 #include "Model.hpp"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -39,17 +37,16 @@ Model::~Model()
 
 HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 {
-	Assimp::Importer importer;
 	int flag = 0;
 	flag |= aiProcess_Triangulate;		// éOäpå`âª
 	flag |= aiProcess_MakeLeftHanded;	// ç∂éËç¿ïWånÇ…ïœä∑
 	flag |= aiProcess_FlipUVs;			// UVîΩì]
 
-	auto scene = importer.ReadFile(fileName, flag);
+	auto scene = m_Importer.ReadFile(fileName, flag);
 
 	if (!scene)
 	{
-		auto error = importer.GetErrorString();
+		auto error = m_Importer.GetErrorString();
 		OutputDebugStringA(error);
 		assert(0 && "ÉÇÉfÉãÇÃì«Ç›çûÇ›Ç…é∏îs");
 		return E_FAIL;

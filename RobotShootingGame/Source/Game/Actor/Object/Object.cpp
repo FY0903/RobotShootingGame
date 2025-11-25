@@ -20,6 +20,13 @@ void Object::OnInit()
 	{
 		assert(0 && "Object.cpp モデルの読み込みに失敗しました。");
 	}
+
+	m_pAnimation = new Animation();
+	if (FAILED(m_pAnimation->Load("Assets/Model/character/taiki_mae.fbx")))
+	{
+		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
+	}
+
 	AddComponent<MeshRenderer>()->Init(m_pModel);
 }
 

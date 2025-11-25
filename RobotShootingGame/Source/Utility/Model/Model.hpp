@@ -16,6 +16,8 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 // ==============================
@@ -80,7 +82,9 @@ public:
 
 	HRESULT Load(const std::string& fileName, bool inverseU, bool inverseV);
 
-	inline const std::vector<Mesh>& GetMeshes() const { return m_Meshes; }
+	inline const aiScene* GetScene() { return m_pScene; }
+	inline const std::vector<Mesh>& GetMeshes() { return m_Meshes; }
+	inline std::unordered_map<std::string, Bone>& GetBones() { return m_Bones; }
 
 private:
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
@@ -94,6 +98,7 @@ private:
 
 	DirectX::XMMATRIX AiToXmMatrix(const aiMatrix4x4& aiMat);
 
+	Assimp::Importer m_Importer;
 	const aiScene* m_pScene{};							// シーン情報
 
 	std::vector<Mesh> m_Meshes{};						// メッシュ群

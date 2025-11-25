@@ -12,6 +12,7 @@
 // ==============================
 #include "Game/Actor/Actor.hpp"
 #include "Utility/Model/Model.hpp"
+#include "Utility/Animation/Animation.hpp"
 
 /**
  * @brief Objectクラス
@@ -34,4 +35,5 @@ private:
 	void OnUninit() override final;
 
 	Model* m_pModel{}; // モデルデータ
+	Animation* m_pAnimation{}; // アニメーションデータ
 };
