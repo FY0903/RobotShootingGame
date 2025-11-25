@@ -29,15 +29,18 @@ namespace Vertex
 	struct Mesh
 	{
 		DirectX::XMFLOAT3 Position{};	// 頂点座標
-		DirectX::XMFLOAT3 Normal{};	// 法線ベクトル
-		DirectX::XMFLOAT2 UV{};		// UV座標
+		DirectX::XMFLOAT3 Normal{};		// 法線ベクトル
+		DirectX::XMFLOAT2 UV{};			// UV座標
 		DirectX::XMFLOAT3 Tangent{};	// 接線ベクトル
-		DirectX::XMFLOAT4 Color{};	// 頂点カラー
+		DirectX::XMFLOAT4 Color{};		// 頂点カラー
+		int BoneIndex[4]{};				// ボーンインデックス
+		float BoneWeight[4]{};			// ボーンウェイト
+		int BoneCount{};				// ボーン数
 
 		static const D3D12_INPUT_LAYOUT_DESC InputLayout;
 
 	private:
-		static const int InputElementCount = 5;
+		static const int InputElementCount = 8;
 		static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
 	};
 

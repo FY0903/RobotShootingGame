@@ -12,9 +12,11 @@
 // ==============================
 #include "Utility/SharedStruct/SharedStruct.hpp"
 #include "Utility/Texture/Texture.hpp"
+#include <DirectXMath.h>
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <assimp/postprocess.h>
 
 // ==============================
 //	前方宣言
@@ -22,6 +24,7 @@
 struct aiMesh;
 struct aiMaterial;
 struct aiNode;
+struct aiScene;
 
 /**
  * @brief Modelクラス
@@ -36,9 +39,33 @@ public:
 		Texture* DiffuseMap{};					// ディフューズマップ
 	};
 
+	struct Weight
+	{
+		std::string BoneName{};
+		float WeightNum{};
+		int VertexIndex{};
+	};
+
 	struct Bone
 	{
+		std::string BoneName{};				// ボーン名
+		int index{};						// ボーンインデックス
+		DirectX::XMMATRIX Matrix{};
+		DirectX::XMMATRIX OffsetMatrix{};
+		DirectX::XMMATRIX AnimationMatrix{};
+		DirectX::XMMATRIX Blend1{};
+		DirectX::XMMATRIX Blend2{};
+		std::vector<Weight> Weights{};	// ウェイト情報
+	};
 
+	struct ModelOtherInfo
+	{
+		std::string MeshName{};
+		unsigned int VertexNum{};
+		unsigned int IndexNum{};
+		unsigned int VertexBase{};
+		unsigned int IndexBase{};
+		unsigned int MaterialIndex{};
 	};
 
 	/**
@@ -59,8 +86,18 @@ private:
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
 	void LoadTexture(const std::string& fineName, Mesh& dst, const aiMaterial* src);
 
-	void CreateBone(aiNode* node);
+	void CreateBone(const aiNode* node);
+	void GetBoneInfo(const aiMesh* src);
 
-	std::vector<Mesh> m_Meshes{};
-	std::unordered_map<std::string, Bone> m_Bones{};
+	void CalcMeshBaseIndex(std::vector<ModelOtherInfo>& modelInfo);
+	void SetBoneDataToVertex(std::vector<Mesh>& meshes, std::vector<ModelOtherInfo>& modelInfo, std::vector<std::vector<Bone>>& meshBones);
+
+	DirectX::XMMATRIX AiToXmMatrix(const aiMatrix4x4& aiMat);
+
+	const aiScene* m_pScene{};							// シーン情報
+
+	std::vector<Mesh> m_Meshes{};						// メッシュ群
+	std::unordered_map<std::string, Bone> m_Bones{};	// ボーン情報
+	std::vector<std::vector<Bone>> m_MeshBones{};		// メッシュごとのボーン情報
+	std::vector<ModelOtherInfo> m_ModelOtherInfo{};		// モデルのその他情報
 };

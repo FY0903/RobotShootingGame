@@ -15,7 +15,8 @@
 void Object::OnInit()
 {
 	m_pModel = new Model();
-	if (FAILED(m_pModel->Load("Assets/Model/test/FBX_Demo_Idle.fbx", false, true)))
+	//if (FAILED(m_pModel->Load("Assets/Model/test/FBX_Demo_Idle.fbx", false, false)))
+	if (FAILED(m_pModel->Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false)))
 	{
 		assert(0 && "Object.cpp ƒ‚ƒfƒ‹‚Ì“Ç‚İ‚İ‚É¸”s‚µ‚Ü‚µ‚½B");
 	}

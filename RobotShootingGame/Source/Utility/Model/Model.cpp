@@ -12,7 +12,6 @@
 #include "Model.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -42,13 +41,9 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 {
 	Assimp::Importer importer;
 	int flag = 0;
-	flag |= aiProcess_Triangulate;              // 三角形化
-	flag |= aiProcess_PreTransformVertices;     // 変換の適用
-	flag |= aiProcess_CalcTangentSpace;         // 接線空間の計算
-	flag |= aiProcess_GenSmoothNormals;			// スムースシェーディング用の法線を生成
-	flag |= aiProcess_GenUVCoords;				// UV座標の生成
-	flag |= aiProcess_RemoveRedundantMaterials;	// 冗長なマテリアルの削除
-	flag |= aiProcess_OptimizeMeshes;			// メッシュの最適化
+	flag |= aiProcess_Triangulate;		// 三角形化
+	flag |= aiProcess_MakeLeftHanded;	// 左手座標系に変換
+	flag |= aiProcess_FlipUVs;			// UV反転
 
 	auto scene = importer.ReadFile(fileName, flag);
 
@@ -62,23 +57,44 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 
 	CreateBone(scene->mRootNode);
 
+	unsigned int boneIndex = 0;
+	for (auto& bone : m_Bones)
+	{
+		bone.second.index = boneIndex;
+		++boneIndex;
+	}
+
 	std::vector<Mesh> meshes;
 
 	meshes.clear();
 	meshes.resize(scene->mNumMeshes);
+	m_Meshes.clear();
+	m_Meshes.resize(scene->mNumMeshes);
+
+	m_ModelOtherInfo.clear();
+	m_ModelOtherInfo.resize(scene->mNumMeshes);
 
 	// メッシュの読み込み
 	for (size_t i = 0; i < meshes.size(); ++i)
 	{
 		const auto pMesh = scene->mMeshes[i];
 		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
+		GetBoneInfo(pMesh);
+
 		const auto pMaterial = scene->mMaterials[i];
 		LoadTexture(fileName, meshes[i], pMaterial);
+
+		m_ModelOtherInfo[i].MeshName = std::string(pMesh->mName.C_Str());
+		m_ModelOtherInfo[i].VertexNum = meshes[i].Vertices.size();
+		m_ModelOtherInfo[i].IndexNum = meshes[i].Indices.size();
+		m_ModelOtherInfo[i].MaterialIndex = pMesh->mMaterialIndex;
 	}
 
-	scene = nullptr;
+	CalcMeshBaseIndex(m_ModelOtherInfo);
+	SetBoneDataToVertex(meshes, m_ModelOtherInfo, m_MeshBones);
 
 	m_Meshes = meshes;
+	m_pScene = scene;
 
 	return S_OK;
 }
@@ -152,7 +168,7 @@ void Model::LoadTexture(const std::string& fineName, Mesh& dst, const aiMaterial
 	}
 }
 
-void Model::CreateBone(aiNode* node)
+void Model::CreateBone(const aiNode* node)
 {
 	Bone bone{};
 	m_Bones[node->mName.C_Str()] = bone;
@@ -161,4 +177,95 @@ void Model::CreateBone(aiNode* node)
 	{
 		CreateBone(node->mChildren[i]);
 	}
+}
+
+void Model::GetBoneInfo(const aiMesh* src)
+{
+	std::vector<Bone> bones{};
+
+	for (unsigned int i = 0; i < src->mNumBones; ++i)
+	{
+		Bone bone{};
+		
+		bone.BoneName = std::string(src->mBones[i]->mName.C_Str());
+		bone.OffsetMatrix = AiToXmMatrix(src->mBones[i]->mOffsetMatrix);
+
+		bone.Weights.clear();
+
+		for (unsigned int j = 0; j < src->mBones[i]->mNumWeights; ++j)
+		{
+			Weight weight{};
+			weight.BoneName = bone.BoneName;
+			weight.WeightNum = src->mBones[i]->mWeights[j].mWeight;
+			weight.VertexIndex = src->mBones[i]->mWeights[j].mVertexId;
+			bone.Weights.emplace_back(weight);
+		}
+
+		m_Bones[src->mBones[i]->mName.C_Str()].OffsetMatrix = bone.OffsetMatrix;
+
+		bones.emplace_back(bone);
+	}
+
+	m_MeshBones.emplace_back(bones);
+}
+
+void Model::CalcMeshBaseIndex(std::vector<ModelOtherInfo>& modelInfo)
+{
+	for (int i = 0; i < modelInfo.size(); ++i)
+	{
+		for (int j = i - 1; j >= 0; --j)
+		{
+			modelInfo[i].VertexBase += modelInfo[j].VertexNum;
+		}
+
+		for (int j = i - 1; j >= 0; --j)
+		{
+			modelInfo[i].IndexBase += modelInfo[j].IndexNum;
+		}
+	}
+}
+
+void Model::SetBoneDataToVertex(std::vector<Mesh>& meshes, std::vector<ModelOtherInfo>& modelInfo, std::vector<std::vector<Bone>>& meshBones)
+{
+	for (auto& mesh : meshes)
+	{
+		for (auto& vertex : mesh.Vertices)
+		{
+			for (int i = 0; i < 4; ++i)
+			{
+				vertex.BoneIndex[i] = -1;
+				vertex.BoneWeight[i] = 0.0f;
+			}
+		}
+	}
+
+	int meshIndex = 0;
+	for (auto& bones : meshBones)
+	{
+		for (auto& bone : bones)
+		{
+			for (auto& weight : bone.Weights)
+			{
+				int& index = meshes[meshIndex].Vertices[weight.VertexIndex].BoneCount;
+				if (index < 4)
+				{
+					meshes[meshIndex].Vertices[weight.VertexIndex].BoneIndex[index] = m_Bones[weight.BoneName].index;
+					meshes[meshIndex].Vertices[weight.VertexIndex].BoneWeight[index] = weight.WeightNum;
+					++index;
+				}
+			}
+		}
+		++meshIndex;
+	}
+}
+
+DirectX::XMMATRIX Model::AiToXmMatrix(const aiMatrix4x4& aiMat)
+{
+	DirectX::XMMATRIX xmMat(
+		aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1,
+		aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2,
+		aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3,
+		aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4
+	);
+	return xmMat;
 }
