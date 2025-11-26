@@ -40,13 +40,8 @@ public:
 	void Draw() override final;
 	void Uninit() override final;
 
-	void UpdateBoneMatrix(const aiNode* node, DirectX::XMMATRIX matrix);
-
-	void SetAnimationData(Animation* pAnimation);
-
 private:
 	Model* m_pModel{};			// モデルデータ
-	Animation* m_pAnimation{};	// アニメーションデータ
 
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ

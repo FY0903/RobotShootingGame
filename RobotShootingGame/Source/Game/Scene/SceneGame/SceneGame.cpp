@@ -32,6 +32,9 @@ void SceneGame::OnInit()
 
 void SceneGame::OnUpdate()
 {
+	auto obj = GetGameObject<Object>();
+	Transform& transform = obj->GetTransform();
+	transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, 0.01f, 0.0f));
 }
 
 void SceneGame::OnDraw()

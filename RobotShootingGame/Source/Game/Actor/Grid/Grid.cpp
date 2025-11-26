@@ -21,6 +21,10 @@ void Grid::OnInit()
 	line->Create();
 }
 
+void Grid::OnUpdate()
+{
+}
+
 void Grid::OnUninit()
 {
 }

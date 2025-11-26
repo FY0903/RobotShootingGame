@@ -11,25 +11,34 @@
 // ==============================
 #include "Object.hpp"
 #include "Utility/Compornent/MeshRenderer/MeshRenderer.hpp"
+#include "Utility/Compornent/SkeletalAnimator/SkeletalAnimator.hpp"
 
 void Object::OnInit()
 {
 	m_pModel = new Model();
-	//if (FAILED(m_pModel->Load("Assets/Model/test/FBX_Demo_Idle.fbx", false, false)))
-	if (FAILED(m_pModel->Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false)))
+	if (FAILED(m_pModel->Load("Assets/Model/test/FBX_Demo_Idle.fbx", false, false)))
+	//if (FAILED(m_pModel->Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false)))
 	{
 		assert(0 && "Object.cpp モデルの読み込みに失敗しました。");
 	}
 
 	m_pAnimation = new Animation();
-	if (FAILED(m_pAnimation->Load("Assets/Model/character/Animation/taiki_mae.fbx")))
+	if (FAILED(m_pAnimation->Load("Assets/Model/test/FBX_Demo_Idle.fbx")))
 	{
 		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
 	}
 
 	auto meshRenderer = AddComponent<MeshRenderer>();
 	meshRenderer->Init(m_pModel);
-	//meshRenderer->SetAnimationData(m_pAnimation);
+
+	auto skeletalAnimator = AddComponent<SkeletalAnimator>();
+	skeletalAnimator->Init(m_pModel);
+	skeletalAnimator->AddAnimation("Idle", m_pAnimation);
+	skeletalAnimator->PlayAnimation("Idle");
+}
+
+void Object::OnUpdate()
+{
 }
 
 void Object::OnUninit()

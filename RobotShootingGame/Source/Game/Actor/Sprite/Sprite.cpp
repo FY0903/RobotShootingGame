@@ -23,6 +23,10 @@ void Sprite::OnInit()
 	AddComponent<SpriteRenderer>()->Init(m_pTexture);
 }
 
+void Sprite::OnUpdate()
+{
+}
+
 void Sprite::OnUninit()
 {
 	delete m_pTexture;

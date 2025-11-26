@@ -30,5 +30,6 @@ public:
 
 private:
 	void OnInit() override final;
+	void OnUpdate() override final;
 	void OnUninit() override final;
 };

@@ -23,6 +23,10 @@ void MainCamera::OnInit()
 	CameraManager::GetInstance().RegisterCamera("Camera01", camera);
 }
 
+void MainCamera::OnUpdate()
+{
+}
+
 void MainCamera::OnUninit()
 {
 }

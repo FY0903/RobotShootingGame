@@ -31,19 +31,19 @@ struct Transform
 	{
 	}
 
-	DirectX::SimpleMath::Quaternion ToQuaternion(const DirectX::SimpleMath::Vector3& eulerAngles)
+	static inline DirectX::SimpleMath::Quaternion ToQuaternion(const DirectX::SimpleMath::Vector3& eulerAngles)
 	{
 		// TODO: å„Ç≈é©ï™Ç≈çÏê¨Ç∑ÇÈ
-		return DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(eulerAngles.y, eulerAngles.x, eulerAngles.z);
+		return DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(eulerAngles);
 	}
 
-	DirectX::SimpleMath::Vector3 ToEulerAngles(const DirectX::SimpleMath::Quaternion& quaternion)
+	static inline DirectX::SimpleMath::Vector3 ToEulerAngles(const DirectX::SimpleMath::Quaternion& quaternion)
 	{
 		// TODO: å„Ç≈é©ï™Ç≈çÏê¨Ç∑ÇÈ
 		return quaternion.ToEuler();
 	}
 
-	DirectX::XMMATRIX GetWorldMatrix()
+	inline DirectX::XMMATRIX GetWorldMatrix()
 	{
 		DirectX::XMMATRIX scaleMatrix = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
 		DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationQuaternion(Rotation);
@@ -51,7 +51,7 @@ struct Transform
 		return scaleMatrix * rotationMatrix * translationMatrix;
 	}
 
-	DirectX::XMFLOAT4X4 GetWorldMatrixFloat4x4(bool transpose = true)
+	inline DirectX::XMFLOAT4X4 GetWorldMatrixFloat4x4(bool transpose = true)
 	{
 		DirectX::XMFLOAT4X4 worldf{};
 		DirectX::XMMATRIX worldMat = GetWorldMatrix();

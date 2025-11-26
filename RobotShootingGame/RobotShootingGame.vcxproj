@@ -75,6 +75,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\SkeletalAnimator\SkeletalAnimator.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Compornent\SpriteRenderer\SpriteRenderer.cpp">
       <SubType>
       </SubType>
@@ -164,6 +168,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Compornent\MeshRenderer\MeshRenderer.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\SkeletalAnimator\SkeletalAnimator.hpp">
       <SubType>
       </SubType>
     </ClInclude>

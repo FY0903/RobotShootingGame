@@ -85,6 +85,7 @@ public:
 	inline const aiScene* GetScene() { return m_pScene; }
 	inline const std::vector<Mesh>& GetMeshes() { return m_Meshes; }
 	inline std::unordered_map<std::string, Bone>& GetBones() { return m_Bones; }
+	inline std::vector<DirectX::XMMATRIX>& GetBoneMatCB() { return m_BoneMatCB; }
 
 private:
 	void LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV);
@@ -105,4 +106,6 @@ private:
 	std::unordered_map<std::string, Bone> m_Bones{};	// ボーン情報
 	std::vector<std::vector<Bone>> m_MeshBones{};		// メッシュごとのボーン情報
 	std::vector<ModelOtherInfo> m_ModelOtherInfo{};		// モデルのその他情報
+
+	std::vector<DirectX::XMMATRIX> m_BoneMatCB{};		// ボーン行列用定数バッファデータ
 };

@@ -109,6 +109,9 @@
     <Filter Include="Source\Utility\Animation">
       <UniqueIdentifier>{02a33f10-9211-412e-b2b8-f58e6e5af389}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Compornent\SkeletalAnimator">
+      <UniqueIdentifier>{c9ca683c-b282-4180-a3bb-15d03391e826}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -200,6 +203,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Animation\Animation.cpp">
       <Filter>Source\Utility\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\SkeletalAnimator\SkeletalAnimator.cpp">
+      <Filter>Source\Utility\Compornent\SkeletalAnimator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -298,6 +304,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Animation\Animation.hpp">
       <Filter>Source\Utility\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\SkeletalAnimator\SkeletalAnimator.hpp">
+      <Filter>Source\Utility\Compornent\SkeletalAnimator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -33,6 +33,8 @@ void Actor::Init()
 
 void Actor::Update()
 {
+	OnUpdate();
+
 	for (auto& component : m_Components)
 	{
 		component->Update();

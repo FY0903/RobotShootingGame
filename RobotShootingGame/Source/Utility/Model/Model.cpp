@@ -78,7 +78,7 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
 		GetBoneInfo(pMesh);
 
-		const auto pMaterial = scene->mMaterials[i];
+		const auto pMaterial = scene->mMaterials[pMesh->mMaterialIndex];
 		LoadTexture(fileName, meshes[i], pMaterial);
 
 		m_ModelOtherInfo[i].MeshName = std::string(pMesh->mName.C_Str());
@@ -89,6 +89,8 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 
 	CalcMeshBaseIndex(m_ModelOtherInfo);
 	SetBoneDataToVertex(meshes, m_ModelOtherInfo, m_MeshBones);
+
+	m_BoneMatCB.resize(m_Bones.size());
 
 	m_Meshes = meshes;
 	m_pScene = scene;
@@ -142,21 +144,26 @@ void Model::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV)
 void Model::LoadTexture(const std::string& fineName, Mesh& dst, const aiMaterial* src)
 {
 	aiString path{};
-	if (src->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), path) == AI_SUCCESS)
-	{
-		auto dir = GetDirectoryPath(fineName);	// ディレクトリ名
-		auto file = std::string(path.C_Str());	// ファイル名
-		size_t idx = file.find_last_of('\\');	// 区切り文字を探す
-		if (idx != std::string::npos)
-		{
-			file = file.substr(idx + 1);	// 区切り文字以降を取得
+	src->GetTexture(aiTextureType_DIFFUSE, 0, &path);
 
-			dst.DiffuseMap = new Texture();
-			if (FAILED(dst.DiffuseMap->Load(dir + file)))	// フルパスを設定
-			{
-				delete dst.DiffuseMap;
-				dst.DiffuseMap = nullptr;
-			}
+	if (path.length)
+	{
+		auto file = std::string(path.C_Str());
+		size_t idx = file.find_last_of('\\');	// 区切り文字を探す
+
+		if (idx == std::string::npos)
+		{
+			file = std::string('\\' + file);	// 区切り文字が無ければ追加
+		}
+
+		auto dir = GetDirectoryPath(fineName);			// ディレクトリ名
+		file = std::string(dir + file.substr(idx + 1));	// フルパスを設定
+
+		dst.DiffuseMap = new Texture();
+		if (FAILED(dst.DiffuseMap->Load(file)))	// テクスチャの読み込み
+		{
+			delete dst.DiffuseMap;
+			dst.DiffuseMap = nullptr;
 		}
 	}
 	else

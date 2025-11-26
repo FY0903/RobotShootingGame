@@ -32,6 +32,7 @@ public:
 
 private:
 	void OnInit() override final;
+	void OnUpdate() override final;
 	void OnUninit() override final;
 
 	Model* m_pModel{}; // モデルデータ
