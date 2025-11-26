@@ -13,6 +13,11 @@
 #include "Utility/Transform/Transform.hpp"
 #include <chrono>
 
+// ==============================
+//	constcxpr
+// ==============================
+constexpr float DEFAULT_TICKS_PER_SECOND = 25.0f;
+
 void SkeletalAnimator::Init(Model* pModel)
 {
 	m_pModel = pModel;
@@ -41,11 +46,8 @@ void SkeletalAnimator::Update()
 
 	std::unordered_map<std::string, Model::Bone>& bones = m_pModel->GetBones();
 
-	// ticksPerSecondが0の場合は一般的な値(例:25)を使用
-	double ticksPerSecond = (pAnimation->mTicksPerSecond != 0.0) ? pAnimation->mTicksPerSecond : 25.0;
-
 	// アニメーション時間をticks単位で更新し、durationでループ
-	animeTimeTicks += deltaSeconds * ticksPerSecond;
+	animeTimeTicks += deltaSeconds * m_ticksPerSecond;
 	double animationDuration = pAnimation->mDuration > 0.0 ? pAnimation->mDuration : 0.0;
 	double animationTime = animationDuration > 0.0 ? fmod(animeTimeTicks, animationDuration) : animeTimeTicks;
 
@@ -168,6 +170,8 @@ void SkeletalAnimator::AddAnimation(const std::string& name, Animation* animatio
 void SkeletalAnimator::PlayAnimation(const std::string& name)
 {
 	m_pPlayAnimation = m_Animations[name];
+	aiAnimation* pAnimation = m_pPlayAnimation->GetAnimation(0);
+	m_ticksPerSecond = (pAnimation->mTicksPerSecond != 0.0) ? pAnimation->mTicksPerSecond : DEFAULT_TICKS_PER_SECOND;
 }
 
 void SkeletalAnimator::StopAnimation()

@@ -54,6 +54,9 @@ private:
 
 	Model* m_pModel{};
 
+	float m_ticksPerSecond{};
+	float m_animationTime{};
+
 	Animation* m_pPlayAnimation{};
 	std::unordered_map<std::string, Animation*> m_Animations{};
 };

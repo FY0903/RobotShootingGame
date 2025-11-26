@@ -23,7 +23,7 @@ void Object::OnInit()
 	}
 
 	m_pAnimation = new Animation();
-	if (FAILED(m_pAnimation->Load("Assets/Model/test/FBX_Demo_Idle.fbx")))
+	if (FAILED(m_pAnimation->Load("Assets/Model/test/FBX_Demo_tatsumaki_heavy.fbx")))
 	{
 		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
 	}
