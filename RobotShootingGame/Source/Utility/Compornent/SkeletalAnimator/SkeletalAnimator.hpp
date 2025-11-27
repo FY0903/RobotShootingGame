@@ -20,6 +20,8 @@
 //	‘O•ûéŒ¾
 // ==============================
 struct aiNode;
+struct aiVectorKey;
+struct aiQuatKey;
 
 /**
  * @brief SkeletalAnimatorƒNƒ‰ƒX
@@ -51,11 +53,16 @@ public:
 
 private:
 	void UpdateBoneMatrix(const aiNode* node, DirectX::XMMATRIX matrix);
+	unsigned int FindKeyIndex(const aiVectorKey* pKeys, unsigned int keyCount, float animationTime);
+	unsigned int FindKeyIndex(const aiQuatKey* pKeys, unsigned int keyCount, float animationTime);
 
 	Model* m_pModel{};
 
 	float m_ticksPerSecond{};
 	float m_animationTime{};
+	float m_animeTimeTicks{};
+	float m_animationDuration{};
+	int m_flameCount{};
 
 	Animation* m_pPlayAnimation{};
 	std::unordered_map<std::string, Animation*> m_Animations{};
