@@ -12,6 +12,7 @@
 #include "Object.hpp"
 #include "Utility/Compornent/MeshRenderer/MeshRenderer.hpp"
 #include "Utility/Compornent/SkeletalAnimator/SkeletalAnimator.hpp"
+#include "Utility/Compornent/AnimatorController/AnimatorController.hpp"
 
 void Object::OnInit()
 {
@@ -23,7 +24,7 @@ void Object::OnInit()
 	}
 
 	m_pAnimation = new Animation();
-	if (FAILED(m_pAnimation->Load("Assets/Model/test/FBX_Demo_tatsumaki_heavy.fbx")))
+	if (FAILED(m_pAnimation->Load("Assets/Model/character/Animation/taiki_mae.fbx")))
 	{
 		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
 	}
@@ -33,8 +34,12 @@ void Object::OnInit()
 
 	auto skeletalAnimator = AddComponent<SkeletalAnimator>();
 	skeletalAnimator->Init(m_pModel);
-	skeletalAnimator->AddAnimation("Idle", m_pAnimation);
-	skeletalAnimator->PlayAnimation("Idle");
+
+	auto animatorController = AddComponent<AnimatorController>();
+	auto state = animatorController
+		->AddState("Idle", m_pAnimation)
+		->AddTransition(0.0f)
+		->AddCondition({ ConditionMode::If, "isIdle", true, 0.0f, 0 });
 }
 
 void Object::OnUpdate()

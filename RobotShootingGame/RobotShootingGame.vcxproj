@@ -59,6 +59,7 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\AnimatorController\AnimatorController.cpp" />
     <ClCompile Include="Source\Utility\Compornent\Camera\Camera.cpp">
       <SubType>
       </SubType>
@@ -155,6 +156,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\AnimatorController\AnimatorController.hpp" />
     <ClInclude Include="Source\Utility\Compornent\Camera\Camera.hpp">
       <SubType>
       </SubType>
