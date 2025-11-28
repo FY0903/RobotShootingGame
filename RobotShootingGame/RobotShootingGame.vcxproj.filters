@@ -112,6 +112,9 @@
     <Filter Include="Source\Utility\Compornent\SkeletalAnimator">
       <UniqueIdentifier>{c9ca683c-b282-4180-a3bb-15d03391e826}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Compornent\AnimatorController">
+      <UniqueIdentifier>{d45ebf5e-ceda-44aa-979a-7768159cd106}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -206,6 +209,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Compornent\SkeletalAnimator\SkeletalAnimator.cpp">
       <Filter>Source\Utility\Compornent\SkeletalAnimator</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\AnimatorController\AnimatorController.cpp">
+      <Filter>Source\Utility\Compornent\AnimatorController</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -307,6 +313,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Compornent\SkeletalAnimator\SkeletalAnimator.hpp">
       <Filter>Source\Utility\Compornent\SkeletalAnimator</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\AnimatorController\AnimatorController.hpp">
+      <Filter>Source\Utility\Compornent\AnimatorController</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

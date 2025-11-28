@@ -11,102 +11,110 @@
 //	include
 // ==============================
 #include "Utility/Compornent/Component.hpp"
+#include "Game/Actor/Actor.hpp"
 #include "Utility/Animation/Animation.hpp"
+#include "Utility/Compornent/SkeletalAnimator/SkeletalAnimator.hpp"
+#include "Utility/Input/Input.hpp"
 #include <unordered_map>
 #include <string>
 #include <memory>
 #include <functional>
 
-// ==============================
-//	ëOï˚êÈåæ
-// ==============================
-template<typename T>
+template<typename OwnerType>
 class StateMachine;
 
-template<typename T>
+template<typename OwnerType>
 class StateBase
 {
 protected:
-	friend class StateMachine<T>;
+	friend class StateMachine<OwnerType>;
 
-	virtual void OnStart(T* owner) {}
-	virtual void OnUpdate(T* owner) {}
-	virtual void OnExit(T* owner) {}
-
-	StateMachine<T>* m_pMachine{};
-	T* m_pOwner{};
+	virtual void OnStart(OwnerType* pOwner) {}
+	virtual void OnUpdate(OwnerType* pOwner) {}
+	virtual void OnExit(OwnerType* pOwner) {}
 
 private:
-	void SetMachine(StateMachine<T>* machine) { m_pMachine = machine; }
 
-	void Start(T* owner)
+	void SetMachine(StateMachine<OwnerType>* pMachine)
 	{
-		if (!m_pMachine || !m_pOwner) return;
-		OnStart(owner);
+		m_pMachine = pMachine;
 	}
 
-	void Update(T* owner)
+	void CallStart(OwnerType* pOwner)
 	{
-		if (!m_pMachine || !m_pOwner) return;
-		OnUpdate(owner);
+		if (!m_pMachine || !pOwner) return;
+		OnStart(pOwner);
 	}
 
-	void Exit(T* owner)
+	void CallUpdate(OwnerType* pOwner)
 	{
-		if (!m_pMachine || !m_pOwner) return;
-		OnExit(owner);
+		if (!m_pMachine || !pOwner) return;
+		OnUpdate(pOwner);
 	}
+
+	void CallExit(OwnerType* pOwner)
+	{
+		if (!m_pMachine || !pOwner) return;
+		OnExit(pOwner);
+	}
+
+protected:
+	StateMachine<OwnerType>* m_pMachine{};
+	OwnerType* m_pOwner{};
 };
 
-template<typename T>
+template<typename OwnerType>
 class StateMachine
 {
 public:
 	StateMachine()
-		: m_fcChangeState([]() {})
+		:m_fnChangeState([]() {})
 	{
 	}
 
-	void Start(T* pOwner)
+	void Start(OwnerType* pOwner)
 	{
 		m_pOwner = pOwner;
-		m_fcChangeState = []() {};
+		m_fnChangeState = []() {};
 	}
 
-	template<typename StateType, typename... Args>
-	void ChangeState(Args...args)
+	template<typename StateType, typename...ArgType>
+	void ChangeState(ArgType...args)
 	{
-		m_fcChangeState = [&]()
+		m_fnChangeState = [&]()
 		{
 			if (!m_pOwner) return;
 
-			if (m_pCurrentState)
+			if (m_spNowState)
 			{
-				m_pCurrentState->Exit(m_pOwner);
-				m_pCurrentState = nullptr;
+				m_spNowState->CallExit(m_pOwner);
+				m_spNowState = nullptr;
 			}
 
-			m_pCurrentState = std::make_shared<StateType>(args...);
-			if (!m_pCurrentState) return;
-			m_pCurrentState->SetMachine(this);
-			m_pCurrentState->Start(m_pOwner);
-		}
+			m_spNowState = std::make_shared<StateType>(args...);
+			if (!m_spNowState) return;
+
+			m_spNowState->SetMachine(this);
+			m_spNowState->CallStart(m_pOwner);
+		};
 	}
 
 	void Update()
 	{
-		m_fcChangeState();
-		m_fcChangeState = []() {};
-		if (m_pCurrentState)
+		m_fnChangeState();
+		m_fnChangeState = []() {};
+
+		if (m_spNowState)
 		{
-			m_pCurrentState->Update(m_pOwner);
+			m_spNowState->CallUpdate(m_pOwner);
 		}
+
 	}
 
 private:
-	T* m_pOwner{};
-	std::shared_ptr<StateBase<T>> m_pCurrentState{};
-	std::function<void()> m_fcChangeState{};
+	OwnerType* m_pOwner{};
+	std::shared_ptr<StateBase<OwnerType>> m_spNowState{};
+	std::function<void()> m_fnChangeState{};
 };
 
 /**
@@ -127,9 +135,101 @@ public:
 	 */
 	~AnimatorController() = default;
 
+	void Init();
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;
+
+	void AddAnimation(const std::string& name, Animation* animation);
+
+	inline Animation* GetAnimation(const std::string& name) { return m_Animations[name]; }
+	inline Actor* GetOwner() { return m_Owner; }
 	
 private:
+	std::unordered_map<std::string, Animation*> m_Animations{};
+	StateMachine<AnimatorController> m_StateMachine{};
 };
+
+namespace AnimatorState
+{
+	class Run;
+	class Walk;
+
+	class Idle : public StateBase<AnimatorController>
+	{
+		void OnStart(AnimatorController* pOwner) override
+		{
+			Animation* pAnimation = pOwner->GetAnimation("Idle");
+			if (!pAnimation) return;
+
+			SkeletalAnimator* skeletalAnimator = pOwner->GetOwner()->GetComponent<SkeletalAnimator>();
+			if (skeletalAnimator)
+			{
+				skeletalAnimator->PlayAnimation(pAnimation);
+			}
+		}
+
+		void OnUpdate(AnimatorController* pOwner) override
+		{
+			if (Input::IsKeyTrigger(VK_RETURN))
+			{
+				m_pMachine->ChangeState<Walk>();
+			}
+		}
+	};
+
+	class Walk : public StateBase<AnimatorController>
+	{
+		void OnStart(AnimatorController* pOwner) override
+		{
+			Animation* pAnimation = pOwner->GetAnimation("Walk");
+			if (!pAnimation) return;
+
+			SkeletalAnimator* skeletalAnimator = pOwner->GetOwner()->GetComponent<SkeletalAnimator>();
+			if (skeletalAnimator)
+			{
+				skeletalAnimator->PlayAnimation(pAnimation);
+			}
+		}
+
+		void OnUpdate(AnimatorController* pOwner) override
+		{
+			if (Input::IsKeyTrigger(VK_RETURN))
+			{
+				m_pMachine->ChangeState<Run>();
+			}
+		}
+
+		void OnExit(AnimatorController* pOwner) override
+		{
+			SkeletalAnimator* skeletalAnimator = pOwner->GetOwner()->GetComponent<SkeletalAnimator>();
+			if (skeletalAnimator)
+			{
+				skeletalAnimator->StopAnimation();
+			}
+		}
+	};
+
+	class Run : public StateBase<AnimatorController>
+	{
+		void OnStart(AnimatorController* pOwner) override
+		{
+			Animation* pAnimation = pOwner->GetAnimation("Run");
+			if (!pAnimation) return;
+
+			SkeletalAnimator* skeletalAnimator = pOwner->GetOwner()->GetComponent<SkeletalAnimator>();
+			if (skeletalAnimator)
+			{
+				skeletalAnimator->PlayAnimation(pAnimation);
+			}
+		}
+
+		void OnUpdate(AnimatorController* pOwner) override
+		{
+			if (Input::IsKeyTrigger(VK_RETURN))
+			{
+				m_pMachine->ChangeState<Idle>();
+			}
+		}
+	};
+}

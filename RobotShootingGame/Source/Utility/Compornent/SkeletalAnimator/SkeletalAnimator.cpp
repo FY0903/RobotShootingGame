@@ -149,32 +149,21 @@ void SkeletalAnimator::Draw()
 
 void SkeletalAnimator::Uninit()
 {
-	for (auto& animation : m_Animations)
-	{
-		animation.second = nullptr;
-	}
-	m_Animations.clear();
-
 	m_pPlayAnimation = nullptr;
 
 	m_pModel = nullptr;
 }
 
-void SkeletalAnimator::AddAnimation(const std::string& name, Animation* animation)
+void SkeletalAnimator::PlayAnimation(Animation* pAnimation)
 {
-	m_Animations[name] = animation;
-}
-
-void SkeletalAnimator::PlayAnimation(const std::string& name)
-{
-	m_pPlayAnimation = m_Animations[name];
+	m_pPlayAnimation = pAnimation;
 	m_animeTimeTicks = 0.0f;
 	m_flameCount = 0;
 
 	// アニメーション情報を取得
-	aiAnimation* pAnimation = m_pPlayAnimation->GetAnimation(0);
-	m_ticksPerSecond = static_cast<float>((pAnimation->mTicksPerSecond != 0.0) ? pAnimation->mTicksPerSecond : DEFAULT_TICKS_PER_SECOND);
-	m_animationDuration = static_cast<float>(pAnimation->mDuration > 0.0 ? pAnimation->mDuration : 0.0);
+	aiAnimation* pAiAnimation = m_pPlayAnimation->GetAnimation(0);
+	m_ticksPerSecond = static_cast<float>((pAiAnimation->mTicksPerSecond != 0.0) ? pAiAnimation->mTicksPerSecond : DEFAULT_TICKS_PER_SECOND);
+	m_animationDuration = static_cast<float>(pAiAnimation->mDuration > 0.0 ? pAiAnimation->mDuration : 0.0);
 }
 
 void SkeletalAnimator::StopAnimation()

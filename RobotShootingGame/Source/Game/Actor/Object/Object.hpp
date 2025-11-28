@@ -36,5 +36,5 @@ private:
 	void OnUninit() override final;
 
 	Model* m_pModel{}; // モデルデータ
-	Animation* m_pAnimation{}; // アニメーションデータ
+	std::vector<Animation*> m_pAnimations{}; // アニメーションデータ
 };

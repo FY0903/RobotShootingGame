@@ -46,9 +46,7 @@ public:
 	void Draw() override final;
 	void Uninit() override final;
 
-	void AddAnimation(const std::string& name, Animation* animation);
-
-	void PlayAnimation(const std::string& name);
+	void PlayAnimation(Animation* pAnimation);
 	void StopAnimation();
 
 private:
@@ -65,5 +63,4 @@ private:
 	int m_flameCount{};
 
 	Animation* m_pPlayAnimation{};
-	std::unordered_map<std::string, Animation*> m_Animations{};
 };

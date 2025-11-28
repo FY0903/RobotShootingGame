@@ -17,14 +17,21 @@
 void Object::OnInit()
 {
 	m_pModel = new Model();
-	if (FAILED(m_pModel->Load("Assets/Model/test/FBX_Demo_Idle.fbx", false, false)))
-	//if (FAILED(m_pModel->Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false)))
+	//if (FAILED(m_pModel->Load("Assets/Model/test/FBX_Demo_Idle.fbx", false, false)))
+	if (FAILED(m_pModel->Load("Assets/Model/character/Hew_kyaracter(1.0).fbx", false, false)))
 	{
 		assert(0 && "Object.cpp モデルの読み込みに失敗しました。");
 	}
 
-	m_pAnimation = new Animation();
-	if (FAILED(m_pAnimation->Load("Assets/Model/character/Animation/taiki_mae.fbx")))
+	m_pAnimations.resize(2);
+	m_pAnimations[0] = new Animation();
+	if (FAILED(m_pAnimations[0]->Load("Assets/Model/character/Animation/taiki_mae.fbx")))
+	{
+		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
+	}
+
+	m_pAnimations[1] = new Animation();
+	if (FAILED(m_pAnimations[1]->Load("Assets/Model/character/Animation/walk.fbx")))
 	{
 		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
 	}
@@ -36,10 +43,9 @@ void Object::OnInit()
 	skeletalAnimator->Init(m_pModel);
 
 	auto animatorController = AddComponent<AnimatorController>();
-	auto state = animatorController
-		->AddState("Idle", m_pAnimation)
-		->AddTransition(0.0f)
-		->AddCondition({ ConditionMode::If, "isIdle", true, 0.0f, 0 });
+	animatorController->AddAnimation("Idle", m_pAnimations[0]);
+	animatorController->AddAnimation("Walk", m_pAnimations[1]);
+	animatorController->Init();
 }
 
 void Object::OnUpdate()
@@ -54,9 +60,12 @@ void Object::OnUninit()
 		m_pModel = nullptr;
 	}
 
-	if (m_pAnimation)
+	for (auto& animation : m_pAnimations)
 	{
-		delete m_pAnimation;
-		m_pAnimation = nullptr;
+		if (animation)
+		{
+			delete animation;
+			animation = nullptr;
+		}
 	}
 }
