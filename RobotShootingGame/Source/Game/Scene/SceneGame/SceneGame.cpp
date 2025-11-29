@@ -14,6 +14,7 @@
 #include "Game/Actor/Grid/Grid.hpp"
 #include "Game/Actor/Sprite/Sprite.hpp"
 #include "Game/Actor/Object/Object.hpp"
+#include "Game/Actor/Empty/Empty.hpp"
 
 void SceneGame::OnInit()
 {
@@ -27,14 +28,17 @@ void SceneGame::OnInit()
 	//AddGameObject<Sprite>(Layer::DEFAULT);
 
 	// オブジェクトの生成
-	AddGameObject<Object>(Layer::DEFAULT);
+	//AddGameObject<Object>(Layer::DEFAULT);
+
+	// エンプティの生成
+	AddGameObject<Empty>(Layer::DEFAULT);
 }
 
 void SceneGame::OnUpdate()
 {
-	auto obj = GetGameObject<Object>();
+	auto obj = GetGameObject<Empty>();
 	Transform& transform = obj->GetTransform();
-	//transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, 0.01f, 0.0f));
+	transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, 0.01f, 0.0f));
 }
 
 void SceneGame::OnDraw()

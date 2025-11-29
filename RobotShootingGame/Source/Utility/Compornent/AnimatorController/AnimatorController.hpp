@@ -50,5 +50,4 @@ public:
 	
 private:
 	std::unordered_map<std::string, Animation*> m_Animations{};
-	StateMachine<AnimatorController> m_StateMachine{};
 };

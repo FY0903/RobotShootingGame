@@ -13,6 +13,7 @@
 #include "Utility/Compornent/MeshRenderer/MeshRenderer.hpp"
 #include "Utility/Compornent/SkeletalAnimator/SkeletalAnimator.hpp"
 #include "Utility/Compornent/AnimatorController/AnimatorController.hpp"
+#include "Utility/Input/Input.hpp"
 
 void Object::OnInit()
 {
@@ -41,15 +42,22 @@ void Object::OnInit()
 
 	auto skeletalAnimator = AddComponent<SkeletalAnimator>();
 	skeletalAnimator->Init(m_pModel);
-
-	auto animatorController = AddComponent<AnimatorController>();
-	animatorController->AddAnimation("Idle", m_pAnimations[0]);
-	animatorController->AddAnimation("Walk", m_pAnimations[1]);
-	animatorController->Init();
+	skeletalAnimator->PlayAnimation(m_pAnimations[0]);
 }
 
 void Object::OnUpdate()
 {
+	if (Input::IsKeyTrigger('W'))
+	{
+		auto skeletalAnimator = GetComponent<SkeletalAnimator>();
+		skeletalAnimator->BlendAnimation(m_pAnimations[1], 2.0f);
+	}
+
+	if (Input::IsKeyTrigger('S'))
+	{
+		auto skeletalAnimator = GetComponent<SkeletalAnimator>();
+		skeletalAnimator->BlendAnimation(m_pAnimations[0], 2.0f);
+	}
 }
 
 void Object::OnUninit()

@@ -47,12 +47,17 @@ public:
 	void Uninit() override final;
 
 	void PlayAnimation(Animation* pAnimation);
+	void BlendAnimation(Animation* pBlendAnimation, float blendTime);
 	void StopAnimation();
 
 private:
+	void UpdateSingleBoneAnimation();
+	void UpdateBlendBoneAnimation();
+
 	void UpdateBoneMatrix(const aiNode* node, DirectX::XMMATRIX matrix);
 	unsigned int FindKeyIndex(const aiVectorKey* pKeys, unsigned int keyCount, float animationTime);
 	unsigned int FindKeyIndex(const aiQuatKey* pKeys, unsigned int keyCount, float animationTime);
+	aiNodeAnim* FindChannel(aiAnimation* anim, const std::string& name);
 
 	Model* m_pModel{};
 
@@ -60,7 +65,14 @@ private:
 	float m_animationTime{};
 	float m_animeTimeTicks{};
 	float m_animationDuration{};
-	int m_flameCount{};
+	float m_blendTime{};
+
+	// ブレンド用タイミング（追加）
+	float m_blendTicksPerSecond{};        // ブレンド先アニメの ticks/sec
+	float m_blendAnimationDuration{};     // ブレンド先アニメの duration
+	float m_blendAnimeTimeTicks{};        // ブレンド先アニメの現在ticks
+	float m_blendElapsedSeconds{};        // ブレンド経過秒
 
 	Animation* m_pPlayAnimation{};
+	Animation* m_pBlendAnimation{};
 };

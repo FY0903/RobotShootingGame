@@ -76,6 +76,29 @@ public:
 		delete component;
 	}
 
+	template<typename T = Actor>
+	inline T* AddChildActor()
+	{
+		T* actor = new T();
+		m_ChildActors.emplace_back(actor);
+		actor->Init();
+		return actor;
+	}
+
+	template<typename T = Actor>
+	inline T* GetChildActor()
+	{
+		for (Actor* actor : m_ChildActors)
+		{
+			T* castedActor = dynamic_cast<T*>(actor);
+			if (castedActor)
+			{
+				return castedActor;
+			}
+		}
+		return nullptr;
+	}
+
 	inline Transform& GetTransform() { return m_Transform; }
 	inline const Tags& GetTag() { return m_Tag; }
 
@@ -85,6 +108,7 @@ protected:
 	virtual void OnUninit() = 0;
 
 	std::list<Component*> m_Components{};
+	std::vector<Actor*> m_ChildActors{};
 
 	Transform m_Transform{};
 	Tags m_Tag{};

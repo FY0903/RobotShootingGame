@@ -13,13 +13,10 @@
 
 void AnimatorController::Init()
 {
-	m_StateMachine.Start(this);
-	m_StateMachine.ChangeState<AnimatorState::Idle>();
 }
 
 void AnimatorController::Update()
 {
-	m_StateMachine.Update();
 }
 
 void AnimatorController::Draw()

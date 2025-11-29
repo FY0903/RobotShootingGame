@@ -23,6 +23,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Empty\Empty.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Game\Actor\Grid\Grid.cpp">
       <SubType>
       </SubType>
@@ -121,6 +125,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Game\Actor\Actor.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Empty\Empty.hpp">
       <SubType>
       </SubType>
     </ClInclude>
