@@ -115,6 +115,9 @@
     <Filter Include="Source\Utility\Compornent\AnimatorController">
       <UniqueIdentifier>{d45ebf5e-ceda-44aa-979a-7768159cd106}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\StateMachine">
+      <UniqueIdentifier>{bc87ded4-aaac-4548-bf0e-07b3d7fb510e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -212,6 +215,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Compornent\AnimatorController\AnimatorController.cpp">
       <Filter>Source\Utility\Compornent\AnimatorController</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\StateMachine\StateMachine.cpp">
+      <Filter>Source\Utility\StateMachine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -316,6 +322,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Compornent\AnimatorController\AnimatorController.hpp">
       <Filter>Source\Utility\Compornent\AnimatorController</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\StateMachine\StateMachine.hpp">
+      <Filter>Source\Utility\StateMachine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
