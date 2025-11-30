@@ -15,6 +15,7 @@
 #include "System/Engine/Engine.hpp"
 #include "Utility/ConstantBuffer/ConstantBuffer.hpp"
 #include "Utility/RootSignature/RootSignature.hpp"
+#include "Utility/MaterialManager/MaterialManager.hpp"
 #include <list>
 
 /**
@@ -99,6 +100,7 @@ public:
 		return nullptr;
 	}
 
+	inline Material* GetMaterial() { return m_pMaterial; }
 	inline Transform& GetTransform() { return m_Transform; }
 	inline const Tags& GetTag() { return m_Tag; }
 
@@ -112,4 +114,5 @@ protected:
 
 	Transform m_Transform{};
 	Tags m_Tag{};
+	Material* m_pMaterial{};
 };

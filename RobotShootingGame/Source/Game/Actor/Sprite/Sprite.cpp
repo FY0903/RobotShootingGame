@@ -11,6 +11,7 @@
 // ==============================
 #include "Sprite.hpp"
 #include "Utility/Compornent/SpriteRenderer/SpriteRenderer.hpp"
+#include "Utility/MaterialManager/MaterialManager.hpp"
 
 void Sprite::OnInit()
 {
@@ -19,6 +20,10 @@ void Sprite::OnInit()
 	{
 		assert(false && "Sprite.cpp テクスチャの読み込みに失敗しました。");
 	}
+
+	// マテリアルの設定
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Sprite");
+	m_pMaterial->SetTexture(m_pTexture);
 
 	AddComponent<SpriteRenderer>()->Init(m_pTexture);
 }

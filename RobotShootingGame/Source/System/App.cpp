@@ -40,6 +40,9 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 	// Input‚Ì‰Šú‰»
 	Input::Init();
 
+	// MaterialManager‚Ì‰Šú‰»
+	MaterialManager::GetInstance().Init();
+
 	// Sound‚Ì‰Šú‰»
 	if (FAILED(Sound::GetInstance().Init()))
 	{

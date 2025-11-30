@@ -25,3 +25,9 @@ void CameraManager::SetMainCamera(const std::string& name)
 		m_pMainCamera = m_pCameraData[name];
 	}
 }
+
+CameraManager::~CameraManager()
+{
+	m_pMainCamera = nullptr;
+	m_pCameraData.clear();
+}

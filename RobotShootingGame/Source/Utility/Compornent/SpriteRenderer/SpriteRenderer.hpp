@@ -38,8 +38,4 @@ private:
 	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};	// インデックスバッファ
 	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
-	DescriptorHandle* m_pMaterialHandle{}; // ディスクリプタハンドル
-	RootSignature* m_pRootSignature{};	// ルートシグネチャ
-	PipelineState* m_pPipelineState{};	// パイプラインステート
 };

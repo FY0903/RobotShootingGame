@@ -83,6 +83,7 @@ void RootSignature::AddRootParameter(UINT shaderRegiser, D3D12_SHADER_VISIBILITY
 
 void RootSignature::AddDescriptorRange(UINT shaderRegiser, D3D12_DESCRIPTOR_RANGE_TYPE rangeType, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility)
 {
+	// テクスチャを使用するためのディスクリプタレンジを作成必要がある
 	CD3DX12_DESCRIPTOR_RANGE range{};
 	range.Init(rangeType, numDescriptors, shaderRegiser);
 	m_DescriptorRanges.push_back(range);

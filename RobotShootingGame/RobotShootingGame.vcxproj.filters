@@ -121,6 +121,12 @@
     <Filter Include="Source\Game\Actor\Empty">
       <UniqueIdentifier>{59df4685-d381-438e-ad51-f095329a7cbf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\MaterialManager">
+      <UniqueIdentifier>{dc818547-fdb2-4481-8b47-b949ab89e144}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\MaterialBase">
+      <UniqueIdentifier>{72395144-3d91-40e5-91aa-468e27b930a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -224,6 +230,12 @@
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\Empty\Empty.cpp">
       <Filter>Source\Game\Actor\Empty</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\MaterialManager\MaterialManager.cpp">
+      <Filter>Source\Utility\MaterialManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\MaterialBase\MaterialBase.cpp">
+      <Filter>Source\Utility\MaterialBase</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -334,6 +346,12 @@
     </ClInclude>
     <ClInclude Include="Source\Game\Actor\Empty\Empty.hpp">
       <Filter>Source\Game\Actor\Empty</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\MaterialManager\MaterialManager.hpp">
+      <Filter>Source\Utility\MaterialManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\MaterialBase\MaterialBase.hpp">
+      <Filter>Source\Utility\MaterialBase</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

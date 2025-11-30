@@ -98,6 +98,11 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Utility\Input\Input.cpp" />
+    <ClCompile Include="Source\Utility\MaterialBase\MaterialBase.cpp" />
+    <ClCompile Include="Source\Utility\MaterialManager\MaterialManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Model\Model.cpp">
       <SubType>
       </SubType>
@@ -204,6 +209,11 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Input\Input.hpp" />
+    <ClInclude Include="Source\Utility\MaterialBase\MaterialBase.hpp" />
+    <ClInclude Include="Source\Utility\MaterialManager\MaterialManager.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\Model\Model.hpp">
       <SubType>
       </SubType>

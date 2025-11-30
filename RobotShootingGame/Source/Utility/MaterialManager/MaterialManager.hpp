@@ -1,0 +1,73 @@
+/*+===================================================================
+	File: MaterialManager.hpp
+	Summary: （このファイルで何をするか記載する）
+	Author: AT13C192 23 藤原佑埜
+	Date: 2025/11/30 5:41:16 初回作成
+	（これ以降下に更新日時と更新内容を書く）
+===================================================================+*/
+#pragma once
+
+// ==============================
+//	include
+// ==============================
+#include "Utility/MaterialBase/MaterialBase.hpp"
+#include "Utility/Singleton/Singleton.hpp"
+#include "Utility/DescriptorHeap/DescriptorHeap.hpp"
+#include <vector>
+#include <unordered_map>
+
+class Material
+{
+public:
+	/**
+	 * コンストラクタ
+	 */
+	Material(MaterialBase* pMaterial);
+	
+	/**
+	 * デストラクタ
+	 */
+	~Material();
+
+	void SetTexture(class Texture* pTexture);
+
+	DescriptorHeap* GetDescriptorHeap() const { return m_pDescriptorHeap; }
+	DescriptorHandle* GetDescriptorHandle(size_t index) const { return m_pDescriptorHandle[index]; }
+	inline class RootSignature* GetRootSignature() const { return m_pMaterial->GetRootSignature(); }
+	inline class PipelineState* GetPipelineState() const { return m_pMaterial->GetPipelineState(); }
+
+private:
+	MaterialBase* m_pMaterial{}; // マテリアル
+	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_pDescriptorHandle{}; // ディスクリプタハンドル
+};
+
+/**
+ * @brief MaterialManagerクラス
+ */
+class MaterialManager : public Singleton<MaterialManager>
+{
+public:
+	void Init();
+
+	Material* CreateMaterial(const std::string& materialName);
+
+private:
+	friend class Singleton<MaterialManager>;
+
+	/**
+	 * コンストラクタ
+	 */
+	MaterialManager() = default;
+
+	/**
+	 * デストラクタ
+	 */
+	~MaterialManager();
+
+	MaterialBase* CreateMaterialBase(const std::string& name);
+	MaterialBase* GetMaterial(const std::string& name);
+
+	std::unordered_map<std::string, MaterialBase*> m_MaterialData{};
+	std::unordered_map<std::string, std::vector<Material*>> m_MaterialInstanceData{};
+};

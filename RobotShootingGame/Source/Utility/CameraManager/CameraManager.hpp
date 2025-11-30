@@ -37,7 +37,7 @@ private:
 	/**
 	 * デストラクタ
 	 */
-	~CameraManager() = default;
+	~CameraManager();
 
 	std::unordered_map<std::string, Camera*> m_pCameraData{};
 	Camera* m_pMainCamera{};        // メインカメラ
