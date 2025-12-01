@@ -56,6 +56,17 @@ void MaterialManager::Init()
 	line->SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 	line->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	line->Create();
+
+	// SkeletalMeshƒ}ƒeƒŠƒAƒ‹‚Ìì¬
+	auto skeletalMesh = CreateMaterialBase("SkeletalMesh");
+	skeletalMesh->SetVSFilepath(L"Assets/Shader/SkeletalMeshVS.cso");
+	skeletalMesh->SetPSFilepath(L"Assets/Shader/SimplePS.cso");
+	skeletalMesh->SetInputLayout(Vertex::Mesh::InputLayout);
+	skeletalMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	skeletalMesh->SetCBV(1, D3D12_SHADER_VISIBILITY_VERTEX);
+	skeletalMesh->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	skeletalMesh->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	skeletalMesh->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)

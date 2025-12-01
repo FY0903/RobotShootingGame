@@ -119,6 +119,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\TextureManager\TextureManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Texture\Texture.cpp">
       <SubType>
       </SubType>
@@ -227,6 +231,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\StateMachine\StateMachine.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\TextureManager\TextureManager.hpp">
       <SubType>
       </SubType>
     </ClInclude>

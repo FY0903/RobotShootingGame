@@ -12,20 +12,18 @@
 #include "Sprite.hpp"
 #include "Utility/Compornent/SpriteRenderer/SpriteRenderer.hpp"
 #include "Utility/MaterialManager/MaterialManager.hpp"
+#include "Utility/TextureManager/TextureManager.hpp"
 
 void Sprite::OnInit()
 {
-	m_pTexture = new Texture();
-	if (FAILED(m_pTexture->Load("Assets/Texture/ADC_COW.png")))
-	{
-		assert(false && "Sprite.cpp テクスチャの読み込みに失敗しました。");
-	}
+	// テクスチャの読み込み
+	auto pTexture = TextureManager::GetInstance().LoadTexture("Assets/Texture/ADC_COW.png");
 
 	// マテリアルの設定
 	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Sprite");
-	m_pMaterial->SetTexture(m_pTexture);
+	m_pMaterial->SetTexture(pTexture);
 
-	AddComponent<SpriteRenderer>()->Init(m_pTexture);
+	AddComponent<SpriteRenderer>()->Init();
 }
 
 void Sprite::OnUpdate()
@@ -34,6 +32,4 @@ void Sprite::OnUpdate()
 
 void Sprite::OnUninit()
 {
-	delete m_pTexture;
-	m_pTexture = nullptr;
 }

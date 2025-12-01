@@ -40,14 +40,12 @@ void MeshRenderer::Init(Model* pModel)
 		m_pIndexBuffers.push_back(pIndexBuffer);
 	}
 
-	m_pDescriptorHeap = new DescriptorHeap();
-	m_pMaterialHandles.clear();
+	// マテリアルの設定
+	auto material = m_Owner->GetMaterial();
 	for (size_t i = 0; i < meshes.size(); ++i)
 	{
 		auto& mesh = meshes[i];
-		auto handle = m_pDescriptorHeap->Register(mesh.DiffuseMap->Resource(), mesh.DiffuseMap->ViewDesc());
-		assert(handle);	// nullptrチェック
-		m_pMaterialHandles.push_back(handle);
+		material->SetTexture(mesh.DiffuseMap);
 	}
 
 	// 定数バッファの生成
@@ -68,24 +66,6 @@ void MeshRenderer::Init(Model* pModel)
 			bonePtr->BoneMat[j] = DirectX::XMMatrixIdentity();
 		}
 	}
-
-	// ルートシグネチャの生成
-	m_pRootSignature = new RootSignature();
-	assert(m_pRootSignature);	// nullptrチェック
-	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
-	m_pRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
-	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, D3D12_SHADER_VISIBILITY_PIXEL); // テクスチャ
-	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
-	m_pRootSignature->Create();
-
-	// パイプラインステートの生成
-	m_pPipelineState = new PipelineState();
-	assert(m_pPipelineState);	// nullptrチェック
-	m_pPipelineState->SetInputLayout(Vertex::Mesh::InputLayout);
-	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
-	m_pPipelineState->SetVS(L"Assets/Shader/SkeletalMeshVS.cso");
-	m_pPipelineState->SetPS(L"Assets/Shader/SimplePS.cso");
-	m_pPipelineState->Create();
 }
 
 void MeshRenderer::Update()
@@ -105,20 +85,22 @@ void MeshRenderer::Update()
 
 void MeshRenderer::Draw()
 {
+	auto material = m_Owner->GetMaterial();
+
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
-	auto materialHeap = m_pDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
+	auto materialHeap = material->GetDescriptorHeap()->GetHeap();			// ディスクリプタヒープを取得
 
 	std::vector<Model::Mesh> meshes = m_pModel->GetMeshes();
 
 	for (size_t i = 0; i < meshes.size(); ++i)
 	{
-		auto vbView = m_pVertexBuffers[i]->GetView();		// 頂点バッファビューを取得
-		auto ibView = m_pIndexBuffers[i]->GetView();		// インデックスバッファビューを取得
-		auto materialHandle = m_pMaterialHandles[i];		// マテリアルのディスクリプタハンドルを取得
+		auto vbView = m_pVertexBuffers[i]->GetView();			// 頂点バッファビューを取得
+		auto ibView = m_pIndexBuffers[i]->GetView();			// インデックスバッファビューを取得
+		auto materialHandle = material->GetDescriptorHandle(i);	// マテリアルのディスクリプタハンドルを取得
 
-		commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
-		commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
+		commandList->SetGraphicsRootSignature(material->GetRootSignature()->Get());		// ルートシグネチャを設定
+		commandList->SetPipelineState(material->GetPipelineState()->Get());				// パイプラインステートを設定
 		commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());		// 定数バッファを設定
 		commandList->SetGraphicsRootConstantBufferView(1, m_pBoneMatrixCB[currentIndex]->GetAddress()); // ボーン行列用定数バッファを設定
 
@@ -156,17 +138,6 @@ void MeshRenderer::Uninit()
 		delete m_pBoneMatrixCB[i];
 		m_pBoneMatrixCB[i] = nullptr;
 	}
-
-	delete m_pDescriptorHeap;
-	m_pDescriptorHeap = nullptr;
-
-	m_pMaterialHandles.clear();
-
-	delete m_pRootSignature;
-	m_pRootSignature = nullptr;
-
-	delete m_pPipelineState;
-	m_pPipelineState = nullptr;
 
 	m_pModel = nullptr;
 }

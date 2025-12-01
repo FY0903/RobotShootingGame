@@ -25,13 +25,13 @@ void SceneGame::OnInit()
 	AddGameObject<Grid>(Layer::DEFAULT);
 
 	// スプライトの生成
-	AddGameObject<Sprite>(Layer::DEFAULT);
+	//AddGameObject<Sprite>(Layer::DEFAULT);
 
 	// オブジェクトの生成
 	//AddGameObject<Object>(Layer::DEFAULT);
 
 	// エンプティの生成
-	//AddGameObject<Empty>(Layer::DEFAULT);
+	AddGameObject<Empty>(Layer::DEFAULT);
 }
 
 void SceneGame::OnUpdate()

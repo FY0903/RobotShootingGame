@@ -37,6 +37,9 @@ void Object::OnInit()
 		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
 	}
 
+	// マテリアルの設定
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("SkeletalMesh");
+
 	auto meshRenderer = AddComponent<MeshRenderer>();
 	meshRenderer->Init(m_pModel);
 

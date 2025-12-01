@@ -14,7 +14,7 @@
 #include "Utility/CameraManager/CameraManager.hpp"
 #include "Game/Actor/Actor.hpp"
 
-void SpriteRenderer::Init(Texture* pTexture)
+void SpriteRenderer::Init()
 {
 	Vertex::Sprite vertices[4]{};
 

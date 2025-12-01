@@ -10,6 +10,7 @@
 //	include
 // ==============================
 #include "Model.hpp"
+#include "Utility/TextureManager/TextureManager.hpp"
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -23,15 +24,6 @@ std::string GetDirectoryPath(const std::string& filepath)
 
 Model::~Model()
 {
-	for (auto& mesh : m_Meshes)
-	{
-		if (mesh.DiffuseMap)
-		{
-			delete mesh.DiffuseMap;
-			mesh.DiffuseMap = nullptr;
-		}
-	}
-
 	m_Meshes.clear();
 }
 
@@ -159,12 +151,7 @@ void Model::LoadTexture(const std::string& fineName, Mesh& dst, const aiMaterial
 		auto dir = GetDirectoryPath(fineName);			// ディレクトリ名
 		file = std::string(dir + file.substr(idx + 1));	// フルパスを設定
 
-		dst.DiffuseMap = new Texture();
-		if (FAILED(dst.DiffuseMap->Load(file)))	// テクスチャの読み込み
-		{
-			delete dst.DiffuseMap;
-			dst.DiffuseMap = nullptr;
-		}
+		dst.DiffuseMap = TextureManager::GetInstance().LoadTexture(file);	// テクスチャ読み込み
 	}
 	else
 	{

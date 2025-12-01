@@ -47,8 +47,4 @@ private:
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	ConstantBuffer* m_pBoneMatrixCB[FRAME_BUFFER_COUNT]{}; // ボーン行列用定数バッファ
-	RootSignature* m_pRootSignature{};	// ルートシグネチャ
-	PipelineState* m_pPipelineState{};	// パイプラインステート
-	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_pMaterialHandles{}; // ディスクリプタハンドル
 };

@@ -28,7 +28,7 @@ class SpriteRenderer : public Component
 public:
 	using Component::Component;
 
-	void Init(Texture* pTexture);
+	void Init();
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;

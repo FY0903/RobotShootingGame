@@ -127,6 +127,9 @@
     <Filter Include="Source\Utility\MaterialBase">
       <UniqueIdentifier>{72395144-3d91-40e5-91aa-468e27b930a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\TextureManager">
+      <UniqueIdentifier>{b8c9e01d-13a7-43ea-9d57-431fa431c16a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -236,6 +239,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\MaterialBase\MaterialBase.cpp">
       <Filter>Source\Utility\MaterialBase</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\TextureManager\TextureManager.cpp">
+      <Filter>Source\Utility\TextureManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -352,6 +358,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\MaterialBase\MaterialBase.hpp">
       <Filter>Source\Utility\MaterialBase</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\TextureManager\TextureManager.hpp">
+      <Filter>Source\Utility\TextureManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
