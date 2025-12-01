@@ -15,9 +15,121 @@
 #include "Utility/CameraManager/CameraManager.hpp"
 #include "Utility/Compornent/SkeletalAnimator/SkeletalAnimator.hpp"
 
+void MeshRenderer::Init()
+{
+	std::vector<Vertex::Mesh> meshes{};
+	Vertex::Mesh vertices[4 * 6]{};
+	m_pVertexBuffers.reserve(1);
+	m_pIndexBuffers.reserve(1);
+
+	// +Z面
+	vertices[0].Position = { -1.0f, 1.0f, 1.0f };
+	vertices[1].Position = { 1.0f, 1.0f, 1.0f };
+	vertices[2].Position = { 1.0f, -1.0f, 1.0f };
+	vertices[3].Position = { -1.0f, -1.0f, 1.0f };
+
+	vertices[0].UV = { 0.0f, 0.0f };
+	vertices[1].UV = { 1.0f, 0.0f };
+	vertices[2].UV = { 1.0f, 1.0f };
+	vertices[3].UV = { 0.0f, 1.0f };
+
+	// -Z面
+	vertices[4].Position = { 1.0f, 1.0f, -1.0f };
+	vertices[5].Position = { -1.0f, 1.0f, -1.0f };
+	vertices[6].Position = { -1.0f, -1.0f, -1.0f };
+	vertices[7].Position = { 1.0f, -1.0f, -1.0f };
+
+	vertices[4].UV = { 0.0f, 0.0f };
+	vertices[5].UV = { 1.0f, 0.0f };
+	vertices[6].UV = { 1.0f, 1.0f };
+	vertices[7].UV = { 0.0f, 1.0f };
+
+	// +X面
+	vertices[8].Position = { 1.0f, 1.0f, 1.0f };
+	vertices[9].Position = { 1.0f, 1.0f, -1.0f };
+	vertices[10].Position = { 1.0f, -1.0f, -1.0f };
+	vertices[11].Position = { 1.0f, -1.0f, 1.0f };
+
+	vertices[8].UV = { 0.0f, 0.0f };
+	vertices[9].UV = { 1.0f, 0.0f };
+	vertices[10].UV = { 1.0f, 1.0f };
+	vertices[11].UV = { 0.0f, 1.0f };
+
+	// -X面
+	vertices[12].Position = { -1.0f, 1.0f, -1.0f };
+	vertices[13].Position = { -1.0f, 1.0f, 1.0f };
+	vertices[14].Position = { -1.0f, -1.0f, 1.0f };
+	vertices[15].Position = { -1.0f, -1.0f, -1.0f };
+
+	vertices[12].UV = { 0.0f, 0.0f };
+	vertices[13].UV = { 1.0f, 0.0f };
+	vertices[14].UV = { 1.0f, 1.0f };
+	vertices[15].UV = { 0.0f, 1.0f };
+
+	// +Y面
+	vertices[16].Position = { -1.0f, 1.0f, -1.0f };
+	vertices[17].Position = { 1.0f, 1.0f, -1.0f };
+	vertices[18].Position = { 1.0f, 1.0f, 1.0f };
+	vertices[19].Position = { -1.0f, 1.0f, 1.0f };
+
+	vertices[16].UV = { 0.0f, 0.0f };
+	vertices[17].UV = { 1.0f, 0.0f };
+	vertices[18].UV = { 1.0f, 1.0f };
+	vertices[19].UV = { 0.0f, 1.0f };
+
+	// -Y面
+	vertices[20].Position = { -1.0f, -1.0f, 1.0f };
+	vertices[21].Position = { 1.0f, -1.0f, 1.0f };
+	vertices[22].Position = { 1.0f, -1.0f, -1.0f };
+	vertices[23].Position = { -1.0f, -1.0f, -1.0f };
+
+	vertices[20].UV = { 0.0f, 0.0f };
+	vertices[21].UV = { 1.0f, 0.0f };
+	vertices[22].UV = { 1.0f, 1.0f };
+	vertices[23].UV = { 0.0f, 1.0f };
+
+	// 頂点カラーの設定
+	for (auto& vertex : vertices)
+	{
+		vertex.Color = { 1.0f, 1.0f, 1.0f, 1.0f };	// 白色
+	}
+
+	// 頂点バッファの生成
+	auto vertexSize = std::size(vertices) * sizeof(Vertex::Mesh);
+	auto vertexStride = sizeof(Vertex::Mesh);
+	m_pVertexBuffers.push_back(new VertexBuffer(vertexSize, vertexStride, vertices));
+
+	uint32_t indices[] =
+	{
+		// +Z面
+		0, 1, 2,
+		0, 2, 3,
+		// -Z面
+		4, 5, 6,
+		4, 6, 7,
+		// +X面
+		8, 9, 10,
+		8, 10, 11,
+		// -X面
+		12, 13, 14,
+		12, 14, 15,
+		// +Y面
+		16, 17, 18,
+		16, 18, 19,
+		// -Y面
+		20, 21, 22,
+		20, 22, 23,
+	};
+
+	// インデックスバッファの生成
+	auto indexSize = std::size(indices) * sizeof(uint32_t);
+	m_pIndexBuffers.push_back(new IndexBuffer(indexSize, indices));
+}
+
 void MeshRenderer::Init(Model* pModel)
 {
 	m_pModel = pModel;
+
 	std::vector<Model::Mesh> meshes = m_pModel->GetMeshes();
 
 	m_pVertexBuffers.reserve(meshes.size());
@@ -140,4 +252,8 @@ void MeshRenderer::Uninit()
 	}
 
 	m_pModel = nullptr;
+}
+
+void MeshRenderer::Init(std::vector<Vertex::Mesh> meshes)
+{
 }
