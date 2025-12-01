@@ -130,6 +130,9 @@
     <Filter Include="Source\Utility\TextureManager">
       <UniqueIdentifier>{b8c9e01d-13a7-43ea-9d57-431fa431c16a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\ModelManager">
+      <UniqueIdentifier>{79bff565-7cac-410b-a8f2-6972a4b0b7d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -242,6 +245,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\TextureManager\TextureManager.cpp">
       <Filter>Source\Utility\TextureManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\ModelManager\ModelManager.cpp">
+      <Filter>Source\Utility\ModelManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -361,6 +367,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\TextureManager\TextureManager.hpp">
       <Filter>Source\Utility\TextureManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\ModelManager\ModelManager.hpp">
+      <Filter>Source\Utility\ModelManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

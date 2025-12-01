@@ -67,7 +67,6 @@ private:
 	float m_animationDuration{};
 	float m_blendTime{};
 
-	// ブレンド用タイミング（追加）
 	float m_blendTicksPerSecond{};        // ブレンド先アニメの ticks/sec
 	float m_blendAnimationDuration{};     // ブレンド先アニメの duration
 	float m_blendAnimeTimeTicks{};        // ブレンド先アニメの現在ticks
