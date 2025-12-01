@@ -15,8 +15,7 @@
 Texture* TextureManager::LoadTexture(const std::string& texturePath)
 {
 	// ‚·‚Å‚É“Ç‚Ýž‚Ü‚ê‚Ä‚¢‚éê‡‚Í‚»‚ê‚ð•Ô‚·
-	auto it = m_textureMap.find(texturePath);
-	if (it != m_textureMap.end())
+	if (auto it = m_textureMap.find(texturePath); it != m_textureMap.end())
 	{
 		return it->second;
 	}

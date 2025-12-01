@@ -14,8 +14,7 @@
 Model* ModelManager::LoadModel(const std::string& modelPath, bool inverseU, bool inverseV)
 {
 	// ‚·‚Å‚É“Ç‚Ýž‚Ü‚ê‚Ä‚¢‚éê‡‚Í‚»‚ê‚ð•Ô‚·
-	auto it = m_modelMap.find(modelPath);
-	if (it != m_modelMap.end())
+	if (auto it = m_modelMap.find(modelPath); it != m_modelMap.end())
 	{
 		return it->second;
 	}

@@ -55,6 +55,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\AnimationManager\AnimationManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\Animation\Animation.cpp">
       <SubType>
       </SubType>
@@ -170,6 +174,10 @@
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
     <ClInclude Include="Source\System\main.hpp" />
     <ClInclude Include="Source\System\Window\Window.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\AnimationManager\AnimationManager.hpp">
       <SubType>
       </SubType>
     </ClInclude>

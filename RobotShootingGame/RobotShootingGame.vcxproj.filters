@@ -133,6 +133,9 @@
     <Filter Include="Source\Utility\ModelManager">
       <UniqueIdentifier>{79bff565-7cac-410b-a8f2-6972a4b0b7d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\AnimationManager">
+      <UniqueIdentifier>{918ec7ec-db36-4ac6-851f-c3b89b890e23}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -248,6 +251,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\ModelManager\ModelManager.cpp">
       <Filter>Source\Utility\ModelManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\AnimationManager\AnimationManager.cpp">
+      <Filter>Source\Utility\AnimationManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -370,6 +376,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\ModelManager\ModelManager.hpp">
       <Filter>Source\Utility\ModelManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\AnimationManager\AnimationManager.hpp">
+      <Filter>Source\Utility\AnimationManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

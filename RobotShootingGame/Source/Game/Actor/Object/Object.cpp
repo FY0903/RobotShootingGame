@@ -15,23 +15,15 @@
 #include "Utility/Compornent/AnimatorController/AnimatorController.hpp"
 #include "Utility/Input/Input.hpp"
 #include "Utility/ModelManager/ModelManager.hpp"
+#include "Utility/AnimationManager/AnimationManager.hpp"
 
 void Object::OnInit()
 {
 	auto pModel = ModelManager::GetInstance().LoadModel("Assets/Model/character/Hew_kyaracter(1.0).fbx");
 
 	m_pAnimations.resize(2);
-	m_pAnimations[0] = new Animation();
-	if (FAILED(m_pAnimations[0]->Load("Assets/Model/character/Animation/taiki_mae.fbx")))
-	{
-		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
-	}
-
-	m_pAnimations[1] = new Animation();
-	if (FAILED(m_pAnimations[1]->Load("Assets/Model/character/Animation/walk.fbx")))
-	{
-		assert(0 && "Object.cpp アニメーションの読み込みに失敗しました。");
-	}
+	m_pAnimations[0] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/taiki_mae.fbx");
+	m_pAnimations[1] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/walk.fbx");
 
 	// マテリアルの設定
 	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("SkeletalMesh");
@@ -61,12 +53,4 @@ void Object::OnUpdate()
 
 void Object::OnUninit()
 {
-	for (auto& animation : m_pAnimations)
-	{
-		if (animation)
-		{
-			delete animation;
-			animation = nullptr;
-		}
-	}
 }
