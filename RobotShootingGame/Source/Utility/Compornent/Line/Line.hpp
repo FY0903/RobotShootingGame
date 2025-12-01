@@ -50,8 +50,6 @@ public:
 private:
 	VertexBuffer* m_pVertexBuffer{};				// 頂点バッファ
 	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	RootSignature* m_pRootSignature{};				// ルートシグネチャ
-	PipelineState* m_pPipelineState{};				// パイプラインステート
 
 	std::vector<Vertex::Line> m_Lines{}; // 線の頂点データ
 };

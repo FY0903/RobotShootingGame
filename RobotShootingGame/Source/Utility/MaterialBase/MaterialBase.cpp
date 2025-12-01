@@ -59,6 +59,12 @@ void MaterialBase::SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout)
 	m_pPipelineState->SetInputLayout(layout);
 }
 
+void MaterialBase::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type)
+{
+	if (!m_pPipelineState) return;
+	m_pPipelineState->SetPrimitiveTopologyType(type);
+}
+
 void MaterialBase::Create()
 {
 	if (!m_pRootSignature || !m_pPipelineState) return;

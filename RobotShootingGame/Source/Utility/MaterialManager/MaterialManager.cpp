@@ -38,6 +38,7 @@ void Material::SetTexture(Texture* pTexture)
 
 void MaterialManager::Init()
 {
+	// Spriteマテリアルの作成
 	auto sprite = CreateMaterialBase("Sprite");
 	sprite->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	sprite->SetPSFilepath(L"Assets/Shader/SpritePS.cso");
@@ -46,6 +47,15 @@ void MaterialManager::Init()
 	sprite->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	sprite->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	sprite->Create();
+
+	// Lineマテリアルの作成
+	auto line = CreateMaterialBase("Line");
+	line->SetVSFilepath(L"Assets/Shader/LineVS.cso");
+	line->SetPSFilepath(L"Assets/Shader/LinePS.cso");
+	line->SetInputLayout(Vertex::Line::InputLayout);
+	line->SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+	line->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	line->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)

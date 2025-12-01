@@ -14,6 +14,10 @@
 
 void Grid::OnInit()
 {
+	// マテリアルの設定
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Line");
+
+	// 線分コンポーネントの追加
 	auto line = AddComponent<Line>();
 	line->AddPoint({ -10.0f, 0.0f, 0.0f }, { 10.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }); // X軸
 	line->AddPoint({ 0.0f, -10.0f, 0.0f }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }); // Y軸

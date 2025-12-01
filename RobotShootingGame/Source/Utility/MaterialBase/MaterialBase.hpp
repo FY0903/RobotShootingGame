@@ -41,6 +41,7 @@ public:
 	void SetSRV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility);
 	void SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter);
 	void SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout);
+	void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
 
 	void Create();
 
