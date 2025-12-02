@@ -20,11 +20,6 @@
 #include "Utility/Sound/Sound.hpp"
 #include "Game/Scene/SceneGame/SceneGame.hpp"
 
-// ==============================
-//	lib
-// ==============================
-#pragma comment(lib, "winmm.lib")
-
 void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdShow)
 {
 	// ウィンドウの初期化

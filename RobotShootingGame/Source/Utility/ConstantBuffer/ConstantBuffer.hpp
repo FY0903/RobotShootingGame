@@ -11,8 +11,6 @@
 //	include
 // ==============================
 #include <d3d12.h>
-#include "Utility/ComPtr.h"
-#include <vector>
 
 /**
  * @brief ConstantBufferƒNƒ‰ƒX

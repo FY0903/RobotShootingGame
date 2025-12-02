@@ -8,16 +8,6 @@
 
 #pragma once
 
-// ==============================
-//	include
-// ==============================
-#include <DirectXMath.h>
-#include <SimpleMath.h>
-
-// ==============================
-//	using
-// ==============================
-
 struct Transform
 {
 	DirectX::SimpleMath::Vector3 Position{};	// ˆÊ’u

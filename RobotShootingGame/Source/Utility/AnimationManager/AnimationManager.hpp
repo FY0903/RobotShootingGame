@@ -7,13 +7,6 @@
 ===================================================================+*/
 #pragma once
 
-// ==============================
-//	include
-// ==============================
-#include "Utility/Singleton/Singleton.hpp"
-#include <string>
-#include <unordered_map>
-
 /**
  * @brief AnimationManagerƒNƒ‰ƒX
  */

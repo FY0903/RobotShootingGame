@@ -1,10 +1,6 @@
 #pragma once
 
 #include <d3d12.h>
-#include <DirectXMath.h>
-#include <SimpleMath.h>
-#include <vector>
-#include <string>
 
 // ==============================
 //	constexpr

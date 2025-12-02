@@ -1,8 +1,5 @@
 # pragma once
 
-# include <cassert>
-# include <mutex>
-
 class SingletonFinalizer final
 {
 public:

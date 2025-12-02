@@ -10,7 +10,6 @@
 // ==============================
 //	include
 // ==============================
-#include <DirectXMath.h>
 #include "Utility/Compornent/Component.hpp"
 #include "System/main.hpp"
 #include "System/Engine/Engine.hpp"

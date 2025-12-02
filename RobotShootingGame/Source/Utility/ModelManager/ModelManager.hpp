@@ -10,10 +10,7 @@
 // ==============================
 //	include
 // ==============================
-#include "Utility/Singleton/Singleton.hpp"
 #include "Utility/Model/Model.hpp"
-#include <string>
-#include <unordered_map>
 
 /**
  * @brief ModelManagerƒNƒ‰ƒX

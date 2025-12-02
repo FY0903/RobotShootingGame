@@ -11,7 +11,7 @@
 // ==============================
 #include "Model.hpp"
 #include "Utility/TextureManager/TextureManager.hpp"
-#include <filesystem>
+#include <assimp/postprocess.h>
 
 namespace fs = std::filesystem;
 
@@ -74,8 +74,8 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 		LoadTexture(fileName, meshes[i], pMaterial);
 
 		m_ModelOtherInfo[i].MeshName = std::string(pMesh->mName.C_Str());
-		m_ModelOtherInfo[i].VertexNum = meshes[i].Vertices.size();
-		m_ModelOtherInfo[i].IndexNum = meshes[i].Indices.size();
+		m_ModelOtherInfo[i].VertexNum = static_cast<unsigned int>(meshes[i].Vertices.size());
+		m_ModelOtherInfo[i].IndexNum = static_cast<unsigned int>(meshes[i].Indices.size());
 		m_ModelOtherInfo[i].MaterialIndex = pMesh->mMaterialIndex;
 	}
 

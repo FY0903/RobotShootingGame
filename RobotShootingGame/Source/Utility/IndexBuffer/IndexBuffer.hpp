@@ -11,8 +11,6 @@
 //	include
 // ==============================
 #include <d3d12.h>
-#include "Utility/ComPtr.h"
-#include <cstdint>
 
 /**
  * @brief IndexBufferƒNƒ‰ƒX

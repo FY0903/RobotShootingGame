@@ -10,7 +10,6 @@
 // ==============================
 //	include
 // ==============================
-#include <array>
 #include "Game/Actor/Actor.hpp"
 
 enum class Layer : int

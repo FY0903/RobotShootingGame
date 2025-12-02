@@ -136,6 +136,9 @@
     <Filter Include="Source\Utility\AnimationManager">
       <UniqueIdentifier>{918ec7ec-db36-4ac6-851f-c3b89b890e23}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Pch">
+      <UniqueIdentifier>{1f4cfa2e-3f63-4a44-bb12-80707ad3605e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -254,6 +257,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\AnimationManager\AnimationManager.cpp">
       <Filter>Source\Utility\AnimationManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Pch\Pch.cpp">
+      <Filter>Source\Utility\Pch</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -379,6 +385,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\AnimationManager\AnimationManager.hpp">
       <Filter>Source\Utility\AnimationManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Pch\Pch.hpp">
+      <Filter>Source\Utility\Pch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

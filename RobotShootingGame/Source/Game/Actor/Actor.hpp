@@ -16,7 +16,6 @@
 #include "Utility/ConstantBuffer/ConstantBuffer.hpp"
 #include "Utility/RootSignature/RootSignature.hpp"
 #include "Utility/MaterialManager/MaterialManager.hpp"
-#include <list>
 
 /**
  * @brief ActorƒNƒ‰ƒX

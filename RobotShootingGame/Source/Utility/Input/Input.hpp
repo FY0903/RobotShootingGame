@@ -10,11 +10,6 @@
 #undef max
 #undef min
 
-// ==============================
-//	include
-// ==============================
-#include <Windows.h>
-
 namespace Input
 {
 	HRESULT Init();

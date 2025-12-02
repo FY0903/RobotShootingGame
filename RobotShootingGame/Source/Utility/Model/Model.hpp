@@ -12,13 +12,8 @@
 // ==============================
 #include "Utility/SharedStruct/SharedStruct.hpp"
 #include "Utility/Texture/Texture.hpp"
-#include <DirectXMath.h>
-#include <vector>
-#include <string>
-#include <unordered_map>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 // ==============================
 //	‘O•ûéŒ¾

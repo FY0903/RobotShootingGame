@@ -7,14 +7,6 @@
 ===================================================================+*/
 #pragma once
 
-// ==============================
-//	include
-// ==============================
-#include <Windows.h>
-#include <cstdint>
-
-#include "Utility/Singleton/Singleton.hpp"
-
 /**
  * @brief WindowƒNƒ‰ƒX
  */

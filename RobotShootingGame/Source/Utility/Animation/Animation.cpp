@@ -12,7 +12,6 @@
 #include "Animation.hpp"
 #include <assimp/cimport.h>
 #include <assimp/postprocess.h>
-#include <cassert>
 
 HRESULT Animation::Load(const std::string& fileName)
 {

@@ -13,8 +13,6 @@
 #include "Utility/Compornent/Component.hpp"
 #include "Utility/Animation/Animation.hpp"
 #include "Utility/Model/Model.hpp"
-#include <unordered_map>
-#include <DirectXMath.h>
 
 // ==============================
 //	‘O•ûéŒ¾

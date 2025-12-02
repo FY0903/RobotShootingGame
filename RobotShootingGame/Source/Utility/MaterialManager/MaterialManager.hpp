@@ -11,10 +11,7 @@
 //	include
 // ==============================
 #include "Utility/MaterialBase/MaterialBase.hpp"
-#include "Utility/Singleton/Singleton.hpp"
 #include "Utility/DescriptorHeap/DescriptorHeap.hpp"
-#include <vector>
-#include <unordered_map>
 
 class Material
 {

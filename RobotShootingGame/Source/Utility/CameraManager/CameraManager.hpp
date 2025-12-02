@@ -10,9 +10,7 @@
 // ==============================
 //	include
 // ==============================
-#include "Utility/Singleton/Singleton.hpp"
 #include "Utility/Compornent/Camera/Camera.hpp"
-#include <unordered_map>
 
 /**
  * @brief CameraManagerƒNƒ‰ƒX

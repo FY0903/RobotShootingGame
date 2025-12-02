@@ -9,9 +9,7 @@
 // ==============================
 //	include
 // ==============================
-#include "Utility/ComPtr.h"
 #include "../DirectXTex/d3dx12.h"
-#include <vector>
 
 // ==============================
 //	‘O•ûéŒ¾

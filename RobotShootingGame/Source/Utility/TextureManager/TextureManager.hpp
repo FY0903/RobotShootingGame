@@ -7,13 +7,6 @@
 ===================================================================+*/
 #pragma once
 
-// ==============================
-//	include
-// ==============================
-#include "Utility/Singleton/Singleton.hpp"
-#include <unordered_map>
-#include <string>
-
 /**
  * @brief TextureManagerƒNƒ‰ƒX
  */

@@ -14,8 +14,6 @@
 #include "Utility/DescriptorHeap/DescriptorHeap.hpp"
 #include "Utility/RootSignature/RootSignature.hpp"
 #include "Utility/PipelineState/PipelineState.hpp"
-#include <vector>
-#include <string>
 
 /**
  * @brief MaterialƒNƒ‰ƒX

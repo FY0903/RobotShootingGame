@@ -10,14 +10,9 @@
 // ==============================
 //	include
 // ==============================
-#include <xaudio2.h>
 #include <mmreg.h>
 #include <MSAcm.h>
 #include <Shlwapi.h>
-#include <map>
-#include <unordered_map>
-#include "Utility/Singleton/Singleton.hpp"
-#include "Utility/ComPtr.h"
 
 // ==============================
 //	lib

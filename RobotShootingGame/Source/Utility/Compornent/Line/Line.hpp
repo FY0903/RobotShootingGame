@@ -12,8 +12,6 @@
 // ==============================
 #include "Utility/Compornent/Component.hpp"
 #include "System/Engine/Engine.hpp"
-#include <vector>
-#include <DirectXMath.h>
 
 #include "Utility/ConstantBuffer/ConstantBuffer.hpp"
 #include "Utility/RootSignature/RootSignature.hpp"

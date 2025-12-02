@@ -11,8 +11,6 @@
 //	include
 // ==============================
 #include "../DirectXTex/d3dx12.h"
-#include "Utility/ComPtr.h"
-#include <string>
 
 /**
  * @brief TextureƒNƒ‰ƒX
