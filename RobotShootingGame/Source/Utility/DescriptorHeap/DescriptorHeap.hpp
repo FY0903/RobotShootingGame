@@ -46,7 +46,7 @@ public:
 	 */
 	~DescriptorHeap();
 
-	ID3D12DescriptorHeap* GetHeap() const { return m_pHeap.Get(); }
+	ID3D12DescriptorHeap* GetHeap() const;
 	DescriptorHandle* Register(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
 
 private:

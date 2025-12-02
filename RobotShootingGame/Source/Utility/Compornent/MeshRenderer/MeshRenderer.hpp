@@ -35,16 +35,16 @@ class MeshRenderer : public Component
 public:
 	using Component::Component;
 
-	void Init();
 	void Init(Model* pModel = nullptr);
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;
 
 private:
-	void Init(std::vector<Vertex::Mesh> meshes);
+	void Init(std::vector<Model::Mesh> meshes);
 
 	Model* m_pModel{};			// モデルデータ
+	std::vector<Model::Mesh> m_Meshes{};
 
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ

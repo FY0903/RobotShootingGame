@@ -69,7 +69,8 @@ void SpriteRenderer::Draw()
 
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();		// 現在のバックバッファのインデックスを取得
 	auto commandList = Engine::GetInstance().GetCommandList();					// コマンドリストを取得
-	auto materialHeap = material->GetDescriptorHeap()->GetHeap();				// ディスクリプタヒープを取得
+	auto materialHeap = material->GetDescriptorHeap();							// ディスクリプタヒープを取得
+	auto heap = materialHeap->GetHeap();
 
 	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
 	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
@@ -82,7 +83,7 @@ void SpriteRenderer::Draw()
 	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
 	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
 
-	commandList->SetDescriptorHeaps(1, &materialHeap);												// ディスクリプタヒープを設定
+	commandList->SetDescriptorHeaps(1, &heap);														// ディスクリプタヒープを設定
 	commandList->SetGraphicsRootDescriptorTable(1, material->GetDescriptorHandle(0)->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画

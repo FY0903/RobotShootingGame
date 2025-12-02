@@ -51,6 +51,12 @@ DescriptorHeap::~DescriptorHeap()
 	m_pHandles.clear();
 }
 
+ID3D12DescriptorHeap* DescriptorHeap::GetHeap() const
+{
+	if (m_pHeap) return m_pHeap.Get();
+	return nullptr;
+}
+
 DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc)
 {
 	auto count = m_pHandles.size();

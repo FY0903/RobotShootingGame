@@ -31,10 +31,10 @@ public:
 
 	void SetTexture(class Texture* pTexture);
 
-	DescriptorHeap* GetDescriptorHeap() const { return m_pDescriptorHeap; }
-	DescriptorHandle* GetDescriptorHandle(size_t index) const { return m_pDescriptorHandle[index]; }
-	inline class RootSignature* GetRootSignature() const { return m_pMaterial->GetRootSignature(); }
-	inline class PipelineState* GetPipelineState() const { return m_pMaterial->GetPipelineState(); }
+	DescriptorHeap* GetDescriptorHeap() const;
+	DescriptorHandle* GetDescriptorHandle(size_t index) const;
+	class RootSignature* GetRootSignature() const;
+	class PipelineState* GetPipelineState() const;
 
 private:
 	MaterialBase* m_pMaterial{}; // ƒ}ƒeƒŠƒAƒ‹

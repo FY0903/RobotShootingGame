@@ -431,6 +431,8 @@ unsigned int SkeletalAnimator::FindKeyIndex(const aiQuatKey* pKeys, unsigned int
 aiNodeAnim* SkeletalAnimator::FindChannel(aiAnimation* anim, const std::string& name)
 {
 	if (!anim) return nullptr;
+
+	// チャネル配列を走査して、名前が一致するチャネルを探す
 	for (unsigned int i = 0; i < anim->mNumChannels; ++i)
 	{
 		aiNodeAnim* ch = anim->mChannels[i];

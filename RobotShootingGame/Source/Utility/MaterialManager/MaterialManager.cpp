@@ -36,6 +36,38 @@ void Material::SetTexture(Texture* pTexture)
 	m_pDescriptorHandle.push_back(handle);
 }
 
+DescriptorHeap* Material::GetDescriptorHeap() const
+{
+	// ヒープが存在しない場合はnullptrを返す
+	if (!m_pDescriptorHeap) return nullptr;
+	
+	return m_pDescriptorHeap;
+}
+
+DescriptorHandle* Material::GetDescriptorHandle(size_t index) const
+{
+	// 範囲外チェック
+	if (index >= m_pDescriptorHandle.size() || !m_pDescriptorHandle[index] || !m_pDescriptorHandle.size()) return nullptr;
+
+	return m_pDescriptorHandle[index];
+}
+
+RootSignature* Material::GetRootSignature() const
+{
+	// マテリアルが存在しない場合はnullptrを返す
+	if (!m_pMaterial) return nullptr;
+
+	return m_pMaterial->GetRootSignature();
+}
+
+PipelineState* Material::GetPipelineState() const
+{
+	// マテリアルが存在しない場合はnullptrを返す
+	if (!m_pMaterial) return nullptr;
+
+	return m_pMaterial->GetPipelineState();
+}
+
 void MaterialManager::Init()
 {
 	// Spriteマテリアルの作成
@@ -56,6 +88,14 @@ void MaterialManager::Init()
 	line->SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 	line->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	line->Create();
+
+	// DebugMeshマテリアルの作成
+	auto debugMesh = CreateMaterialBase("DebugMesh");
+	debugMesh->SetVSFilepath(L"Assets/Shader/SimpleVS.cso");
+	debugMesh->SetPSFilepath(L"Assets/Shader/DebugPS.cso");
+	debugMesh->SetInputLayout(Vertex::Mesh::InputLayout);
+	debugMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	debugMesh->Create();
 
 	// SkeletalMeshマテリアルの作成
 	auto skeletalMesh = CreateMaterialBase("SkeletalMesh");

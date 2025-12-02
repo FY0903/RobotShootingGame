@@ -61,16 +61,16 @@ private:
 
 	Model* m_pModel{};
 
-	float m_ticksPerSecond{};
-	float m_animationTime{};
-	float m_animeTimeTicks{};
-	float m_animationDuration{};
-	float m_blendTime{};
+	float m_ticksPerSecond{};			// アニメの ticks/sec
+	float m_animationTime{};			// アニメの経過秒
+	float m_animeTimeTicks{};			// アニメの現在ticks
+	float m_animationDuration{};		// アニメの duration
+	float m_blendTime{};				// ブレンド時間
 
-	float m_blendTicksPerSecond{};        // ブレンド先アニメの ticks/sec
-	float m_blendAnimationDuration{};     // ブレンド先アニメの duration
-	float m_blendAnimeTimeTicks{};        // ブレンド先アニメの現在ticks
-	float m_blendElapsedSeconds{};        // ブレンド経過秒
+	float m_blendTicksPerSecond{};		// ブレンド先アニメの ticks/sec
+	float m_blendAnimationDuration{};	// ブレンド先アニメの duration
+	float m_blendAnimeTimeTicks{};		// ブレンド先アニメの現在ticks
+	float m_blendElapsedSeconds{};		// ブレンド経過秒
 
 	Animation* m_pPlayAnimation{};
 	Animation* m_pBlendAnimation{};

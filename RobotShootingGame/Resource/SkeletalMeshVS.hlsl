@@ -28,6 +28,7 @@ VSOutput main(VSInput input)
     VSOutput output = (VSOutput) 0;
     float4 localPos = (float4) 0;
     
+    // ボーンが存在する場合、スキニングを行う
     if (input.BoneCount > 0)
     {
         float4x4 skinMat = (float4x4) 0;
@@ -40,7 +41,7 @@ VSOutput main(VSInput input)
         localPos = float4(input.pos, 1.0f); // 頂点座標
         localPos = mul(skinMat, localPos); // スキニング後の頂点座標        
     }
-    else
+    else // ボーンが存在しない場合、そのまま頂点座標を使用
     {
         localPos = float4(input.pos, 1.0f); // 頂点座標
     }
