@@ -24,7 +24,7 @@ void Empty::OnUpdate()
 
 void Empty::OnFixedUpdate()
 {
-	const float angularVelocity = DirectX::XM_PI / 2.0f; // 毎秒90度回転
+	const float angularVelocity = Transform::ToRadian(45.0f); // 角速度（度/秒）
 	const float deltaTime = Time::GetInstance().GetDeltaTime();	// フレーム間の時間差
 
 	const float deltaAngle = angularVelocity * deltaTime;

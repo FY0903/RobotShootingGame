@@ -13,7 +13,7 @@
 class Time : public Singleton<Time>
 {
 public:
-	void Init(float timeScale = 1.0f, float fixedDeltaTime = 0.02f);
+	void Init(float timeScale = 1.0f, float fixedDeltaTime = 1.0f / 60.0f);
 
 	void Update();
 

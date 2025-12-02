@@ -16,6 +16,11 @@
 // ==============================
 #undef min
 
+// ==============================
+//	constexpr
+// ==============================
+constexpr float MAX_DELTA_TIME = 0.25f; // フレーム落ち対策での最大デルタタイム
+
 void Time::Init(float timeScale, float fixedDeltaTime)
 {
 	m_NowTime = m_lastTime = std::chrono::steady_clock::now();
@@ -28,7 +33,7 @@ void Time::Update()
 	m_NowTime = std::chrono::steady_clock::now();
 
 	const float delta = std::chrono::duration<float>(m_NowTime - m_lastTime).count();
-	const float clampedDelta = std::clamp(delta, 0.0f, 0.25f); // フレーム落ち対策で最大値を設定
+	const float clampedDelta = std::clamp(delta, 0.0f, MAX_DELTA_TIME);
 
 	// 更新時間の計算
 	m_time = clampedDelta;

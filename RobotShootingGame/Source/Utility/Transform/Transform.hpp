@@ -21,6 +21,11 @@ struct Transform
 	{
 	}
 
+	static inline float ToRadian(float degree)
+	{
+		return degree * (DirectX::XM_PI / 180.0f);
+	}
+
 	static inline DirectX::SimpleMath::Quaternion ToQuaternion(const DirectX::SimpleMath::Vector3& eulerAngles)
 	{
 		// TODO: Œã‚Å©•ª‚Åì¬‚·‚é
