@@ -11,10 +11,16 @@
 // ==============================
 #include "Time.hpp"
 
+// ==============================
+//	define
+// ==============================
+#undef min
+
 void Time::Init(float timeScale, float fixedDeltaTime)
 {
 	m_NowTime = m_lastTime = std::chrono::steady_clock::now();
 	SetTimeScale(timeScale);
+	SetFixedDeltaTime(fixedDeltaTime);
 }
 
 void Time::Update()
@@ -24,12 +30,15 @@ void Time::Update()
 	const float delta = std::chrono::duration<float>(m_NowTime - m_lastTime).count();
 	const float clampedDelta = std::clamp(delta, 0.0f, 0.25f); // フレーム落ち対策で最大値を設定
 
+	// 更新時間の計算
 	m_time = clampedDelta;
 	m_deltaTime = clampedDelta * m_timeScale;
 
+	// 累積時間の更新
 	m_timeSinceStartup += m_time;
 	m_deltaTimeSinceStartup += m_deltaTime;
 
+	// 固定更新用アキュムレータの更新
 	m_fixedAccumulator += m_time;
 
 	m_lastTime = m_NowTime;
@@ -42,6 +51,7 @@ void Time::SetTimeScale(float timeScale)
 	if (std::isnan(timeScale) || timeScale < 0.0f) timeScale = 1.0f;
 	m_timeScale = timeScale;
 }
+
 void Time::SetFixedDeltaTime(float fixedDeltaTime)
 {
 	// 不正な値の場合はデフォルト値に設定
@@ -49,10 +59,13 @@ void Time::SetFixedDeltaTime(float fixedDeltaTime)
 	m_fixedDeltaTime = fixedDeltaTime;
 }
 
-int Time::ConsumeFixedUpdateSteps()
+int Time::ConsumeFixedUpdateSteps(int maxPerFrame)
 {
 	// 固定更新ステップ数を計算
 	int steps = static_cast<int>(m_fixedAccumulator / m_fixedDeltaTime);
+
+	// 最大値を超える場合は最大値に制限
+	steps = std::min(steps, maxPerFrame);
 
 	if (steps > 0)
 	{

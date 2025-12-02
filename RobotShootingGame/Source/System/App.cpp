@@ -88,10 +88,18 @@ void App::Run()
 
 			// シーンの更新と描画
 			m_pCurrentScene->Update();
+			
+			// 固定更新の実行
+			for (int i = 0; i < Time::GetInstance().ConsumeFixedUpdateSteps(); ++i)
+			{
+				m_pCurrentScene->FixedUpdate();
+			}
+
 			Engine::GetInstance().BeginDraw();
 			m_pCurrentScene->Draw();
 			Engine::GetInstance().EndDraw();
 
+			// キー入力の更新終了
 			Input::EndUpdateInput();
 
 #ifdef _DEBUG

@@ -69,3 +69,4 @@
 // ------------------------------
 #include "Utility/ComPtr.h"
 #include "Utility/Singleton/Singleton.hpp"
+#include "Utility/Time/Time.hpp"

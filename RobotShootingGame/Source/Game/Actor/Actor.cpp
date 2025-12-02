@@ -50,6 +50,20 @@ void Actor::Update()
 	}
 }
 
+void Actor::FixedUpdate()
+{
+	OnFixedUpdate();
+	for (auto& component : m_Components)
+	{
+		component->FixedUpdate();
+	}
+
+	for (auto& child : m_ChildActors)
+	{
+		child->FixedUpdate();
+	}
+}
+
 void Actor::Draw()
 {
 	for (auto& component : m_Components)

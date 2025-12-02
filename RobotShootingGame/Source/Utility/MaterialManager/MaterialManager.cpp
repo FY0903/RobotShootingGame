@@ -90,7 +90,7 @@ void MaterialManager::Init()
 	line->Create();
 
 	// DebugMeshマテリアルの作成
-	auto debugMesh = CreateMaterialBase("DebugMesh");
+	auto debugMesh = CreateMaterialBase("Debug");
 	debugMesh->SetVSFilepath(L"Assets/Shader/SimpleVS.cso");
 	debugMesh->SetPSFilepath(L"Assets/Shader/DebugPS.cso");
 	debugMesh->SetInputLayout(Vertex::Mesh::InputLayout);
@@ -98,7 +98,7 @@ void MaterialManager::Init()
 	debugMesh->Create();
 
 	// SkeletalMeshマテリアルの作成
-	auto skeletalMesh = CreateMaterialBase("SkeletalMesh");
+	auto skeletalMesh = CreateMaterialBase("Skeletal");
 	skeletalMesh->SetVSFilepath(L"Assets/Shader/SkeletalMeshVS.cso");
 	skeletalMesh->SetPSFilepath(L"Assets/Shader/SimplePS.cso");
 	skeletalMesh->SetInputLayout(Vertex::Mesh::InputLayout);

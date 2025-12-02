@@ -29,7 +29,7 @@ public:
 	void SetTimeScale(float timeScale);
 	void SetFixedDeltaTime(float fixedDeltaTime);
 
-	int ConsumeFixedUpdateSteps();
+	int ConsumeFixedUpdateSteps(int maxPerFrame = 5);
 
 private:
 	friend class Singleton<Time>;

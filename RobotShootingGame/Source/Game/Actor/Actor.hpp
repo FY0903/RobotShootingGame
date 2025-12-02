@@ -43,6 +43,7 @@ public:
 
 	void Init();
 	void Update();
+	void FixedUpdate();
 	void Draw();
 	void Uninit();
 
@@ -106,6 +107,7 @@ public:
 protected:
 	virtual void OnInit() = 0;
 	virtual void OnUpdate() = 0;
+	virtual void OnFixedUpdate() {}
 	virtual void OnUninit() = 0;
 
 	std::list<Component*> m_Components{};

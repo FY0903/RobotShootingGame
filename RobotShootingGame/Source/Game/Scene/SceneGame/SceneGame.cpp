@@ -41,6 +41,10 @@ void SceneGame::OnUpdate()
 	//transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, 0.01f, 0.0f));
 }
 
+void SceneGame::OnFixedUpdate()
+{
+}
+
 void SceneGame::OnDraw()
 {
 }

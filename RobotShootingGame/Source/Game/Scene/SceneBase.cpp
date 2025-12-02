@@ -32,6 +32,21 @@ void SceneBase::Update()
 	}
 }
 
+void SceneBase::FixedUpdate()
+{
+	// シーン固有の固定更新処理
+	OnFixedUpdate();
+	
+	// 全レイヤーのアクターを固定更新
+	for (size_t i = 0; i < static_cast<size_t>(Layer::MAX); ++i)
+	{
+		for (Actor* actor : m_Actors[i])
+		{
+			actor->FixedUpdate();
+		}
+	}
+}
+
 void SceneBase::Draw()
 {
 	// シーン固有の描画処理

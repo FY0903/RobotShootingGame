@@ -22,6 +22,16 @@ void Empty::OnUpdate()
 {
 }
 
+void Empty::OnFixedUpdate()
+{
+	const float angularVelocity = DirectX::XM_PI / 2.0f; // –ˆ•b90“x‰ñ“]
+	const float deltaTime = Time::GetInstance().GetDeltaTime();	// ƒtƒŒ[ƒ€ŠÔ‚ÌŠÔ·
+
+	const float deltaAngle = angularVelocity * deltaTime;
+
+	m_Transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, deltaAngle, 0.0f));
+}
+
 void Empty::OnUninit()
 {
 }
