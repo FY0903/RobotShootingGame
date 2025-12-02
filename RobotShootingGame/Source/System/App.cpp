@@ -18,6 +18,7 @@
 #include "App.hpp"
 #include "Utility/Input/Input.hpp"
 #include "Utility/Sound/Sound.hpp"
+#include "Utility/Time/Time.hpp"
 #include "Game/Scene/SceneGame/SceneGame.hpp"
 
 void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdShow)
@@ -34,6 +35,9 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 
 	// Inputの初期化
 	Input::Init();
+
+	// Timeの初期化
+	Time::GetInstance().Init();
 
 	// MaterialManagerの初期化
 	MaterialManager::GetInstance().Init();
@@ -63,12 +67,6 @@ void App::UnInit()
 
 void App::Run()
 {
-#ifdef _DEBUG
-	DWORD fpsCount = 0;    // FPSカウント
-	DWORD FPS = 0;        // 直近のFPS
-	DWORD fpsTime = timeGetTime(); // FPS計測用の時間
-#endif // _DEBUG
-
 	MSG msg{};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (msg.message != WM_QUIT)
@@ -85,6 +83,9 @@ void App::Run()
 			// キー入力の更新
 			Input::Update();
 
+			// Timeの更新
+			Time::GetInstance().Update();
+
 			// シーンの更新と描画
 			m_pCurrentScene->Update();
 			Engine::GetInstance().BeginDraw();
@@ -94,24 +95,21 @@ void App::Run()
 			Input::EndUpdateInput();
 
 #ifdef _DEBUG
+			const float deltaTime = Time::GetInstance().GetDeltaTime();
+			m_fpsTimer += deltaTime;
+			++m_fpsFrames;
 
-			++fpsCount;// 処理回数をカウント
-
-			// ------------------------------
-			//    FPSの計測
-			// ------------------------------
-			if (timeGetTime() - fpsTime >= 1000)    // 1000ms経過したら
+			if (m_fpsTimer >= 1.0f)
 			{
-				// 整数型から文字列へ変換
-				std::string mes;
-				mes = "fps:" + std::to_string(fpsCount);
+				m_fps = static_cast<float>(m_fpsFrames) / m_fpsTimer;
+				m_fpsTimer = 0.0f;
+				m_fpsFrames = 0;
 
-				SetWindowText(Window::GetInstance().GetHandle(), mes.c_str());    // FPSの表示
-
-				// 次の計測の準備
-				fpsCount = 0;
-				fpsTime = timeGetTime();
+				// ウィンドウタイトルにFPSを表示
+				std::string title = "Robot Shooting Game - FPS: " + std::to_string(static_cast<int>(m_fps));
+				SetWindowText(Window::GetInstance().GetHandle(), title.c_str());
 			}
+
 #endif // _DEBUG
 		}
 	}

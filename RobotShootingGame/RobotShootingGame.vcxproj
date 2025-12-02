@@ -139,6 +139,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\Time\Time.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\VertexBuffer\VertexBuffer.cpp">
       <SubType>
       </SubType>
@@ -260,6 +264,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Texture\Texture.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Time\Time.hpp">
       <SubType>
       </SubType>
     </ClInclude>

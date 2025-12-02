@@ -139,6 +139,9 @@
     <Filter Include="Source\Utility\Pch">
       <UniqueIdentifier>{1f4cfa2e-3f63-4a44-bb12-80707ad3605e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Time">
+      <UniqueIdentifier>{172b7216-40c8-4378-9936-aea69bcae296}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -260,6 +263,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Pch\Pch.cpp">
       <Filter>Source\Utility\Pch</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Time\Time.cpp">
+      <Filter>Source\Utility\Time</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -388,6 +394,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Pch\Pch.hpp">
       <Filter>Source\Utility\Pch</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Time\Time.hpp">
+      <Filter>Source\Utility\Time</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

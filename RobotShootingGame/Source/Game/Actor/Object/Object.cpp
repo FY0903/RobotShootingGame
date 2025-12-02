@@ -26,10 +26,10 @@ void Object::OnInit()
 	m_pAnimations[1] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/walk.fbx");
 
 	// ƒ}ƒeƒŠƒAƒ‹‚Ìİ’è
-	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("DebugMesh");
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("SkeletalMesh");
 
 	auto meshRenderer = AddComponent<MeshRenderer>();
-	meshRenderer->Init();
+	meshRenderer->Init(pModel);
 
 	auto skeletalAnimator = AddComponent<SkeletalAnimator>();
 	skeletalAnimator->Init(pModel);

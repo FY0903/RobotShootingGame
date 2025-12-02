@@ -45,4 +45,8 @@ public:
 
 private:
 	SceneBase* m_pCurrentScene{};
+
+	float m_fpsTimer{};
+	uint32_t m_fpsFrames{};
+	float m_fps{};
 };
