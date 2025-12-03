@@ -26,6 +26,7 @@ void Time::Init(float timeScale, float fixedDeltaTime)
 	m_NowTime = m_lastTime = std::chrono::steady_clock::now();
 	SetTimeScale(timeScale);
 	SetFixedDeltaTime(fixedDeltaTime);
+	m_maxPerFrame = static_cast<int>(MAX_DELTA_TIME / m_fixedDeltaTime);	// 1フレームあたりの最大固定更新回数を計算
 }
 
 void Time::Update()
@@ -64,13 +65,13 @@ void Time::SetFixedDeltaTime(float fixedDeltaTime)
 	m_fixedDeltaTime = fixedDeltaTime;
 }
 
-int Time::ConsumeFixedUpdateSteps(int maxPerFrame)
+int Time::ConsumeFixedUpdateSteps()
 {
 	// 固定更新ステップ数を計算
 	int steps = static_cast<int>(m_fixedAccumulator / m_fixedDeltaTime);
 
 	// 最大値を超える場合は最大値に制限
-	steps = std::min(steps, maxPerFrame);
+	steps = std::min(steps, m_maxPerFrame);
 
 	if (steps > 0)
 	{

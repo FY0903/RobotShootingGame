@@ -27,6 +27,7 @@ public:
 	~Material();
 
 	void SetTexture(class Texture* pTexture);
+	void SetTexture(class RenderTarget* pTexture);
 
 	DescriptorHeap* GetDescriptorHeap() const;
 	DescriptorHandle* GetDescriptorHandle(size_t index) const;

@@ -11,11 +11,13 @@
 // ==============================
 #include "MaterialManager.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/Texture/Texture.hpp"
+#include "Utility/RenderTarget/RenderTarget.hpp"
 
 Material::Material(MaterialBase* pMaterial)
 	: m_pMaterial(pMaterial)
 {
-	m_pDescriptorHeap = new DescriptorHeap();
+	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 }
 
 Material::~Material()
@@ -28,6 +30,15 @@ Material::~Material()
 }
 
 void Material::SetTexture(Texture* pTexture)
+{
+	if (!m_pDescriptorHeap || !pTexture) return;
+
+	DescriptorHandle* handle = m_pDescriptorHeap->Register(pTexture->Resource(), pTexture->ViewDesc());
+	if (!handle) return;
+	m_pDescriptorHandle.push_back(handle);
+}
+
+void Material::SetTexture(RenderTarget* pTexture)
 {
 	if (!m_pDescriptorHeap || !pTexture) return;
 

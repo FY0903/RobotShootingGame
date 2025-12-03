@@ -29,7 +29,7 @@ public:
 	void SetTimeScale(float timeScale);
 	void SetFixedDeltaTime(float fixedDeltaTime);
 
-	int ConsumeFixedUpdateSteps(int maxPerFrame = 5);
+	int ConsumeFixedUpdateSteps();
 
 private:
 	friend class Singleton<Time>;
@@ -56,6 +56,8 @@ private:
 	// 固定更新関連
 	float m_fixedDeltaTime{};
 	float m_fixedAccumulator{};
+
+	int m_maxPerFrame{};	// 1フレームあたりの最大固定更新回数
 
 	// フレームカウント
 	uint64_t m_frameCount{};

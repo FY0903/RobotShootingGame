@@ -37,15 +37,19 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	DescriptorHeap();
+	DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flag);
+
+	DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, D3D12_DESCRIPTOR_HEAP_FLAGS flag);
 
 	/**
 	 * デストラクタ
 	 */
 	~DescriptorHeap();
 
+	inline UINT GetIncrementSize() const { return m_IncrementSize; }
 	ID3D12DescriptorHeap* GetHeap() const;
 	DescriptorHandle* Register(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
+	DescriptorHandle* Register(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc);
 
 private:
 	UINT m_IncrementSize{};	// ディスクリプタサイズ

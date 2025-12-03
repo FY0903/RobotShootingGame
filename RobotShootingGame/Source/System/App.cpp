@@ -37,7 +37,7 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 	Input::Init();
 
 	// Time‚Ì‰Šú‰»
-	Time::GetInstance().Init(1.0f, 1.0f / 120.0f);
+	Time::GetInstance().Init();
 
 	// MaterialManager‚Ì‰Šú‰»
 	MaterialManager::GetInstance().Init();

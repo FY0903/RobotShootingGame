@@ -142,6 +142,9 @@
     <Filter Include="Source\Utility\Time">
       <UniqueIdentifier>{172b7216-40c8-4378-9936-aea69bcae296}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\RenderTarget">
+      <UniqueIdentifier>{463d6089-25ca-49c1-a07c-9772b44cf383}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -266,6 +269,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\Time\Time.cpp">
       <Filter>Source\Utility\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\RenderTarget\RenderTarget.cpp">
+      <Filter>Source\Utility\RenderTarget</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -397,6 +403,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\Time\Time.hpp">
       <Filter>Source\Utility\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\RenderTarget\RenderTarget.hpp">
+      <Filter>Source\Utility\RenderTarget</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
