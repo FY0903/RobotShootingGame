@@ -12,6 +12,12 @@
 #include "RenderTarget.hpp"
 #include "System/Engine/Engine.hpp"
 
+RenderTarget::~RenderTarget()
+{
+	delete m_pDescriptorHeap;
+	m_pDescriptorHeap = nullptr;
+}
+
 HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float clearColor[4])
 {
 	// リソースの設定
@@ -31,21 +37,20 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 	);
 
 	// 最適化されたクリア値の設定
-	D3D12_CLEAR_VALUE clearValue{};
-	clearValue.Format = format;
+	m_ClearValue.Format = format;
 	if (clearColor)
 	{
-		clearValue.Color[0] = clearColor[0];
-		clearValue.Color[1] = clearColor[1];
-		clearValue.Color[2] = clearColor[2];
-		clearValue.Color[3] = clearColor[3];
+		m_ClearValue.Color[0] = clearColor[0];
+		m_ClearValue.Color[1] = clearColor[1];
+		m_ClearValue.Color[2] = clearColor[2];
+		m_ClearValue.Color[3] = clearColor[3];
 	}
 	else
 	{
-		clearValue.Color[0] = 0.0f;
-		clearValue.Color[1] = 0.0f;
-		clearValue.Color[2] = 0.0f;
-		clearValue.Color[3] = 1.0f;
+		m_ClearValue.Color[0] = 0.0f;
+		m_ClearValue.Color[1] = 0.0f;
+		m_ClearValue.Color[2] = 0.0f;
+		m_ClearValue.Color[3] = 1.0f;
 	}
 
 	// リソースを生成
@@ -53,8 +58,8 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 		&prop,										// ヒープのプロパティ
 		D3D12_HEAP_FLAG_NONE,						// ヒープのフラグ
 		&desc,										// リソースの設定
-		D3D12_RESOURCE_STATE_RENDER_TARGET,			// リソースの初期状態
-		&clearValue,								// 最適化されたクリア値
+		D3D12_RESOURCE_STATE_PRESENT,				// リソースの初期状態
+		&m_ClearValue,								// 最適化されたクリア値
 		IID_PPV_ARGS(m_pResource.ReleaseAndGetAddressOf())); // リソースのポインタ
 
 	if (FAILED(hr))
@@ -74,6 +79,19 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 	m_ViewDesc.Texture2D.MipLevels = 1; // ミップ数
 
 	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+
+	m_RTVDesc.Format = m_pResource->GetDesc().Format; // フォーマット
+	m_RTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D; // テクスチャ2D
+	m_RTVDesc.Texture2D.MipSlice = 0; // ミップスライス
+	m_RTVDesc.Texture2D.PlaneSlice = 0; // プレーンスライス
+
+	m_pDescriptorHandle = m_pDescriptorHeap->Register(m_pResource.Get(), m_RTVDesc);
+
+	if (!m_pDescriptorHandle)
+	{
+		MessageBox(nullptr, "レンダーターゲットビューの登録に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return E_FAIL;
+	}
 
 	return hr;
 }

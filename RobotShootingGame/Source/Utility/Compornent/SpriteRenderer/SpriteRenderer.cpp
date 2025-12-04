@@ -65,6 +65,10 @@ void SpriteRenderer::Update()
 
 void SpriteRenderer::Draw()
 {
+}
+
+void SpriteRenderer::LateDraw()
+{
 	auto material = m_Owner->GetMaterial();
 
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();		// 現在のバックバッファのインデックスを取得

@@ -13,7 +13,7 @@
 #include <dxgi1_4.h>
 #include <d3dcompiler.h>
 
-#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "Utility/RenderTarget/RenderTarget.hpp"
 
 // ==============================
 //	Linker
@@ -37,13 +37,14 @@ public:
 	HRESULT Init(HWND wnd);
 
 	void BeginDraw();
+	void Draw();
 	void EndDraw();
 
 	ID3D12Device* GetDevice() const { return m_pDevice.Get(); }
 	ID3D12GraphicsCommandList* GetCommandList() const { return m_pCommandList.Get(); }
 	UINT GetCurrentBackBufferIndex() const { return m_CurrentBackBufferIndex; }
 
-	void SetViewProjCB(const ConstantBuffer* ConstantBuffer);
+	void SetRenderTarget(RenderTarget* pRenderTarget) { m_pOffScreenRTV = pRenderTarget; }
 
 private:
 	friend class Singleton<Engine>;
@@ -96,5 +97,5 @@ private:
 
 	HWND m_hWnd{};			// ウィンドウハンドル
 
-	ConstantBuffer* m_pViewProjCB[FRAME_BUFFER_COUNT]{}; // ビュー・プロジェクション行列用定数バッファ
+	RenderTarget* m_pOffScreenRTV{}; // オフスクリーンレンダーターゲット
 };

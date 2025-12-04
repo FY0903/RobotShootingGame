@@ -41,6 +41,7 @@ public:
 	void Update();
 	void FixedUpdate();
 	void Draw();
+	void LateDraw();
 	void Uninit();
 
 	template<typename T = Actor>
@@ -74,6 +75,7 @@ protected:
 	virtual void OnUpdate() = 0;
 	virtual void OnFixedUpdate() = 0;
 	virtual void OnDraw() = 0;
+	virtual void OnLateDraw() {}
 	virtual void OnUninit() = 0;
 
 	std::array<std::list<Actor*>, static_cast<size_t>(Layer::MAX)> m_Actors{}; // アクターコンテナ

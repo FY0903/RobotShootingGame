@@ -38,11 +38,11 @@ void Material::SetTexture(Texture* pTexture)
 	m_pDescriptorHandle.push_back(handle);
 }
 
-void Material::SetTexture(RenderTarget* pTexture)
+void Material::SetTexture(RenderTarget* pRTV)
 {
-	if (!m_pDescriptorHeap || !pTexture) return;
+	if (!m_pDescriptorHeap || !pRTV) return;
 
-	DescriptorHandle* handle = m_pDescriptorHeap->Register(pTexture->Resource(), pTexture->ViewDesc());
+	DescriptorHandle* handle = m_pDescriptorHeap->Register(pRTV->Resource(), pRTV->ViewDesc());
 	if (!handle) return;
 	m_pDescriptorHandle.push_back(handle);
 }

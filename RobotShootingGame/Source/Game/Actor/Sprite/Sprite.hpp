@@ -12,6 +12,7 @@
 // ==============================
 #include "Game/Actor/Actor.hpp"
 #include "Utility/Texture/Texture.hpp"
+#include "Utility/RenderTarget/RenderTarget.hpp"
 
 /**
  * @brief Spriteクラス
@@ -33,4 +34,6 @@ private:
 	void OnInit() override final;
 	void OnUpdate() override final;
 	void OnUninit() override final;
+
+	RenderTarget* m_pRenderTarget{}; // レンダーターゲット
 };

@@ -77,6 +77,19 @@ void Actor::Draw()
 	}
 }
 
+void Actor::LateDraw()
+{
+	for (auto& component : m_Components)
+	{
+		component->LateDraw();
+	}
+
+	for (auto& child : m_ChildActors)
+	{
+		child->LateDraw();
+	}
+}
+
 void Actor::Uninit()
 {
 	for (auto& child : m_ChildActors)

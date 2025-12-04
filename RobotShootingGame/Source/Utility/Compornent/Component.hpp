@@ -28,6 +28,7 @@ public:
 	virtual void Update() = 0;
 	virtual void FixedUpdate() {}
 	virtual void Draw() = 0;
+	virtual void LateDraw() {}
 	virtual void Uninit() = 0;
 
 protected:

@@ -97,6 +97,8 @@ void App::Run()
 
 			Engine::GetInstance().BeginDraw();
 			m_pCurrentScene->Draw();
+			m_pCurrentScene->LateDraw();
+			Engine::GetInstance().Draw();
 			Engine::GetInstance().EndDraw();
 
 			// キー入力の更新終了

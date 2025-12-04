@@ -27,7 +27,7 @@ public:
 	/**
 	 * デストラクタ
 	 */
-	~RenderTarget() = default;
+	~RenderTarget();
 
 	HRESULT Create(UINT width, UINT height, DXGI_FORMAT format, float clearColor[4] = nullptr);
 
@@ -36,12 +36,17 @@ public:
 
 	ID3D12Resource* Resource() const { return m_pResource.Get(); }
 	D3D12_SHADER_RESOURCE_VIEW_DESC ViewDesc() const { return m_ViewDesc; }
+	DescriptorHandle* GetDescriptorHandle() const { return m_pDescriptorHandle; }
+	D3D12_CLEAR_VALUE GetClearValue() const { return m_ClearValue; }
 
 private:
 	UINT m_Width{};		// テクスチャの幅
 	UINT m_Height{};	// テクスチャの高さ
 	ComPtr<ID3D12Resource> m_pResource{};			// テクスチャリソース
 	D3D12_SHADER_RESOURCE_VIEW_DESC m_ViewDesc{};	// シェーダーリソースビューの設定
+	D3D12_RENDER_TARGET_VIEW_DESC m_RTVDesc{};	// レンダーターゲットビューの設定
+	D3D12_CLEAR_VALUE m_ClearValue{};		// クリア値
 
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
+	DescriptorHandle* m_pDescriptorHandle{}; // ディスクリプタハンドル
 };

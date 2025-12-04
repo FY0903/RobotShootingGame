@@ -18,12 +18,23 @@ void Sprite::OnInit()
 {
 	// テクスチャの読み込み
 	auto pTexture = TextureManager::GetInstance().LoadTexture("Assets/Texture/ADC_COW.png");
+	m_pRenderTarget = new RenderTarget();
+	if (FAILED(m_pRenderTarget->Create(
+		1280,
+		720,
+		DXGI_FORMAT_R8G8B8A8_UNORM)))
+	{
+		MessageBox(nullptr, "レンダーターゲットの作成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		return;
+	}
 
 	// マテリアルの設定
 	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Sprite");
-	m_pMaterial->SetTexture(pTexture);
+	m_pMaterial->SetTexture(m_pRenderTarget);
 
 	AddComponent<SpriteRenderer>()->Init();
+
+	Engine::GetInstance().SetRenderTarget(m_pRenderTarget);
 }
 
 void Sprite::OnUpdate()
