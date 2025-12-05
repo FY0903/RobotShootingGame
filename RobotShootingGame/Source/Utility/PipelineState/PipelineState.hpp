@@ -33,6 +33,7 @@ public:
 	void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
 	void SetVS(std::wstring filepath);
 	void SetPS(std::wstring filepath);
+	void SetDSVFormat(DXGI_FORMAT format);
 	void Create();
 
 	ID3D12PipelineState* Get() const { return m_pPipelineState.Get(); }

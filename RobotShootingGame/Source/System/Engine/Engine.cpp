@@ -112,9 +112,6 @@ HRESULT Engine::Init(HWND wnd)
 
 void Engine::BeginDraw()
 {
-	// 現在のRTVを更新
-	m_pCurrentRenderTarget = m_pRenderTargets[m_CurrentBackBufferIndex].Get();
-
 	// コマンドアロケーターのリセット
 	m_pAllocator[m_CurrentBackBufferIndex]->Reset();
 
@@ -125,6 +122,7 @@ void Engine::BeginDraw()
 	m_pCommandList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
 	m_pCommandList->RSSetScissorRects(1, &m_scissor); // シザー矩形の設定
 
+#if 0
 	// RTVのディスクリプタヒープの開始アドレスを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pRtvHeap->GetCPUDescriptorHandleForHeapStart();
 	rtvHandle.ptr += m_CurrentBackBufferIndex * m_rtvDescriptorSize;	// 現在のRTVのアドレスを計算
@@ -162,16 +160,59 @@ void Engine::BeginDraw()
 
 	// DSVをクリア
 	m_pCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+#endif
+
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_pOffScreenRTV->Resource(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	m_pCommandList->ResourceBarrier(1, &barrier);
+	auto offScreenHandlePtr = m_pOffScreenRTV->GetDescriptorHandle()->HandleCPU;
+	auto dsvHandlePtr = m_pDsvHeap->GetCPUDescriptorHandleForHeapStart();
+	m_pCommandList->OMSetRenderTargets(1, &offScreenHandlePtr, FALSE, &dsvHandlePtr);
+	
+	// RTVをクリア
+	m_pCommandList->ClearRenderTargetView(offScreenHandlePtr, m_pOffScreenRTV->GetClearValue().Color, 0, nullptr);
+	// DSVをクリア
+	m_pCommandList->ClearDepthStencilView(dsvHandlePtr, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void Engine::Draw()
 {
-	// オフスクリーンをここで PRESENT に戻さない（描画を行うため）
-	// ここにRTVを使う描画処理を追加
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_pOffScreenRTV->Resource(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	m_pCommandList->ResourceBarrier(1, &barrier);
+
+	// ビューポートとシザー矩形の設定
+	m_pCommandList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
+	m_pCommandList->RSSetScissorRects(1, &m_scissor); // シザー矩形の設定
+
+	// 現在のRTVを更新
+	m_pCurrentRenderTarget = m_pRenderTargets[m_CurrentBackBufferIndex].Get();
+		
+	// RTVのディスクリプタヒープの開始アドレスを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pRtvHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvHandle.ptr += m_CurrentBackBufferIndex * m_rtvDescriptorSize;	// 現在のRTVのアドレスを計算
+
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_pCurrentRenderTarget.Get(),
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	m_pCommandList->ResourceBarrier(1, &barrier);
+
+	// RTV設定
+	m_pCommandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+
+	// RTVをクリア
+	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f }; // クリアカラー（青色）
+	m_pCommandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 }
 
 void Engine::EndDraw()
 {
+#if 0
 	// バックバッファとオフスクリーンの両方を PRESENT に戻す
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		m_pCurrentRenderTarget.Get(),
@@ -185,6 +226,14 @@ void Engine::EndDraw()
 
 	CD3DX12_RESOURCE_BARRIER barriers[] = { barrier, offScreenBarrier };
 	m_pCommandList->ResourceBarrier(_countof(barriers), barriers);
+#endif
+
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_pCurrentRenderTarget.Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT);
+
+	m_pCommandList->ResourceBarrier(1, &barrier);
 
 	// コマンドリストのクローズ
 	m_pCommandList->Close();

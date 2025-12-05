@@ -89,6 +89,7 @@ void MaterialManager::Init()
 	sprite->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	sprite->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	sprite->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	sprite->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
 	sprite->Create();
 
 	// Lineƒ}ƒeƒŠƒAƒ‹‚Ìì¬

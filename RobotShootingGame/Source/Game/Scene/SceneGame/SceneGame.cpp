@@ -25,19 +25,21 @@ void SceneGame::OnInit()
 	AddGameObject<Grid>(Layer::DEFAULT);
 
 	// スプライトの生成
-	AddGameObject<Sprite>(Layer::DEFAULT);
+	auto sprite = AddGameObject<Sprite>(Layer::DEFAULT);
 
 	// オブジェクトの生成
 	//AddGameObject<Object>(Layer::DEFAULT);
 
 	// エンプティの生成
-	//AddGameObject<Empty>(Layer::DEFAULT);
+	AddGameObject<Empty>(Layer::DEFAULT);
+
+	sprite->GetTransform().Scale = DirectX::SimpleMath::Vector3(16.0f, 9.0f, 1.0f);
 }
 
 void SceneGame::OnUpdate()
 {
-	auto obj = GetGameObject<Empty>();
-	Transform& transform = obj->GetTransform();
+	//auto obj = GetGameObject<Empty>();
+	//Transform& transform = obj->GetTransform();
 	//transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, 0.01f, 0.0f));
 }
 

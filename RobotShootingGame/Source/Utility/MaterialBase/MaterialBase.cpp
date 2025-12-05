@@ -65,6 +65,12 @@ void MaterialBase::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type)
 	m_pPipelineState->SetPrimitiveTopologyType(type);
 }
 
+void MaterialBase::SetDSVFormat(DXGI_FORMAT format)
+{
+	if (!m_pPipelineState) return;
+	m_pPipelineState->SetDSVFormat(format);
+}
+
 void MaterialBase::Create()
 {
 	if (!m_pRootSignature || !m_pPipelineState) return;

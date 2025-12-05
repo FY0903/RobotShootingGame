@@ -40,6 +40,7 @@ public:
 	void SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter);
 	void SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout);
 	void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
+	void SetDSVFormat(DXGI_FORMAT format);
 
 	void Create();
 

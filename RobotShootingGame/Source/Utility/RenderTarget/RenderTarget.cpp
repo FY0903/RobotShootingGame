@@ -58,7 +58,7 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 		&prop,										// ヒープのプロパティ
 		D3D12_HEAP_FLAG_NONE,						// ヒープのフラグ
 		&desc,										// リソースの設定
-		D3D12_RESOURCE_STATE_PRESENT,				// リソースの初期状態
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,	// リソースの初期状態
 		&m_ClearValue,								// 最適化されたクリア値
 		IID_PPV_ARGS(m_pResource.ReleaseAndGetAddressOf())); // リソースのポインタ
 
@@ -72,12 +72,6 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 	m_Width = width;
 	m_Height = height;
 
-	// シェーダーリソースビューの設定
-	m_ViewDesc.Format = m_pResource->GetDesc().Format; // フォーマット
-	m_ViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // コンポーネントのマッピング
-	m_ViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // テクスチャ2D
-	m_ViewDesc.Texture2D.MipLevels = 1; // ミップ数
-
 	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
 
 	m_RTVDesc.Format = m_pResource->GetDesc().Format; // フォーマット
@@ -86,12 +80,17 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 	m_RTVDesc.Texture2D.PlaneSlice = 0; // プレーンスライス
 
 	m_pDescriptorHandle = m_pDescriptorHeap->Register(m_pResource.Get(), m_RTVDesc);
-
 	if (!m_pDescriptorHandle)
 	{
 		MessageBox(nullptr, "レンダーターゲットビューの登録に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL;
 	}
+
+	// シェーダーリソースビューの設定
+	m_ViewDesc.Format = m_pResource->GetDesc().Format; // フォーマット
+	m_ViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // コンポーネントのマッピング
+	m_ViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // テクスチャ2D
+	m_ViewDesc.Texture2D.MipLevels = 1; // ミップ数
 
 	return hr;
 }

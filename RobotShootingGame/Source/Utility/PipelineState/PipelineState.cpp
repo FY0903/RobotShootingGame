@@ -84,6 +84,11 @@ void PipelineState::SetPS(std::wstring filepath)
 	m_Desc.PS = CD3DX12_SHADER_BYTECODE(m_pPSBlob.Get());
 }
 
+void PipelineState::SetDSVFormat(DXGI_FORMAT format)
+{
+	m_Desc.DSVFormat = format;
+}
+
 void PipelineState::Create()
 {
 	// パイプラインステートオブジェクトの生成
