@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "困ったとき"
+    url: "https://example.com"
+    about: "テンプレートで当てはまらない場合や雑談的な相談はこちらへ。"
