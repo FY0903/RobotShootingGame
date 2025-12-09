@@ -145,6 +145,9 @@
     <Filter Include="Source\Utility\RenderTarget">
       <UniqueIdentifier>{463d6089-25ca-49c1-a07c-9772b44cf383}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System\Render">
+      <UniqueIdentifier>{913b244c-dc3f-46e3-ad88-72d2ab2a2bfe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -161,9 +164,6 @@
     </ClCompile>
     <ClCompile Include="Source\System\Window\Window.cpp">
       <Filter>Source\System\Window</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\System\App.cpp">
-      <Filter>Source\System\App</Filter>
     </ClCompile>
     <ClCompile Include="Source\System\Engine\Engine.cpp">
       <Filter>Source\System\Engine</Filter>
@@ -243,9 +243,6 @@
     <ClCompile Include="Source\Utility\Compornent\AnimatorController\AnimatorController.cpp">
       <Filter>Source\Utility\Compornent\AnimatorController</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\StateMachine\StateMachine.cpp">
-      <Filter>Source\Utility\StateMachine</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Game\Actor\Empty\Empty.cpp">
       <Filter>Source\Game\Actor\Empty</Filter>
     </ClCompile>
@@ -273,6 +270,9 @@
     <ClCompile Include="Source\Utility\RenderTarget\RenderTarget.cpp">
       <Filter>Source\Utility\RenderTarget</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\App\App.cpp">
+      <Filter>Source\System\App</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
@@ -289,9 +289,6 @@
     </ClInclude>
     <ClInclude Include="Source\System\Window\Window.hpp">
       <Filter>Source\System\Window</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\System\App.hpp">
-      <Filter>Source\System\App</Filter>
     </ClInclude>
     <ClInclude Include="Source\System\Engine\Engine.hpp">
       <Filter>Source\System\Engine</Filter>
@@ -377,9 +374,6 @@
     <ClInclude Include="Source\Utility\Compornent\AnimatorController\AnimatorController.hpp">
       <Filter>Source\Utility\Compornent\AnimatorController</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\StateMachine\StateMachine.hpp">
-      <Filter>Source\Utility\StateMachine</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Game\Actor\Empty\Empty.hpp">
       <Filter>Source\Game\Actor\Empty</Filter>
     </ClInclude>
@@ -406,6 +400,9 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\RenderTarget\RenderTarget.hpp">
       <Filter>Source\Utility\RenderTarget</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\App\App.hpp">
+      <Filter>Source\System\App</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

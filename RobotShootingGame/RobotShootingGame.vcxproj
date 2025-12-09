@@ -48,7 +48,7 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Game\Scene\SceneGame\SceneGame.cpp" />
-    <ClCompile Include="Source\System\App.cpp" />
+    <ClCompile Include="Source\System\App\App.cpp" />
     <ClCompile Include="Source\System\Engine\Engine.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
     <ClCompile Include="Source\System\Window\Window.cpp">
@@ -131,10 +131,6 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Utility\StateMachine\StateMachine.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="Source\Utility\TextureManager\TextureManager.cpp">
       <SubType>
       </SubType>
@@ -182,7 +178,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Game\Scene\SceneGame\SceneGame.hpp" />
-    <ClInclude Include="Source\System\App.hpp" />
+    <ClInclude Include="Source\System\App\App.hpp" />
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
     <ClInclude Include="Source\System\main.hpp" />
     <ClInclude Include="Source\System\Window\Window.hpp">
@@ -260,10 +256,6 @@
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp" />
     <ClInclude Include="Source\Utility\Singleton\Singleton.hpp" />
     <ClInclude Include="Source\Utility\Sound\Sound.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="Source\Utility\StateMachine\StateMachine.hpp">
       <SubType>
       </SubType>
     </ClInclude>

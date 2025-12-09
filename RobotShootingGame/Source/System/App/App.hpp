@@ -16,8 +16,8 @@
 // ==============================
 //	include
 // ==============================
-#include "Window/Window.hpp"
-#include "Engine/Engine.hpp"
+#include "System/Window/Window.hpp"
+#include "System/Engine/Engine.hpp"
 
 #include "Game/Scene/SceneBase.hpp"
 
