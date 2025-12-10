@@ -28,7 +28,8 @@ public:
 
 	void Init();
 
-	void Uninit();
+	void BeginDraw();
+	void EndDraw();
 
 private:
 	friend class Singleton<Render>;

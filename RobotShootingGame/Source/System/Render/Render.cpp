@@ -26,15 +26,25 @@ Render::Render()
 
 Render::~Render()
 {
+	for (auto& rtv : m_pDefaultRenderTargets)
+	{
+		delete rtv;
+		rtv = nullptr;
+	}
 }
 
 void Render::Init()
 {
 	m_pDefaultRenderTargets[0]->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_R32_FLOAT, clearColor);
-	m_pDefaultRenderTargets[1]->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_R16G16B16A16_FLOAT, clearColor);
+	m_pDefaultRenderTargets[1]->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_R32_FLOAT, clearColor);
 	m_pDefaultRenderTargets[2]->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_R32G32B32A32_FLOAT, clearColor);
 }
 
-void Render::Uninit()
+void Render::BeginDraw()
+{
+	CD3DX12_RESOURCE_BARRIER barrier[3]{};
+}
+
+void Render::EndDraw()
 {
 }
