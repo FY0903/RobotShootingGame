@@ -67,6 +67,7 @@
 // ------------------------------
 //	original
 // ------------------------------
-#include "Utility/ComPtr.h"
 #include "Utility/Singleton/Singleton.hpp"
+#include "System/main.hpp"
+#include "Utility/ComPtr.h"
 #include "Utility/Time/Time.hpp"

@@ -51,6 +51,10 @@
     <ClCompile Include="Source\System\App\App.cpp" />
     <ClCompile Include="Source\System\Engine\Engine.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
+    <ClCompile Include="Source\System\Render\Render.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\System\Window\Window.cpp">
       <SubType>
       </SubType>
@@ -181,6 +185,10 @@
     <ClInclude Include="Source\System\App\App.hpp" />
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
     <ClInclude Include="Source\System\main.hpp" />
+    <ClInclude Include="Source\System\Render\Render.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\System\Window\Window.hpp">
       <SubType>
       </SubType>

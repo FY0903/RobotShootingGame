@@ -115,9 +115,6 @@
     <Filter Include="Source\Utility\Compornent\AnimatorController">
       <UniqueIdentifier>{d45ebf5e-ceda-44aa-979a-7768159cd106}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\StateMachine">
-      <UniqueIdentifier>{bc87ded4-aaac-4548-bf0e-07b3d7fb510e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Game\Actor\Empty">
       <UniqueIdentifier>{59df4685-d381-438e-ad51-f095329a7cbf}</UniqueIdentifier>
     </Filter>
@@ -273,6 +270,9 @@
     <ClCompile Include="Source\System\App\App.cpp">
       <Filter>Source\System\App</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\Render\Render.cpp">
+      <Filter>Source\System\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility\ConstantBuffer\ConstantBuffer.hpp">
@@ -403,6 +403,9 @@
     </ClInclude>
     <ClInclude Include="Source\System\App\App.hpp">
       <Filter>Source\System\App</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\Render\Render.hpp">
+      <Filter>Source\System\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
