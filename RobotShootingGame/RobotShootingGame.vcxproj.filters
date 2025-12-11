@@ -145,6 +145,9 @@
     <Filter Include="Source\System\Render">
       <UniqueIdentifier>{913b244c-dc3f-46e3-ad88-72d2ab2a2bfe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\DepthStencil">
+      <UniqueIdentifier>{0a31134a-3586-4e82-ad42-96ce49afee03}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -272,6 +275,9 @@
     </ClCompile>
     <ClCompile Include="Source\System\Render\Render.cpp">
       <Filter>Source\System\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\DepthStencil\DepthStencil.cpp">
+      <Filter>Source\Utility\DepthStencil</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -407,6 +413,9 @@
     <ClInclude Include="Source\System\Render\Render.hpp">
       <Filter>Source\System\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\DepthStencil\DepthStencil.hpp">
+      <Filter>Source\Utility\DepthStencil</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -431,6 +440,12 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\SkeletalMeshVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\RenderTargetVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\RenderTargetPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

@@ -11,6 +11,14 @@
 //	include
 // ==============================
 #include "Utility/RenderTarget/RenderTarget.hpp"
+#include "Utility/DepthStencil/DepthStencil.hpp"
+
+#include "Utility/VertexBuffer/VertexBuffer.hpp"
+#include "Utility/IndexBuffer/IndexBuffer.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "Utility/DescriptorHeap/DescriptorHeap.hpp"
+#include "Utility/RootSignature/RootSignature.hpp"
+#include "Utility/PipelineState/PipelineState.hpp"
 
 /**
  * @brief Renderクラス
@@ -18,12 +26,12 @@
 class Render : public Singleton<Render>
 {
 public:
-	enum DefaultRenderTarget : size_t
+	enum GbufferRT : size_t
 	{
-		DEFAULT_RENDER_TARGET_0,
-		DEFAULT_RENDER_TARGET_1,
-		DEFAULT_RENDER_TARGET_2,
-		RENDER_DEFAULT_TARGET_NUM
+		Albedo,
+		Normal,
+		WorldPos,
+		NumGbufferRT,
 	};
 
 	void Init();
@@ -44,7 +52,14 @@ private:
 	 */
 	~Render();
 
-	std::array<RenderTarget*, RENDER_DEFAULT_TARGET_NUM> m_pDefaultRenderTargets{}; // デフォルトのレンダーターゲット
+	std::array<RenderTarget*, NumGbufferRT> m_GbufferRT{};	// Gバッファ用レンダーターゲット
+	DepthStencil* m_pDepthStencil{};						// 深度ステンシルバッファ
 
 	float clearColor[4]{};
+
+	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
+	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
+	DescriptorHeap* m_pDescriptorHeap{};	// ディスクリプタヒープ
+	RootSignature* m_pRootSignature{};		// ルートシグネチャ
+	PipelineState* m_pPipelineState{};		// パイプラインステート
 };

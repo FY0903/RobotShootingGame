@@ -88,7 +88,7 @@ DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource, D3D12_SHADE
 	return pHandle;
 }
 
-DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc)
+DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource)
 {
 	auto count = m_pHandles.size();
 	if (count >= HANDLE_MAX) return nullptr;
@@ -101,10 +101,24 @@ DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource, D3D12_RENDE
 	pHandle->HandleCPU = cpuHandle;
 	pHandle->HandleGPU = {}; // RTVはGPUハンドルを使用しない
 
-	Engine::GetInstance().GetDevice()->CreateRenderTargetView(
-		resource,				// テクスチャ
-		&desc,					// RTVの設定（デフォルト）
-		pHandle->HandleCPU);	// CPUディスクリプタハンドル
+	if (resource->GetDesc().Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
+	{
+		Engine::GetInstance().GetDevice()->CreateRenderTargetView(
+			resource,				// テクスチャ
+			nullptr,				// RTVの設定（デフォルト）
+			pHandle->HandleCPU);	// CPUディスクリプタハンドル
+	}
+	else if (resource->GetDesc().Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)
+	{
+		Engine::GetInstance().GetDevice()->CreateDepthStencilView(
+			resource,				// テクスチャ
+			nullptr,				// DSVの設定（デフォルト）
+			pHandle->HandleCPU);	// CPUディスクリプタハンドル
+	}
+	else
+	{
+		return nullptr;
+	}
 
 	m_pHandles.push_back(pHandle);
 	return pHandle;

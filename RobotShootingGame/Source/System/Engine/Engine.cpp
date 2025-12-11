@@ -160,7 +160,6 @@ void Engine::BeginDraw()
 
 	// DSVをクリア
 	m_pCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-#endif
 
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		m_pOffScreenRTV->Resource(),
@@ -175,6 +174,7 @@ void Engine::BeginDraw()
 	m_pCommandList->ClearRenderTargetView(offScreenHandlePtr, m_pOffScreenRTV->GetClearValue().Color, 0, nullptr);
 	// DSVをクリア
 	m_pCommandList->ClearDepthStencilView(dsvHandlePtr, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+#endif
 }
 
 void Engine::Draw()

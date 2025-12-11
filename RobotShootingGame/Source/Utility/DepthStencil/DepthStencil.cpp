@@ -1,24 +1,24 @@
 /*+===================================================================
-	File: RenderTarget.cpp
+	File: DepthStencil.cpp
 	Summary: （このファイルで何をするか記載する）
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/12/03 15:07:34 初回作成
+	Date: 2025/12/11 13:37:02 初回作成
 	（これ以降下に更新日時と更新内容を書く）
 ===================================================================+*/
 
 // ==============================
 //	include
 // ==============================
-#include "RenderTarget.hpp"
+#include "DepthStencil.hpp"
 #include "System/Engine/Engine.hpp"
 
-RenderTarget::~RenderTarget()
+DepthStencil::~DepthStencil()
 {
 	delete m_pDescriptorHeap;
 	m_pDescriptorHeap = nullptr;
 }
 
-HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float clearColor[4])
+HRESULT DepthStencil::Create(UINT width, UINT height, DXGI_FORMAT format, float clearDepth, UINT8 clearStencil)
 {
 	// リソースの設定
 	CD3DX12_HEAP_PROPERTIES prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -33,25 +33,13 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 		1,										// サンプルカウント
 		0,										// サンプルクオリティ
 		D3D12_TEXTURE_LAYOUT_UNKNOWN,			// テクスチャのレイアウト
-		D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET	// リソースのフラグ
+		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE	// リソースのフラグ
 	);
 
 	// 最適化されたクリア値の設定
 	m_ClearValue.Format = format;
-	if (clearColor)
-	{
-		m_ClearValue.Color[0] = clearColor[0];
-		m_ClearValue.Color[1] = clearColor[1];
-		m_ClearValue.Color[2] = clearColor[2];
-		m_ClearValue.Color[3] = clearColor[3];
-	}
-	else
-	{
-		m_ClearValue.Color[0] = 0.0f;
-		m_ClearValue.Color[1] = 0.0f;
-		m_ClearValue.Color[2] = 0.0f;
-		m_ClearValue.Color[3] = 1.0f;
-	}
+	m_ClearValue.DepthStencil.Depth = clearDepth;
+	m_ClearValue.DepthStencil.Stencil = clearStencil;
 
 	// リソースを生成
 	HRESULT hr = Engine::GetInstance().GetDevice()->CreateCommittedResource(
@@ -64,7 +52,7 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 
 	if (FAILED(hr))
 	{
-		MessageBox(nullptr, "レンダーターゲットの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		MessageBox(nullptr, "深度ステンシルバッファの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return hr;
 	}
 
@@ -72,19 +60,14 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 	m_Width = width;
 	m_Height = height;
 
-	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+
 	m_pDescriptorHandle = m_pDescriptorHeap->Register(m_pResource.Get());
 	if (!m_pDescriptorHandle)
 	{
-		MessageBox(nullptr, "レンダーターゲットのディスクリプタハンドルの登録に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
+		MessageBox(nullptr, "深度ステンシルバッファのディスクリプタハンドルの登録に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL;
 	}
-
-	// シェーダーリソースビューの設定
-	m_ViewDesc.Format = m_pResource->GetDesc().Format; // フォーマット
-	m_ViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING; // コンポーネントのマッピング
-	m_ViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // テクスチャ2D
-	m_ViewDesc.Texture2D.MipLevels = 1; // ミップ数
 
 	return hr;
 }

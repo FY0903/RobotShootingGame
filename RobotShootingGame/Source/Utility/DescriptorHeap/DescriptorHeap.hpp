@@ -49,7 +49,7 @@ public:
 	inline UINT GetIncrementSize() const { return m_IncrementSize; }
 	ID3D12DescriptorHeap* GetHeap() const;
 	DescriptorHandle* Register(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
-	DescriptorHandle* Register(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc);
+	DescriptorHandle* Register(ID3D12Resource* resource);
 
 private:
 	UINT m_IncrementSize{};	// ディスクリプタサイズ
