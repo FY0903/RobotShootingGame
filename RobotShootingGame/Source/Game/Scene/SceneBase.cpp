@@ -62,20 +62,6 @@ void SceneBase::Draw()
 	}
 }
 
-void SceneBase::LateDraw()
-{
-	// シーン固有の後描画処理
-	OnLateDraw();
-
-	for (size_t i = 0; i < static_cast<size_t>(Layer::MAX); ++i)
-	{
-		for (Actor* actor : m_Actors[i])
-		{
-			actor->LateDraw();
-		}
-	}
-}
-
 void SceneBase::Uninit()
 {
 	// シーン固有の終了処理

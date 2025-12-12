@@ -21,7 +21,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	PipelineState();
+	PipelineState(size_t renderTargetNum = 1);
 
 	/**
 	 * デストラクタ

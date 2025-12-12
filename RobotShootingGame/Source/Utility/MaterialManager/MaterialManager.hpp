@@ -63,7 +63,7 @@ private:
 	 */
 	~MaterialManager();
 
-	MaterialBase* CreateMaterialBase(const std::string& name);
+	MaterialBase* CreateMaterialBase(const std::string& name, size_t renderTargetNum = 1);
 	MaterialBase* GetMaterial(const std::string& name);
 
 	std::unordered_map<std::string, MaterialBase*> m_MaterialData{};

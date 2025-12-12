@@ -136,8 +136,8 @@ void MeshRenderer::Update()
 
 	CB::WVP* ptr = m_pWVPCB[currentIndex]->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
-	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->GetViewMatrixFloat4x4(false);
-	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->GetProjectionMatrixFloat4x4(false);
+	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
+	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 
 	if (!m_Owner->GetComponent<SkeletalAnimator>() || !m_pModel) return;
 
@@ -248,8 +248,8 @@ void MeshRenderer::Init(std::vector<Model::Mesh> meshes)
 		assert(m_pWVPCB[i]);	// nullptrチェック
 		CB::WVP* WVPptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
 		WVPptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
-		WVPptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->GetViewMatrixFloat4x4(false);
-		WVPptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->GetProjectionMatrixFloat4x4(false);
+		WVPptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
+		WVPptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 
 		if (!m_pModel) continue;
 

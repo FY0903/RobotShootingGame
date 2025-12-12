@@ -10,8 +10,8 @@
 //	include
 // ==============================
 #include "Render.hpp"
-#include "System/Engine/Engine.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/CameraManager/CameraManager.hpp"
 
 Render::Render()
 {
@@ -57,11 +57,32 @@ Render::Render()
 	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 	assert(m_pDescriptorHeap);	// nullptrチェック
 
+	DirectX::XMFLOAT4X4 projMat{};
+
+	DirectX::XMStoreFloat4x4(&projMat,
+		DirectX::XMMatrixTranspose(
+			DirectX::XMMatrixOrthographicLH(
+				static_cast<float>(WINDOW_WIDTH),
+				static_cast<float>(WINDOW_HEIGHT),
+				0.1f, 1000.0f)));
+
+	// 定数バッファの生成
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		m_pCB[i] = new ConstantBuffer(sizeof(CB::WVP));
+		assert(m_pCB[i]);	// nullptrチェック
+
+		CB::WVP* ptr = m_pCB[i]->GetPtr<CB::WVP>();
+		ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
+		ptr->ViewMat = DirectX::SimpleMath::Matrix::Identity;
+		ptr->ProjMat = projMat;
+	}
+
 	// ルートシグネチャの生成
 	m_pRootSignature = new RootSignature();
 	assert(m_pRootSignature);	// nullptrチェック
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
-	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, D3D12_SHADER_VISIBILITY_PIXEL);	// RTV用テクスチャ
+	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, D3D12_SHADER_VISIBILITY_PIXEL);	// RTV用テクスチャ
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
 	m_pRootSignature->Create();
 
@@ -72,6 +93,7 @@ Render::Render()
 	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
 	m_pPipelineState->SetVS(L"Assets/Shader/RenderTargetVS.cso");
 	m_pPipelineState->SetPS(L"Assets/Shader/RenderTargetPS.cso");
+	m_pPipelineState->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
 	m_pPipelineState->Create();
 }
 
@@ -85,6 +107,12 @@ Render::~Render()
 
 	delete m_pDepthStencil;
 	m_pDepthStencil = nullptr;
+
+	for (auto& cb : m_pCB)
+	{
+		delete cb;
+		cb = nullptr;
+	}
 
 	delete m_pVertexBuffer;
 	m_pVertexBuffer = nullptr;
@@ -109,7 +137,7 @@ void Render::Init()
 	m_GbufferRT[Albedo]->Create(
 		WINDOW_WIDTH,
 		WINDOW_HEIGHT,
-		DXGI_FORMAT_R32G32B32A32_FLOAT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
 		clearColor);
 
 	// 法線
@@ -123,7 +151,7 @@ void Render::Init()
 	m_GbufferRT[WorldPos]->Create(
 		WINDOW_WIDTH,
 		WINDOW_HEIGHT,
-		DXGI_FORMAT_R32G32B32A32_FLOAT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
 		clearColor);
 
 	// 深度ステンシルバッファの生成
@@ -140,6 +168,7 @@ void Render::Init()
 			m_GbufferRT[i]->Resource(),
 			m_GbufferRT[i]->ViewDesc());
 		assert(srvHandle);	// nullptrチェック
+		m_SRVHandles.push_back(srvHandle);
 	}
 }
 
@@ -203,4 +232,29 @@ void Render::EndDraw()
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 	Engine::GetInstance().GetCommandList()->ResourceBarrier(NumGbufferRT, barriers);
+}
+
+void Render::DrawBackBuffer()
+{
+	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
+	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
+	auto materialHeap = m_pDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
+
+	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
+	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
+
+	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
+	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
+	commandList->SetGraphicsRootConstantBufferView(0, m_pCB[currentIndex]->GetAddress());	// 定数バッファを設定
+
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
+	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
+	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
+
+	commandList->SetDescriptorHeaps(1, &materialHeap);							// ディスクリプタヒープを設定
+	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
+	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[1]->HandleGPU);	// ディスクリプタテーブルを設定
+	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[2]->HandleGPU);	// ディスクリプタテーブルを設定
+
+	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
 }

@@ -30,8 +30,11 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 	m_Aspect = aspect;
 
 	// ビュー行列とプロジェクション行列の計算
-	m_VP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
-	m_VP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
+	m_3DVP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
+	m_3DVP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
+
+	m_2DVP[0] = DirectX::XMMatrixIdentity();
+	m_2DVP[1] = DirectX::XMMatrixOrthographicLH(WINDOW_WIDTH, WINDOW_HEIGHT, 0.1f, 1000.0f);
 }
 
 void Camera::Update()
@@ -74,18 +77,20 @@ void Camera::Update()
 void Camera::Draw()
 {
 	// ビュー行列とプロジェクション行列の計算
-	m_VP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
-	m_VP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
+	m_3DVP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
+	m_3DVP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
+
+	// 2Dビュー行列とプロジェクション行列は固定
 }
 
 void Camera::Uninit()
 {
 }
 
-const DirectX::XMFLOAT4X4 Camera::GetViewMatrixFloat4x4(bool transpose)
+const DirectX::XMFLOAT4X4 Camera::Get3DViewMatrixFloat4x4(bool transpose)
 {
 	DirectX::XMFLOAT4X4 viewf{};
-	DirectX::XMMATRIX wiewMat = m_VP[0];
+	DirectX::XMMATRIX wiewMat = m_3DVP[0];
 
 	if (transpose)
 		wiewMat = DirectX::XMMatrixTranspose(wiewMat);
@@ -95,15 +100,40 @@ const DirectX::XMFLOAT4X4 Camera::GetViewMatrixFloat4x4(bool transpose)
 	return viewf;
 }
 
-const DirectX::XMFLOAT4X4 Camera::GetProjectionMatrixFloat4x4(bool transpose)
+const DirectX::XMFLOAT4X4 Camera::Get3DProjectionMatrixFloat4x4(bool transpose)
 {
 	DirectX::XMFLOAT4X4 projf{};
-	DirectX::XMMATRIX projMat = m_VP[1];
+	DirectX::XMMATRIX projMat = m_3DVP[1];
 
 	if (transpose)
 		projMat = DirectX::XMMatrixTranspose(projMat);
 
 	DirectX::XMStoreFloat4x4(&projf, projMat);
 
+	return projf;
+}
+
+const DirectX::XMFLOAT4X4 Camera::Get2DViewMatrixFloat4x4(bool transpose)
+{
+	DirectX::XMFLOAT4X4 viewf{};
+	DirectX::XMMATRIX wiewMat = m_2DVP[0];
+
+	if (transpose)
+		wiewMat = DirectX::XMMatrixTranspose(wiewMat);
+
+	DirectX::XMStoreFloat4x4(&viewf, wiewMat);
+
+	return viewf;
+}
+
+const DirectX::XMFLOAT4X4 Camera::Get2DProjectionMatrixFloat4x4(bool transpose)
+{
+	DirectX::XMFLOAT4X4 projf{};
+	DirectX::XMMATRIX projMat = m_2DVP[1];
+	
+	if (transpose)
+		projMat = DirectX::XMMatrixTranspose(projMat);
+	DirectX::XMStoreFloat4x4(&projf, projMat);
+	
 	return projf;
 }

@@ -24,7 +24,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	MaterialBase();
+	MaterialBase(size_t renderTargetNum = 1);
 
 	/**
 	 * デストラクタ

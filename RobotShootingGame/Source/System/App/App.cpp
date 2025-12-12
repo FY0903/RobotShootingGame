@@ -16,9 +16,11 @@
 //	include
 // ==============================
 #include "App.hpp"
+#include "System/Window/Window.hpp"
+#include "System/Engine/Engine.hpp"
+#include "System/Render/Render.hpp"
 #include "Utility/Input/Input.hpp"
 #include "Utility/Sound/Sound.hpp"
-#include "Utility/Time/Time.hpp"
 #include "Game/Scene/SceneGame/SceneGame.hpp"
 
 void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdShow)
@@ -32,6 +34,9 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 
 	// Engineの初期化
 	Engine::GetInstance().Init(Window::GetInstance().GetHandle());
+
+	// Renderの初期化
+	Render::GetInstance().Init();
 
 	// Inputの初期化
 	Input::Init();
@@ -97,8 +102,6 @@ void App::Run()
 
 			Engine::GetInstance().BeginDraw();
 			m_pCurrentScene->Draw();
-			Engine::GetInstance().Draw();
-			m_pCurrentScene->LateDraw();
 			Engine::GetInstance().EndDraw();
 
 			// キー入力の更新終了

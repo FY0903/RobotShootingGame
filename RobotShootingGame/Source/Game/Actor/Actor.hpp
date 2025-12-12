@@ -45,7 +45,6 @@ public:
 	void Update();
 	void FixedUpdate();
 	void Draw();
-	void LateDraw();
 	void Uninit();
 
 	template<typename T = Component>

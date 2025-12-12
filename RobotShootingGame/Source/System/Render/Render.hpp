@@ -13,6 +13,8 @@
 #include "Utility/RenderTarget/RenderTarget.hpp"
 #include "Utility/DepthStencil/DepthStencil.hpp"
 
+#include "System/Engine/Engine.hpp"
+
 #include "Utility/VertexBuffer/VertexBuffer.hpp"
 #include "Utility/IndexBuffer/IndexBuffer.hpp"
 #include "Utility/ConstantBuffer/ConstantBuffer.hpp"
@@ -39,6 +41,8 @@ public:
 	void BeginDraw();
 	void EndDraw();
 
+	void DrawBackBuffer();
+
 private:
 	friend class Singleton<Render>;
 
@@ -59,7 +63,9 @@ private:
 
 	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
+	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	DescriptorHeap* m_pDescriptorHeap{};	// ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_SRVHandles{}; // SRVハンドル配列
 	RootSignature* m_pRootSignature{};		// ルートシグネチャ
 	PipelineState* m_pPipelineState{};		// パイプラインステート
 };

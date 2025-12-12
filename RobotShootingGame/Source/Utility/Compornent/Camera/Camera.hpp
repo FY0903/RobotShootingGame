@@ -44,12 +44,14 @@ public:
 	void Draw() override final;
 	void Uninit() override final;
 
-	const DirectX::XMFLOAT4X4 GetViewMatrixFloat4x4(bool transpose = true);
-
-	const DirectX::XMFLOAT4X4 GetProjectionMatrixFloat4x4(bool transpose = true);
+	const DirectX::XMFLOAT4X4 Get3DViewMatrixFloat4x4(bool transpose = true);
+	const DirectX::XMFLOAT4X4 Get3DProjectionMatrixFloat4x4(bool transpose = true);
+	const DirectX::XMFLOAT4X4 Get2DViewMatrixFloat4x4(bool transpose = true);
+	const DirectX::XMFLOAT4X4 Get2DProjectionMatrixFloat4x4(bool transpose = true);
 
 private:
-	DirectX::XMMATRIX m_VP[2]{}; // ビュー/プロジェクション行列
+	DirectX::XMMATRIX m_3DVP[2]{};	// 3Dビュー行列とプロジェクション行列
+	DirectX::XMMATRIX m_2DVP[2]{};	// 2Dビュー行列とプロジェクション行列
 
 	DirectX::XMVECTOR m_EyePos{};		// 視線位置
 	DirectX::XMVECTOR m_TargetPos{};	// 注視点

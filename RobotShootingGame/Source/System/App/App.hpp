@@ -16,9 +16,6 @@
 // ==============================
 //	include
 // ==============================
-#include "System/Window/Window.hpp"
-#include "System/Engine/Engine.hpp"
-
 #include "Game/Scene/SceneBase.hpp"
 
 class App

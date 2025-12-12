@@ -119,6 +119,13 @@ void MaterialManager::Init()
 	skeletalMesh->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	skeletalMesh->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	skeletalMesh->Create();
+
+	auto gbufferMesh = CreateMaterialBase("GBuffer", 3);
+	gbufferMesh->SetVSFilepath(L"Assets/Shader/MeshGBufferVS.cso");
+	gbufferMesh->SetPSFilepath(L"Assets/Shader/MeshGBufferPS.cso");
+	gbufferMesh->SetInputLayout(Vertex::Mesh::InputLayout);
+	gbufferMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	gbufferMesh->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)
@@ -132,14 +139,14 @@ Material* MaterialManager::CreateMaterial(const std::string& materialName)
 	return pInstance;
 }
 
-MaterialBase* MaterialManager::CreateMaterialBase(const std::string& name)
+MaterialBase* MaterialManager::CreateMaterialBase(const std::string& name, size_t renderTargetNum)
 {
 	if (m_MaterialData.find(name) != m_MaterialData.end())
 	{
 		return m_MaterialData[name];
 	}
 
-	MaterialBase* pMaterial = new MaterialBase();
+	MaterialBase* pMaterial = new MaterialBase(renderTargetNum);
 	m_MaterialData[name] = pMaterial;
 
 	return pMaterial;

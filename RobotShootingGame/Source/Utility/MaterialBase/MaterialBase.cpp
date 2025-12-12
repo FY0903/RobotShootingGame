@@ -12,11 +12,11 @@
 #include "MaterialBase.hpp"
 #include "Utility/Texture/Texture.hpp"
 
-MaterialBase::MaterialBase()
+MaterialBase::MaterialBase(size_t renderTargetNum)
 {
 	// インスタンスの生成
 	m_pRootSignature = new RootSignature();
-	m_pPipelineState = new PipelineState();
+	m_pPipelineState = new PipelineState(renderTargetNum);
 }
 
 MaterialBase::~MaterialBase()

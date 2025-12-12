@@ -48,8 +48,8 @@ void SpriteRenderer::Init()
 		assert(m_pCB[i]);	// nullptrチェック
 		CB::WVP* ptr = m_pCB[i]->GetPtr<CB::WVP>();
 		ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
-		ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->GetViewMatrixFloat4x4(false);
-		ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->GetProjectionMatrixFloat4x4(false);
+		ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
+		ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 	}
 }
 
@@ -59,15 +59,11 @@ void SpriteRenderer::Update()
 	CB::WVP* ptr = m_pCB[currentIndex]->GetPtr<CB::WVP>();
 
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
-	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->GetViewMatrixFloat4x4(false);
-	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->GetProjectionMatrixFloat4x4(false);
+	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
+	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 }
 
 void SpriteRenderer::Draw()
-{
-}
-
-void SpriteRenderer::LateDraw()
 {
 	auto material = m_Owner->GetMaterial();
 

@@ -46,7 +46,7 @@ HRESULT DepthStencil::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 		&prop,										// ヒープのプロパティ
 		D3D12_HEAP_FLAG_NONE,						// ヒープのフラグ
 		&desc,										// リソースの設定
-		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,	// リソースの初期状態
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,			// リソースの初期状態
 		&m_ClearValue,								// 最適化されたクリア値
 		IID_PPV_ARGS(m_pResource.ReleaseAndGetAddressOf())); // リソースのポインタ
 

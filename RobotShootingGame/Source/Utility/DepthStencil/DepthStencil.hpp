@@ -27,9 +27,6 @@ public:
 	UINT Width() const { return m_Width; }
 	UINT Height() const { return m_Height; }
 
-	UINT Width() const { return m_Width; }
-	UINT Height() const { return m_Height; }
-
 	ID3D12Resource* Resource() const { return m_pResource.Get(); }
 	DescriptorHandle* GetDescriptorHandle() const { return m_pDescriptorHandle; }
 	D3D12_CLEAR_VALUE GetClearValue() const { return m_ClearValue; }

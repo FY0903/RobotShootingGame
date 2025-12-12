@@ -31,7 +31,6 @@ public:
 	void Init();
 	void Update() override final;
 	void Draw() override final;
-	void LateDraw() override final;
 	void Uninit() override final;
 
 private:
