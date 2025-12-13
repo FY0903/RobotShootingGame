@@ -9,6 +9,7 @@ struct VSInput
 struct VSOutput
 {
     float4 svpos : SV_POSITION;
+    float4 worldPos : TEXCOORD1;
     float2 uv : TEXCOORD;
 };
 
@@ -22,6 +23,7 @@ VSOutput main(VSInput input)
     float4 projPos = mul(Proj, viewPos); // ìäâeç¿ïW
     
     output.svpos = projPos;
+    output.worldPos = worldPos;
     output.uv = input.uv;
     
     return output;

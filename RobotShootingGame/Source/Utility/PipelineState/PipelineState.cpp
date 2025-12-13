@@ -95,6 +95,10 @@ void PipelineState::SetPS(std::wstring filepath)
 void PipelineState::SetDSVFormat(DXGI_FORMAT format)
 {
 	m_Desc.DSVFormat = format;
+	if (format == DXGI_FORMAT_UNKNOWN)
+	{
+		m_Desc.DepthStencilState.DepthEnable = FALSE; // 深度テストを無効化
+	}
 }
 
 void PipelineState::Create()

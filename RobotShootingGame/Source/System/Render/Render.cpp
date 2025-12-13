@@ -22,8 +22,8 @@ Render::Render()
 	m_pDepthStencil = new DepthStencil();
 
 	clearColor[0] = 0.0f;
-	clearColor[1] = 0.0f;
-	clearColor[2] = 0.0f;
+	clearColor[1] = 0.2f;
+	clearColor[2] = 0.4f;
 	clearColor[3] = 1.0f;
 
 	float halfWidth = WINDOW_WIDTH / 2.0f;
@@ -253,8 +253,6 @@ void Render::DrawBackBuffer()
 
 	commandList->SetDescriptorHeaps(1, &materialHeap);							// ディスクリプタヒープを設定
 	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
-	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[1]->HandleGPU);	// ディスクリプタテーブルを設定
-	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[2]->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
 }

@@ -1,6 +1,7 @@
 struct VSOutput
 {
     float4 svpos : SV_POSITION;
+    float4 worldPos : TEXCOORD1;
     float2 uv : TEXCOORD;
 };
 
@@ -17,7 +18,7 @@ PSOutput main(VSOutput input)
     
     output.albedo = float4(1.0f, 0.0f, 0.0f, 1.0f); // 赤色
     output.normal = float4(0.0f, 0.0f, 1.0f, 0.0f); // 法線ベクトル
-    output.worldPos = input.svpos; // ワールド座標
+    output.worldPos = input.worldPos; // ワールド座標
     
     return output;
 }
