@@ -66,6 +66,8 @@ HRESULT Texture::Load(const std::string& FileName)
 		return hr;
 	}
 
+	m_IsOpaque = scratch.IsAlphaAllOpaque();
+
 	// テクスチャの情報を取得
 	auto img = scratch.GetImage(0, 0, 0);
 	CD3DX12_HEAP_PROPERTIES prop = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);

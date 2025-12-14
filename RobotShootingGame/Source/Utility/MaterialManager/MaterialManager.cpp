@@ -126,6 +126,16 @@ void MaterialManager::Init()
 	gbufferMesh->SetInputLayout(Vertex::Mesh::InputLayout);
 	gbufferMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	gbufferMesh->Create();
+
+	auto skeletalGBuffer = CreateMaterialBase("SkeletalGBuffer", 3);
+	skeletalGBuffer->SetVSFilepath(L"Assets/Shader/SkeletalMeshGBufferVS.cso");
+	skeletalGBuffer->SetPSFilepath(L"Assets/Shader/SkeletalMeshGBufferPS.cso");
+	skeletalGBuffer->SetInputLayout(Vertex::Mesh::InputLayout);
+	skeletalGBuffer->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	skeletalGBuffer->SetCBV(1, D3D12_SHADER_VISIBILITY_VERTEX);
+	skeletalGBuffer->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	skeletalGBuffer->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	skeletalGBuffer->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)

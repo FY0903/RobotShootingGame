@@ -13,11 +13,11 @@ Texture2D<float4> worldPosTex : register(t2);
 float4 main(VSOutput input) : SV_TARGET
 {
     float4 albedo = albedoTex.Sample(smp, input.uv);
-    //float4 normal = normalTex.Sample(smp, input.uv);
+    float4 normal = normalTex.Sample(smp, input.uv);
     float4 worldPos = worldPosTex.Sample(smp, input.uv);
     
     // ‡¬ˆ—i—á: ’Pƒ‚É‰ÁZj
     //float4 finalColor = albedo + normal * 0.5f + worldPos * 0.1f;
     
-    return worldPos;
+    return albedo;
 }

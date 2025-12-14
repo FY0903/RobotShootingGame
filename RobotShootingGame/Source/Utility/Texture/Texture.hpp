@@ -41,4 +41,5 @@ private:
 	UINT m_Height{};	// テクスチャの高さ
 	ComPtr<ID3D12Resource> m_pResource{};			// テクスチャリソース
 	D3D12_SHADER_RESOURCE_VIEW_DESC m_ViewDesc{};	// シェーダーリソースビューの設定
+	bool m_IsOpaque{};
 };
