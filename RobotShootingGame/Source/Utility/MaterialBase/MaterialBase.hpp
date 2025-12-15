@@ -24,7 +24,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	MaterialBase(size_t renderTargetNum = 1);
+	MaterialBase(size_t renderTargetNum = 1, bool alphaBlend = false);
 
 	/**
 	 * デストラクタ
@@ -46,10 +46,13 @@ public:
 
 	inline RootSignature* GetRootSignature() const { return m_pRootSignature; }
 	inline PipelineState* GetPipelineState() const { return m_pPipelineState; }
+	inline int GetRootParameterIndex() const { return m_rootParameterIndex; }
 
 private:
 	std::wstring m_VSFilepath{};	// 頂点シェーダーファイルパス
 	std::wstring m_PSFilepath{};	// ピクセルシェーダーファイルパス
 	RootSignature* m_pRootSignature{};	// ルートシグネチャ
 	PipelineState* m_pPipelineState{};	// パイプラインステート
+
+	int m_rootParameterIndex{};
 };

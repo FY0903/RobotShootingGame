@@ -22,10 +22,17 @@ void SceneGame::OnInit()
 	AddGameObject<MainCamera>(Layer::DEFAULT);
 
 	// グリッドの生成
-	//AddGameObject<Grid>(Layer::DEFAULT);
+	AddGameObject<Grid>(Layer::DEFAULT);
 
 	// スプライトの生成
-	AddGameObject<Sprite>(Layer::DEFAULT);
+	Sprite* sprite[2];
+	for (int i = 0; i < _countof(sprite); ++i)
+		sprite[i] = AddGameObject<Sprite>(Layer::DEFAULT);
+
+	sprite[0]->GetTransform().Position = DirectX::SimpleMath::Vector3(0.0f, 0.0f, -5.0f);
+	sprite[0]->GetTransform().Scale = DirectX::SimpleMath::Vector3(5.0f, 5.0f, 1.0f);
+	sprite[1]->GetTransform().Position = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 5.0f);
+	sprite[1]->GetTransform().Scale = DirectX::SimpleMath::Vector3(5.0f, 5.0f, 1.0f);
 
 	// オブジェクトの生成
 	//AddGameObject<Object>(Layer::DEFAULT);

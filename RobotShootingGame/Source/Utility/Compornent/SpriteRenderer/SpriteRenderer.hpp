@@ -37,5 +37,5 @@ private:
 
 	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};	// インデックスバッファ
-	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 };

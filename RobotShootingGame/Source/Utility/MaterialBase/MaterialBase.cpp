@@ -12,11 +12,11 @@
 #include "MaterialBase.hpp"
 #include "Utility/Texture/Texture.hpp"
 
-MaterialBase::MaterialBase(size_t renderTargetNum)
+MaterialBase::MaterialBase(size_t renderTargetNum, bool alphaBlend)
 {
 	// インスタンスの生成
 	m_pRootSignature = new RootSignature();
-	m_pPipelineState = new PipelineState(renderTargetNum);
+	m_pPipelineState = new PipelineState(renderTargetNum, alphaBlend);
 }
 
 MaterialBase::~MaterialBase()
@@ -33,18 +33,21 @@ void MaterialBase::SetCBV(UINT shaderRegister, D3D12_SHADER_VISIBILITY visibilit
 {
 	if (!m_pRootSignature) return;
 	m_pRootSignature->AddRootParameter(shaderRegister, visibility);
+	++m_rootParameterIndex;
 }
 
 void MaterialBase::SetCBV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility)
 {
 	if (!m_pRootSignature) return;
 	m_pRootSignature->AddDescriptorRange(shaderRegister, D3D12_DESCRIPTOR_RANGE_TYPE_CBV, numDescriptors, visibility);
+	++m_rootParameterIndex;
 }
 
 void MaterialBase::SetSRV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility)
 {
 	if (!m_pRootSignature) return;
 	m_pRootSignature->AddDescriptorRange(shaderRegister, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, numDescriptors, visibility);
+	++m_rootParameterIndex;
 }
 
 void MaterialBase::SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter)

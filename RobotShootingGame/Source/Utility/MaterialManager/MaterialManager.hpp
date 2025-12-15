@@ -33,7 +33,8 @@ public:
 	DescriptorHandle* GetDescriptorHandle(size_t index) const;
 	class RootSignature* GetRootSignature() const;
 	class PipelineState* GetPipelineState() const;
-	bool IsOpaque() const { return m_IsOpaque; }
+	inline bool IsOpaque() const { return m_IsOpaque; }
+	int GetRootParameterIndex() const;
 
 private:
 	MaterialBase* m_pMaterial{}; // ƒ}ƒeƒŠƒAƒ‹
@@ -65,7 +66,7 @@ private:
 	 */
 	~MaterialManager();
 
-	MaterialBase* CreateMaterialBase(const std::string& name, size_t renderTargetNum = 1);
+	MaterialBase* CreateMaterialBase(const std::string& name, size_t renderTargetNum = 1, bool alphaBlend = false);
 	MaterialBase* GetMaterial(const std::string& name);
 
 	std::unordered_map<std::string, MaterialBase*> m_MaterialData{};

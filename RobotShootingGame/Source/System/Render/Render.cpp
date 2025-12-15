@@ -70,10 +70,10 @@ Render::Render()
 	// 定数バッファの生成
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pCB[i] = new ConstantBuffer(sizeof(CB::WVP));
-		assert(m_pCB[i]);	// nullptrチェック
+		m_pWVPCB[i] = new ConstantBuffer(sizeof(CB::WVP));
+		assert(m_pWVPCB[i]);	// nullptrチェック
 
-		CB::WVP* ptr = m_pCB[i]->GetPtr<CB::WVP>();
+		CB::WVP* ptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
 		ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
 		ptr->ViewMat = DirectX::SimpleMath::Matrix::Identity;
 		ptr->ProjMat = projMat;
@@ -109,7 +109,7 @@ Render::~Render()
 	delete m_pDepthStencil;
 	m_pDepthStencil = nullptr;
 
-	for (auto& cb : m_pCB)
+	for (auto& cb : m_pWVPCB)
 	{
 		delete cb;
 		cb = nullptr;
@@ -131,159 +131,7 @@ Render::~Render()
 	m_pPipelineState = nullptr;
 }
 
-void Render::DrawOpaque()
-{
-	const auto cmd = Engine::GetInstance().GetCommandList();
-	if (!cmd) return;
-
-	for (auto& item : m_OpaqueRenderItems)
-	{
-		if (!item.pMaterial) continue;
-
-		// マテリアルのルートシグネチャとパイプラインステートをセット
-		auto rootSig = item.pMaterial->GetRootSignature();
-		auto pso = item.pMaterial->GetPipelineState();
-		if (!rootSig || !pso) continue;
-		cmd->SetGraphicsRootSignature(rootSig->Get());
-		cmd->SetPipelineState(pso->Get());
-
-		// マテリアルのディスクリプタヒープをセット
-		auto descriptorHeap = item.pMaterial->GetDescriptorHeap();
-		if (descriptorHeap)
-		{
-			auto descriptorHeapPtr = descriptorHeap->GetHeap();
-			cmd->SetDescriptorHeaps(1, &descriptorHeapPtr);
-		}
-
-		// 定数バッファをセット
-		cmd->SetGraphicsRootConstantBufferView(0, item.pWVPCB->GetAddress());
-		for (size_t i = 0; i < item.pCBs.size(); ++i)
-		{
-			if (!item.pCBs[i]) continue;
-			cmd->SetGraphicsRootConstantBufferView(i + 1, item.pCBs[i]->GetAddress());
-		}
-
-		for (size_t i = 0; i < item.MeshSize; ++i)
-		{
-			if (!item.pVertexBuffers[i] || !item.pIndexBuffers[i]) continue;
-
-			// 頂点バッファとインデックスバッファをセット
-			auto vbView = item.pVertexBuffers[i]->GetView();
-			auto ibView = item.pIndexBuffers[i]->GetView();
-			cmd->IASetVertexBuffers(0, 1, &vbView);
-			cmd->IASetIndexBuffer(&ibView);
-			cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-			if (descriptorHeap)
-			{
-				auto srvHandle = item.pMaterial->GetDescriptorHandle(i);
-				if (srvHandle)
-					cmd->SetGraphicsRootDescriptorTable(2, srvHandle->HandleGPU);
-			}
-		}
-	}
-
-	// マテリアルごとに描画
-	for (auto& pair : m_OpaqueRenderItems)
-	{
-		Material* material = pair.first;
-		if (!material) continue;
-		
-		// マテリアルのルートシグネチャとパイプラインステートをセット
-		auto materialRootSig = material->GetRootSignature();
-		auto materialPSO = material->GetPipelineState();
-		if (!materialRootSig || !materialPSO) continue;
-		
-		cmd->SetGraphicsRootSignature(materialRootSig->Get());
-		cmd->SetPipelineState(materialPSO->Get());
-		
-		// マテリアルのディスクリプタヒープをセット
-		auto materialHeap = material->GetDescriptorHeap();
-		if (materialHeap)
-		{
-			auto heap = materialHeap->GetHeap();
-			cmd->SetDescriptorHeaps(1, &heap);
-		}
-		
-		// マテリアルのSRVをセット
-		auto srvHandle = material->GetDescriptorHandle(0);
-		if (!srvHandle) continue;
-		cmd->SetGraphicsRootDescriptorTable(1, srvHandle->HandleGPU);
-		
-		// レンダーアイテムごとに描画（メッシュごと）
-		for (auto& item : pair.second)
-		{
-			if (!item.pVertexBuffer || !item.pIndexBuffer) continue;
-
-			// 頂点バッファとインデックスバッファをセット
-			auto vbView = item.pVertexBuffer->GetView();
-			auto ibView = item.pIndexBuffer->GetView();
-
-			cmd->IASetVertexBuffers(0, 1, &vbView);
-			cmd->IASetIndexBuffer(&ibView);
-			cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-			// 定数バッファをセット
-			cmd->SetGraphicsRootConstantBufferView(0, item.pWVPCB->GetAddress());
-			for (size_t i = 0; i < item.pCBs.size(); ++i)
-			{
-				if (!item.pCBs[i]) continue;
-				cmd->SetGraphicsRootConstantBufferView(i + 1, item.pCBs[i]->GetAddress());
-			}
-			
-			// 描画コマンド発行
-			cmd->DrawIndexedInstanced(item.indexCount, 1, 0, 0, 0);
-		}
-	}
-}
-
-void Render::DrawTransparent()
-{
-}
-
-void Render::Init()
-{
-	// Gバッファ用レンダーターゲットの生成
-	// アルベド
-	m_GbufferRT[Albedo]->Create(
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		clearColor);
-
-	// 法線
-	m_GbufferRT[Normal]->Create(
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		clearColor);
-
-	// ワールド座標
-	m_GbufferRT[WorldPos]->Create(
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		clearColor);
-
-	// 深度ステンシルバッファの生成
-	m_pDepthStencil->Create(
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
-		DXGI_FORMAT_D32_FLOAT);
-
-	// ディスクリプタヒープにSRVを登録
-	for (size_t i = 0; i < NumGbufferRT; ++i)
-	{
-		// Gバッファ用レンダーターゲットのSRVをディスクリプタヒープに登録
-		auto srvHandle = m_pDescriptorHeap->Register(
-			m_GbufferRT[i]->Resource(),
-			m_GbufferRT[i]->ViewDesc());
-		assert(srvHandle);	// nullptrチェック
-		m_SRVHandles.push_back(srvHandle);
-	}
-}
-
-void Render::BeginDraw()
+void Render::SetGbufferRenderTargets()
 {
 	// Gバッファ用レンダーターゲットをレンダーターゲットとして設定
 	CD3DX12_RESOURCE_BARRIER barriers[NumGbufferRT]{};
@@ -331,8 +179,14 @@ void Render::BeginDraw()
 		nullptr);
 }
 
-void Render::EndDraw()
+void Render::DrawOpaque()
 {
+	// Gバッファ用レンダーターゲットをセット
+	SetGbufferRenderTargets();
+
+	// 不透明レンダーアイテムの描画
+	DrawRenderItems(m_OpaqueRenderItems);
+
 	// Gバッファ用レンダーターゲットをピクセルシェーダーリソースに戻す
 	CD3DX12_RESOURCE_BARRIER barriers[NumGbufferRT]{};
 	for (size_t i = 0; i < NumGbufferRT; ++i)
@@ -343,6 +197,67 @@ void Render::EndDraw()
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 	Engine::GetInstance().GetCommandList()->ResourceBarrier(NumGbufferRT, barriers);
+}
+
+void Render::DrawTransparent()
+{
+	// 不透明板ポリゴンの描画
+	DrawBackBuffer();
+
+	std::stable_sort(
+		m_TransparentRenderItems.begin(),
+		m_TransparentRenderItems.end(),
+		[](const RenderItem& a, const RenderItem& b)
+		{
+			return a.sortKey > b.sortKey; // カメラから遠い順にソート
+	});
+
+	// 透明レンダーアイテムの描画
+	DrawRenderItems(m_TransparentRenderItems);
+
+	ResetRenderItems();
+}
+
+void Render::Init()
+{
+	// Gバッファ用レンダーターゲットの生成
+	// アルベド
+	m_GbufferRT[Albedo]->Create(
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		clearColor);
+
+	// 法線
+	m_GbufferRT[Normal]->Create(
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		clearColor);
+
+	// ワールド座標
+	m_GbufferRT[WorldPos]->Create(
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		clearColor);
+
+	// 深度ステンシルバッファの生成
+	m_pDepthStencil->Create(
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		DXGI_FORMAT_D32_FLOAT);
+
+	// ディスクリプタヒープにSRVを登録
+	for (size_t i = 0; i < NumGbufferRT; ++i)
+	{
+		// Gバッファ用レンダーターゲットのSRVをディスクリプタヒープに登録
+		auto srvHandle = m_pDescriptorHeap->Register(
+			m_GbufferRT[i]->Resource(),
+			m_GbufferRT[i]->ViewDesc());
+		assert(srvHandle);	// nullptrチェック
+		m_SRVHandles.push_back(srvHandle);
+	}
 }
 
 void Render::DrawBackBuffer()
@@ -356,7 +271,7 @@ void Render::DrawBackBuffer()
 
 	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
 	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
-	commandList->SetGraphicsRootConstantBufferView(0, m_pCB[currentIndex]->GetAddress());	// 定数バッファを設定
+	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
@@ -366,6 +281,76 @@ void Render::DrawBackBuffer()
 	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
+}
+
+void Render::ResetRenderItems()
+{
+	m_OpaqueRenderItems.clear();
+	m_TransparentRenderItems.clear();
+}
+
+void Render::DrawRenderItems(const std::vector<RenderItem>& renderItems)
+{
+	// コマンドリストを取得
+	const auto cmd = Engine::GetInstance().GetCommandList();
+	if (!cmd) return;
+
+	for (auto& item : renderItems)
+	{
+		if (!item.pMaterial) continue;
+
+		// マテリアルのルートシグネチャとパイプラインステートをセット
+		auto rootSig = item.pMaterial->GetRootSignature();
+		auto pso = item.pMaterial->GetPipelineState();
+		if (!rootSig || !pso) continue;
+		cmd->SetGraphicsRootSignature(rootSig->Get());
+		cmd->SetPipelineState(pso->Get());
+
+		// マテリアルのディスクリプタヒープをセット
+		auto descriptorHeap = item.pMaterial->GetDescriptorHeap();
+		if (descriptorHeap)
+		{
+			auto descriptorHeapPtr = descriptorHeap->GetHeap();
+			cmd->SetDescriptorHeaps(1, &descriptorHeapPtr);
+		}
+
+		// 定数バッファをセット
+		cmd->SetGraphicsRootConstantBufferView(0, item.pWVPCB->GetAddress());
+		for (size_t i = 0; i < item.pCBs.size(); ++i)
+		{
+			if (!item.pCBs[i]) continue;
+			if (i + 1 > item.pMaterial->GetRootParameterIndex()) assert(false); // RootParameterIndexを超過している
+
+			cmd->SetGraphicsRootConstantBufferView(static_cast<UINT>(i + 1), item.pCBs[i]->GetAddress());
+		}
+
+		for (size_t i = 0; i < item.MeshSize; ++i)
+		{
+			if (!item.pVertexBuffers[i]) continue;
+
+			// 頂点バッファとインデックスバッファをセット
+			auto vbView = item.pVertexBuffers[i]->GetView();
+			cmd->IASetVertexBuffers(0, 1, &vbView);
+			if (item.pIndexBuffers.size())
+			{
+				auto ibView = item.pIndexBuffers[i]->GetView();
+				cmd->IASetIndexBuffer(&ibView);
+			}
+			cmd->IASetPrimitiveTopology(item.type);
+
+			if (descriptorHeap)
+			{
+				auto srvHandle = item.pMaterial->GetDescriptorHandle(i);
+				if (srvHandle)
+					cmd->SetGraphicsRootDescriptorTable(item.pMaterial->GetRootParameterIndex() - 1, srvHandle->HandleGPU);
+			}
+
+			if (item.pIndexBuffers.size())
+				cmd->DrawIndexedInstanced(item.indexCounts[i], 1, 0, 0, 0);
+			else
+				cmd->DrawInstanced(item.indexCounts[i], 1, 0, 0);
+		}
+	}
 }
 
 void Render::EnqueueRenderItem(const RenderItem& item)

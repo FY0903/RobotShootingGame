@@ -36,9 +36,7 @@ class Engine : public Singleton<Engine>
 public:
 	HRESULT Init(HWND wnd);
 
-	void BeginDraw();
 	void Draw();
-	void EndDraw();
 
 	ID3D12Device* GetDevice() const { return m_pDevice.Get(); }
 	ID3D12GraphicsCommandList* GetCommandList() const { return m_pCommandList.Get(); }
@@ -57,6 +55,10 @@ private:
 	 * @brief デストラクタ
 	 */
 	~Engine();
+
+	void BeginDraw();
+	void EndDraw();
+	void SetBackBufferRenderTarget();
 
 	HRESULT CreateDevice();							
 	HRESULT CreateCommandQueue();

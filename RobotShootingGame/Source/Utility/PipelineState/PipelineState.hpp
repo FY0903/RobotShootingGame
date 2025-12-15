@@ -21,7 +21,7 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	PipelineState(size_t renderTargetNum = 1);
+	PipelineState(size_t renderTargetNum = 1, bool alphaBlend = false);
 
 	/**
 	 * デストラクタ

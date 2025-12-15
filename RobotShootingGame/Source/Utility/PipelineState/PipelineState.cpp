@@ -18,24 +18,24 @@
 // ==============================
 #pragma comment(lib, "d3dcompiler.lib")
 
-PipelineState::PipelineState(size_t renderTargetNum)
+PipelineState::PipelineState(size_t renderTargetNum, bool alphaBlend)
 {
 	// ブレンドステートの設定
-	D3D12_BLEND_DESC desc{};
-	desc.AlphaToCoverageEnable = FALSE;								// アルファトゥカバレッジを無効
-	desc.IndependentBlendEnable = FALSE;							// レンダーターゲットごとのブレンドステートを無効
-	for (size_t i = 0; i < renderTargetNum; ++i)
+	D3D12_BLEND_DESC desc = CD3DX12_BLEND_DESC(D3D12_DEFAULT);	// デフォルトのブレンドステートを取得
+
+	// アルファブレンドを有効にする場合
+	if (alphaBlend)
 	{
-		desc.RenderTarget[i].BlendEnable = FALSE;									// ブレンドを無効
-		desc.RenderTarget[i].LogicOpEnable = FALSE;									// ロジックオペレーションを無効
-		desc.RenderTarget[i].SrcBlend = D3D12_BLEND_ONE;							// ソースのブレンド係数
-		desc.RenderTarget[i].DestBlend = D3D12_BLEND_ZERO;							// デストのブレンド係数
-		desc.RenderTarget[i].BlendOp = D3D12_BLEND_OP_ADD;							// ブレンドの演算
-		desc.RenderTarget[i].SrcBlendAlpha = D3D12_BLEND_ONE;						// ソースのアルファブレンド係数
-		desc.RenderTarget[i].DestBlendAlpha = D3D12_BLEND_ZERO;						// デストのアルファブレンド係数
-		desc.RenderTarget[i].BlendOpAlpha = D3D12_BLEND_OP_ADD;						// アルファブレンドの演算
-		desc.RenderTarget[i].LogicOp = D3D12_LOGIC_OP_NOOP;							// ロジックオペレーションの設定
-		desc.RenderTarget[i].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	// RGBA全てのチャンネルを描画
+		desc.RenderTarget[0].BlendEnable = TRUE;									// ブレンドを有効にする
+		desc.RenderTarget[0].LogicOpEnable = FALSE;									// 論理演算を無効にする
+		desc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;						// ソースのブレンドファクター
+		desc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;					// デスティネーションのブレンドファクター
+		desc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;							// ブレンドオペレーション
+		desc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;						// アルファのソースのブレンドファクター
+		desc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;						// アルファのデスティネーションのブレンドファクター
+		desc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;						// アルファのブレンドオペレーション
+		desc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;							// 論理演算オペレーション
+		desc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	// 書き込みマスク
 	}
 
 	// パイプラインステートの設定
@@ -45,7 +45,7 @@ PipelineState::PipelineState(size_t renderTargetNum)
 	m_Desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);	// 深度ステンシルステートの設定
 	m_Desc.SampleMask = UINT_MAX;											// サンプルマスク
 	m_Desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;	// プリミティブトポロジーの設定（三角形リスト）
-	m_Desc.NumRenderTargets = renderTargetNum;								// レンダーターゲットの数
+	m_Desc.NumRenderTargets = static_cast<UINT>(renderTargetNum);			// レンダーターゲットの数
 	m_Desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;								// 深度ステンシルビューのフォーマット
 	m_Desc.SampleDesc.Count = 1;											// マルチサンプリングのサンプル数
 	m_Desc.SampleDesc.Quality = 0;

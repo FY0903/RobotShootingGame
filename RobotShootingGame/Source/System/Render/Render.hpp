@@ -50,15 +50,13 @@ public:
 		ConstantBuffer* pWVPCB{};
 		std::vector<ConstantBuffer*> pCBs{};
 		size_t MeshSize{};
+		D3D_PRIMITIVE_TOPOLOGY type{};
 		float sortKey{};
 	};
 
 	void Init();
-
-	void BeginDraw();
-	void EndDraw();
-
-	void DrawBackBuffer();
+	void DrawOpaque();
+	void DrawTransparent();
 
 	void EnqueueRenderItem(const RenderItem& item);
 
@@ -77,9 +75,10 @@ private:
 	 */
 	~Render();
 
-	void DrawOpaque();
-
-	void DrawTransparent();
+	void SetGbufferRenderTargets();
+	void DrawBackBuffer();
+	void ResetRenderItems();
+	void DrawRenderItems(const std::vector<RenderItem>& renderItems);
 
 	std::array<RenderTarget*, NumGbufferRT> m_GbufferRT{};	// Gバッファ用レンダーターゲット
 	DepthStencil* m_pDepthStencil{};						// 深度ステンシルバッファ
@@ -91,7 +90,7 @@ private:
 
 	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
-	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	DescriptorHeap* m_pDescriptorHeap{};	// ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_SRVHandles{}; // SRVハンドル配列
 	RootSignature* m_pRootSignature{};		// ルートシグネチャ

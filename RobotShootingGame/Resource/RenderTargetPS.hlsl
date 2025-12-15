@@ -21,5 +21,5 @@ float4 main(VSOutput input) : SV_TARGET
     // ‡¬ˆ—i—á: ’Pƒ‚É‰ÁZj
     //float4 finalColor = albedo + normal * 0.5f + worldPos * 0.1f;
     
-    return worldPos;
+    return albedo;
 }

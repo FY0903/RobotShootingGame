@@ -154,9 +154,10 @@ void MeshRenderer::Draw()
 	Render::RenderItem item{};
 	item.pMaterial = m_Owner->GetMaterial();
 	item.pWVPCB = m_pWVPCB[currentIndex];
+	item.type = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	if (m_pModel) item.pCBs.push_back(m_pBoneMatrixCB[currentIndex]);
 	if (!m_Owner->GetMaterial()->IsOpaque())
-		item.sortKey = CameraManager::GetInstance().CalculateDistanceToMainCamera(m_Owner->GetTransform().GetWorldMatrixFloat4x4());
+		item.sortKey = CameraManager::GetInstance().CalculateDistanceToMainCamera(m_Owner->GetTransform().GetWorldMatrixFloat4x4(false));
 
 	// 頂点バッファとインデックスバッファの設定
 	for (size_t i = 0; i < m_Meshes.size(); ++i)
@@ -167,7 +168,7 @@ void MeshRenderer::Draw()
 	}
 	item.MeshSize = m_Meshes.size();	// メッシュ数を設定
 
-	// 3D空間上の距離をソートキーに設定
+	// レンダーキューに登録
 	Render::GetInstance().EnqueueRenderItem(item);
 
 #if 0

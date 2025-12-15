@@ -100,9 +100,8 @@ void App::Run()
 				m_pCurrentScene->FixedUpdate();
 			}
 
-			Engine::GetInstance().BeginDraw();
 			m_pCurrentScene->Draw();
-			Engine::GetInstance().EndDraw();
+			Engine::GetInstance().Draw();
 
 			// キー入力の更新終了
 			Input::EndUpdateInput();

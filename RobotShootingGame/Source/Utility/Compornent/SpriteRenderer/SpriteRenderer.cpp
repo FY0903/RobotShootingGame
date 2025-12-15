@@ -13,6 +13,7 @@
 #include "Utility/SharedStruct/SharedStruct.hpp"
 #include "Utility/CameraManager/CameraManager.hpp"
 #include "Game/Actor/Actor.hpp"
+#include "System/Render/Render.hpp"
 
 void SpriteRenderer::Init()
 {
@@ -44,9 +45,9 @@ void SpriteRenderer::Init()
 	// 定数バッファの生成
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pCB[i] = new ConstantBuffer(sizeof(CB::WVP));
-		assert(m_pCB[i]);	// nullptrチェック
-		CB::WVP* ptr = m_pCB[i]->GetPtr<CB::WVP>();
+		m_pWVPCB[i] = new ConstantBuffer(sizeof(CB::WVP));
+		assert(m_pWVPCB[i]);	// nullptrチェック
+		CB::WVP* ptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
 		ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 		ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 		ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
@@ -56,7 +57,7 @@ void SpriteRenderer::Init()
 void SpriteRenderer::Update()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
-	CB::WVP* ptr = m_pCB[currentIndex]->GetPtr<CB::WVP>();
+	CB::WVP* ptr = m_pWVPCB[currentIndex]->GetPtr<CB::WVP>();
 
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
@@ -65,28 +66,22 @@ void SpriteRenderer::Update()
 
 void SpriteRenderer::Draw()
 {
-	auto material = m_Owner->GetMaterial();
-
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();		// 現在のバックバッファのインデックスを取得
-	auto commandList = Engine::GetInstance().GetCommandList();					// コマンドリストを取得
-	auto materialHeap = material->GetDescriptorHeap();							// ディスクリプタヒープを取得
-	auto heap = materialHeap->GetHeap();
 
-	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
-	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
+	// レンダーアイテムの設定
+	Render::RenderItem item{};
+	item.pMaterial = m_Owner->GetMaterial();
+	item.pWVPCB = m_pWVPCB[currentIndex];
+	item.type = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	item.pVertexBuffers.push_back(m_pVertexBuffer);
+	item.pIndexBuffers.push_back(m_pIndexBuffer);
+	if (!m_Owner->GetMaterial()->IsOpaque())
+		item.sortKey = CameraManager::GetInstance().CalculateDistanceToMainCamera(m_Owner->GetTransform().GetWorldMatrixFloat4x4(false));
+	item.indexCounts.push_back(6);
+	item.MeshSize = 1;
 
-	commandList->SetGraphicsRootSignature(material->GetRootSignature()->Get());			// ルートシグネチャを設定
-	commandList->SetPipelineState(material->GetPipelineState()->Get());					// パイプラインステートを設定
-	commandList->SetGraphicsRootConstantBufferView(0, m_pCB[currentIndex]->GetAddress()); // 定数バッファを設定
-
-	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
-	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
-	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
-
-	commandList->SetDescriptorHeaps(1, &heap);														// ディスクリプタヒープを設定
-	commandList->SetGraphicsRootDescriptorTable(1, material->GetDescriptorHandle(0)->HandleGPU);	// ディスクリプタテーブルを設定
-
-	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
+	// レンダーキューにレンダーアイテムを登録
+	Render::GetInstance().EnqueueRenderItem(item);
 }
 
 void SpriteRenderer::Uninit()
@@ -105,10 +100,10 @@ void SpriteRenderer::Uninit()
 
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		if (m_pCB[i])
+		if (m_pWVPCB[i])
 		{
-			delete m_pCB[i];
-			m_pCB[i] = nullptr;
+			delete m_pWVPCB[i];
+			m_pWVPCB[i] = nullptr;
 		}
 	}
 }

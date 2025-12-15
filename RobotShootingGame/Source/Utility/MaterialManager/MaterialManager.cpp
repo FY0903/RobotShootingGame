@@ -87,17 +87,27 @@ PipelineState* Material::GetPipelineState() const
 	return m_pMaterial->GetPipelineState();
 }
 
+int Material::GetRootParameterIndex() const
+{
+	// マテリアルが存在しない場合は-1を返す
+	if (!m_pMaterial) return -1;
+
+	return m_pMaterial->GetRootParameterIndex();
+}
+
 void MaterialManager::Init()
 {
+	// MEMO: マテリアルの作成はCBVを登録してからSRVを登録すること
+	// SRVを先に登録するとルートパラメータのインデックスがずれるから
+
 	// Spriteマテリアルの作成
-	auto sprite = CreateMaterialBase("Sprite");
+	auto sprite = CreateMaterialBase("Sprite", 1, true);
 	sprite->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	sprite->SetPSFilepath(L"Assets/Shader/SpritePS.cso");
 	sprite->SetInputLayout(Vertex::Sprite::InputLayout);
 	sprite->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	sprite->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	sprite->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-	sprite->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
 	sprite->Create();
 
 	// Lineマテリアルの作成
@@ -157,14 +167,14 @@ Material* MaterialManager::CreateMaterial(const std::string& materialName)
 	return pInstance;
 }
 
-MaterialBase* MaterialManager::CreateMaterialBase(const std::string& name, size_t renderTargetNum)
+MaterialBase* MaterialManager::CreateMaterialBase(const std::string& name, size_t renderTargetNum, bool alphaBlend)
 {
 	if (m_MaterialData.find(name) != m_MaterialData.end())
 	{
 		return m_MaterialData[name];
 	}
 
-	MaterialBase* pMaterial = new MaterialBase(renderTargetNum);
+	MaterialBase* pMaterial = new MaterialBase(renderTargetNum, alphaBlend);
 	m_MaterialData[name] = pMaterial;
 
 	return pMaterial;
