@@ -34,6 +34,4 @@ private:
 	void OnInit() override final;
 	void OnUpdate() override final;
 	void OnUninit() override final;
-
-	RenderTarget* m_pRenderTarget{}; // レンダーターゲット
 };

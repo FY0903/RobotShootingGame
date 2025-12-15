@@ -35,6 +35,7 @@ public:
 
 	ID3D12Resource* Resource() const { return m_pResource.Get(); }
 	D3D12_SHADER_RESOURCE_VIEW_DESC ViewDesc() const { return m_ViewDesc; }
+	bool IsOpaque() const { return m_IsOpaque; }
 
 private:
 	UINT m_Width{};		// テクスチャの幅

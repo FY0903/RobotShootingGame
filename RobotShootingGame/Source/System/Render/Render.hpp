@@ -22,6 +22,11 @@
 #include "Utility/RootSignature/RootSignature.hpp"
 #include "Utility/PipelineState/PipelineState.hpp"
 
+// ==============================
+//	前方宣言
+// ==============================
+class Material;
+
 /**
  * @brief Renderクラス
  */
@@ -36,12 +41,28 @@ public:
 		NumGbufferRT,
 	};
 
+	struct RenderItem
+	{
+		Material* pMaterial{};
+		std::vector<VertexBuffer*> pVertexBuffers{};
+		std::vector<IndexBuffer*> pIndexBuffers{};
+		std::vector<UINT> indexCounts{};
+		ConstantBuffer* pWVPCB{};
+		std::vector<ConstantBuffer*> pCBs{};
+		size_t MeshSize{};
+		float sortKey{};
+	};
+
 	void Init();
 
 	void BeginDraw();
 	void EndDraw();
 
 	void DrawBackBuffer();
+
+	void EnqueueRenderItem(const RenderItem& item);
+
+	DepthStencil* GetDepthStencil() const { return m_pDepthStencil; }
 
 private:
 	friend class Singleton<Render>;
@@ -56,10 +77,17 @@ private:
 	 */
 	~Render();
 
+	void DrawOpaque();
+
+	void DrawTransparent();
+
 	std::array<RenderTarget*, NumGbufferRT> m_GbufferRT{};	// Gバッファ用レンダーターゲット
 	DepthStencil* m_pDepthStencil{};						// 深度ステンシルバッファ
 
 	float clearColor[4]{};
+	
+	std::vector<RenderItem> m_OpaqueRenderItems{};		// 不透明レンダーアイテムマップ
+	std::vector<RenderItem> m_TransparentRenderItems{};	// 透明レンダーアイテムマップ
 
 	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ

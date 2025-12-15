@@ -33,11 +33,13 @@ public:
 	DescriptorHandle* GetDescriptorHandle(size_t index) const;
 	class RootSignature* GetRootSignature() const;
 	class PipelineState* GetPipelineState() const;
+	bool IsOpaque() const { return m_IsOpaque; }
 
 private:
 	MaterialBase* m_pMaterial{}; // マテリアル
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_pDescriptorHandle{}; // ディスクリプタハンドル
+	bool m_IsOpaque{};
 };
 
 /**

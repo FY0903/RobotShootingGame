@@ -13,6 +13,7 @@
 #include "Game/Actor/Actor.hpp"
 #include "Utility/CameraManager/CameraManager.hpp"
 #include "Utility/Compornent/SkeletalAnimator/SkeletalAnimator.hpp"
+#include "System/Render/Render.hpp"
 
 void MeshRenderer::Init(Model* pModel)
 {
@@ -147,8 +148,30 @@ void MeshRenderer::Update()
 
 void MeshRenderer::Draw()
 {
-	auto material = m_Owner->GetMaterial();
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
+	
+	// レンダーアイテムの設定
+	Render::RenderItem item{};
+	item.pMaterial = m_Owner->GetMaterial();
+	item.pWVPCB = m_pWVPCB[currentIndex];
+	if (m_pModel) item.pCBs.push_back(m_pBoneMatrixCB[currentIndex]);
+	if (!m_Owner->GetMaterial()->IsOpaque())
+		item.sortKey = CameraManager::GetInstance().CalculateDistanceToMainCamera(m_Owner->GetTransform().GetWorldMatrixFloat4x4());
+
+	// 頂点バッファとインデックスバッファの設定
+	for (size_t i = 0; i < m_Meshes.size(); ++i)
+	{
+		item.pVertexBuffers.push_back(m_pVertexBuffers[i]);
+		item.pIndexBuffers.push_back(m_pIndexBuffers[i]);
+		item.indexCounts.push_back(static_cast<UINT>(m_Meshes[i].Indices.size()));
+	}
+	item.MeshSize = m_Meshes.size();	// メッシュ数を設定
+
+	// 3D空間上の距離をソートキーに設定
+	Render::GetInstance().EnqueueRenderItem(item);
+
+#if 0
+	auto material = m_Owner->GetMaterial();
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
 
 	commandList->SetGraphicsRootSignature(material->GetRootSignature()->Get());					// ルートシグネチャを設定
@@ -180,6 +203,7 @@ void MeshRenderer::Draw()
 
 		commandList->DrawIndexedInstanced(static_cast<UINT>(m_Meshes[i].Indices.size()), 1, 0, 0, 0);	// 描画
 	}
+#endif
 }
 
 void MeshRenderer::Uninit()

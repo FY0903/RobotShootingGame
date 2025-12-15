@@ -21,8 +21,8 @@ PSOutput main(VSOutput input)
     PSOutput output = (PSOutput) 0;
     
     output.albedo = tex.Sample(smp, input.uv);
-    output.normal = input.normal;
-    output.worldPos = input.worldPos; // ワールド座標
+    output.normal.xyz = normalize(input.normal.xyz) * 0.5f + 0.5f; // 法線ベクトルを[0,1]範囲に変換
+    output.worldPos.xyz = normalize(input.worldPos.xyz) * 0.5f + 0.5f; // ワールド座標を[0,1]範囲に変換
     
     return output;
 }

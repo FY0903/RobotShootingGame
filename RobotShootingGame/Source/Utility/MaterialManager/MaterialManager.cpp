@@ -17,7 +17,6 @@
 Material::Material(MaterialBase* pMaterial)
 	: m_pMaterial(pMaterial)
 {
-	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 }
 
 Material::~Material()
@@ -31,8 +30,13 @@ Material::~Material()
 
 void Material::SetTexture(Texture* pTexture)
 {
-	if (!m_pDescriptorHeap || !pTexture) return;
+	if (!pTexture) return;
 
+	// ディスクリプタヒープが存在しない場合は作成
+	if (!m_pDescriptorHeap)
+		m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+
+	m_IsOpaque = pTexture->IsOpaque();
 	DescriptorHandle* handle = m_pDescriptorHeap->Register(pTexture->Resource(), pTexture->ViewDesc());
 	if (!handle) return;
 	m_pDescriptorHandle.push_back(handle);
@@ -40,7 +44,11 @@ void Material::SetTexture(Texture* pTexture)
 
 void Material::SetTexture(RenderTarget* pRTV)
 {
-	if (!m_pDescriptorHeap || !pRTV) return;
+	if (!pRTV) return;
+
+	// ディスクリプタヒープが存在しない場合は作成
+	if (!m_pDescriptorHeap)
+		m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
 	DescriptorHandle* handle = m_pDescriptorHeap->Register(pRTV->Resource(), pRTV->ViewDesc());
 	if (!handle) return;

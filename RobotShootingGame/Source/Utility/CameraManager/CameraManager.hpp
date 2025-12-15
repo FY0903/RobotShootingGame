@@ -24,6 +24,10 @@ public:
 
 	Camera* GetMainCamera() const { return m_pMainCamera; }
 
+	DirectX::XMFLOAT3 GetMainCameraPosition() const;
+
+	float CalculateDistanceToMainCamera(const DirectX::XMFLOAT4X4& worldMat) const;
+
 private:
 	friend class Singleton<CameraManager>;
 
@@ -36,6 +40,7 @@ private:
 	 * デストラクタ
 	 */
 	~CameraManager();
+
 
 	std::unordered_map<std::string, Camera*> m_pCameraData{};
 	Camera* m_pMainCamera{};        // メインカメラ

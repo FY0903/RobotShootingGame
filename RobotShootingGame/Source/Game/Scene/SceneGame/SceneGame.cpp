@@ -25,15 +25,13 @@ void SceneGame::OnInit()
 	//AddGameObject<Grid>(Layer::DEFAULT);
 
 	// スプライトの生成
-	//auto sprite = AddGameObject<Sprite>(Layer::DEFAULT);
+	AddGameObject<Sprite>(Layer::DEFAULT);
 
 	// オブジェクトの生成
 	//AddGameObject<Object>(Layer::DEFAULT);
 
 	// エンプティの生成
 	AddGameObject<Empty>(Layer::DEFAULT);
-
-	//sprite->GetTransform().Scale = DirectX::SimpleMath::Vector3(16.0f, 9.0f, 1.0f);
 }
 
 void SceneGame::OnUpdate()

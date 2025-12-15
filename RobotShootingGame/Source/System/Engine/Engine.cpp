@@ -224,7 +224,7 @@ void Engine::EndDraw()
 	rtvHandle.ptr += m_CurrentBackBufferIndex * m_rtvDescriptorSize;	// 現在のRTVのアドレスを計算
 
 	// DSVのディスクリプタヒープの開始アドレスを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = m_pDsvHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = Render::GetInstance().GetDepthStencil()->GetDescriptorHandle()->HandleCPU;
 
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		m_pCurrentRenderTarget.Get(),

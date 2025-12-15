@@ -12,6 +12,7 @@
 #include "Render.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
 #include "Utility/CameraManager/CameraManager.hpp"
+#include "Utility/MaterialManager/MaterialManager.hpp"
 
 Render::Render()
 {
@@ -128,6 +129,116 @@ Render::~Render()
 
 	delete m_pPipelineState;
 	m_pPipelineState = nullptr;
+}
+
+void Render::DrawOpaque()
+{
+	const auto cmd = Engine::GetInstance().GetCommandList();
+	if (!cmd) return;
+
+	for (auto& item : m_OpaqueRenderItems)
+	{
+		if (!item.pMaterial) continue;
+
+		// マテリアルのルートシグネチャとパイプラインステートをセット
+		auto rootSig = item.pMaterial->GetRootSignature();
+		auto pso = item.pMaterial->GetPipelineState();
+		if (!rootSig || !pso) continue;
+		cmd->SetGraphicsRootSignature(rootSig->Get());
+		cmd->SetPipelineState(pso->Get());
+
+		// マテリアルのディスクリプタヒープをセット
+		auto descriptorHeap = item.pMaterial->GetDescriptorHeap();
+		if (descriptorHeap)
+		{
+			auto descriptorHeapPtr = descriptorHeap->GetHeap();
+			cmd->SetDescriptorHeaps(1, &descriptorHeapPtr);
+		}
+
+		// 定数バッファをセット
+		cmd->SetGraphicsRootConstantBufferView(0, item.pWVPCB->GetAddress());
+		for (size_t i = 0; i < item.pCBs.size(); ++i)
+		{
+			if (!item.pCBs[i]) continue;
+			cmd->SetGraphicsRootConstantBufferView(i + 1, item.pCBs[i]->GetAddress());
+		}
+
+		for (size_t i = 0; i < item.MeshSize; ++i)
+		{
+			if (!item.pVertexBuffers[i] || !item.pIndexBuffers[i]) continue;
+
+			// 頂点バッファとインデックスバッファをセット
+			auto vbView = item.pVertexBuffers[i]->GetView();
+			auto ibView = item.pIndexBuffers[i]->GetView();
+			cmd->IASetVertexBuffers(0, 1, &vbView);
+			cmd->IASetIndexBuffer(&ibView);
+			cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			if (descriptorHeap)
+			{
+				auto srvHandle = item.pMaterial->GetDescriptorHandle(i);
+				if (srvHandle)
+					cmd->SetGraphicsRootDescriptorTable(2, srvHandle->HandleGPU);
+			}
+		}
+	}
+
+	// マテリアルごとに描画
+	for (auto& pair : m_OpaqueRenderItems)
+	{
+		Material* material = pair.first;
+		if (!material) continue;
+		
+		// マテリアルのルートシグネチャとパイプラインステートをセット
+		auto materialRootSig = material->GetRootSignature();
+		auto materialPSO = material->GetPipelineState();
+		if (!materialRootSig || !materialPSO) continue;
+		
+		cmd->SetGraphicsRootSignature(materialRootSig->Get());
+		cmd->SetPipelineState(materialPSO->Get());
+		
+		// マテリアルのディスクリプタヒープをセット
+		auto materialHeap = material->GetDescriptorHeap();
+		if (materialHeap)
+		{
+			auto heap = materialHeap->GetHeap();
+			cmd->SetDescriptorHeaps(1, &heap);
+		}
+		
+		// マテリアルのSRVをセット
+		auto srvHandle = material->GetDescriptorHandle(0);
+		if (!srvHandle) continue;
+		cmd->SetGraphicsRootDescriptorTable(1, srvHandle->HandleGPU);
+		
+		// レンダーアイテムごとに描画（メッシュごと）
+		for (auto& item : pair.second)
+		{
+			if (!item.pVertexBuffer || !item.pIndexBuffer) continue;
+
+			// 頂点バッファとインデックスバッファをセット
+			auto vbView = item.pVertexBuffer->GetView();
+			auto ibView = item.pIndexBuffer->GetView();
+
+			cmd->IASetVertexBuffers(0, 1, &vbView);
+			cmd->IASetIndexBuffer(&ibView);
+			cmd->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			// 定数バッファをセット
+			cmd->SetGraphicsRootConstantBufferView(0, item.pWVPCB->GetAddress());
+			for (size_t i = 0; i < item.pCBs.size(); ++i)
+			{
+				if (!item.pCBs[i]) continue;
+				cmd->SetGraphicsRootConstantBufferView(i + 1, item.pCBs[i]->GetAddress());
+			}
+			
+			// 描画コマンド発行
+			cmd->DrawIndexedInstanced(item.indexCount, 1, 0, 0, 0);
+		}
+	}
+}
+
+void Render::DrawTransparent()
+{
 }
 
 void Render::Init()
@@ -255,4 +366,12 @@ void Render::DrawBackBuffer()
 	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
+}
+
+void Render::EnqueueRenderItem(const RenderItem& item)
+{
+	// 不透明か透明かでレンダーアイテムを振り分ける
+	item.pMaterial->IsOpaque()
+		? m_OpaqueRenderItems.push_back(item)
+		: m_TransparentRenderItems.push_back(item);
 }
