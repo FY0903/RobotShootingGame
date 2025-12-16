@@ -48,6 +48,4 @@ private:
 
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ
-	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	ConstantBuffer* m_pBoneMatrixCB[FRAME_BUFFER_COUNT]{}; // ボーン行列用定数バッファ
 };

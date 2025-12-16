@@ -11,6 +11,7 @@
 //	include
 // ==============================
 #include "../DirectXTex/d3dx12.h"
+#include "../DirectXTex/DirectXTex.h"
 
 /**
  * @brief Textureクラス
@@ -29,6 +30,7 @@ public:
 	~Texture() = default;
 
 	HRESULT Load(const std::string& FileName);
+	HRESULT CreateDefaultTexture(BYTE R = 255, BYTE G = 255, BYTE B = 255, BYTE A = 255);
 
 	UINT Width() const { return m_Width; }
 	UINT Height() const { return m_Height; }
@@ -38,6 +40,8 @@ public:
 	bool IsOpaque() const { return m_IsOpaque; }
 
 private:
+	HRESULT CreateTextureFromScratch(const DirectX::ScratchImage& scratch, const DirectX::TexMetadata& meta);
+
 	UINT m_Width{};		// テクスチャの幅
 	UINT m_Height{};	// テクスチャの高さ
 	ComPtr<ID3D12Resource> m_pResource{};			// テクスチャリソース

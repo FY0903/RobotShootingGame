@@ -17,11 +17,11 @@
 void Sprite::OnInit()
 {
 	// テクスチャの読み込み
-	auto pTexture = TextureManager::GetInstance().LoadTexture("Assets/Texture/ADC_COW.png");
+	auto pDefTex = TextureManager::GetInstance().CreateDefaultTexture("DefTex");
 
 	// マテリアルの設定
-	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Sprite");
-	m_pMaterial->SetTexture(pTexture);
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Water");
+	m_pMaterial->SetTexture(pDefTex);
 
 	AddComponent<SpriteRenderer>()->Init();
 }

@@ -47,8 +47,6 @@ public:
 		std::vector<VertexBuffer*> pVertexBuffers{};
 		std::vector<IndexBuffer*> pIndexBuffers{};
 		std::vector<UINT> indexCounts{};
-		ConstantBuffer* pWVPCB{};
-		std::vector<ConstantBuffer*> pCBs{};
 		size_t MeshSize{};
 		D3D_PRIMITIVE_TOPOLOGY type{};
 		float sortKey{};

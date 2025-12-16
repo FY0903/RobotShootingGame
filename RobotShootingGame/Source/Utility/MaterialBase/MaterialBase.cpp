@@ -34,6 +34,7 @@ void MaterialBase::SetCBV(UINT shaderRegister, D3D12_SHADER_VISIBILITY visibilit
 	if (!m_pRootSignature) return;
 	m_pRootSignature->AddRootParameter(shaderRegister, visibility);
 	++m_rootParameterIndex;
+	m_pCBVs.push_back({nullptr, nullptr});
 }
 
 void MaterialBase::SetCBV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility)
@@ -41,6 +42,10 @@ void MaterialBase::SetCBV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER
 	if (!m_pRootSignature) return;
 	m_pRootSignature->AddDescriptorRange(shaderRegister, D3D12_DESCRIPTOR_RANGE_TYPE_CBV, numDescriptors, visibility);
 	++m_rootParameterIndex;
+	if (numDescriptors > 0)
+	{
+		m_pCBVs.insert(m_pCBVs.end(), numDescriptors, {nullptr, nullptr});
+	}
 }
 
 void MaterialBase::SetSRV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility)
@@ -74,6 +79,19 @@ void MaterialBase::SetDSVFormat(DXGI_FORMAT format)
 	m_pPipelineState->SetDSVFormat(format);
 }
 
+std::vector<ConstantBuffer*> MaterialBase::SetCB(size_t index, ConstantBuffer* pCB)
+{
+	// 範囲外チェック
+	if (index >= m_pCBVs.size()) return {};
+
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		m_pCBVs[index][i] = pCB;
+	}
+
+	return std::vector<ConstantBuffer*>(m_pCBVs[index].begin(), m_pCBVs[index].end());
+}
+
 void MaterialBase::Create()
 {
 	if (!m_pRootSignature || !m_pPipelineState) return;
@@ -86,4 +104,19 @@ void MaterialBase::Create()
 	m_pPipelineState->SetVS(m_VSFilepath);
 	m_pPipelineState->SetPS(m_PSFilepath);
 	m_pPipelineState->Create();
+}
+
+ConstantBuffer* MaterialBase::GetCB(size_t index) const
+{
+	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
+
+	// 範囲外チェック
+	if (index >= m_pCBVs.size()) return nullptr;
+	
+	return m_pCBVs[index][currentIndex];	// 現在のフレーム用の定数バッファを返す
+}
+
+int MaterialBase::GetCBSize() const
+{
+	return static_cast<int>(m_pCBVs.size());
 }

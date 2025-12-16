@@ -14,6 +14,7 @@ class TextureManager : public Singleton<TextureManager>
 {
 public:
 	class Texture* LoadTexture(const std::string& texturePath);
+	class Texture* CreateDefaultTexture(const std::string& textureName, BYTE R = 255, BYTE G = 255, BYTE B = 255, BYTE A = 255);
 
 private:
 	friend class Singleton<TextureManager>;

@@ -55,6 +55,12 @@ void Material::SetTexture(RenderTarget* pRTV)
 	m_pDescriptorHandle.push_back(handle);
 }
 
+std::vector<ConstantBuffer*> Material::SetCB(size_t index, ConstantBuffer* pCB)
+{
+	if (!m_pMaterial) return;
+	return m_pMaterial->SetCB(index, pCB);
+}
+
 DescriptorHeap* Material::GetDescriptorHeap() const
 {
 	// ヒープが存在しない場合はnullptrを返す
@@ -95,13 +101,29 @@ int Material::GetRootParameterIndex() const
 	return m_pMaterial->GetRootParameterIndex();
 }
 
+ConstantBuffer* Material::GetCB(size_t index) const
+{
+	// マテリアルが存在しない場合はnullptrを返す
+	if (!m_pMaterial) return nullptr;
+
+	return m_pMaterial->GetCB(index);
+}
+
+int Material::GetCBSize() const
+{
+	// マテリアルが存在しない場合は0を返す
+	if (!m_pMaterial) return 0;
+
+	return m_pMaterial->GetCBSize();
+}
+
 void MaterialManager::Init()
 {
 	// MEMO: マテリアルの作成はCBVを登録してからSRVを登録すること
 	// SRVを先に登録するとルートパラメータのインデックスがずれるから
 
 	// Spriteマテリアルの作成
-	auto sprite = CreateMaterialBase("Sprite", 1, true);
+	auto sprite = CreateMaterialBase("Sprite");
 	sprite->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	sprite->SetPSFilepath(L"Assets/Shader/SpritePS.cso");
 	sprite->SetInputLayout(Vertex::Sprite::InputLayout);
@@ -154,6 +176,16 @@ void MaterialManager::Init()
 	skeletalGBuffer->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	skeletalGBuffer->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	skeletalGBuffer->Create();
+
+	auto water = CreateMaterialBase("Water");
+	water->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
+	water->SetPSFilepath(L"Assets/Shader/WaterPS.cso");
+	water->SetInputLayout(Vertex::Sprite::InputLayout);
+	water->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	water->SetCBV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+	water->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	water->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	water->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)

@@ -10,7 +10,6 @@
 //	include
 // ==============================
 #include "Texture.hpp"
-#include "../DirectXTex/DirectXTex.h"
 #include "System/Engine/Engine.hpp"
 
 HRESULT Texture::Load(const std::string& FileName)
@@ -29,7 +28,6 @@ HRESULT Texture::Load(const std::string& FileName)
 		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, FileName.c_str(), -1, &path[0], buff);
 		assert(buff == static_cast<int>(path.size())); // 変換に失敗した場合
 	}
-
 
 	// 画像読み込み
 	DirectX::TexMetadata meta{};
@@ -60,12 +58,63 @@ HRESULT Texture::Load(const std::string& FileName)
 			scratch);					// スクラッチイメージ
 	}
 
+	// テクスチャの作成
+	hr = CreateTextureFromScratch(scratch, meta);
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "テクスチャの読み込みに失敗しました", "エラー", MB_OK);
 		return hr;
 	}
 
+	return hr;
+}
+
+HRESULT Texture::CreateDefaultTexture(BYTE R, BYTE G, BYTE B, BYTE A)
+{
+	// 1x1の白テクスチャを作成
+	DirectX::TexMetadata meta{};
+	DirectX::ScratchImage scratch{};
+
+	HRESULT hr = scratch.Initialize2D(
+		DXGI_FORMAT_R8G8B8A8_UNORM, // フォーマット
+		1,							// 幅
+		1,							// 高さ
+		1,							// 配列サイズ
+		1);							// ミップ数
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "デフォルトテクスチャの初期化に失敗しました", "エラー", MB_OK);
+		return hr;
+	}
+
+	// メタデータを設定
+	meta.format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	meta.width = 1;
+	meta.height = 1;
+	meta.arraySize = 1;
+	meta.mipLevels = 1;
+
+	// ピクセルデータを設定（白色）
+	// MEMO: DXGI_FORMAT_R8G8B8A8_UNORMだから、最大値は255
+	auto img = scratch.GetImage(0, 0, 0);
+	img->pixels[0] = R; // R
+	img->pixels[1] = G; // G
+	img->pixels[2] = B; // B
+	img->pixels[3] = A; // A
+
+	// テクスチャの作成
+	hr = CreateTextureFromScratch(scratch, meta);
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr, "デフォルトテクスチャの作成に失敗しました", "エラー", MB_OK);
+		return hr;
+	}
+
+	return hr;
+}
+
+HRESULT Texture::CreateTextureFromScratch(const DirectX::ScratchImage& scratch, const DirectX::TexMetadata& meta)
+{
 	m_IsOpaque = scratch.IsAlphaAllOpaque();
 
 	// テクスチャの情報を取得
@@ -79,14 +128,13 @@ HRESULT Texture::Load(const std::string& FileName)
 		static_cast<UINT16>(meta.mipLevels));	// ミップ数
 
 	// リソースを生成
-	hr = Engine::GetInstance().GetDevice()->CreateCommittedResource(
+	HRESULT hr = Engine::GetInstance().GetDevice()->CreateCommittedResource(
 		&prop,										// ヒープのプロパティ
 		D3D12_HEAP_FLAG_NONE,						// ヒープのフラグ
 		&resc,										// リソースの設定
 		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, // リソースの初期状態
 		nullptr,									// 最適化されたクリア値
 		IID_PPV_ARGS(m_pResource.ReleaseAndGetAddressOf())); // リソースのポインタ
-
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "テクスチャリソースの生成に失敗しました", "エラー", MB_OK);
@@ -111,5 +159,5 @@ HRESULT Texture::Load(const std::string& FileName)
 	m_ViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // テクスチャ2D
 	m_ViewDesc.Texture2D.MipLevels = 1; // ミップ数
 
-	return S_OK;
+	return hr;
 }

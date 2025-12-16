@@ -134,15 +134,16 @@ void MeshRenderer::Init(Model* pModel)
 void MeshRenderer::Update()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
+	auto material = m_Owner->GetMaterial();
 
-	CB::WVP* ptr = m_pWVPCB[currentIndex]->GetPtr<CB::WVP>();
+	CB::WVP* ptr = material->GetCB(0)->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 
 	if (!m_Owner->GetComponent<SkeletalAnimator>() || !m_pModel) return;
 
-	CB::BoneMatrix* bonePtr = m_pBoneMatrixCB[currentIndex]->GetPtr<CB::BoneMatrix>();
+	CB::BoneMatrix* bonePtr = material->GetCB(1)->GetPtr<CB::BoneMatrix>();
 	std::copy_n(m_pModel->GetBoneMatCB().data(), m_pModel->GetBoneMatCB().size(), bonePtr->BoneMat);
 }
 
@@ -153,9 +154,7 @@ void MeshRenderer::Draw()
 	// レンダーアイテムの設定
 	Render::RenderItem item{};
 	item.pMaterial = m_Owner->GetMaterial();
-	item.pWVPCB = m_pWVPCB[currentIndex];
 	item.type = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	if (m_pModel) item.pCBs.push_back(m_pBoneMatrixCB[currentIndex]);
 	if (!m_Owner->GetMaterial()->IsOpaque())
 		item.sortKey = CameraManager::GetInstance().CalculateDistanceToMainCamera(m_Owner->GetTransform().GetWorldMatrixFloat4x4(false));
 
@@ -219,18 +218,6 @@ void MeshRenderer::Uninit()
 		delete pIB;
 	}
 
-	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-	{
-		delete m_pWVPCB[i];
-		m_pWVPCB[i] = nullptr;
-	}
-
-	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-	{
-		delete m_pBoneMatrixCB[i];
-		m_pBoneMatrixCB[i] = nullptr;
-	}
-
 	m_pModel = nullptr;
 }
 
@@ -267,23 +254,29 @@ void MeshRenderer::Init(std::vector<Model::Mesh> meshes)
 	}
 
 	// 定数バッファの生成
+	auto pWVPCB = material->SetCB(0, new ConstantBuffer(sizeof(CB::WVP)));
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pWVPCB[i] = new ConstantBuffer(sizeof(CB::WVP));
-		assert(m_pWVPCB[i]);	// nullptrチェック
-		CB::WVP* WVPptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
+		assert(pWVPCB[i]);	// nullptrチェック
+		CB::WVP* WVPptr = pWVPCB[i]->GetPtr<CB::WVP>();
 		WVPptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 		WVPptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 		WVPptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
+	}
 
-		if (!m_pModel) continue;
+	// ボーン行列用定数バッファの生成
+	if (m_pModel)
+	{
+		auto pBoneCB = material->SetCB(1, new ConstantBuffer(sizeof(CB::BoneMatrix)));
 
-		m_pBoneMatrixCB[i] = new ConstantBuffer(sizeof(DirectX::XMMATRIX) * m_pModel->GetBones().size());
-		assert(m_pBoneMatrixCB[i]); // nullptrチェック
-		for (size_t j = 0; j < m_pModel->GetBones().size(); ++j)
+		for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 		{
-			CB::BoneMatrix* bonePtr = m_pBoneMatrixCB[i]->GetPtr<CB::BoneMatrix>();
-			bonePtr->BoneMat[j] = DirectX::XMMatrixIdentity();
+			assert(pBoneCB[i]);	// nullptrチェック
+			CB::BoneMatrix* bonePtr = pBoneCB[i]->GetPtr<CB::BoneMatrix>();
+			for (size_t j = 0; j < m_pModel->GetBones().size(); ++j)
+			{
+				bonePtr->BoneMat[j] = DirectX::XMMatrixIdentity();
+			}
 		}
 	}
 }

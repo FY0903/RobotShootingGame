@@ -14,6 +14,8 @@
 #include "Utility/DescriptorHeap/DescriptorHeap.hpp"
 #include "Utility/RootSignature/RootSignature.hpp"
 #include "Utility/PipelineState/PipelineState.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "System/Engine/Engine.hpp"
 
 /**
  * @brief Materialクラス
@@ -42,17 +44,22 @@ public:
 	void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
 	void SetDSVFormat(DXGI_FORMAT format);
 
+	std::vector<ConstantBuffer*> SetCB(size_t index, ConstantBuffer* pCB);
+
 	void Create();
 
 	inline RootSignature* GetRootSignature() const { return m_pRootSignature; }
 	inline PipelineState* GetPipelineState() const { return m_pPipelineState; }
 	inline int GetRootParameterIndex() const { return m_rootParameterIndex; }
+	ConstantBuffer* GetCB(size_t index) const;
+	int GetCBSize() const;
 
 private:
 	std::wstring m_VSFilepath{};	// 頂点シェーダーファイルパス
 	std::wstring m_PSFilepath{};	// ピクセルシェーダーファイルパス
 	RootSignature* m_pRootSignature{};	// ルートシグネチャ
 	PipelineState* m_pPipelineState{};	// パイプラインステート
+	std::vector<std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>> m_pCBVs{};	// CBV用定数バッファ
 
 	int m_rootParameterIndex{};
 };

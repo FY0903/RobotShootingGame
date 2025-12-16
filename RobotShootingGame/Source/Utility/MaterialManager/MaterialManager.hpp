@@ -28,6 +28,7 @@ public:
 
 	void SetTexture(class Texture* pTexture);
 	void SetTexture(class RenderTarget* pRTV);
+	std::vector<ConstantBuffer*> SetCB(size_t index, class ConstantBuffer* pCB);
 
 	DescriptorHeap* GetDescriptorHeap() const;
 	DescriptorHandle* GetDescriptorHandle(size_t index) const;
@@ -35,6 +36,8 @@ public:
 	class PipelineState* GetPipelineState() const;
 	inline bool IsOpaque() const { return m_IsOpaque; }
 	int GetRootParameterIndex() const;
+	class ConstantBuffer* GetCB(size_t index) const;
+	int GetCBSize() const;
 
 private:
 	MaterialBase* m_pMaterial{}; // ƒ}ƒeƒŠƒAƒ‹

@@ -315,7 +315,7 @@ void Render::DrawRenderItems(const std::vector<RenderItem>& renderItems)
 		}
 
 		// 定数バッファをセット
-		cmd->SetGraphicsRootConstantBufferView(0, item.pWVPCB->GetAddress());
+		cmd->SetGraphicsRootConstantBufferView(0, item.pMaterial->GetCB(0)->GetAddress());
 		for (size_t i = 0; i < item.pCBs.size(); ++i)
 		{
 			if (!item.pCBs[i]) continue;
