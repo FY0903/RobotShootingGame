@@ -34,15 +34,7 @@ HRESULT Texture::Load(const std::string& FileName)
 	DirectX::ScratchImage scratch{};
 
 	// 拡張子を取得
-	if (path.find(L".png") != std::string::npos)
-	{
-		hr = DirectX::LoadFromWICFile(
-			path.c_str(),				// ファイルパス
-			DirectX::WIC_FLAGS_NONE,	// フラグ（なし）
-			&meta,						// メタデータ
-			scratch);					// スクラッチイメージ
-	}
-	else if (path.find(L".dds") != std::string::npos)
+	if (path.find(L".dds") != std::string::npos)
 	{
 		hr = DirectX::LoadFromDDSFile(
 			path.c_str(),						// ファイルパス
@@ -54,6 +46,14 @@ HRESULT Texture::Load(const std::string& FileName)
 	{
 		hr = DirectX::LoadFromTGAFile(
 			path.c_str(),				// ファイルパス
+			&meta,						// メタデータ
+			scratch);					// スクラッチイメージ
+	}
+	else
+	{
+		hr = DirectX::LoadFromWICFile(
+			path.c_str(),				// ファイルパス
+			DirectX::WIC_FLAGS_NONE,	// フラグ（なし）
 			&meta,						// メタデータ
 			scratch);					// スクラッチイメージ
 	}

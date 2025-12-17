@@ -316,12 +316,11 @@ void Render::DrawRenderItems(const std::vector<RenderItem>& renderItems)
 
 		// 定数バッファをセット
 		cmd->SetGraphicsRootConstantBufferView(0, item.pMaterial->GetCB(0)->GetAddress());
-		for (size_t i = 0; i < item.pCBs.size(); ++i)
+		for (size_t i = 1; i < item.pMaterial->GetCBSize(); ++i)
 		{
-			if (!item.pCBs[i]) continue;
-			if (i + 1 > item.pMaterial->GetRootParameterIndex()) assert(false); // RootParameterIndexを超過している
+			if (i > item.pMaterial->GetRootParameterIndex()) assert(false); // RootParameterIndexを超過している
 
-			cmd->SetGraphicsRootConstantBufferView(static_cast<UINT>(i + 1), item.pCBs[i]->GetAddress());
+			cmd->SetGraphicsRootConstantBufferView(static_cast<UINT>(i), item.pMaterial->GetCB(i)->GetAddress());
 		}
 
 		for (size_t i = 0; i < item.MeshSize; ++i)

@@ -13,6 +13,7 @@
 #include "Game/Actor/Actor.hpp"
 #include "Utility/Texture/Texture.hpp"
 #include "Utility/RenderTarget/RenderTarget.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
 
 /**
  * @brief Spriteクラス
@@ -34,4 +35,6 @@ private:
 	void OnInit() override final;
 	void OnUpdate() override final;
 	void OnUninit() override final;
+
+	std::vector<ConstantBuffer*> m_pPSTimeCB{}; // 時間用定数バッファ
 };

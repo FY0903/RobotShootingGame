@@ -13,6 +13,7 @@
 #include "Utility/Compornent/SpriteRenderer/SpriteRenderer.hpp"
 #include "Utility/MaterialManager/MaterialManager.hpp"
 #include "Utility/TextureManager/TextureManager.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
 
 void Sprite::OnInit()
 {
@@ -24,10 +25,17 @@ void Sprite::OnInit()
 	m_pMaterial->SetTexture(pDefTex);
 
 	AddComponent<SpriteRenderer>()->Init();
+
+	// 定数バッファの設定
+	m_pPSTimeCB = m_pMaterial->SetCB(sizeof(CB::Time));
 }
 
 void Sprite::OnUpdate()
 {
+	size_t currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
+
+	CB::Time* pTime = m_pPSTimeCB[currentIndex]->GetPtr<CB::Time>();
+	pTime->DeltaTime = Time::GetInstance().GetDeltaTimeSinceStartup();
 }
 
 void Sprite::OnUninit()

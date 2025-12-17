@@ -28,7 +28,8 @@ class SpriteRenderer : public Component
 public:
 	using Component::Component;
 
-	void Init();
+	void Init(bool is2D = false);
+	void Init(size_t cell, float spacing);
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;
@@ -38,4 +39,7 @@ private:
 	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};	// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+
+	int m_IndexCount{};	// インデックス数
+	bool m_Is2D{};	// 2D描画かどうか
 };

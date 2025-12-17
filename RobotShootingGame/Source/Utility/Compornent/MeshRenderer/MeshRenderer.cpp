@@ -141,7 +141,7 @@ void MeshRenderer::Update()
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 
-	if (!m_Owner->GetComponent<SkeletalAnimator>() || !m_pModel) return;
+	if (!m_Owner->GetComponent<SkeletalAnimator>() || !m_pModel->GetBoneNum()) return;
 
 	CB::BoneMatrix* bonePtr = material->GetCB(1)->GetPtr<CB::BoneMatrix>();
 	std::copy_n(m_pModel->GetBoneMatCB().data(), m_pModel->GetBoneMatCB().size(), bonePtr->BoneMat);
@@ -169,41 +169,6 @@ void MeshRenderer::Draw()
 
 	// レンダーキューに登録
 	Render::GetInstance().EnqueueRenderItem(item);
-
-#if 0
-	auto material = m_Owner->GetMaterial();
-	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
-
-	commandList->SetGraphicsRootSignature(material->GetRootSignature()->Get());					// ルートシグネチャを設定
-	commandList->SetPipelineState(material->GetPipelineState()->Get());							// パイプラインステートを設定
-	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
-	
-	// ボーン行列用定数バッファとディスクリプタヒープの設定
-	if (m_pModel)
-	{
-		auto materialHeap = material->GetDescriptorHeap()->GetHeap();	// ディスクリプタヒープを取得
-		commandList->SetGraphicsRootConstantBufferView(1, m_pBoneMatrixCB[currentIndex]->GetAddress()); // ボーン行列用定数バッファを設定
-		commandList->SetDescriptorHeaps(1, &materialHeap);														// ディスクリプタヒープを設定
-	}
-	
-	for (size_t i = 0; i < m_Meshes.size(); ++i)
-	{
-		auto vbView = m_pVertexBuffers[i]->GetView();	// 頂点バッファビューを取得
-		auto ibView = m_pIndexBuffers[i]->GetView();	// インデックスバッファビューを取得
-
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
-		commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
-		commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
-
-		if (m_pModel)
-		{
-			auto materialHandle = material->GetDescriptorHandle(i);	// マテリアルのディスクリプタハンドルを取得
-			commandList->SetGraphicsRootDescriptorTable(2, materialHandle->HandleGPU);	// ディスクリプタテーブルを設定
-		}
-
-		commandList->DrawIndexedInstanced(static_cast<UINT>(m_Meshes[i].Indices.size()), 1, 0, 0, 0);	// 描画
-	}
-#endif
 }
 
 void MeshRenderer::Uninit()
@@ -254,7 +219,7 @@ void MeshRenderer::Init(std::vector<Model::Mesh> meshes)
 	}
 
 	// 定数バッファの生成
-	auto pWVPCB = material->SetCB(0, new ConstantBuffer(sizeof(CB::WVP)));
+	auto pWVPCB = material->SetCB(sizeof(CB::WVP));
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
 		assert(pWVPCB[i]);	// nullptrチェック
@@ -265,9 +230,9 @@ void MeshRenderer::Init(std::vector<Model::Mesh> meshes)
 	}
 
 	// ボーン行列用定数バッファの生成
-	if (m_pModel)
+	if (m_pModel->GetBoneNum())
 	{
-		auto pBoneCB = material->SetCB(1, new ConstantBuffer(sizeof(CB::BoneMatrix)));
+		auto pBoneCB = material->SetCB(sizeof(CB::BoneMatrix));
 
 		for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 		{

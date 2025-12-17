@@ -80,6 +80,7 @@ public:
 	inline const aiScene* GetScene() { return m_pScene; }
 	inline const std::vector<Mesh>& GetMeshes() { return m_Meshes; }
 	inline std::unordered_map<std::string, Bone>& GetBones() { return m_Bones; }
+	inline const int GetBoneNum() { return static_cast<int>(m_Bones.size()); }
 	inline std::vector<DirectX::XMMATRIX>& GetBoneMatCB() { return m_BoneMatCB; }
 
 private:

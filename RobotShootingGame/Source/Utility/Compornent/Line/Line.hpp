@@ -47,7 +47,6 @@ public:
 
 private:
 	VertexBuffer* m_pVertexBuffer{};				// 頂点バッファ
-	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 
 	std::vector<Vertex::Line> m_Lines{}; // 線の頂点データ
 };

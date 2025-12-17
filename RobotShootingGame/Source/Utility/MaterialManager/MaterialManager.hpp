@@ -28,7 +28,7 @@ public:
 
 	void SetTexture(class Texture* pTexture);
 	void SetTexture(class RenderTarget* pRTV);
-	std::vector<ConstantBuffer*> SetCB(size_t index, class ConstantBuffer* pCB);
+	std::vector<ConstantBuffer*> SetCB(size_t size);
 
 	DescriptorHeap* GetDescriptorHeap() const;
 	DescriptorHandle* GetDescriptorHandle(size_t index) const;
@@ -43,6 +43,7 @@ private:
 	MaterialBase* m_pMaterial{}; // マテリアル
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_pDescriptorHandle{}; // ディスクリプタハンドル
+	std::vector<std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>> m_pCBVs{};	// CBV用定数バッファ
 	bool m_IsOpaque{};
 };
 

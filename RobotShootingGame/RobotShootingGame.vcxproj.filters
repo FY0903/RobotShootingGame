@@ -148,6 +148,15 @@
     <Filter Include="Source\Utility\DepthStencil">
       <UniqueIdentifier>{0a31134a-3586-4e82-ad42-96ce49afee03}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game\Actor\Title">
+      <UniqueIdentifier>{228fcca2-1735-4e61-9294-9aed626da5a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Actor\Skybox">
+      <UniqueIdentifier>{39a31ff7-6999-4d05-90d9-757a18a4e8a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Actor\TitleText">
+      <UniqueIdentifier>{6ae17b85-7c54-41b7-a59e-cc82bc4505ce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -278,6 +287,15 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\DepthStencil\DepthStencil.cpp">
       <Filter>Source\Utility\DepthStencil</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Title\Title.cpp">
+      <Filter>Source\Game\Actor\Title</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Skybox\Skybox.cpp">
+      <Filter>Source\Game\Actor\Skybox</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\TitleText\TitleText.cpp">
+      <Filter>Source\Game\Actor\TitleText</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -416,6 +434,15 @@
     <ClInclude Include="Source\Utility\DepthStencil\DepthStencil.hpp">
       <Filter>Source\Utility\DepthStencil</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Title\Title.hpp">
+      <Filter>Source\Game\Actor\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Skybox\Skybox.hpp">
+      <Filter>Source\Game\Actor\Skybox</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\TitleText\TitleText.hpp">
+      <Filter>Source\Game\Actor\TitleText</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -461,6 +488,12 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\WaterPS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\WaterVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\TextPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

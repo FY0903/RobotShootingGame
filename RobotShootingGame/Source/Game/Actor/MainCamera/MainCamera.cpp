@@ -17,7 +17,13 @@ void MainCamera::OnInit()
 {
 	// カメラコンポーネントの生成と初期化
 	Camera* camera = AddComponent<Camera>();
-	camera->Init();
+
+	DirectX::XMFLOAT3 eyePos = { 0.0f, 20.0f, -20.0f };
+	DirectX::XMFLOAT3 targetPos = { -10.0f, 10.0f, 10.0f };
+
+	camera->Init(DirectX::XMLoadFloat3(&eyePos));
+	camera->SetTargetPos(DirectX::XMLoadFloat3(&targetPos));
+	camera->SetRadius(20.0f);
 
 	// カメラマネージャーに登録
 	CameraManager::GetInstance().RegisterCamera("Camera01", camera);

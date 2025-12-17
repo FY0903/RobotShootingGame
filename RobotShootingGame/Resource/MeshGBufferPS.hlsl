@@ -12,13 +12,15 @@ struct PSOutput
     float4 worldPos : SV_Target2;
 };
 
+SamplerState smp : register(s0);
+Texture2D tex : register(t0);
+
 PSOutput main(VSOutput input)
 {
     PSOutput output = (PSOutput) 0;
     
-    output.albedo = float4(1.0f, 0.0f, 0.0f, 1.0f); // 赤色
-    output.normal = float4(0.0f, 0.0f, 1.0f, 0.0f); // 法線ベクトル
-    output.worldPos = input.worldPos; // ワールド座標
+    output.albedo = tex.Sample(smp, input.uv);
+    output.worldPos.xyz = normalize(input.worldPos.xyz) * 0.5f + 0.5f; // ワールド座標を[0,1]範囲に変換
     
     return output;
 }

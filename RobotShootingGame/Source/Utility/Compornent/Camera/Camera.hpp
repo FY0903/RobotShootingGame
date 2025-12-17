@@ -44,6 +44,9 @@ public:
 	void Draw() override final;
 	void Uninit() override final;
 
+	inline void SetTargetPos(DirectX::XMVECTOR targetPos) { m_TargetPos = targetPos; }
+	inline void SetRadius(float radius) { m_Radius = radius; }
+
 	const DirectX::XMFLOAT4X4 Get3DViewMatrixFloat4x4(bool transpose = true);
 	const DirectX::XMFLOAT4X4 Get3DProjectionMatrixFloat4x4(bool transpose = true);
 	const DirectX::XMFLOAT4X4 Get2DViewMatrixFloat4x4(bool transpose = true);

@@ -25,6 +25,16 @@ Material::~Material()
 
 	delete m_pDescriptorHeap;
 	m_pDescriptorHeap = nullptr;
+
+	for (auto& cbvArray : m_pCBVs)
+	{
+		for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+		{
+			delete cbvArray[i];
+			cbvArray[i] = nullptr;
+		}
+	}
+
 	m_pMaterial = nullptr;
 }
 
@@ -55,10 +65,14 @@ void Material::SetTexture(RenderTarget* pRTV)
 	m_pDescriptorHandle.push_back(handle);
 }
 
-std::vector<ConstantBuffer*> Material::SetCB(size_t index, ConstantBuffer* pCB)
+std::vector<ConstantBuffer*> Material::SetCB(size_t size)
 {
-	if (!m_pMaterial) return;
-	return m_pMaterial->SetCB(index, pCB);
+	m_pCBVs.push_back({});
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		m_pCBVs.back()[i] = new ConstantBuffer(size);
+	}
+	return std::vector<ConstantBuffer*>(m_pCBVs.back().begin(), m_pCBVs.back().end());
 }
 
 DescriptorHeap* Material::GetDescriptorHeap() const
@@ -103,18 +117,17 @@ int Material::GetRootParameterIndex() const
 
 ConstantBuffer* Material::GetCB(size_t index) const
 {
-	// マテリアルが存在しない場合はnullptrを返す
-	if (!m_pMaterial) return nullptr;
+	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 
-	return m_pMaterial->GetCB(index);
+	// 範囲外チェック
+	if (index >= m_pCBVs.size()) return nullptr;
+
+	return m_pCBVs[index][currentIndex];	// 現在のフレーム用の定数バッファを返す
 }
 
 int Material::GetCBSize() const
 {
-	// マテリアルが存在しない場合は0を返す
-	if (!m_pMaterial) return 0;
-
-	return m_pMaterial->GetCBSize();
+	return static_cast<int>(m_pCBVs.size());
 }
 
 void MaterialManager::Init()
@@ -123,7 +136,7 @@ void MaterialManager::Init()
 	// SRVを先に登録するとルートパラメータのインデックスがずれるから
 
 	// Spriteマテリアルの作成
-	auto sprite = CreateMaterialBase("Sprite");
+	auto sprite = CreateMaterialBase("Sprite", 1, true);
 	sprite->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	sprite->SetPSFilepath(L"Assets/Shader/SpritePS.cso");
 	sprite->SetInputLayout(Vertex::Sprite::InputLayout);
@@ -165,6 +178,8 @@ void MaterialManager::Init()
 	gbufferMesh->SetPSFilepath(L"Assets/Shader/MeshGBufferPS.cso");
 	gbufferMesh->SetInputLayout(Vertex::Mesh::InputLayout);
 	gbufferMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	gbufferMesh->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	gbufferMesh->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	gbufferMesh->Create();
 
 	auto skeletalGBuffer = CreateMaterialBase("SkeletalGBuffer", 3);
@@ -178,14 +193,35 @@ void MaterialManager::Init()
 	skeletalGBuffer->Create();
 
 	auto water = CreateMaterialBase("Water");
-	water->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
+	water->SetVSFilepath(L"Assets/Shader/WaterVS.cso");
 	water->SetPSFilepath(L"Assets/Shader/WaterPS.cso");
 	water->SetInputLayout(Vertex::Sprite::InputLayout);
 	water->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
-	water->SetCBV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+	water->SetCBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
 	water->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	water->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	water->Create();
+
+	auto ui = CreateMaterialBase("UI", 1, true);
+	ui->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
+	ui->SetPSFilepath(L"Assets/Shader/SpritePS.cso");
+	ui->SetInputLayout(Vertex::Sprite::InputLayout);
+	ui->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	ui->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	ui->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	ui->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
+	ui->Create();
+
+	auto text = CreateMaterialBase("Text", 1, true);
+	text->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
+	text->SetPSFilepath(L"Assets/Shader/TextPS.cso");
+	text->SetInputLayout(Vertex::Sprite::InputLayout);
+	text->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	text->SetCBV(0, D3D12_SHADER_VISIBILITY_PIXEL);
+	text->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	text->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	text->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
+	text->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)

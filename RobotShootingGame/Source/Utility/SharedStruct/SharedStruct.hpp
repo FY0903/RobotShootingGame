@@ -65,4 +65,9 @@ namespace CB
 	{
 		DirectX::XMMATRIX BoneMat[400];		// ボーン行列配列
 	};
+
+	struct Time
+	{
+		float DeltaTime{};
+	};
 }

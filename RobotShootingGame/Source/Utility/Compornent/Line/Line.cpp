@@ -17,8 +17,9 @@
 void Line::Update()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
-	CB::WVP* ptr = m_pWVPCB[currentIndex]->GetPtr<CB::WVP>();
+	auto material = m_Owner->GetMaterial();
 
+	CB::WVP* ptr = material->GetCB(0)->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
@@ -31,7 +32,6 @@ void Line::Draw()
 	// レンダーアイテムの設定
 	Render::RenderItem item{};
 	item.pMaterial = m_Owner->GetMaterial();
-	item.pWVPCB = m_pWVPCB[currentIndex];
 	item.type = D3D_PRIMITIVE_TOPOLOGY_LINELIST;
 	item.pVertexBuffers.push_back(m_pVertexBuffer);
 	item.MeshSize = 1;
@@ -45,12 +45,6 @@ void Line::Uninit()
 {
 	delete m_pVertexBuffer;
 	m_pVertexBuffer = nullptr;
-
-	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-	{
-		delete m_pWVPCB[i];
-		m_pWVPCB[i] = nullptr;
-	}
 }
 
 void Line::AddPoint(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, const DirectX::XMFLOAT4& color)
@@ -65,15 +59,17 @@ void Line::Create()
 	auto vertexStride = sizeof(Vertex::Line);
 	m_pVertexBuffer = new VertexBuffer(vertexSize, vertexStride, m_Lines.data());
 
+	auto material = m_Owner->GetMaterial();
+
 	// 定数バッファの生成
+	auto pWVPCB = material->SetCB(sizeof(CB::WVP));
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pWVPCB[i] = new ConstantBuffer(sizeof(CB::WVP));
-		assert(m_pWVPCB[i]);	// nullptrチェック
-		CB::WVP* ptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
-		ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4();
-		ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4();
-		ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4();
+		assert(pWVPCB[i]);	// nullptrチェック
+		CB::WVP* WVPptr = pWVPCB[i]->GetPtr<CB::WVP>();
+		WVPptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
+		WVPptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
+		WVPptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 	}
 }
 
