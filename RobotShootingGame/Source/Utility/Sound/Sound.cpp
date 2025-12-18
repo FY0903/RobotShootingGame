@@ -35,6 +35,12 @@ void Sound::Uninit()
 	SoundMap::iterator itr = m_soundMap.begin();
 	for (; itr != m_soundMap.end(); ++itr)
 	{
+		// ソースボイスの停止
+		itr->second.pSourceVoice->Stop();
+		// ストップした後、バッファが残るので削除
+		itr->second.pSourceVoice->FlushSourceBuffers();
+
+		// サウンドデータの削除
 		itr->second.data.pBuffer = nullptr;
 	}
 

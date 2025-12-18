@@ -293,6 +293,7 @@ void Render::DrawRenderItems(const std::vector<RenderItem>& renderItems)
 {
 	// コマンドリストを取得
 	const auto cmd = Engine::GetInstance().GetCommandList();
+	const auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	if (!cmd) return;
 
 	for (auto& item : renderItems)
@@ -315,12 +316,12 @@ void Render::DrawRenderItems(const std::vector<RenderItem>& renderItems)
 		}
 
 		// 定数バッファをセット
-		cmd->SetGraphicsRootConstantBufferView(0, item.pMaterial->GetCB(0)->GetAddress());
+		cmd->SetGraphicsRootConstantBufferView(0, item.pMaterial->GetCBByRegisterForFrame(0, currentIndex)->GetAddress());
 		for (size_t i = 1; i < item.pMaterial->GetCBSize(); ++i)
 		{
 			if (i > item.pMaterial->GetRootParameterIndex()) assert(false); // RootParameterIndexを超過している
 
-			cmd->SetGraphicsRootConstantBufferView(static_cast<UINT>(i), item.pMaterial->GetCB(i)->GetAddress());
+			cmd->SetGraphicsRootConstantBufferView(static_cast<UINT>(i), item.pMaterial->GetCBByRegisterForFrame(static_cast<int>(i), currentIndex)->GetAddress());
 		}
 
 		for (size_t i = 0; i < item.MeshSize; ++i)

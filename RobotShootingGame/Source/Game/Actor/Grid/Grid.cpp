@@ -19,12 +19,14 @@ void Grid::OnInit()
 
 	// 線分コンポーネントの追加
 	auto line = AddComponent<Line>();
-	line->AddPoint({ -10.0f, 0.0f, 0.0f }, { 10.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }); // X軸
-	line->AddPoint({ 0.0f, -10.0f, 0.0f }, { 0.0f, 10.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }); // Y軸
-	line->AddPoint({ 0.0f, 0.0f, -10.0f }, { 0.0f, 0.0f, 10.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }); // Z軸
+	line->AddPoint({ -100.0f, 0.0f, 0.0f }, { 100.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }); // X軸
+	line->AddPoint({ 0.0f, -100.0f, 0.0f }, { 0.0f, 100.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }); // Y軸
+	line->AddPoint({ 0.0f, 0.0f, -100.0f }, { 0.0f, 0.0f, 100.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }); // Z軸
 
 	for (int i = -10; i <= 10; ++i)
 	{
+		if (!i) continue; // 中心線はスキップ
+
 		// グリッド線の追加（XZ平面）
 		line->AddPoint({ static_cast<float>(i), 0.0f, -10.0f }, { static_cast<float>(i), 0.0f, 10.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
 		line->AddPoint({ -10.0f, 0.0f, static_cast<float>(i) }, { 10.0f, 0.0f, static_cast<float>(i) }, { 1.0f, 1.0f, 1.0f, 1.0f });

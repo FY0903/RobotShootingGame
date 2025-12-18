@@ -36,5 +36,5 @@ private:
 	void OnUpdate() override final;
 	void OnUninit() override final;
 
-	std::vector<ConstantBuffer*> m_pPSTimeCB{}; // 時間用定数バッファ
+	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pTimeCB{}; // 時間用定数バッファ
 };

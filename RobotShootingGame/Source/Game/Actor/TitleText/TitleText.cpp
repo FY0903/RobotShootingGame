@@ -29,13 +29,13 @@ void TitleText::OnInit()
 	m_Transform.Scale = { 2062.0f * 0.2f, 520.0f * 0.2f, 1.0f };
 
 	// 定数バッファの設定
-	m_pPSTimeCB = m_pMaterial->SetCB(sizeof(CB::Time));
+	m_pTimeCB = m_pMaterial->SetCBAtRegister(1, sizeof(CB::Time)); // レジスタ番号1に時間用定数バッファを設定
 }
 
 void TitleText::OnUpdate()
 {
 	size_t currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
-	CB::Time* pTime = m_pPSTimeCB[currentIndex]->GetPtr<CB::Time>();
+	CB::Time* pTime = m_pTimeCB[currentIndex]->GetPtr<CB::Time>();
 	pTime->DeltaTime = Time::GetInstance().GetDeltaTimeSinceStartup();
 }
 

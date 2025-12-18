@@ -42,6 +42,16 @@ void MeshRenderer::Init(Model* pModel)
 		vertices[2].UV = { 1.0f, 1.0f };
 		vertices[3].UV = { 0.0f, 1.0f };
 
+		vertices[0].Normal = { 0.0f, 0.0f, 1.0f };
+		vertices[1].Normal = { 0.0f, 0.0f, 1.0f };
+		vertices[2].Normal = { 0.0f, 0.0f, 1.0f };
+		vertices[3].Normal = { 0.0f, 0.0f, 1.0f };
+
+		vertices[0].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[1].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[2].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[3].Tangent = { 1.0f, 0.0f, 0.0f };
+
 		// -Z面
 		vertices[4].Position = { 1.0f, 1.0f, -1.0f };
 		vertices[5].Position = { -1.0f, 1.0f, -1.0f };
@@ -52,6 +62,16 @@ void MeshRenderer::Init(Model* pModel)
 		vertices[5].UV = { 1.0f, 0.0f };
 		vertices[6].UV = { 1.0f, 1.0f };
 		vertices[7].UV = { 0.0f, 1.0f };
+
+		vertices[4].Normal = { 0.0f, 0.0f, -1.0f };
+		vertices[5].Normal = { 0.0f, 0.0f, -1.0f };
+		vertices[6].Normal = { 0.0f, 0.0f, -1.0f };
+		vertices[7].Normal = { 0.0f, 0.0f, -1.0f };
+
+		vertices[4].Tangent = { -1.0f, 0.0f, 0.0f };
+		vertices[5].Tangent = { -1.0f, 0.0f, 0.0f };
+		vertices[6].Tangent = { -1.0f, 0.0f, 0.0f };
+		vertices[7].Tangent = { -1.0f, 0.0f, 0.0f };
 
 		// +X面
 		vertices[8].Position = { 1.0f, 1.0f, 1.0f };
@@ -64,6 +84,16 @@ void MeshRenderer::Init(Model* pModel)
 		vertices[10].UV = { 1.0f, 1.0f };
 		vertices[11].UV = { 0.0f, 1.0f };
 
+		vertices[8].Normal = { 1.0f, 0.0f, 0.0f };
+		vertices[9].Normal = { 1.0f, 0.0f, 0.0f };
+		vertices[10].Normal = { 1.0f, 0.0f, 0.0f };
+		vertices[11].Normal = { 1.0f, 0.0f, 0.0f };
+
+		vertices[8].Tangent = { 0.0f, 0.0f, -1.0f };
+		vertices[9].Tangent = { 0.0f, 0.0f, -1.0f };
+		vertices[10].Tangent = { 0.0f, 0.0f, -1.0f };
+		vertices[11].Tangent = { 0.0f, 0.0f, -1.0f };
+
 		// -X面
 		vertices[12].Position = { -1.0f, 1.0f, -1.0f };
 		vertices[13].Position = { -1.0f, 1.0f, 1.0f };
@@ -74,6 +104,16 @@ void MeshRenderer::Init(Model* pModel)
 		vertices[13].UV = { 1.0f, 0.0f };
 		vertices[14].UV = { 1.0f, 1.0f };
 		vertices[15].UV = { 0.0f, 1.0f };
+
+		vertices[12].Normal = { -1.0f, 0.0f, 0.0f };
+		vertices[13].Normal = { -1.0f, 0.0f, 0.0f };
+		vertices[14].Normal = { -1.0f, 0.0f, 0.0f };
+		vertices[15].Normal = { -1.0f, 0.0f, 0.0f };
+
+		vertices[12].Tangent = { 0.0f, 0.0f, 1.0f };
+		vertices[13].Tangent = { 0.0f, 0.0f, 1.0f };
+		vertices[14].Tangent = { 0.0f, 0.0f, 1.0f };
+		vertices[15].Tangent = { 0.0f, 0.0f, 1.0f };
 
 		// +Y面
 		vertices[16].Position = { -1.0f, 1.0f, -1.0f };
@@ -86,6 +126,16 @@ void MeshRenderer::Init(Model* pModel)
 		vertices[18].UV = { 1.0f, 1.0f };
 		vertices[19].UV = { 0.0f, 1.0f };
 
+		vertices[16].Normal = { 0.0f, 1.0f, 0.0f };
+		vertices[17].Normal = { 0.0f, 1.0f, 0.0f };
+		vertices[18].Normal = { 0.0f, 1.0f, 0.0f };
+		vertices[19].Normal = { 0.0f, 1.0f, 0.0f };
+
+		vertices[16].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[17].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[18].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[19].Tangent = { 1.0f, 0.0f, 0.0f };
+
 		// -Y面
 		vertices[20].Position = { -1.0f, -1.0f, 1.0f };
 		vertices[21].Position = { 1.0f, -1.0f, 1.0f };
@@ -96,6 +146,16 @@ void MeshRenderer::Init(Model* pModel)
 		vertices[21].UV = { 1.0f, 0.0f };
 		vertices[22].UV = { 1.0f, 1.0f };
 		vertices[23].UV = { 0.0f, 1.0f };
+
+		vertices[20].Normal = { 0.0f, -1.0f, 0.0f };
+		vertices[21].Normal = { 0.0f, -1.0f, 0.0f };
+		vertices[22].Normal = { 0.0f, -1.0f, 0.0f };
+		vertices[23].Normal = { 0.0f, -1.0f, 0.0f };
+
+		vertices[20].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[21].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[22].Tangent = { 1.0f, 0.0f, 0.0f };
+		vertices[23].Tangent = { 1.0f, 0.0f, 0.0f };
 
 		// 頂点カラーの設定
 		for (auto& vertex : vertices)
@@ -136,14 +196,14 @@ void MeshRenderer::Update()
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	auto material = m_Owner->GetMaterial();
 
-	CB::WVP* ptr = material->GetCB(0)->GetPtr<CB::WVP>();
+	CB::WVP* ptr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 
-	if (!m_Owner->GetComponent<SkeletalAnimator>() || !m_pModel->GetBoneNum()) return;
+	if (!m_Owner->GetComponent<SkeletalAnimator>() || !m_pModel) return;
 
-	CB::BoneMatrix* bonePtr = material->GetCB(1)->GetPtr<CB::BoneMatrix>();
+	CB::BoneMatrix* bonePtr = m_pBoneCBs[currentIndex]->GetPtr<CB::BoneMatrix>();
 	std::copy_n(m_pModel->GetBoneMatCB().data(), m_pModel->GetBoneMatCB().size(), bonePtr->BoneMat);
 }
 
@@ -183,6 +243,9 @@ void MeshRenderer::Uninit()
 		delete pIB;
 	}
 
+	m_pWVPCBs.fill(nullptr);
+	m_pBoneCBs.fill(nullptr);
+
 	m_pModel = nullptr;
 }
 
@@ -219,25 +282,25 @@ void MeshRenderer::Init(std::vector<Model::Mesh> meshes)
 	}
 
 	// 定数バッファの生成
-	auto pWVPCB = material->SetCB(sizeof(CB::WVP));
+	m_pWVPCBs = material->SetCBAtRegister(0, sizeof(CB::WVP)); // レジスタ番号0にWVP用定数バッファを設定
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		assert(pWVPCB[i]);	// nullptrチェック
-		CB::WVP* WVPptr = pWVPCB[i]->GetPtr<CB::WVP>();
+		assert(m_pWVPCBs[i]);	// nullptrチェック
+		CB::WVP* WVPptr = m_pWVPCBs[i]->GetPtr<CB::WVP>();
 		WVPptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 		WVPptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 		WVPptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 	}
 
 	// ボーン行列用定数バッファの生成
-	if (m_pModel->GetBoneNum())
+	if (m_pModel)
 	{
-		auto pBoneCB = material->SetCB(sizeof(CB::BoneMatrix));
+		m_pBoneCBs = material->SetCBAtRegister(1, sizeof(CB::BoneMatrix)); // レジスタ番号1にボーン行列用定数バッファを設定
 
 		for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 		{
-			assert(pBoneCB[i]);	// nullptrチェック
-			CB::BoneMatrix* bonePtr = pBoneCB[i]->GetPtr<CB::BoneMatrix>();
+			assert(m_pBoneCBs[i]);	// nullptrチェック
+			CB::BoneMatrix* bonePtr = m_pBoneCBs[i]->GetPtr<CB::BoneMatrix>();
 			for (size_t j = 0; j < m_pModel->GetBones().size(); ++j)
 			{
 				bonePtr->BoneMat[j] = DirectX::XMMatrixIdentity();

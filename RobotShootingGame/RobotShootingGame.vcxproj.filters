@@ -157,6 +157,12 @@
     <Filter Include="Source\Game\Actor\TitleText">
       <UniqueIdentifier>{6ae17b85-7c54-41b7-a59e-cc82bc4505ce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\Compornent\Light">
+      <UniqueIdentifier>{111c600a-784d-4baa-a901-7a3766008a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Actor\DirectionalLight">
+      <UniqueIdentifier>{24546317-0fab-476c-a53b-a15116636c44}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -296,6 +302,12 @@
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\TitleText\TitleText.cpp">
       <Filter>Source\Game\Actor\TitleText</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\Light\Light.cpp">
+      <Filter>Source\Utility\Compornent\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\DirectionalLight\DirectionalLight.cpp">
+      <Filter>Source\Game\Actor\DirectionalLight</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -442,6 +454,12 @@
     </ClInclude>
     <ClInclude Include="Source\Game\Actor\TitleText\TitleText.hpp">
       <Filter>Source\Game\Actor\TitleText</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\Light\Light.hpp">
+      <Filter>Source\Utility\Compornent\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\DirectionalLight\DirectionalLight.hpp">
+      <Filter>Source\Game\Actor\DirectionalLight</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

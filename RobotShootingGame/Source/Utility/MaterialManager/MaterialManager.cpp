@@ -26,12 +26,12 @@ Material::~Material()
 	delete m_pDescriptorHeap;
 	m_pDescriptorHeap = nullptr;
 
-	for (auto& cbvArray : m_pCBVs)
+	for (auto& pair : m_pCBVs)
 	{
 		for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 		{
-			delete cbvArray[i];
-			cbvArray[i] = nullptr;
+			delete pair.second[i];
+			pair.second[i] = nullptr;
 		}
 	}
 
@@ -65,14 +65,43 @@ void Material::SetTexture(RenderTarget* pRTV)
 	m_pDescriptorHandle.push_back(handle);
 }
 
-std::vector<ConstantBuffer*> Material::SetCB(size_t size)
+std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>& Material::SetCBAtRegister(int index, size_t size)
 {
-	m_pCBVs.push_back({});
+	auto& array = m_pCBVs[index];
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pCBVs.back()[i] = new ConstantBuffer(size);
+		if (!array[i])
+		{
+			array[i] = new ConstantBuffer(size);
+		}
 	}
-	return std::vector<ConstantBuffer*>(m_pCBVs.back().begin(), m_pCBVs.back().end());
+	m_CBSize[index] = size;
+	return array;
+}
+
+const std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>* Material::GetCBByRegister(int index) const
+{
+	auto it = m_pCBVs.find(index);
+	if (it == m_pCBVs.end()) return nullptr;
+
+	return &it->second;
+}
+
+ConstantBuffer* Material::GetCBByRegisterForFrame(int index, size_t frameIndex) const
+{
+	auto it = m_pCBVs.find(index);
+	if (it == m_pCBVs.end()) return nullptr;
+	if (frameIndex >= FRAME_BUFFER_COUNT) return nullptr;
+	
+	return it->second[frameIndex];
+}
+
+size_t Material::GetCBSizeForRegister(int index) const
+{
+	auto it = m_CBSize.find(index);
+	if (it == m_CBSize.end()) return -1;
+
+	return it->second;
 }
 
 DescriptorHeap* Material::GetDescriptorHeap() const
@@ -113,16 +142,6 @@ int Material::GetRootParameterIndex() const
 	if (!m_pMaterial) return -1;
 
 	return m_pMaterial->GetRootParameterIndex();
-}
-
-ConstantBuffer* Material::GetCB(size_t index) const
-{
-	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
-
-	// 範囲外チェック
-	if (index >= m_pCBVs.size()) return nullptr;
-
-	return m_pCBVs[index][currentIndex];	// 現在のフレーム用の定数バッファを返す
 }
 
 int Material::GetCBSize() const
@@ -173,7 +192,7 @@ void MaterialManager::Init()
 	skeletalMesh->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	skeletalMesh->Create();
 
-	auto gbufferMesh = CreateMaterialBase("GBuffer", 3);
+	auto gbufferMesh = CreateMaterialBase("DebugGBuffer", 3);
 	gbufferMesh->SetVSFilepath(L"Assets/Shader/MeshGBufferVS.cso");
 	gbufferMesh->SetPSFilepath(L"Assets/Shader/MeshGBufferPS.cso");
 	gbufferMesh->SetInputLayout(Vertex::Mesh::InputLayout);

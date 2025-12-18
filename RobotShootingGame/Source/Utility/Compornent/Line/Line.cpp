@@ -19,7 +19,7 @@ void Line::Update()
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	auto material = m_Owner->GetMaterial();
 
-	CB::WVP* ptr = material->GetCB(0)->GetPtr<CB::WVP>();
+	CB::WVP* ptr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
@@ -45,6 +45,7 @@ void Line::Uninit()
 {
 	delete m_pVertexBuffer;
 	m_pVertexBuffer = nullptr;
+	m_pWVPCBs.fill(nullptr);
 }
 
 void Line::AddPoint(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, const DirectX::XMFLOAT4& color)
@@ -62,11 +63,11 @@ void Line::Create()
 	auto material = m_Owner->GetMaterial();
 
 	// 定数バッファの生成
-	auto pWVPCB = material->SetCB(sizeof(CB::WVP));
+	m_pWVPCBs = material->SetCBAtRegister(0, sizeof(CB::WVP)); // レジスタ番号0にWVP用定数バッファを設定
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		assert(pWVPCB[i]);	// nullptrチェック
-		CB::WVP* WVPptr = pWVPCB[i]->GetPtr<CB::WVP>();
+		assert(m_pWVPCBs[i]);	// nullptrチェック
+		CB::WVP* WVPptr = m_pWVPCBs[i]->GetPtr<CB::WVP>();
 		WVPptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 		WVPptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 		WVPptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);

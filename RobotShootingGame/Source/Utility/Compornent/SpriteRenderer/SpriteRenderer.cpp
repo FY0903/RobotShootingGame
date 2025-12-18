@@ -48,11 +48,11 @@ void SpriteRenderer::Init(bool is2D)
 	auto material = m_Owner->GetMaterial();
 
 	// 定数バッファの生成
-	auto pWVPCB = material->SetCB(sizeof(CB::WVP));
+	m_pWVPCBs = material->SetCBAtRegister(0, sizeof(CB::WVP)); // レジスタ番号0にWVP用定数バッファを設定
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		assert(pWVPCB[i]);	// nullptrチェック
-		CB::WVP* WVPptr = pWVPCB[i]->GetPtr<CB::WVP>();
+		assert(m_pWVPCBs[i]);	// nullptrチェック
+		CB::WVP* WVPptr = m_pWVPCBs[i]->GetPtr<CB::WVP>();
 		WVPptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 
 		if (m_Is2D)
@@ -123,11 +123,11 @@ void SpriteRenderer::Init(size_t cell, float spacing)
 	auto material = m_Owner->GetMaterial();
 
 	// 定数バッファの生成
-	auto pWVPCB = material->SetCB(sizeof(CB::WVP));
+	m_pWVPCBs = material->SetCBAtRegister(0, sizeof(CB::WVP)); // レジスタ番号0にWVP用定数バッファを設定
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		assert(pWVPCB[i]);	// nullptrチェック
-		CB::WVP* WVPptr = pWVPCB[i]->GetPtr<CB::WVP>();
+		assert(m_pWVPCBs[i]);	// nullptrチェック
+		CB::WVP* WVPptr = m_pWVPCBs[i]->GetPtr<CB::WVP>();
 		WVPptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 		if (m_Is2D)
 		{
@@ -147,7 +147,7 @@ void SpriteRenderer::Update()
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	auto material = m_Owner->GetMaterial();
 
-	CB::WVP* ptr = material->GetCB(0)->GetPtr<CB::WVP>();
+	CB::WVP* ptr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 	if (m_Is2D) return;
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
@@ -187,12 +187,5 @@ void SpriteRenderer::Uninit()
 		m_pIndexBuffer = nullptr;
 	}
 
-	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-	{
-		if (m_pWVPCB[i])
-		{
-			delete m_pWVPCB[i];
-			m_pWVPCB[i] = nullptr;
-		}
-	}
+	m_pWVPCBs.fill(nullptr);
 }

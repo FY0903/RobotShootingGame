@@ -46,7 +46,8 @@ public:
 	void Clear();
 
 private:
-	VertexBuffer* m_pVertexBuffer{};				// 頂点バッファ
+	VertexBuffer* m_pVertexBuffer{};								// 頂点バッファ
+	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pWVPCBs{};	// WVP用定数バッファ
 
 	std::vector<Vertex::Line> m_Lines{}; // 線の頂点データ
 };

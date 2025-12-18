@@ -28,7 +28,12 @@ public:
 
 	void SetTexture(class Texture* pTexture);
 	void SetTexture(class RenderTarget* pRTV);
-	std::vector<ConstantBuffer*> SetCB(size_t size);
+	
+	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>& SetCBAtRegister(int index, size_t size);
+	const std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>* GetCBByRegister(int index) const;
+	ConstantBuffer* GetCBByRegisterForFrame(int index, size_t frameIndex) const;
+	size_t GetCBSizeForRegister(int index) const;
+	int GetCBSize() const;
 
 	DescriptorHeap* GetDescriptorHeap() const;
 	DescriptorHandle* GetDescriptorHandle(size_t index) const;
@@ -36,14 +41,13 @@ public:
 	class PipelineState* GetPipelineState() const;
 	inline bool IsOpaque() const { return m_IsOpaque; }
 	int GetRootParameterIndex() const;
-	class ConstantBuffer* GetCB(size_t index) const;
-	int GetCBSize() const;
 
 private:
 	MaterialBase* m_pMaterial{}; // マテリアル
 	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_pDescriptorHandle{}; // ディスクリプタハンドル
-	std::vector<std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>> m_pCBVs{};	// CBV用定数バッファ
+	std::unordered_map<int, std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>> m_pCBVs{};	// CBV用定数バッファ
+	std::unordered_map<int, size_t> m_CBSize{}; // 定数バッファサイズ
 	bool m_IsOpaque{};
 };
 

@@ -23,6 +23,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Game\Actor\DirectionalLight\DirectionalLight.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Game\Actor\Empty\Empty.cpp">
       <SubType>
       </SubType>
@@ -89,6 +93,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Utility\Compornent\Component.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\Compornent\Light\Light.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -173,6 +181,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Game\Actor\DirectionalLight\DirectionalLight.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Game\Actor\Empty\Empty.hpp">
       <SubType>
       </SubType>
@@ -239,6 +251,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Compornent\Component.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\Compornent\Light\Light.hpp">
       <SubType>
       </SubType>
     </ClInclude>

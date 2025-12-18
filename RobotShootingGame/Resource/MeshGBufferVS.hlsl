@@ -3,7 +3,9 @@
 struct VSInput
 {
     float3 pos : POSITION;
+    float3 normal : NORMAL;
     float2 uv : TEXCOORD;
+    float3 tangent : TANGENT;
 };
 
 struct VSOutput
@@ -11,6 +13,7 @@ struct VSOutput
     float4 svpos : SV_POSITION;
     float4 worldPos : TEXCOORD1;
     float2 uv : TEXCOORD;
+    float4 normal : TEXCOORD2;
 };
 
 VSOutput main(VSInput input)
@@ -25,6 +28,7 @@ VSOutput main(VSInput input)
     output.svpos = projPos;
     output.worldPos = worldPos;
     output.uv = input.uv;
+    output.normal = mul(World, float4(input.normal, 0.0f));
     
     return output;
 }
