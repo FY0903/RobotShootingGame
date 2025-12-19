@@ -74,7 +74,7 @@ DepthTexture::DepthTexture()
 	assert(m_pPipelineState);	// nullptrチェック
 	m_pPipelineState->SetInputLayout(Vertex::Sprite::InputLayout);
 	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
-	m_pPipelineState->SetVS(L"Assets/Shader/SpriteVS.cso");
+	m_pPipelineState->SetVS(L"Assets/Shader/DepthVS.cso");
 	m_pPipelineState->SetPS(L"Assets/Shader/DepthPS.cso");
 	m_pPipelineState->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
 	m_pPipelineState->Create();
@@ -111,6 +111,9 @@ void DepthTexture::Draw()
 {
 	// レンダーターゲットの設定
 	SetRenderTarget();
+
+	// 定数バッファの更新
+	UpdateCB();
 
 	// スプライトの描画
 	DrawSprite();
@@ -161,7 +164,7 @@ void DepthTexture::UpdateCB()
 
 	CB::WVP* ptr = m_pWVPCB[currentIndex]->GetPtr<CB::WVP>();
 	ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
-	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
+	ptr->ViewMat = DirectX::SimpleMath::Matrix::Identity;
 	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 }
 

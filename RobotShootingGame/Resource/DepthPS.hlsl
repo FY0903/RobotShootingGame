@@ -1,15 +1,16 @@
 struct VSOutput
 {
     float4 svpos : SV_POSITION;
-    float2 uv : TEXCOORD;
+    float4 screenPos : TEXCOORD0;
+    float2 uv : TEXCOORD1;
 };
 
 SamplerState smp : register(s0);
 Texture2D tex : register(t0);
 
-float4 main(VSOutput input) : SV_TARGET
+float main(VSOutput input) : SV_TARGET
 {
-    float ndcZ = input.svpos.z / input.svpos.w;
+    float ndcZ = input.screenPos.z / input.screenPos.w;
     
-    return float4(ndcZ, ndcZ, ndcZ, 1.0f);
+    return ndcZ;
 }
