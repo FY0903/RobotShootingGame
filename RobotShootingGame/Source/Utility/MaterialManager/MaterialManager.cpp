@@ -15,7 +15,7 @@
 #include "Utility/RenderTarget/RenderTarget.hpp"
 
 Material::Material(MaterialBase* pMaterial)
-	: m_pMaterial(pMaterial)
+	: m_pMaterial(pMaterial), m_pDescriptorHeap(nullptr), m_IsOpaque(true)
 {
 }
 
@@ -199,6 +199,9 @@ void MaterialManager::Init()
 	gbufferMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	gbufferMesh->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	gbufferMesh->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	gbufferMesh->SetRTVFormat(DXGI_FORMAT_R8G8B8A8_UNORM, 0);		// Albedo
+	gbufferMesh->SetRTVFormat(DXGI_FORMAT_R8G8B8A8_UNORM, 1);		// Normal
+	gbufferMesh->SetRTVFormat(DXGI_FORMAT_R32G32B32A32_FLOAT, 2);	// WorldPos
 	gbufferMesh->Create();
 
 	auto skeletalGBuffer = CreateMaterialBase("SkeletalGBuffer", 3);
@@ -209,6 +212,9 @@ void MaterialManager::Init()
 	skeletalGBuffer->SetCBV(1, D3D12_SHADER_VISIBILITY_VERTEX);
 	skeletalGBuffer->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	skeletalGBuffer->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	skeletalGBuffer->SetRTVFormat(DXGI_FORMAT_R8G8B8A8_UNORM, 0);		// Albedo
+	skeletalGBuffer->SetRTVFormat(DXGI_FORMAT_R8G8B8A8_UNORM, 1);		// Normal
+	skeletalGBuffer->SetRTVFormat(DXGI_FORMAT_R32G32B32A32_FLOAT, 2);	// WorldPos
 	skeletalGBuffer->Create();
 
 	auto water = CreateMaterialBase("Water");

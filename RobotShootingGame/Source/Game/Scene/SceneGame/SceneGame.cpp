@@ -19,6 +19,7 @@
 #include "Game/Actor/Skybox/Skybox.hpp"
 #include "Game/Actor/TitleText/TitleText.hpp"
 #include "Utility/Sound/Sound.hpp"
+#include "Game/Actor/DirectionalLight/DirectionalLight.hpp"
 
 void SceneGame::OnInit()
 {
@@ -45,8 +46,11 @@ void SceneGame::OnInit()
 	// エンプティの生成
 	AddGameObject<Empty>(Layer::DEFAULT);
 
+	// ディレクショナルライトの生成
+	AddGameObject<DirectionalLight>(Layer::DEFAULT);
+
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/Title.mp3", false, true);
-	Sound::GetInstance().Play("BGM");
+	//Sound::GetInstance().Play("BGM");
 }
 
 void SceneGame::OnUpdate()

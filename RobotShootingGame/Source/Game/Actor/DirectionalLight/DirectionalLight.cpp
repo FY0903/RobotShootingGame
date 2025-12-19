@@ -14,7 +14,10 @@
 
 void DirectionalLight::OnInit()
 {
-	AddComponent<Light>();
+	auto light = AddComponent<Light>();
+	light->Init(Light::DIRECTIONAL,
+		DirectX::XMVectorSet(0.0f, -1.0f, -1.0f, 0.0f),
+		DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 void DirectionalLight::OnUpdate()

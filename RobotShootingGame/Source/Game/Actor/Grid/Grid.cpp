@@ -33,6 +33,9 @@ void Grid::OnInit()
 	}
 
 	line->Create();
+
+	// •s“§–¾Ý’è‚ð–³Œø‰»
+	m_pMaterial->SetIsOpaque(false);
 }
 
 void Grid::OnUpdate()

@@ -163,6 +163,12 @@
     <Filter Include="Source\Game\Actor\DirectionalLight">
       <UniqueIdentifier>{24546317-0fab-476c-a53b-a15116636c44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\LightManager">
+      <UniqueIdentifier>{071b17ab-fed0-41a1-a7f3-abe60347efde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\DepthTexture">
+      <UniqueIdentifier>{72cfa81e-3c4d-4f20-a0fc-80a11acbd7cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -308,6 +314,12 @@
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\DirectionalLight\DirectionalLight.cpp">
       <Filter>Source\Game\Actor\DirectionalLight</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\LightManager\LightManager.cpp">
+      <Filter>Source\Utility\LightManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\DepthTexture\DepthTexture.cpp">
+      <Filter>Source\Utility\DepthTexture</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -461,6 +473,12 @@
     <ClInclude Include="Source\Game\Actor\DirectionalLight\DirectionalLight.hpp">
       <Filter>Source\Game\Actor\DirectionalLight</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\LightManager\LightManager.hpp">
+      <Filter>Source\Utility\LightManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\DepthTexture\DepthTexture.hpp">
+      <Filter>Source\Utility\DepthTexture</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -512,6 +530,9 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\TextPS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DepthPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

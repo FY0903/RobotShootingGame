@@ -30,7 +30,7 @@ PSOutput main(VSOutput input)
     output.albedo = ((fHalf * 0.1f) * quat + 0.45f) + (1 - quat) * 0.05f;
     output.albedo.a = 1.0f;
     output.normal = normalize(input.normal) * 0.5f + 0.5f; // 法線を[0,1]範囲に変換
-    output.worldPos.xyz = normalize(input.worldPos.xyz) * 0.5f + 0.5f; // ワールド座標を[0,1]範囲に変換
+    output.worldPos = input.worldPos;
     
     return output;
 }

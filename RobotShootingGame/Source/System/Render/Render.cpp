@@ -13,6 +13,8 @@
 #include "Utility/SharedStruct/SharedStruct.hpp"
 #include "Utility/CameraManager/CameraManager.hpp"
 #include "Utility/MaterialManager/MaterialManager.hpp"
+#include "Utility/LightManager/LightManager.hpp"
+#include "Utility/Compornent/Light/Light.hpp"
 
 Render::Render()
 {
@@ -21,11 +23,12 @@ Render::Render()
 		rtv = new RenderTarget();
 	}
 	m_pDepthStencil = new DepthStencil();
+	m_pDepthTexture = new DepthTexture();
 
 	clearColor[0] = 0.0f;
 	clearColor[1] = 0.2f;
 	clearColor[2] = 0.4f;
-	clearColor[3] = 1.0f;
+	clearColor[3] = 0.0f;
 
 	float halfWidth = WINDOW_WIDTH / 2.0f;
 	float halfHeight = WINDOW_HEIGHT / 2.0f;
@@ -58,8 +61,11 @@ Render::Render()
 	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 	assert(m_pDescriptorHeap);	// nullptrチェック
 
-	DirectX::XMFLOAT4X4 projMat{};
+	// 深度テクスチャのSRV登録
+	auto DepthSRV = m_pDepthTexture->GetRenderTarget();
+	m_SRVHandles.push_back(m_pDescriptorHeap->Register(DepthSRV->Resource(), DepthSRV->ViewDesc()));
 
+	DirectX::XMFLOAT4X4 projMat{};
 	DirectX::XMStoreFloat4x4(&projMat,
 		DirectX::XMMatrixTranspose(
 			DirectX::XMMatrixOrthographicLH(
@@ -72,6 +78,8 @@ Render::Render()
 	{
 		m_pWVPCB[i] = new ConstantBuffer(sizeof(CB::WVP));
 		assert(m_pWVPCB[i]);	// nullptrチェック
+		m_pLightCB[i] = new ConstantBuffer(sizeof(CB::Light));
+		assert(m_pLightCB[i]);	// nullptrチェック
 
 		CB::WVP* ptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
 		ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
@@ -83,7 +91,8 @@ Render::Render()
 	m_pRootSignature = new RootSignature();
 	assert(m_pRootSignature);	// nullptrチェック
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
-	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, D3D12_SHADER_VISIBILITY_PIXEL);	// RTV用テクスチャ
+	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_PIXEL); // 定数バッファ
+	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, D3D12_SHADER_VISIBILITY_PIXEL);	// テクスチャ
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
 	m_pRootSignature->Create();
 
@@ -100,6 +109,9 @@ Render::Render()
 
 Render::~Render()
 {
+	delete m_pDepthTexture;
+	m_pDepthTexture = nullptr;
+
 	for (auto& rtv : m_GbufferRT)
 	{
 		delete rtv;
@@ -181,6 +193,9 @@ void Render::SetGbufferRenderTargets()
 
 void Render::DrawOpaque()
 {
+	// 深度テクスチャの描画
+	m_pDepthTexture->Draw();
+
 	// Gバッファ用レンダーターゲットをセット
 	SetGbufferRenderTargets();
 
@@ -239,7 +254,7 @@ void Render::Init()
 	m_GbufferRT[WorldPos]->Create(
 		WINDOW_WIDTH,
 		WINDOW_HEIGHT,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_FORMAT_R32G32B32A32_FLOAT,
 		clearColor);
 
 	// 深度ステンシルバッファの生成
@@ -265,6 +280,15 @@ void Render::DrawBackBuffer()
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
 	auto materialHeap = m_pDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
+	auto lights = LightManager::GetInstance().GetLights();					// ライト情報を取得
+
+	// ライト情報を定数バッファに転送
+	if (lights.size())
+	{
+		CB::Light* lightPtr = m_pLightCB[currentIndex]->GetPtr<CB::Light>();
+		lightPtr->Direction = lights[0]->GetDirection();
+		lightPtr->Color = lights[0]->GetColor();
+	}
 
 	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
 	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
@@ -272,13 +296,14 @@ void Render::DrawBackBuffer()
 	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
 	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
 	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
+	commandList->SetGraphicsRootConstantBufferView(1, m_pLightCB[currentIndex]->GetAddress());	// 定数バッファを設定
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
 	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
 
 	commandList->SetDescriptorHeaps(1, &materialHeap);							// ディスクリプタヒープを設定
-	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
+	commandList->SetGraphicsRootDescriptorTable(2, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
 }

@@ -11,6 +11,7 @@
 // ==============================
 #include "Light.hpp"
 #include "Utility/Input/Input.hpp"
+#include "Utility/LightManager/LightManager.hpp"
 
 // ==============================
 //	constexpr
@@ -22,6 +23,9 @@ void Light::Init(Type type, DirectX::XMVECTOR dir, DirectX::XMFLOAT4 color)
 	m_Type = type;
 	m_Direction = dir;
 	m_Color = color;
+
+	// ライトマネージャーに登録
+	LightManager::GetInstance().RegisterLight(this);
 }
 
 void Light::Update()
@@ -62,4 +66,11 @@ void Light::Draw()
 
 void Light::Uninit()
 {
+}
+
+DirectX::XMFLOAT4 Light::GetDirection() const
+{
+	DirectX::XMFLOAT4 dir{};
+	DirectX::XMStoreFloat4(&dir, m_Direction);
+	return dir;
 }

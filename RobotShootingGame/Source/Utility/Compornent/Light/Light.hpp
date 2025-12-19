@@ -36,8 +36,9 @@ public:
 	void Uninit() override final;
 
 	inline Type GetType() const { return m_Type; }
-	inline DirectX::XMVECTOR GetDirection() const { return m_Direction; }
+	DirectX::XMFLOAT4 GetDirection() const;
 	inline DirectX::XMFLOAT4 GetColor() const { return m_Color; }
+	inline void SetColor(const DirectX::XMFLOAT4& color) { m_Color = color; }
 
 private:
 	Type m_Type{};

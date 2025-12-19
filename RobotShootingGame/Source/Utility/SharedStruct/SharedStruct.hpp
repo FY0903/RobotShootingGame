@@ -70,4 +70,10 @@ namespace CB
 	{
 		float DeltaTime{};
 	};
+
+	struct Light
+	{
+		DirectX::XMFLOAT4 Direction{};	// ŒõŒ¹‚Ì•ûŒü
+		DirectX::XMFLOAT4 Color{};		// ŒõŒ¹‚ÌF
+	};
 }

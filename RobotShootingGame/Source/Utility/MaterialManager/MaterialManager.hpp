@@ -39,6 +39,7 @@ public:
 	DescriptorHandle* GetDescriptorHandle(size_t index) const;
 	class RootSignature* GetRootSignature() const;
 	class PipelineState* GetPipelineState() const;
+	inline void SetIsOpaque(bool isOpaque) { m_IsOpaque = isOpaque; }
 	inline bool IsOpaque() const { return m_IsOpaque; }
 	int GetRootParameterIndex() const;
 

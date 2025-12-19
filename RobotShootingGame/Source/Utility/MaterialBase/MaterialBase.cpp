@@ -68,6 +68,12 @@ void MaterialBase::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type)
 	m_pPipelineState->SetPrimitiveTopologyType(type);
 }
 
+void MaterialBase::SetRTVFormat(DXGI_FORMAT format, size_t index)
+{
+	if (!m_pPipelineState) return;
+	m_pPipelineState->SetRTVFormat(format, index);
+}
+
 void MaterialBase::SetDSVFormat(DXGI_FORMAT format)
 {
 	if (!m_pPipelineState) return;

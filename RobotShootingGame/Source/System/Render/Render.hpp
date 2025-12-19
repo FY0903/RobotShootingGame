@@ -12,6 +12,7 @@
 // ==============================
 #include "Utility/RenderTarget/RenderTarget.hpp"
 #include "Utility/DepthStencil/DepthStencil.hpp"
+#include "Utility/DepthTexture/DepthTexture.hpp"
 
 #include "System/Engine/Engine.hpp"
 
@@ -78,6 +79,8 @@ private:
 	void ResetRenderItems();
 	void DrawRenderItems(const std::vector<RenderItem>& renderItems);
 
+	DepthTexture* m_pDepthTexture{};					// 深度テクスチャ
+
 	std::array<RenderTarget*, NumGbufferRT> m_GbufferRT{};	// Gバッファ用レンダーターゲット
 	DepthStencil* m_pDepthStencil{};						// 深度ステンシルバッファ
 
@@ -89,6 +92,7 @@ private:
 	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	ConstantBuffer* m_pLightCB[FRAME_BUFFER_COUNT]{}; // ライト用定数バッファ
 	DescriptorHeap* m_pDescriptorHeap{};	// ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_SRVHandles{}; // SRVハンドル配列
 	RootSignature* m_pRootSignature{};		// ルートシグネチャ

@@ -92,6 +92,11 @@ void PipelineState::SetPS(std::wstring filepath)
 	m_Desc.PS = CD3DX12_SHADER_BYTECODE(m_pPSBlob.Get());
 }
 
+void PipelineState::SetRTVFormat(DXGI_FORMAT format, size_t index)
+{
+	m_Desc.RTVFormats[index] = format;
+}
+
 void PipelineState::SetDSVFormat(DXGI_FORMAT format)
 {
 	m_Desc.DSVFormat = format;

@@ -124,12 +124,20 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Utility\DepthTexture\DepthTexture.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\DescriptorHeap\DescriptorHeap.cpp" />
     <ClCompile Include="Source\Utility\IndexBuffer\IndexBuffer.cpp">
       <SubType>
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Utility\Input\Input.cpp" />
+    <ClCompile Include="Source\Utility\LightManager\LightManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\MaterialBase\MaterialBase.cpp" />
     <ClCompile Include="Source\Utility\MaterialManager\MaterialManager.cpp">
       <SubType>
@@ -283,12 +291,20 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Utility\DepthTexture\DepthTexture.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\DescriptorHeap\DescriptorHeap.hpp" />
     <ClInclude Include="Source\Utility\IndexBuffer\IndexBuffer.hpp">
       <SubType>
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\Input\Input.hpp" />
+    <ClInclude Include="Source\Utility\LightManager\LightManager.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\MaterialBase\MaterialBase.hpp" />
     <ClInclude Include="Source\Utility\MaterialManager\MaterialManager.hpp">
       <SubType>
@@ -336,6 +352,12 @@
   <ItemGroup>
     <FxCompile Include="Resource\DebugPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Resource\DepthPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Resource\MeshGBufferPS.hlsl">
