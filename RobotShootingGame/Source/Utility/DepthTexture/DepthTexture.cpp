@@ -12,6 +12,7 @@
 #include "DepthTexture.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
 #include "Utility/CameraManager/CameraManager.hpp"
+#include "Utility/MaterialManager/MaterialManager.hpp"
 
 DepthTexture::DepthTexture()
 {
@@ -23,61 +24,11 @@ DepthTexture::DepthTexture()
 	m_pDepthStencil = new DepthStencil();
 	m_pDepthStencil->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_D32_FLOAT);
 
-	float halfWidth = WINDOW_WIDTH / 2.0f;
-	float halfHeight = WINDOW_HEIGHT / 2.0f;
-
-	Vertex::Sprite vertices[4]{};
-	vertices[0].Position = { -halfWidth, halfHeight, 0.0f };
-	vertices[1].Position = { halfWidth, halfHeight, 0.0f };
-	vertices[2].Position = { halfWidth, -halfHeight, 0.0f };
-	vertices[3].Position = { -halfWidth, -halfHeight, 0.0f };
-
-	vertices[0].UV = { 0.0f, 0.0f };
-	vertices[1].UV = { 1.0f, 0.0f };
-	vertices[2].UV = { 1.0f, 1.0f };
-	vertices[3].UV = { 0.0f, 1.0f };
-
-	// 頂点バッファの生成
-	auto vertexSize = std::size(vertices) * sizeof(Vertex::Sprite);
-	auto vertexStride = sizeof(Vertex::Sprite);
-	m_pVertexBuffer = new VertexBuffer(vertexSize, vertexStride, vertices);
-	assert(m_pVertexBuffer);	// nullptrチェック
-
-	uint32_t indices[] = { 0, 1, 2, 0, 2, 3 };
-
-	// インデックスバッファの生成
-	auto indexSize = std::size(indices) * sizeof(uint32_t);
-	m_pIndexBuffer = new IndexBuffer(indexSize, indices);
-	assert(m_pIndexBuffer);	// nullptrチェック
-
-	// 定数バッファの生成
-	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-	{
-		m_pWVPCB[i] = new ConstantBuffer(sizeof(CB::WVP));
-		assert(m_pWVPCB[i]);	// nullptrチェック
-
-		CB::WVP* ptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
-		ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
-		ptr->ViewMat = DirectX::SimpleMath::Matrix::Identity;
-		ptr->ProjMat = DirectX::SimpleMath::Matrix::Identity;
-	}
-
 	// ルートシグネチャの生成
-	m_pRootSignature = new RootSignature();
-	assert(m_pRootSignature);	// nullptrチェック
-	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
-	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
-	m_pRootSignature->Create();
+	CreateRootSignature();
 
 	// パイプラインステートの生成
-	m_pPipelineState = new PipelineState();
-	assert(m_pPipelineState);	// nullptrチェック
-	m_pPipelineState->SetInputLayout(Vertex::Sprite::InputLayout);
-	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
-	m_pPipelineState->SetVS(L"Assets/Shader/DepthVS.cso");
-	m_pPipelineState->SetPS(L"Assets/Shader/DepthPS.cso");
-	m_pPipelineState->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
-	m_pPipelineState->Create();
+	CreatePSO();
 }
 
 DepthTexture::~DepthTexture()
@@ -87,39 +38,60 @@ DepthTexture::~DepthTexture()
 	
 	delete m_pDepthStencil;
 	m_pDepthStencil = nullptr;
-	
-	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-	{
-		delete m_pWVPCB[i];
-		m_pWVPCB[i] = nullptr;
-	}
-	
-	delete m_pVertexBuffer;
-	m_pVertexBuffer = nullptr;
-	
-	delete m_pIndexBuffer;
-	m_pIndexBuffer = nullptr;
-	
+
 	delete m_pRootSignature;
 	m_pRootSignature = nullptr;
 
-	delete m_pPipelineState;
-	m_pPipelineState = nullptr;
+	for (size_t i = 0; i < NumPSO; ++i)
+	{
+		delete m_pPSOs[i];
+		m_pPSOs[i] = nullptr;
+	}
+
+	m_RenderItems.clear();
 }
 
 void DepthTexture::Draw()
 {
+	// レンダーアイテムがなければ終了
+	if (m_RenderItems.empty()) return;
+
 	// レンダーターゲットの設定
 	SetRenderTarget();
 
-	// 定数バッファの更新
-	UpdateCB();
-
-	// スプライトの描画
-	DrawSprite();
-
 	// GPUの待機
 	WaitGPU();
+}
+
+void DepthTexture::CreateRootSignature()
+{
+	m_pRootSignature = new RootSignature();
+	assert(m_pRootSignature);	// nullptrチェック
+	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
+	m_pRootSignature->Create();
+}
+
+void DepthTexture::CreatePSO()
+{
+	// メッシュ用PSOの生成
+	m_pPSOs[Mesh] = new PipelineState();
+	assert(m_pPSOs[Mesh]);	// nullptrチェック
+	m_pPSOs[Mesh]->SetInputLayout(Vertex::Mesh::InputLayout);
+	m_pPSOs[Mesh]->SetRootSignature(m_pRootSignature->Get());
+	m_pPSOs[Mesh]->SetVS(L"Assets/Shader/DepthMeshVS.cso");
+	m_pPSOs[Mesh]->SetPS(L"Assets/Shader/DepthMeshPS.cso");
+	m_pPSOs[Mesh]->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
+	m_pPSOs[Mesh]->Create();
+
+	// スプライト用PSOの生成
+	m_pPSOs[Sprite] = new PipelineState();
+	assert(m_pPSOs[Sprite]);	// nullptrチェック
+	m_pPSOs[Sprite]->SetInputLayout(Vertex::Sprite::InputLayout);
+	m_pPSOs[Sprite]->SetRootSignature(m_pRootSignature->Get());
+	m_pPSOs[Sprite]->SetVS(L"Assets/Shader/DepthSpriteVS.cso");
+	m_pPSOs[Sprite]->SetPS(L"Assets/Shader/DepthSpritePS.cso");
+	m_pPSOs[Sprite]->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
+	m_pPSOs[Sprite]->Create();
 }
 
 void DepthTexture::SetRenderTarget()
@@ -157,34 +129,43 @@ void DepthTexture::SetRenderTarget()
 		nullptr);
 }
 
-void DepthTexture::UpdateCB()
+void DepthTexture::DrawRenderItems()
 {
-	// 定数バッファの更新
-	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
+	const auto cmd = Engine::GetInstance().GetCommandList();						// コマンドリストを取得
+	const auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
 
-	CB::WVP* ptr = m_pWVPCB[currentIndex]->GetPtr<CB::WVP>();
-	ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
-	ptr->ViewMat = DirectX::SimpleMath::Matrix::Identity;
-	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
-}
+	for (auto& item : m_RenderItems)
+	{
+		if (!item.pMaterial) continue;
 
-void DepthTexture::DrawSprite()
-{
-	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
-	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
+		auto pso = item.pMaterial->GetPipelineState();
+		if (!m_pRootSignature || !pso) continue;
+		cmd->SetGraphicsRootSignature(m_pRootSignature->Get());
+		cmd->SetPipelineState(pso->Get());
 
-	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
-	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
+		// 定数バッファをセット
+		cmd->SetGraphicsRootConstantBufferView(0, item.pMaterial->GetCBByRegisterForFrame(0, currentIndex)->GetAddress());
 
-	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
-	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
-	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
+		for (size_t i = 0; i < item.MeshSize; ++i)
+		{
+			if (!item.pVertexBuffers[i]) continue;
 
-	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
-	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
-	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
+			// 頂点バッファとインデックスバッファをセット
+			auto vbView = item.pVertexBuffers[i]->GetView();
+			cmd->IASetVertexBuffers(0, 1, &vbView);
+			if (item.pIndexBuffers.size())
+			{
+				auto ibView = item.pIndexBuffers[i]->GetView();
+				cmd->IASetIndexBuffer(&ibView);
+			}
+			cmd->IASetPrimitiveTopology(item.type);
 
-	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
+			if (item.pIndexBuffers.size())
+				cmd->DrawIndexedInstanced(item.indexCounts[i], 1, 0, 0, 0);
+			else
+				cmd->DrawInstanced(item.indexCounts[i], 1, 0, 0);
+		}
+	}
 }
 
 void DepthTexture::WaitGPU()

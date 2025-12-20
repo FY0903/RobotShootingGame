@@ -24,7 +24,6 @@ float4 main(VSOutput input) : SV_TARGET
     normal.xyz = normalize(normal.xyz * 2.0f - 1.0f); // 法線ベクトルを[-1,1]範囲に変換
     float4 worldPos = worldPosTex.Sample(smp, input.uv);
     
-    
     return depthTex.Sample(smp, input.uv);
     
     if (albedo.a < 1.0f)

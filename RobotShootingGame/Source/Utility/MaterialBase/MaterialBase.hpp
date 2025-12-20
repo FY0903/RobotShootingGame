@@ -41,6 +41,7 @@ public:
 	void SetSRV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility);
 	void SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter);
 	void SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout);
+	void SetInputLayout(std::type_index type);
 	void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
 	void SetRTVFormat(DXGI_FORMAT format, size_t index);
 	void SetDSVFormat(DXGI_FORMAT format);
@@ -56,6 +57,7 @@ private:
 	std::wstring m_PSFilepath{};	// ピクセルシェーダーファイルパス
 	RootSignature* m_pRootSignature{};	// ルートシグネチャ
 	PipelineState* m_pPipelineState{};	// パイプラインステート
+	std::type_index m_InputLayoutType{ typeid(void) }; // 入力レイアウトの型情報
 
 	int m_rootParameterIndex{};
 };

@@ -532,10 +532,16 @@
     <FxCompile Include="Resource\TextPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\DepthPS.hlsl">
+    <FxCompile Include="Resource\DepthMeshPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\DepthVS.hlsl">
+    <FxCompile Include="Resource\DepthMeshVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DepthSpritePS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DepthSpriteVS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

@@ -51,6 +51,7 @@
 #include <unordered_map>
 #include <chrono>
 #include <iterator>
+#include <typeindex>
 
 // ------------------------------
 //	xaudio2

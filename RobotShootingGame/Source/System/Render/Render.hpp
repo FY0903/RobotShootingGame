@@ -10,11 +10,9 @@
 // ==============================
 //	include
 // ==============================
+#include "System/Engine/Engine.hpp"
 #include "Utility/RenderTarget/RenderTarget.hpp"
 #include "Utility/DepthStencil/DepthStencil.hpp"
-#include "Utility/DepthTexture/DepthTexture.hpp"
-
-#include "System/Engine/Engine.hpp"
 
 #include "Utility/VertexBuffer/VertexBuffer.hpp"
 #include "Utility/IndexBuffer/IndexBuffer.hpp"
@@ -79,7 +77,7 @@ private:
 	void ResetRenderItems();
 	void DrawRenderItems(const std::vector<RenderItem>& renderItems);
 
-	DepthTexture* m_pDepthTexture{};					// 深度テクスチャ
+	class DepthTexture* m_pDepthTexture{};					// 深度テクスチャ
 
 	std::array<RenderTarget*, NumGbufferRT> m_GbufferRT{};	// Gバッファ用レンダーターゲット
 	DepthStencil* m_pDepthStencil{};						// 深度ステンシルバッファ

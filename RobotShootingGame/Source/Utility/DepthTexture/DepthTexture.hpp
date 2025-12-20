@@ -11,9 +11,7 @@
 //	include
 // ==============================
 #include "System/Engine/Engine.hpp"
-#include "Utility/VertexBuffer/VertexBuffer.hpp"
-#include "Utility/IndexBuffer/IndexBuffer.hpp"
-#include "Utility/DescriptorHeap/DescriptorHeap.hpp"
+#include "System/Render/Render.hpp"
 #include "Utility/RootSignature/RootSignature.hpp"
 #include "Utility/PipelineState/PipelineState.hpp"
 #include "Utility/ConstantBuffer/ConstantBuffer.hpp"
@@ -39,18 +37,26 @@ public:
 	void Draw();
 
 	RenderTarget* GetRenderTarget() const { return m_pDepthRT; }
+	inline void SetRenderItems(const std::vector<Render::RenderItem>& items) { m_RenderItems = items; }
 
 private:
+	enum PSOType : size_t
+	{
+		Mesh,
+		Sprite,
+		NumPSO,
+	};
+
+	void CreateRootSignature();
+	void CreatePSO();
 	void SetRenderTarget();
-	void UpdateCB();
-	void DrawSprite();
+	void DrawRenderItems();
 	void WaitGPU();
 
-	RenderTarget* m_pDepthRT{};				// 深度レンダーターゲット
-	DepthStencil* m_pDepthStencil{};		// 深度ステンシル
-	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
-	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
-	RootSignature* m_pRootSignature{};		// ルートシグネチャ
-	PipelineState* m_pPipelineState{};		// パイプラインステート
+	RenderTarget* m_pDepthRT{};						// 深度レンダーターゲット
+	DepthStencil* m_pDepthStencil{};				// 深度ステンシル
+	PipelineState* m_pPSOs[NumPSO]{};				// パイプラインステートオブジェクト
+	RootSignature* m_pRootSignature{};				// ルートシグネチャ
+
+	std::vector<Render::RenderItem> m_RenderItems{};
 };

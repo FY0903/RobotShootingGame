@@ -15,6 +15,7 @@
 #include "Utility/MaterialManager/MaterialManager.hpp"
 #include "Utility/LightManager/LightManager.hpp"
 #include "Utility/Compornent/Light/Light.hpp"
+#include "Utility/DepthTexture/DepthTexture.hpp"
 
 Render::Render()
 {
@@ -23,7 +24,6 @@ Render::Render()
 		rtv = new RenderTarget();
 	}
 	m_pDepthStencil = new DepthStencil();
-	m_pDepthTexture = new DepthTexture();
 
 	clearColor[0] = 0.0f;
 	clearColor[1] = 0.2f;
