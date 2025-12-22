@@ -44,7 +44,15 @@ void SceneGame::OnInit()
 	//AddGameObject<Object>(Layer::DEFAULT);
 
 	// エンプティの生成
-	AddGameObject<Empty>(Layer::DEFAULT);
+	auto emp = AddGameObject<Empty>(Layer::DEFAULT);
+	auto emp1 = AddGameObject<Empty>(Layer::DEFAULT);
+	auto emp2 = AddGameObject<Empty>(Layer::DEFAULT);
+	auto emp3 = AddGameObject<Empty>(Layer::DEFAULT);
+	auto emp4 = AddGameObject<Empty>(Layer::DEFAULT);
+	emp1->GetTransform().Position = DirectX::XMFLOAT3(5.0f, 0.0f, 0.0f);
+	emp2->GetTransform().Position = DirectX::XMFLOAT3(-5.0f, 0.0f, 0.0f);
+	emp3->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 0.0f, 5.0f);
+	emp4->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
 
 	// ディレクショナルライトの生成
 	AddGameObject<DirectionalLight>(Layer::DEFAULT);

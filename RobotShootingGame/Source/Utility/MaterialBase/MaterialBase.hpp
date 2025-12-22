@@ -23,6 +23,15 @@
 class MaterialBase
 {
 public:
+	enum InputLayoutType
+	{
+		None = -1,
+		Mesh,
+		Sprite,
+		Line,
+		Num,
+	};
+
 	/**
 	 * コンストラクタ
 	 */
@@ -40,8 +49,7 @@ public:
 	void SetCBV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility);
 	void SetSRV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility);
 	void SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter);
-	void SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout);
-	void SetInputLayout(std::type_index type);
+	void SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout, InputLayoutType type);
 	void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
 	void SetRTVFormat(DXGI_FORMAT format, size_t index);
 	void SetDSVFormat(DXGI_FORMAT format);
@@ -51,13 +59,14 @@ public:
 	inline RootSignature* GetRootSignature() const { return m_pRootSignature; }
 	inline PipelineState* GetPipelineState() const { return m_pPipelineState; }
 	inline int GetRootParameterIndex() const { return m_rootParameterIndex; }
+	inline InputLayoutType GetInputLayoutType() const { return m_InputLayoutType; }
 
 private:
-	std::wstring m_VSFilepath{};	// 頂点シェーダーファイルパス
-	std::wstring m_PSFilepath{};	// ピクセルシェーダーファイルパス
-	RootSignature* m_pRootSignature{};	// ルートシグネチャ
-	PipelineState* m_pPipelineState{};	// パイプラインステート
-	std::type_index m_InputLayoutType{ typeid(void) }; // 入力レイアウトの型情報
+	std::wstring m_VSFilepath{};			// 頂点シェーダーファイルパス
+	std::wstring m_PSFilepath{};			// ピクセルシェーダーファイルパス
+	RootSignature* m_pRootSignature{};		// ルートシグネチャ
+	PipelineState* m_pPipelineState{};		// パイプラインステート
+	InputLayoutType m_InputLayoutType{};	// 入力レイアウトタイプ
 
 	int m_rootParameterIndex{};
 };

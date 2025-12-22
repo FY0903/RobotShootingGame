@@ -42,6 +42,7 @@ public:
 	inline void SetIsOpaque(bool isOpaque) { m_IsOpaque = isOpaque; }
 	inline bool IsOpaque() const { return m_IsOpaque; }
 	int GetRootParameterIndex() const;
+	MaterialBase::InputLayoutType GetInputLayoutType() const;
 
 private:
 	MaterialBase* m_pMaterial{}; // ƒ}ƒeƒŠƒAƒ‹

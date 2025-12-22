@@ -12,7 +12,7 @@ cbuffer lightBuffer : register(b0)
 
 SamplerState smp : register(s0);
 
-Texture2D<float4> depthTex : register(t0);
+Texture2D<float> depthTex : register(t0);
 Texture2D<float4> albedoTex : register(t1);
 Texture2D<float4> normalTex : register(t2);
 Texture2D<float4> worldPosTex : register(t3);
@@ -24,7 +24,9 @@ float4 main(VSOutput input) : SV_TARGET
     normal.xyz = normalize(normal.xyz * 2.0f - 1.0f); // 法線ベクトルを[-1,1]範囲に変換
     float4 worldPos = worldPosTex.Sample(smp, input.uv);
     
-    return depthTex.Sample(smp, input.uv);
+    float d = depthTex.Sample(smp, input.uv);
+    
+    return float4(d, d, d, 1.0f); // デプス値をグレースケールで出力
     
     if (albedo.a < 1.0f)
     {

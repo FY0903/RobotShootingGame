@@ -35,6 +35,7 @@ public:
 	~DepthTexture();
 
 	void Draw();
+	void DrawDebugSprite();
 
 	RenderTarget* GetRenderTarget() const { return m_pDepthRT; }
 	inline void SetRenderItems(const std::vector<Render::RenderItem>& items) { m_RenderItems = items; }
@@ -59,4 +60,12 @@ private:
 	RootSignature* m_pRootSignature{};				// ルートシグネチャ
 
 	std::vector<Render::RenderItem> m_RenderItems{};
+
+	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
+	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
+	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	DescriptorHeap* m_pDescriptorHeap{};	// ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_SRVHandles{}; // SRVハンドル配列
+	RootSignature* m_pRootSig{};		// ルートシグネチャ
+	PipelineState* m_pPipelineState{};		// パイプラインステート
 };

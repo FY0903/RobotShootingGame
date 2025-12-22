@@ -56,10 +56,11 @@ void MaterialBase::SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter)
 	m_pRootSignature->AddStaticSampler(shaderRegister, filter);
 }
 
-void MaterialBase::SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout)
+void MaterialBase::SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout, InputLayoutType type)
 {
 	if (!m_pPipelineState) return;
 	m_pPipelineState->SetInputLayout(layout);
+	m_InputLayoutType = type;
 }
 
 void MaterialBase::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type)

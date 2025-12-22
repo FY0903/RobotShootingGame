@@ -24,10 +24,11 @@ Render::Render()
 		rtv = new RenderTarget();
 	}
 	m_pDepthStencil = new DepthStencil();
+	m_pDepthTexture = new DepthTexture();
 
 	clearColor[0] = 0.0f;
-	clearColor[1] = 0.2f;
-	clearColor[2] = 0.4f;
+	clearColor[1] = 0.0f;
+	clearColor[2] = 0.0f;
 	clearColor[3] = 0.0f;
 
 	float halfWidth = WINDOW_WIDTH / 2.0f;
@@ -193,6 +194,9 @@ void Render::SetGbufferRenderTargets()
 
 void Render::DrawOpaque()
 {
+	// 深度テクスチャに不透明レンダーアイテムをセット
+	m_pDepthTexture->SetRenderItems(m_OpaqueRenderItems);
+
 	// 深度テクスチャの描画
 	m_pDepthTexture->Draw();
 
@@ -216,6 +220,10 @@ void Render::DrawOpaque()
 
 void Render::DrawTransparent()
 {
+	//m_pDepthTexture->DrawDebugSprite();
+
+	//return;
+
 	// 不透明板ポリゴンの描画
 	DrawBackBuffer();
 

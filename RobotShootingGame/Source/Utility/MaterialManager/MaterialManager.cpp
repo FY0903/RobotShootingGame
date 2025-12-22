@@ -144,6 +144,14 @@ int Material::GetRootParameterIndex() const
 	return m_pMaterial->GetRootParameterIndex();
 }
 
+MaterialBase::InputLayoutType Material::GetInputLayoutType() const
+{
+	// ƒ}ƒeƒŠƒAƒ‹‚ª‘¶Ý‚µ‚È‚¢ê‡‚ÍNone‚ð•Ô‚·
+	if (!m_pMaterial) return MaterialBase::InputLayoutType::None;
+		
+	return m_pMaterial->GetInputLayoutType();
+}
+
 int Material::GetCBSize() const
 {
 	return static_cast<int>(m_pCBVs.size());
@@ -158,7 +166,7 @@ void MaterialManager::Init()
 	auto sprite = CreateMaterialBase("Sprite", 1, true);
 	sprite->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	sprite->SetPSFilepath(L"Assets/Shader/SpritePS.cso");
-	sprite->SetInputLayout(Vertex::Sprite::InputLayout);
+	sprite->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
 	sprite->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	sprite->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	sprite->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
@@ -168,7 +176,7 @@ void MaterialManager::Init()
 	auto line = CreateMaterialBase("Line");
 	line->SetVSFilepath(L"Assets/Shader/LineVS.cso");
 	line->SetPSFilepath(L"Assets/Shader/LinePS.cso");
-	line->SetInputLayout(Vertex::Line::InputLayout);
+	line->SetInputLayout(Vertex::Line::InputLayout, MaterialBase::Line);
 	line->SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 	line->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	line->Create();
@@ -177,7 +185,7 @@ void MaterialManager::Init()
 	auto debugMesh = CreateMaterialBase("Debug");
 	debugMesh->SetVSFilepath(L"Assets/Shader/SimpleVS.cso");
 	debugMesh->SetPSFilepath(L"Assets/Shader/DebugPS.cso");
-	debugMesh->SetInputLayout(Vertex::Mesh::InputLayout);
+	debugMesh->SetInputLayout(Vertex::Mesh::InputLayout, MaterialBase::Mesh);
 	debugMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	debugMesh->Create();
 
@@ -185,7 +193,7 @@ void MaterialManager::Init()
 	auto skeletalMesh = CreateMaterialBase("Skeletal");
 	skeletalMesh->SetVSFilepath(L"Assets/Shader/SkeletalMeshVS.cso");
 	skeletalMesh->SetPSFilepath(L"Assets/Shader/SimplePS.cso");
-	skeletalMesh->SetInputLayout(Vertex::Mesh::InputLayout);
+	skeletalMesh->SetInputLayout(Vertex::Mesh::InputLayout, MaterialBase::Mesh);
 	skeletalMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	skeletalMesh->SetCBV(1, D3D12_SHADER_VISIBILITY_VERTEX);
 	skeletalMesh->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -195,7 +203,7 @@ void MaterialManager::Init()
 	auto gbufferMesh = CreateMaterialBase("DebugGBuffer", 3);
 	gbufferMesh->SetVSFilepath(L"Assets/Shader/MeshGBufferVS.cso");
 	gbufferMesh->SetPSFilepath(L"Assets/Shader/MeshGBufferPS.cso");
-	gbufferMesh->SetInputLayout(Vertex::Mesh::InputLayout);
+	gbufferMesh->SetInputLayout(Vertex::Mesh::InputLayout, MaterialBase::Mesh);
 	gbufferMesh->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	gbufferMesh->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	gbufferMesh->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
@@ -207,7 +215,7 @@ void MaterialManager::Init()
 	auto skeletalGBuffer = CreateMaterialBase("SkeletalGBuffer", 3);
 	skeletalGBuffer->SetVSFilepath(L"Assets/Shader/SkeletalMeshGBufferVS.cso");
 	skeletalGBuffer->SetPSFilepath(L"Assets/Shader/SkeletalMeshGBufferPS.cso");
-	skeletalGBuffer->SetInputLayout(Vertex::Mesh::InputLayout);
+	skeletalGBuffer->SetInputLayout(Vertex::Mesh::InputLayout, MaterialBase::Mesh);
 	skeletalGBuffer->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	skeletalGBuffer->SetCBV(1, D3D12_SHADER_VISIBILITY_VERTEX);
 	skeletalGBuffer->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -220,7 +228,7 @@ void MaterialManager::Init()
 	auto water = CreateMaterialBase("Water");
 	water->SetVSFilepath(L"Assets/Shader/WaterVS.cso");
 	water->SetPSFilepath(L"Assets/Shader/WaterPS.cso");
-	water->SetInputLayout(Vertex::Sprite::InputLayout);
+	water->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
 	water->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	water->SetCBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
 	water->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -230,7 +238,7 @@ void MaterialManager::Init()
 	auto ui = CreateMaterialBase("UI", 1, true);
 	ui->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	ui->SetPSFilepath(L"Assets/Shader/SpritePS.cso");
-	ui->SetInputLayout(Vertex::Sprite::InputLayout);
+	ui->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
 	ui->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	ui->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	ui->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
@@ -240,7 +248,7 @@ void MaterialManager::Init()
 	auto text = CreateMaterialBase("Text", 1, true);
 	text->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	text->SetPSFilepath(L"Assets/Shader/TextPS.cso");
-	text->SetInputLayout(Vertex::Sprite::InputLayout);
+	text->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
 	text->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	text->SetCBV(0, D3D12_SHADER_VISIBILITY_PIXEL);
 	text->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
