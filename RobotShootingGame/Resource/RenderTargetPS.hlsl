@@ -10,6 +10,11 @@ cbuffer lightBuffer : register(b0)
     float4 lightColor : packoffset(c1);
 };
 
+cbuffer cameraBuffer : register(b1)
+{
+    float4x4 invVP : packoffset(c0);
+};
+
 SamplerState smp : register(s0);
 
 Texture2D<float> depthTex : register(t0);
@@ -25,6 +30,16 @@ float4 main(VSOutput input) : SV_TARGET
     float4 worldPos = worldPosTex.Sample(smp, input.uv);
     
     float d = depthTex.Sample(smp, input.uv);
+    
+    float4 proj = float4(input.uv * 2.0f - 1.0f, d, 1.0f); // NDC空間の座標に変換
+    
+    proj.y = -proj.y; // Y軸を反転（DirectXのNDCは左手系）
+    
+    float4 pos = mul(invVP, proj);
+    
+    //return worldPos;
+    
+    return float4(pos.xyz / pos.w, 1.0f);
     
     return float4(d, d, d, 1.0f); // デプス値をグレースケールで出力
     

@@ -76,4 +76,9 @@ namespace CB
 		DirectX::XMFLOAT4 Direction{};	// ŒõŒ¹‚Ì•ûŒü
 		DirectX::XMFLOAT4 Color{};		// ŒõŒ¹‚ÌF
 	};
+
+	struct Camera
+	{
+		DirectX::XMFLOAT4X4 invVPMat{};	// ƒJƒƒ‰‚Ì‹tVPs—ñ
+	};
 }

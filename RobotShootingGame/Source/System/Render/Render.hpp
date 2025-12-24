@@ -91,6 +91,7 @@ private:
 	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	ConstantBuffer* m_pLightCB[FRAME_BUFFER_COUNT]{}; // ライト用定数バッファ
+	ConstantBuffer* m_pCameraCB[FRAME_BUFFER_COUNT]{}; // カメラ用定数バッファ
 	DescriptorHeap* m_pDescriptorHeap{};	// ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_SRVHandles{}; // SRVハンドル配列
 	RootSignature* m_pRootSignature{};		// ルートシグネチャ

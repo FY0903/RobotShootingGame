@@ -52,6 +52,11 @@ public:
 	const DirectX::XMFLOAT4X4 Get2DViewMatrixFloat4x4(bool transpose = true);
 	const DirectX::XMFLOAT4X4 Get2DProjectionMatrixFloat4x4(bool transpose = true);
 
+	const DirectX::XMMATRIX& Get3DViewMatrix() const { return m_3DVP[0]; }
+	const DirectX::XMMATRIX& Get3DProjectionMatrix() const { return m_3DVP[1]; }
+	const DirectX::XMMATRIX& Get2DViewMatrix() const { return m_2DVP[0]; }
+	const DirectX::XMMATRIX& Get2DProjectionMatrix() const { return m_2DVP[1]; }
+
 private:
 	DirectX::XMMATRIX m_3DVP[2]{};	// 3Dビュー行列とプロジェクション行列
 	DirectX::XMMATRIX m_2DVP[2]{};	// 2Dビュー行列とプロジェクション行列

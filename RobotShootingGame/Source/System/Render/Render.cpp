@@ -81,6 +81,8 @@ Render::Render()
 		assert(m_pWVPCB[i]);	// nullptrチェック
 		m_pLightCB[i] = new ConstantBuffer(sizeof(CB::Light));
 		assert(m_pLightCB[i]);	// nullptrチェック
+		m_pCameraCB[i] = new ConstantBuffer(sizeof(CB::Camera));
+		assert(m_pCameraCB[i]);	// nullptrチェック
 
 		CB::WVP* ptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
 		ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
@@ -93,6 +95,7 @@ Render::Render()
 	assert(m_pRootSignature);	// nullptrチェック
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_PIXEL); // 定数バッファ
+	m_pRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_PIXEL); // 定数バッファ
 	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, D3D12_SHADER_VISIBILITY_PIXEL);	// テクスチャ
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
 	m_pRootSignature->Create();
@@ -123,6 +126,18 @@ Render::~Render()
 	m_pDepthStencil = nullptr;
 
 	for (auto& cb : m_pWVPCB)
+	{
+		delete cb;
+		cb = nullptr;
+	}
+
+	for (auto& cb : m_pLightCB)
+	{
+		delete cb;
+		cb = nullptr;
+	}
+
+	for (auto& cb : m_pCameraCB)
 	{
 		delete cb;
 		cb = nullptr;
@@ -220,10 +235,6 @@ void Render::DrawOpaque()
 
 void Render::DrawTransparent()
 {
-	//m_pDepthTexture->DrawDebugSprite();
-
-	//return;
-
 	// 不透明板ポリゴンの描画
 	DrawBackBuffer();
 
@@ -298,6 +309,15 @@ void Render::DrawBackBuffer()
 		lightPtr->Color = lights[0]->GetColor();
 	}
 
+	// カメラの逆VP行列を定数バッファに転送
+	DirectX::XMMATRIX V = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrix();
+	DirectX::XMMATRIX P = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrix();
+	DirectX::XMMATRIX invVP = DirectX::XMMatrixInverse(nullptr, V * P);
+	DirectX::XMFLOAT4X4 invVPMat{};
+	DirectX::XMStoreFloat4x4(&invVPMat, invVP);
+	CB::Camera* cameraPtr = m_pCameraCB[currentIndex]->GetPtr<CB::Camera>();
+	cameraPtr->invVPMat = invVPMat;
+	
 	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
 	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
 
@@ -305,13 +325,14 @@ void Render::DrawBackBuffer()
 	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
 	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
 	commandList->SetGraphicsRootConstantBufferView(1, m_pLightCB[currentIndex]->GetAddress());	// 定数バッファを設定
+	commandList->SetGraphicsRootConstantBufferView(2, m_pCameraCB[currentIndex]->GetAddress()); // カメラ用定数バッファを設定
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
 	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
 
 	commandList->SetDescriptorHeaps(1, &materialHeap);							// ディスクリプタヒープを設定
-	commandList->SetGraphicsRootDescriptorTable(2, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
+	commandList->SetGraphicsRootDescriptorTable(3, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
 }
