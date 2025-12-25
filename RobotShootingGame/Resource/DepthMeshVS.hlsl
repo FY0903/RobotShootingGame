@@ -28,6 +28,8 @@ VSOutput main(VSInput input)
     float4 viewPos = mul(View, worldPos); // ビュー座標
     float4 projPos = mul(Proj, viewPos); // 投影座標
     
+    // TODO: スケルタルメッシュアニメーションを対応させる
+    
     output.svpos = projPos;
     output.screenPos = projPos;
     output.uv = input.uv;

@@ -19,38 +19,41 @@
 
 void Object::OnInit()
 {
-	auto pModel = ModelManager::GetInstance().LoadModel("Assets/Model/character/Hew_kyaracter(1.0).fbx");
+	auto pModel = ModelManager::GetInstance().LoadModel("Assets/Model/F15E/F15E.fbx");
 
 	m_pAnimations.resize(2);
 	m_pAnimations[0] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/taiki_mae.fbx");
 	m_pAnimations[1] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/walk.fbx");
 
 	// É}ÉeÉäÉAÉãÇÃê›íË
-	//m_pMaterial = MaterialManager::GetInstance().CreateMaterial("SkeletalGBuffer");
-	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("DebugGBuffer");
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("SkeletalGBuffer");
+	//m_pMaterial = MaterialManager::GetInstance().CreateMaterial("DebugGBuffer");
 
 	auto meshRenderer = AddComponent<MeshRenderer>();
-	//meshRenderer->Init(pModel);
-	meshRenderer->Init();
+	meshRenderer->Init(pModel);
+	//meshRenderer->Init();
 
-	auto skeletalAnimator = AddComponent<SkeletalAnimator>();
-	skeletalAnimator->Init(pModel);
-	skeletalAnimator->PlayAnimation(m_pAnimations[0]);
+	//auto skeletalAnimator = AddComponent<SkeletalAnimator>();
+	//skeletalAnimator->Init(pModel);
+	//skeletalAnimator->PlayAnimation(m_pAnimations[0]);
+
+	m_Transform.Scale = DirectX::XMFLOAT3(0.01f, 0.01f, 0.01f);
+	m_Transform.Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
 }
 
 void Object::OnUpdate()
 {
-	if (Input::IsKeyTrigger('W'))
-	{
-		auto skeletalAnimator = GetComponent<SkeletalAnimator>();
-		skeletalAnimator->BlendAnimation(m_pAnimations[1], 2.0f);
-	}
+	//if (Input::IsKeyTrigger('W'))
+	//{
+	//	auto skeletalAnimator = GetComponent<SkeletalAnimator>();
+	//	skeletalAnimator->BlendAnimation(m_pAnimations[1], 2.0f);
+	//}
 
-	if (Input::IsKeyTrigger('S'))
-	{
-		auto skeletalAnimator = GetComponent<SkeletalAnimator>();
-		skeletalAnimator->BlendAnimation(m_pAnimations[0], 2.0f);
-	}
+	//if (Input::IsKeyTrigger('S'))
+	//{
+	//	auto skeletalAnimator = GetComponent<SkeletalAnimator>();
+	//	skeletalAnimator->BlendAnimation(m_pAnimations[0], 2.0f);
+	//}
 }
 
 void Object::OnUninit()

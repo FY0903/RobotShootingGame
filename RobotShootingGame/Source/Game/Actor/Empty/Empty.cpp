@@ -29,7 +29,7 @@ void Empty::OnFixedUpdate()
 
 	const float deltaAngle = angularVelocity * deltaTime;
 
-	m_Transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, deltaAngle, 0.0f));
+	//m_Transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, deltaAngle, 0.0f));
 }
 
 void Empty::OnUninit()

@@ -20,7 +20,7 @@ void MainCamera::OnInit()
 
 	camera->Init();
 	//camera->SetTargetPos(DirectX::XMLoadFloat3(&targetPos));
-	//camera->SetRadius(100.0f);
+	//camera->SetRadius(10.0f);
 
 	// カメラマネージャーに登録
 	CameraManager::GetInstance().RegisterCamera("Camera01", camera);

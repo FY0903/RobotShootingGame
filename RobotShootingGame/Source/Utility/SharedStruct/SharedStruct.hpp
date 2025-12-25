@@ -79,6 +79,13 @@ namespace CB
 
 	struct Camera
 	{
-		DirectX::XMFLOAT4X4 invVPMat{};	// カメラの逆VP行列
+		DirectX::XMFLOAT4X4 invVMat{};		// カメラの逆ビュー行列
+		DirectX::XMFLOAT4X4 invPMat{};		// カメラの逆射影行列
+		DirectX::XMFLOAT4X4 PMat{};			// カメラの射影行列
+	};
+
+	struct SSAOKernel
+	{
+		DirectX::XMFLOAT3 Kernel[64];		// SSAO用カーネル
 	};
 }

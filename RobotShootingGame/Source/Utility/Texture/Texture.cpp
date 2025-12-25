@@ -71,7 +71,6 @@ HRESULT Texture::Load(const std::string& FileName)
 
 HRESULT Texture::CreateDefaultTexture(BYTE R, BYTE G, BYTE B, BYTE A)
 {
-	// 1x1の白テクスチャを作成
 	DirectX::TexMetadata meta{};
 	DirectX::ScratchImage scratch{};
 

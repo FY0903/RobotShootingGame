@@ -52,6 +52,7 @@
 #include <chrono>
 #include <iterator>
 #include <typeindex>
+#include <random>
 
 // ------------------------------
 //	xaudio2

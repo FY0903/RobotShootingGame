@@ -280,6 +280,7 @@ void MeshRenderer::Init(std::vector<Model::Mesh> meshes)
 		auto& mesh = m_Meshes[i];
 		material->SetTexture(mesh.DiffuseMap);
 	}
+	material->SetIsOpaque(true);	// モデルは不透明とする
 
 	// 定数バッファの生成
 	m_pWVPCBs = material->SetCBAtRegister(0, sizeof(CB::WVP)); // レジスタ番号0にWVP用定数バッファを設定
