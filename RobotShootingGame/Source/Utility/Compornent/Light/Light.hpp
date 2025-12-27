@@ -29,21 +29,23 @@ public:
 	using Component::Component;
 
 	void Init(Type type,
-		DirectX::XMVECTOR dir = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),
-		DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+		DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		float range = 1.0f, float angle = DirectX::XMConvertToRadians(60.0f));
 	void Update() override final;
 	void Draw() override final;
 	void Uninit() override final;
 
 	inline Type GetType() const { return m_Type; }
-	DirectX::XMFLOAT4 GetDirection() const;
+	DirectX::XMFLOAT3 GetPosition() const;
+	inline float GetRange() const { return m_Range; }
+	inline float GetAngle() const { return m_Angle; }
+	DirectX::XMFLOAT3 GetDirection() const;
 	inline DirectX::XMFLOAT4 GetColor() const { return m_Color; }
 	inline void SetColor(const DirectX::XMFLOAT4& color) { m_Color = color; }
 
 private:
 	Type m_Type{};
-	DirectX::XMVECTOR m_Direction{};
 	DirectX::XMFLOAT4 m_Color{};
-	float m_RadXZ{};	// XZ平面でのラジアン
-	float m_RadY{};		// Y軸でのラジアン
+	float m_Range{};	// ライトの届く距離
+	float m_Angle{};	// スポットライトの角度
 };

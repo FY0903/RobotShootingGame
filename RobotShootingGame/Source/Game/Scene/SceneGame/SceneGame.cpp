@@ -20,6 +20,8 @@
 #include "Game/Actor/TitleText/TitleText.hpp"
 #include "Utility/Sound/Sound.hpp"
 #include "Game/Actor/DirectionalLight/DirectionalLight.hpp"
+#include "Game/Actor/PointLight/PointLight.hpp"
+#include "Game/Actor/SpotLight/SpotLight.hpp"
 
 void SceneGame::OnInit()
 {
@@ -47,7 +49,13 @@ void SceneGame::OnInit()
 	auto emp = AddGameObject<Empty>(Layer::DEFAULT);
 
 	// ディレクショナルライトの生成
-	AddGameObject<DirectionalLight>(Layer::DEFAULT);
+	//AddGameObject<DirectionalLight>(Layer::DEFAULT);
+
+	// ポイントライトの生成
+	//AddGameObject<PointLight>(Layer::DEFAULT);
+
+	// スポットライトの生成
+	AddGameObject<SpotLight>(Layer::DEFAULT);
 
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/Title.mp3", false, true);
 	//Sound::GetInstance().Play("BGM");

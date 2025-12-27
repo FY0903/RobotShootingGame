@@ -73,7 +73,10 @@ namespace CB
 
 	struct Light
 	{
-		DirectX::XMFLOAT4 Direction{};	// 光源の方向
+		DirectX::XMFLOAT3 Position{};	// 光源の位置
+		float Range{};					// 光源の範囲
+		DirectX::XMFLOAT3 Direction{};	// 光源の方向
+		float Angle{};					// スポットライトの角度
 		DirectX::XMFLOAT4 Color{};		// 光源の色
 	};
 

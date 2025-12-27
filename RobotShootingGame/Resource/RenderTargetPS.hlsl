@@ -6,8 +6,11 @@ struct VSOutput
 
 cbuffer lightBuffer : register(b0)
 {
-    float3 lightDirection : packoffset(c0);
-    float4 lightColor : packoffset(c1);
+    float3 lightPosition : packoffset(c0);
+    float lightRange : packoffset(c0.w);
+    float3 lightDirection : packoffset(c1);
+    float lightAngle : packoffset(c1.w);
+    float4 lightColor : packoffset(c2);
 };
 
 cbuffer cameraBuffer : register(b1)
@@ -71,6 +74,38 @@ float4 main(VSOutput input) : SV_TARGET
     float3 worldPos = ReconstructWorldPositionFromDepth(input.uv, d);
     float3 viewPos = ReconstructViewPositionFromDepth(input.uv, d);
     
+    float3 L = worldPos - lightPosition;
+    float D = length(L);
+    float R = lightRange;
+    
+    float A = 1.0f - 1.0f / R * D;
+    A = saturate(A);
+    
+    A = pow(A, 2.0f);
+    
+    L = normalize(L);
+    float3 N = normalize(normal.xyz);
+    float NdotL = saturate(dot(N, -L));
+    float3 diffuse = lightColor.rgb * NdotL;
+    diffuse *= A;
+    
+    float3 slV = normalize(lightDirection);
+    float angle = dot(L, slV);
+    angle = cos(angle);
+    
+    float affect = 1.0f - 1.0f / lightAngle * angle;
+    affect = saturate(affect);
+    affect = pow(affect, 0.5f);
+    
+    diffuse *= affect;
+    
+    if (albedo.a <= 0.0f)
+    {
+        discard; // 背景を透過させる(処理しない)
+    }
+    
+    return float4(albedo.rgb * diffuse, 1.0f);
+    
     float3 dpdx = ddx(viewPos);
     float3 dpdy = ddy(viewPos);
     
@@ -109,16 +144,11 @@ float4 main(VSOutput input) : SV_TARGET
     
     return float4(d, d, d, 1.0f); // デプス値をグレースケールで出力
     
-    if (albedo.a < 1.0f)
-    {
-        discard; // 背景を透過させる(処理しない)
-    }
+    //float NdotL = saturate(dot(normal.xyz, -lightDirection));
     
-    float NdotL = saturate(dot(normal.xyz, -lightDirection));
+    //float3 diffuse = lightColor.rgb * NdotL;
     
-    float3 diffuse = lightColor.rgb * NdotL;
+    //float3 finalColor = albedo.rgb * diffuse;
     
-    float3 finalColor = albedo.rgb * diffuse;
-    
-    return float4(finalColor, 1.0f);
+    //return float4(finalColor, 1.0f);
 }

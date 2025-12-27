@@ -169,6 +169,12 @@
     <Filter Include="Source\Utility\DepthTexture">
       <UniqueIdentifier>{72cfa81e-3c4d-4f20-a0fc-80a11acbd7cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game\Actor\PointLight">
+      <UniqueIdentifier>{80beae20-4470-47ea-b2e9-233c73cbc111}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Game\Actor\SpotLight">
+      <UniqueIdentifier>{85354a78-25b9-48e7-a882-260e8a66dc87}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -320,6 +326,12 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\DepthTexture\DepthTexture.cpp">
       <Filter>Source\Utility\DepthTexture</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\PointLight\PointLight.cpp">
+      <Filter>Source\Game\Actor\PointLight</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\SpotLight\SpotLight.cpp">
+      <Filter>Source\Game\Actor\SpotLight</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -478,6 +490,12 @@
     </ClInclude>
     <ClInclude Include="Source\Utility\DepthTexture\DepthTexture.hpp">
       <Filter>Source\Utility\DepthTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\PointLight\PointLight.hpp">
+      <Filter>Source\Game\Actor\PointLight</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\SpotLight\SpotLight.hpp">
+      <Filter>Source\Game\Actor\SpotLight</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

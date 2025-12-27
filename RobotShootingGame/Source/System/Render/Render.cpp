@@ -345,7 +345,10 @@ void Render::DrawBackBuffer()
 	if (lights.size())
 	{
 		CB::Light* lightPtr = m_pLightCB[currentIndex]->GetPtr<CB::Light>();
+		lightPtr->Position = lights[0]->GetPosition();
+		lightPtr->Range = lights[0]->GetRange();
 		lightPtr->Direction = lights[0]->GetDirection();
+		lightPtr->Angle = lights[0]->GetAngle();
 		lightPtr->Color = lights[0]->GetColor();
 	}
 

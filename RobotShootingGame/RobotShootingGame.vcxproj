@@ -43,7 +43,15 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Game\Actor\PointLight\PointLight.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Game\Actor\Skybox\Skybox.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\SpotLight\SpotLight.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -209,7 +217,15 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Game\Actor\PointLight\PointLight.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Game\Actor\Skybox\Skybox.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Actor\SpotLight\SpotLight.hpp">
       <SubType>
       </SubType>
     </ClInclude>
