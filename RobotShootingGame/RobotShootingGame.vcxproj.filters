@@ -175,6 +175,9 @@
     <Filter Include="Source\Game\Actor\SpotLight">
       <UniqueIdentifier>{85354a78-25b9-48e7-a882-260e8a66dc87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System\RenderPass">
+      <UniqueIdentifier>{ae520918-4230-4a86-9798-6857184dfb44}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -332,6 +335,9 @@
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\SpotLight\SpotLight.cpp">
       <Filter>Source\Game\Actor\SpotLight</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\RenderPass\RenderPass.cpp">
+      <Filter>Source\System\RenderPass</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -496,6 +502,9 @@
     </ClInclude>
     <ClInclude Include="Source\Game\Actor\SpotLight\SpotLight.hpp">
       <Filter>Source\Game\Actor\SpotLight</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\RenderPass\RenderPass.hpp">
+      <Filter>Source\System\RenderPass</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
