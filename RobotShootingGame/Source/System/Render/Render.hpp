@@ -52,8 +52,7 @@ public:
 	};
 
 	void Init();
-	void DrawOpaque();
-	void DrawTransparent();
+	void Draw();
 
 	void EnqueueRenderItem(const RenderItem& item);
 
@@ -72,7 +71,11 @@ private:
 	 */
 	~Render();
 
+	void DrawOpaque();
+	void DrawTransparent();
+
 	void SetGbufferRenderTargets();
+	void SetBackBufferRenderTarget();
 	void DrawBackBuffer();
 	void ResetRenderItems();
 	void DrawRenderItems(const std::vector<RenderItem>& renderItems);
@@ -81,6 +84,8 @@ private:
 
 	std::array<RenderTarget*, NumGbufferRT> m_GbufferRT{};	// Gバッファ用レンダーターゲット
 	DepthStencil* m_pDepthStencil{};						// 深度ステンシルバッファ
+
+	RenderTarget* m_pBackBufferRT{};						// バックバッファ用レンダーターゲット
 
 	float clearColor[4]{};
 	

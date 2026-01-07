@@ -127,9 +127,7 @@ void Engine::BeginDraw()
 void Engine::Draw()
 {
 	BeginDraw();
-	Render::GetInstance().DrawOpaque();
-	SetBackBufferRenderTarget();
-	Render::GetInstance().DrawTransparent();
+	Render::GetInstance().Draw();
 	EndDraw();
 }
 

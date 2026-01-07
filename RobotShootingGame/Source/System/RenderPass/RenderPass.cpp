@@ -10,27 +10,90 @@
 //	include
 // ==============================
 #include "RenderPass.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
 
-// ==============================
-//	define
-// ==============================
+RenderPass::RenderPass()
+{
+	float clearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-// ==============================
-//	構造体定義
-// ==============================
+	// 深度レンダーターゲットの生成
+	m_pRT = new RenderTarget();
+	m_pRT->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_R8G8B8A8_UNORM, clearColor);
 
-// ==============================
-//	列挙型定義
-// ==============================
+	// 深度ステンシルの生成
+	m_pDSV = new DepthStencil();
+	m_pDSV->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_D32_FLOAT);
 
-// ==============================
-//	プロトタイプ宣言
-// ==============================
+	float halfWidth = WINDOW_WIDTH / 2.0f;
+	float halfHeight = WINDOW_HEIGHT / 2.0f;
 
-// ==============================
-//	定数定義
-// ==============================
+	Vertex::Sprite vertices[4]{};
+	vertices[0].Position = { -halfWidth, halfHeight, 0.0f };
+	vertices[1].Position = { halfWidth, halfHeight, 0.0f };
+	vertices[2].Position = { halfWidth, -halfHeight, 0.0f };
+	vertices[3].Position = { -halfWidth, -halfHeight, 0.0f };
 
-// ==============================
-//	グローバル変数宣言
-// ==============================
+	vertices[0].UV = { 0.0f, 0.0f };
+	vertices[1].UV = { 1.0f, 0.0f };
+	vertices[2].UV = { 1.0f, 1.0f };
+	vertices[3].UV = { 0.0f, 1.0f };
+
+	// 頂点バッファの生成
+	auto vertexSize = std::size(vertices) * sizeof(Vertex::Sprite);
+	auto vertexStride = sizeof(Vertex::Sprite);
+	m_pVB = new VertexBuffer(vertexSize, vertexStride, vertices);
+	assert(m_pVB);	// nullptrチェック
+
+	uint32_t indices[] = { 0, 1, 2, 0, 2, 3 };
+
+	// インデックスバッファの生成
+	auto indexSize = std::size(indices) * sizeof(uint32_t);
+	m_pIB = new IndexBuffer(indexSize, indices);
+	assert(m_pIB);	// nullptrチェック
+
+	// ディスクリプタヒープの生成
+	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+	assert(m_pDescriptorHeap);	// nullptrチェック
+
+	DirectX::XMFLOAT4X4 projMat{};
+	DirectX::XMStoreFloat4x4(&projMat,
+		DirectX::XMMatrixTranspose(
+			DirectX::XMMatrixOrthographicLH(
+				static_cast<float>(WINDOW_WIDTH),
+				static_cast<float>(WINDOW_HEIGHT),
+				0.1f, 1000.0f)));
+
+	// 定数バッファの生成
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		m_pWVPCB[i] = new ConstantBuffer(sizeof(CB::WVP));
+		assert(m_pWVPCB[i]);	// nullptrチェック
+
+		CB::WVP* ptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
+		ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
+		ptr->ViewMat = DirectX::SimpleMath::Matrix::Identity;
+		ptr->ProjMat = projMat;
+	}
+}
+
+void RenderPass::Execute()
+{
+	// PSOまたはルートシグネチャが存在しない場合は処理を抜ける
+	if (!m_pPipelineState || !m_pRootSignature) return;
+
+	SetRenderTarget();
+	DrawSprite();
+	WaitGPU();
+}
+
+void RenderPass::SetRenderTarget()
+{
+}
+
+void RenderPass::DrawSprite()
+{
+}
+
+void RenderPass::WaitGPU()
+{
+}

@@ -10,30 +10,14 @@
 // ==============================
 //	include
 // ==============================
-
-// ==============================
-//	define
-// ==============================
-
-// ==============================
-//	構造体定義
-// ==============================
-
-// ==============================
-//	列挙型定義
-// ==============================
-
-// ==============================
-//	プロトタイプ宣言
-// ==============================
-
-// ==============================
-//	定数定義
-// ==============================
-
-// ==============================
-//	グローバル変数宣言
-// ==============================
+#include "System/Engine/Engine.hpp"
+#include "Utility/VertexBuffer/VertexBuffer.hpp"
+#include "Utility/IndexBuffer/IndexBuffer.hpp"
+#include "Utility/RootSignature/RootSignature.hpp"
+#include "Utility/PipelineState/PipelineState.hpp"
+#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
+#include "Utility/RenderTarget/RenderTarget.hpp"
+#include "Utility/DepthStencil/DepthStencil.hpp"
 
 /**
  * @brief RenderPassクラス
@@ -44,10 +28,32 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	RenderPass() = default;
+	RenderPass();
 
 	/**
 	 * デストラクタ
 	 */
 	~RenderPass() = default;
+
+	void Execute();
+
+protected:
+	virtual void CreateRootSignature() = 0;
+	virtual void CreatePSO() = 0;
+
+private:
+	void SetRenderTarget();
+	void DrawSprite();
+	void WaitGPU();
+
+	RenderTarget* m_pRT{};
+	DepthStencil* m_pDSV{};
+
+	VertexBuffer* m_pVB{};	// 頂点バッファ
+	IndexBuffer* m_pIB{};	// インデックスバッファ
+	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	DescriptorHeap* m_pDescriptorHeap{};			// ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_SRVHandles{};	// SRVハンドル配列
+	RootSignature* m_pRootSignature{};				// ルートシグネチャ
+	PipelineState* m_pPipelineState{};				// パイプラインステート
 };

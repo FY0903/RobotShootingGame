@@ -23,6 +23,7 @@ Render::Render()
 	{
 		rtv = new RenderTarget();
 	}
+	m_pBackBufferRT = new RenderTarget();
 	m_pDepthStencil = new DepthStencil();
 	m_pDepthTexture = new DepthTexture();
 
@@ -150,6 +151,9 @@ Render::~Render()
 	delete m_pDepthTexture;
 	m_pDepthTexture = nullptr;
 
+	delete m_pBackBufferRT;
+	m_pBackBufferRT = nullptr;
+
 	for (auto& rtv : m_GbufferRT)
 	{
 		delete rtv;
@@ -247,6 +251,41 @@ void Render::SetGbufferRenderTargets()
 		nullptr);
 }
 
+void Render::SetBackBufferRenderTarget()
+{
+	// バックバッファ用レンダーターゲットをレンダーターゲットとして設定
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_pBackBufferRT->Resource(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	// リソースバリアの適用
+	Engine::GetInstance().GetCommandList()->ResourceBarrier(1, &barrier);
+
+	// レンダーターゲットと深度ステンシルバッファを設定
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pBackBufferRT->GetDescriptorHandle()->HandleCPU;
+	auto dsvHandle = m_pDepthStencil->GetDescriptorHandle()->HandleCPU;
+
+	// レンダーターゲットと深度ステンシルバッファを設定
+	Engine::GetInstance().GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+
+	// レンダーターゲットをクリア
+	Engine::GetInstance().GetCommandList()->ClearRenderTargetView(
+		rtvHandle,
+		m_pBackBufferRT->GetClearValue().Color,
+		0,
+		nullptr);
+
+	// 深度ステンシルバッファをクリア
+	Engine::GetInstance().GetCommandList()->ClearDepthStencilView(
+		dsvHandle,
+		D3D12_CLEAR_FLAG_DEPTH,
+		1.0f,
+		0,
+		0,
+		nullptr);
+}
+
 void Render::DrawOpaque()
 {
 	// 深度テクスチャに不透明レンダーアイテムをセット
@@ -332,6 +371,20 @@ void Render::Init()
 		assert(srvHandle);	// nullptrチェック
 		m_SRVHandles.push_back(srvHandle);
 	}
+
+	// バックバッファ用レンダーターゲットの生成
+	m_pBackBufferRT->Create(
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		clearColor);
+}
+
+void Render::Draw()
+{
+	DrawOpaque();
+	SetBackBufferRenderTarget();
+	DrawTransparent();
 }
 
 void Render::DrawBackBuffer()
