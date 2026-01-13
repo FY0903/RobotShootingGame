@@ -178,6 +178,9 @@
     <Filter Include="Source\System\RenderPass">
       <UniqueIdentifier>{ae520918-4230-4a86-9798-6857184dfb44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System\RenderPass\Sepia">
+      <UniqueIdentifier>{a46187ee-49ea-4256-9a35-155b4c3c8499}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -338,6 +341,9 @@
     </ClCompile>
     <ClCompile Include="Source\System\RenderPass\RenderPass.cpp">
       <Filter>Source\System\RenderPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\RenderPass\Sepia\Sepia.cpp">
+      <Filter>Source\System\RenderPass\Sepia</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -506,6 +512,9 @@
     <ClInclude Include="Source\System\RenderPass\RenderPass.hpp">
       <Filter>Source\System\RenderPass</Filter>
     </ClInclude>
+    <ClInclude Include="Source\System\RenderPass\Sepia\Sepia.hpp">
+      <Filter>Source\System\RenderPass\Sepia</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\SimplePS.hlsl">
@@ -569,6 +578,9 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\DepthSpriteVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SepiaPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

@@ -28,32 +28,39 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	RenderPass();
+	RenderPass(class RenderTarget* rt);
 
 	/**
 	 * デストラクタ
 	 */
-	~RenderPass() = default;
+	~RenderPass();
+
+	virtual void Init() = 0;
 
 	void Execute();
+
+	RenderTarget* GetRenderTarget() const { return m_pRT; }
 
 protected:
 	virtual void CreateRootSignature() = 0;
 	virtual void CreatePSO() = 0;
+
+	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
+	DescriptorHeap* m_pSnapshotDescriptorHeap{};			// ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_SnapshotRVHandles{};	// SRVハンドル配列
+	RootSignature* m_pSnapshotRootSignature{};				// ルートシグネチャ
+	PipelineState* m_pSnapshotPSO{};				// パイプラインステート
 
 private:
 	void SetRenderTarget();
 	void DrawSprite();
 	void WaitGPU();
 
+	RenderPass() = delete;
+
 	RenderTarget* m_pRT{};
 	DepthStencil* m_pDSV{};
 
 	VertexBuffer* m_pVB{};	// 頂点バッファ
 	IndexBuffer* m_pIB{};	// インデックスバッファ
-	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	DescriptorHeap* m_pDescriptorHeap{};			// ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_SRVHandles{};	// SRVハンドル配列
-	RootSignature* m_pRootSignature{};				// ルートシグネチャ
-	PipelineState* m_pPipelineState{};				// パイプラインステート
 };

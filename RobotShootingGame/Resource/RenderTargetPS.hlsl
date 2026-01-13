@@ -74,37 +74,37 @@ float4 main(VSOutput input) : SV_TARGET
     float3 worldPos = ReconstructWorldPositionFromDepth(input.uv, d);
     float3 viewPos = ReconstructViewPositionFromDepth(input.uv, d);
     
-    float3 L = worldPos - lightPosition;
-    float D = length(L);
-    float R = lightRange;
+    //float3 L = worldPos - lightPosition;
+    //float D = length(L);
+    //float R = lightRange;
     
-    float A = 1.0f - 1.0f / R * D;
-    A = saturate(A);
+    //float A = 1.0f - 1.0f / R * D;
+    //A = saturate(A);
     
-    A = pow(A, 2.0f);
+    //A = pow(A, 2.0f);
     
-    L = normalize(L);
-    float3 N = normalize(normal.xyz);
-    float NdotL = saturate(dot(N, -L));
-    float3 diffuse = lightColor.rgb * NdotL;
-    diffuse *= A;
+    //L = normalize(L);
+    //float3 N = normalize(normal.xyz);
+    //float NdotL = saturate(dot(N, -L));
+    //float3 diffuse = lightColor.rgb * NdotL;
+    //diffuse *= A;
     
-    float3 slV = normalize(lightDirection);
-    float angle = dot(L, slV);
-    angle = cos(angle);
+    //float3 slV = normalize(lightDirection);
+    //float angle = dot(L, slV);
+    //angle = cos(angle);
     
-    float affect = 1.0f - 1.0f / lightAngle * angle;
-    affect = saturate(affect);
-    affect = pow(affect, 0.5f);
+    //float affect = 1.0f - 1.0f / lightAngle * angle;
+    //affect = saturate(affect);
+    //affect = pow(affect, 0.5f);
     
-    diffuse *= affect;
+    //diffuse *= affect;
     
     if (albedo.a <= 0.0f)
     {
         discard; // ”wŒi‚ð“§‰ß‚³‚¹‚é(ˆ—‚µ‚È‚¢)
     }
     
-    return float4(albedo.rgb * diffuse, 1.0f);
+    //return float4(albedo.rgb * diffuse, 1.0f);
     
     float3 dpdx = ddx(viewPos);
     float3 dpdy = ddy(viewPos);

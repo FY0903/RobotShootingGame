@@ -138,7 +138,7 @@ void RootSignature::Create()
 		0,												// ノードマスク
 		pBlob->GetBufferPointer(),						// シリアライズされたルートシグネチャ
 		pBlob->GetBufferSize(),							// バッファサイズ
-		IID_PPV_ARGS(m_pRootSignature.GetAddressOf())); // ルートシグネチャのポインタ
+		IID_PPV_ARGS(m_pSnapshotRootSignature.GetAddressOf())); // ルートシグネチャのポインタ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "ルートシグネチャの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);

@@ -111,7 +111,7 @@ void PipelineState::Create()
 	// パイプラインステートオブジェクトの生成
 	HRESULT hr = Engine::GetInstance().GetDevice()->CreateGraphicsPipelineState(
 		&m_Desc,													// グラフィックスパイプラインステートの記述
-		IID_PPV_ARGS(m_pPipelineState.ReleaseAndGetAddressOf()));	// パイプラインステートオブジェクトのポインタ
+		IID_PPV_ARGS(m_pSnapshotPSO.ReleaseAndGetAddressOf()));	// パイプラインステートオブジェクトのポインタ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "パイプラインステートオブジェクトの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);

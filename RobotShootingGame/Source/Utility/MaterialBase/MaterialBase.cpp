@@ -15,82 +15,82 @@
 MaterialBase::MaterialBase(size_t renderTargetNum, bool alphaBlend)
 {
 	// インスタンスの生成
-	m_pRootSignature = new RootSignature();
-	m_pPipelineState = new PipelineState(renderTargetNum, alphaBlend);
+	m_pSnapshotRootSignature = new RootSignature();
+	m_pSnapshotPSO = new PipelineState(renderTargetNum, alphaBlend);
 }
 
 MaterialBase::~MaterialBase()
 {
 	// インスタンスの解放
-	delete m_pRootSignature;
-	m_pRootSignature = nullptr;
+	delete m_pSnapshotRootSignature;
+	m_pSnapshotRootSignature = nullptr;
 
-	delete m_pPipelineState;
-	m_pPipelineState = nullptr;
+	delete m_pSnapshotPSO;
+	m_pSnapshotPSO = nullptr;
 }
 
 void MaterialBase::SetCBV(UINT shaderRegister, D3D12_SHADER_VISIBILITY visibility)
 {
-	if (!m_pRootSignature) return;
-	m_pRootSignature->AddRootParameter(shaderRegister, visibility);
+	if (!m_pSnapshotRootSignature) return;
+	m_pSnapshotRootSignature->AddRootParameter(shaderRegister, visibility);
 	++m_rootParameterIndex;
 }
 
 void MaterialBase::SetCBV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility)
 {
-	if (!m_pRootSignature) return;
-	m_pRootSignature->AddDescriptorRange(shaderRegister, D3D12_DESCRIPTOR_RANGE_TYPE_CBV, numDescriptors, visibility);
+	if (!m_pSnapshotRootSignature) return;
+	m_pSnapshotRootSignature->AddDescriptorRange(shaderRegister, D3D12_DESCRIPTOR_RANGE_TYPE_CBV, numDescriptors, visibility);
 	++m_rootParameterIndex;
 }
 
 void MaterialBase::SetSRV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER_VISIBILITY visibility)
 {
-	if (!m_pRootSignature) return;
-	m_pRootSignature->AddDescriptorRange(shaderRegister, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, numDescriptors, visibility);
+	if (!m_pSnapshotRootSignature) return;
+	m_pSnapshotRootSignature->AddDescriptorRange(shaderRegister, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, numDescriptors, visibility);
 	++m_rootParameterIndex;
 }
 
 void MaterialBase::SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter)
 {
-	if (!m_pRootSignature) return;
-	m_pRootSignature->AddStaticSampler(shaderRegister, filter);
+	if (!m_pSnapshotRootSignature) return;
+	m_pSnapshotRootSignature->AddStaticSampler(shaderRegister, filter);
 }
 
 void MaterialBase::SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout, InputLayoutType type)
 {
-	if (!m_pPipelineState) return;
-	m_pPipelineState->SetInputLayout(layout);
+	if (!m_pSnapshotPSO) return;
+	m_pSnapshotPSO->SetInputLayout(layout);
 	m_InputLayoutType = type;
 }
 
 void MaterialBase::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type)
 {
-	if (!m_pPipelineState) return;
-	m_pPipelineState->SetPrimitiveTopologyType(type);
+	if (!m_pSnapshotPSO) return;
+	m_pSnapshotPSO->SetPrimitiveTopologyType(type);
 }
 
 void MaterialBase::SetRTVFormat(DXGI_FORMAT format, size_t index)
 {
-	if (!m_pPipelineState) return;
-	m_pPipelineState->SetRTVFormat(format, index);
+	if (!m_pSnapshotPSO) return;
+	m_pSnapshotPSO->SetRTVFormat(format, index);
 }
 
 void MaterialBase::SetDSVFormat(DXGI_FORMAT format)
 {
-	if (!m_pPipelineState) return;
-	m_pPipelineState->SetDSVFormat(format);
+	if (!m_pSnapshotPSO) return;
+	m_pSnapshotPSO->SetDSVFormat(format);
 }
 
 void MaterialBase::Create()
 {
-	if (!m_pRootSignature || !m_pPipelineState) return;
+	if (!m_pSnapshotRootSignature || !m_pSnapshotPSO) return;
 
 	// ルートシグネチャの作成
-	m_pRootSignature->Create();
+	m_pSnapshotRootSignature->Create();
 
 	// パイプラインステートの設定
-	m_pPipelineState->SetRootSignature(m_pRootSignature->Get());
-	m_pPipelineState->SetVS(m_VSFilepath);
-	m_pPipelineState->SetPS(m_PSFilepath);
-	m_pPipelineState->Create();
+	m_pSnapshotPSO->SetRootSignature(m_pSnapshotRootSignature->Get());
+	m_pSnapshotPSO->SetVS(m_VSFilepath);
+	m_pSnapshotPSO->SetPS(m_PSFilepath);
+	m_pSnapshotPSO->Create();
 }

@@ -14,8 +14,8 @@
 
 RenderTarget::~RenderTarget()
 {
-	delete m_pDescriptorHeap;
-	m_pDescriptorHeap = nullptr;
+	delete m_pSnapshotDescriptorHeap;
+	m_pSnapshotDescriptorHeap = nullptr;
 }
 
 HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float clearColor[4])
@@ -72,8 +72,8 @@ HRESULT RenderTarget::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 	m_Width = width;
 	m_Height = height;
 
-	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
-	m_pDescriptorHandle = m_pDescriptorHeap->Register(m_pResource.Get());
+	m_pSnapshotDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+	m_pDescriptorHandle = m_pSnapshotDescriptorHeap->Register(m_pResource.Get());
 	if (!m_pDescriptorHandle)
 	{
 		MessageBox(nullptr, "レンダーターゲットのディスクリプタハンドルの登録に失敗しました。", "エラー", MB_OK | MB_ICONERROR);

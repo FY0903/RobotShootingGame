@@ -79,6 +79,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\System\RenderPass\Sepia\Sepia.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\System\Render\Render.cpp">
       <SubType>
       </SubType>
@@ -254,6 +258,10 @@
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
     <ClInclude Include="Source\System\main.hpp" />
     <ClInclude Include="Source\System\RenderPass\RenderPass.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\System\RenderPass\Sepia\Sepia.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -435,6 +443,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Resource\SepiaPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Resource\SimplePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

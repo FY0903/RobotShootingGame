@@ -46,7 +46,7 @@ public:
 
 private:
 	MaterialBase* m_pMaterial{}; // マテリアル
-	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
+	DescriptorHeap* m_pSnapshotDescriptorHeap{}; // ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_pDescriptorHandle{}; // ディスクリプタハンドル
 	std::unordered_map<int, std::array<ConstantBuffer*, FRAME_BUFFER_COUNT>> m_pCBVs{};	// CBV用定数バッファ
 	std::unordered_map<int, size_t> m_CBSize{}; // 定数バッファサイズ

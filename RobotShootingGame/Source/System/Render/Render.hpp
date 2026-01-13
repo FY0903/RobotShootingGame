@@ -11,6 +11,7 @@
 //	include
 // ==============================
 #include "System/Engine/Engine.hpp"
+#include "System/RenderPass/RenderPass.hpp"
 #include "Utility/RenderTarget/RenderTarget.hpp"
 #include "Utility/DepthStencil/DepthStencil.hpp"
 
@@ -53,6 +54,7 @@ public:
 
 	void Init();
 	void Draw();
+	void CopyBackBufferToFrameBuffer();
 
 	void EnqueueRenderItem(const RenderItem& item);
 
@@ -60,6 +62,27 @@ public:
 
 private:
 	friend class Singleton<Render>;
+
+	template <typename T = RenderPass>
+	inline void AddRenderPass()
+	{
+		T* pass{};
+
+		// レンダーパスの追加
+		if (!m_RenderPasses.size())
+		{
+			// 1つ目のレンダーパスはスナップショット用レンダーターゲットを渡す
+			pass = new T(m_pSnapshotRT);
+		}
+		else
+		{
+			// 2つ目以降のレンダーパスは直前のレンダーターゲットを渡す
+			pass = new T(m_RenderPasses.back()->GetRenderTarget());
+		}
+		
+		pass->Init();
+		m_RenderPasses.push_back(pass);
+	}
 
 	/**
 	 * コンストラクタ
@@ -71,12 +94,16 @@ private:
 	 */
 	~Render();
 
+	void InitRenderPasses();
+
 	void DrawOpaque();
 	void DrawTransparent();
+	void DrawPostProcess();
+	void WaitGPU();
 
 	void SetGbufferRenderTargets();
-	void SetBackBufferRenderTarget();
-	void DrawBackBuffer();
+	void SetSnapshotRenderTarget();
+	void DrawOpaqueSprite();
 	void ResetRenderItems();
 	void DrawRenderItems(const std::vector<RenderItem>& renderItems);
 
@@ -85,21 +112,29 @@ private:
 	std::array<RenderTarget*, NumGbufferRT> m_GbufferRT{};	// Gバッファ用レンダーターゲット
 	DepthStencil* m_pDepthStencil{};						// 深度ステンシルバッファ
 
-	RenderTarget* m_pBackBufferRT{};						// バックバッファ用レンダーターゲット
+	RenderTarget* m_pSnapshotRT{};							// スナップショット用レンダーターゲット
 
 	float clearColor[4]{};
 	
 	std::vector<RenderItem> m_OpaqueRenderItems{};		// 不透明レンダーアイテムマップ
 	std::vector<RenderItem> m_TransparentRenderItems{};	// 透明レンダーアイテムマップ
 
+	std::vector<RenderPass*> m_RenderPasses{};			// レンダーパス配列
+
 	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	ConstantBuffer* m_pLightCB[FRAME_BUFFER_COUNT]{}; // ライト用定数バッファ
 	ConstantBuffer* m_pCameraCB[FRAME_BUFFER_COUNT]{}; // カメラ用定数バッファ
-	ConstantBuffer* m_pSSAOKernelCB[FRAME_BUFFER_COUNT]{}; // SSAOカーネル用定数バッファ
-	DescriptorHeap* m_pDescriptorHeap{};	// ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_SRVHandles{}; // SRVハンドル配列
-	RootSignature* m_pRootSignature{};		// ルートシグネチャ
-	PipelineState* m_pPipelineState{};		// パイプラインステート
+	ConstantBuffer* m_pSSAOKernelCB[FRAME_BUFFER_COUNT]{};	// SSAOカーネル用定数バッファ
+	
+	DescriptorHeap* m_pSnapshotDescriptorHeap{};			// スナップショット用ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_SnapshotRVHandles{};	// スナップショット用SRVハンドル配列
+	RootSignature* m_pSnapshotRootSignature{};		// スナップショット用ルートシグネチャ
+	PipelineState* m_pSnapshotPSO{};				// スナップショット用パイプラインステート
+	
+	DescriptorHeap* m_pFrameBufferDescriptorHeap{};				// フレームバッファ用ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_FrameBufferRVHandles{};	// フレームバッファ用SRVハンドル配列
+	RootSignature* m_pFrameBufferRootSignature{};	// フレームバッファ用ルートシグネチャ
+	PipelineState* m_pFrameBufferPSO{};				// フレームバッファ用パイプラインステート
 };

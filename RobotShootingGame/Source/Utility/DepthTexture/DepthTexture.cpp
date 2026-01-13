@@ -61,11 +61,11 @@ DepthTexture::DepthTexture()
 	assert(m_pIndexBuffer);	// nullptrチェック
 
 	// ディスクリプタヒープの生成
-	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
-	assert(m_pDescriptorHeap);	// nullptrチェック
+	m_pSnapshotDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+	assert(m_pSnapshotDescriptorHeap);	// nullptrチェック
 
 	// 深度テクスチャのSRV登録
-	m_SRVHandles.push_back(m_pDescriptorHeap->Register(m_pDepthRT->Resource(), m_pDepthRT->ViewDesc()));
+	m_SnapshotRVHandles.push_back(m_pSnapshotDescriptorHeap->Register(m_pDepthRT->Resource(), m_pDepthRT->ViewDesc()));
 
 	DirectX::XMFLOAT4X4 projMat{};
 	DirectX::XMStoreFloat4x4(&projMat,
@@ -96,14 +96,14 @@ DepthTexture::DepthTexture()
 	m_pRootSig->Create();
 
 	// パイプラインステートの生成
-	m_pPipelineState = new PipelineState();
-	assert(m_pPipelineState);	// nullptrチェック
-	m_pPipelineState->SetInputLayout(Vertex::Sprite::InputLayout);
-	m_pPipelineState->SetRootSignature(m_pRootSig->Get());
-	m_pPipelineState->SetVS(L"Assets/Shader/SpriteVS.cso");
-	m_pPipelineState->SetPS(L"Assets/Shader/SpritePS.cso");
-	m_pPipelineState->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
-	m_pPipelineState->Create();
+	m_pSnapshotPSO = new PipelineState();
+	assert(m_pSnapshotPSO);	// nullptrチェック
+	m_pSnapshotPSO->SetInputLayout(Vertex::Sprite::InputLayout);
+	m_pSnapshotPSO->SetRootSignature(m_pRootSig->Get());
+	m_pSnapshotPSO->SetVS(L"Assets/Shader/SpriteVS.cso");
+	m_pSnapshotPSO->SetPS(L"Assets/Shader/SpritePS.cso");
+	m_pSnapshotPSO->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
+	m_pSnapshotPSO->Create();
 }
 
 DepthTexture::~DepthTexture()
@@ -114,8 +114,8 @@ DepthTexture::~DepthTexture()
 	delete m_pDepthStencil;
 	m_pDepthStencil = nullptr;
 
-	delete m_pRootSignature;
-	m_pRootSignature = nullptr;
+	delete m_pSnapshotRootSignature;
+	m_pSnapshotRootSignature = nullptr;
 
 	for (size_t i = 0; i < NumPSO; ++i)
 	{
@@ -137,14 +137,14 @@ DepthTexture::~DepthTexture()
 		m_pWVPCB[i] = nullptr;
 	}
 
-	delete m_pDescriptorHeap;
-	m_pDescriptorHeap = nullptr;
+	delete m_pSnapshotDescriptorHeap;
+	m_pSnapshotDescriptorHeap = nullptr;
 
 	delete m_pRootSig;
 	m_pRootSig = nullptr;
 
-	delete m_pPipelineState;
-	m_pPipelineState = nullptr;
+	delete m_pSnapshotPSO;
+	m_pSnapshotPSO = nullptr;
 }
 
 void DepthTexture::Draw()
@@ -166,13 +166,13 @@ void DepthTexture::DrawDebugSprite()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
-	auto materialHeap = m_pDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
+	auto materialHeap = m_pSnapshotDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
 
 	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
 	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
 
 	commandList->SetGraphicsRootSignature(m_pRootSig->Get());			// ルートシグネチャを設定
-	commandList->SetPipelineState(m_pPipelineState->Get());					// パイプラインステートを設定
+	commandList->SetPipelineState(m_pSnapshotPSO->Get());					// パイプラインステートを設定
 	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
@@ -180,17 +180,17 @@ void DepthTexture::DrawDebugSprite()
 	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
 
 	commandList->SetDescriptorHeaps(1, &materialHeap);							// ディスクリプタヒープを設定
-	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
+	commandList->SetGraphicsRootDescriptorTable(1, m_SnapshotRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
 }
 
 void DepthTexture::CreateRootSignature()
 {
-	m_pRootSignature = new RootSignature();
-	assert(m_pRootSignature);	// nullptrチェック
-	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
-	m_pRootSignature->Create();
+	m_pSnapshotRootSignature = new RootSignature();
+	assert(m_pSnapshotRootSignature);	// nullptrチェック
+	m_pSnapshotRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
+	m_pSnapshotRootSignature->Create();
 }
 
 void DepthTexture::CreatePSO()
@@ -199,7 +199,7 @@ void DepthTexture::CreatePSO()
 	m_pPSOs[Mesh] = new PipelineState();
 	assert(m_pPSOs[Mesh]);	// nullptrチェック
 	m_pPSOs[Mesh]->SetInputLayout(Vertex::Mesh::InputLayout);
-	m_pPSOs[Mesh]->SetRootSignature(m_pRootSignature->Get());
+	m_pPSOs[Mesh]->SetRootSignature(m_pSnapshotRootSignature->Get());
 	m_pPSOs[Mesh]->SetVS(L"Assets/Shader/DepthMeshVS.cso");
 	m_pPSOs[Mesh]->SetPS(L"Assets/Shader/DepthMeshPS.cso");
 	m_pPSOs[Mesh]->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
@@ -209,10 +209,10 @@ void DepthTexture::CreatePSO()
 	m_pPSOs[Sprite] = new PipelineState();
 	assert(m_pPSOs[Sprite]);	// nullptrチェック
 	m_pPSOs[Sprite]->SetInputLayout(Vertex::Sprite::InputLayout);
-	m_pPSOs[Sprite]->SetRootSignature(m_pRootSignature->Get());
+	m_pPSOs[Sprite]->SetRootSignature(m_pSnapshotRootSignature->Get());
 	m_pPSOs[Sprite]->SetVS(L"Assets/Shader/DepthSpriteVS.cso");
 	m_pPSOs[Sprite]->SetPS(L"Assets/Shader/DepthSpritePS.cso");
-	m_pPSOs[Sprite]->SetRTVFormat(DXGI_FORMAT_R32G32B32A32_FLOAT, 0);
+	m_pPSOs[Sprite]->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
 	m_pPSOs[Sprite]->Create();
 }
 
@@ -261,7 +261,7 @@ void DepthTexture::DrawRenderItems()
 		if (!item.pMaterial) continue;
 
 		// ルートシグネチャをセット
-		cmd->SetGraphicsRootSignature(m_pRootSignature->Get());
+		cmd->SetGraphicsRootSignature(m_pSnapshotRootSignature->Get());
 
 		// パイプラインステートをセット
 		MaterialBase::InputLayoutType layoutType = item.pMaterial->GetInputLayoutType();

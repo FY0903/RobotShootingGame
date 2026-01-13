@@ -33,7 +33,7 @@ public:
 	 */
 	~RootSignature() = default;
 
-	ID3D12RootSignature* Get() const { return m_pRootSignature.Get(); }
+	ID3D12RootSignature* Get() const { return m_pSnapshotRootSignature.Get(); }
 
 	void AddRootParameter(UINT shaderRegiser, D3D12_SHADER_VISIBILITY visibility);
 
@@ -44,7 +44,7 @@ public:
 	void Create();
 
 private:
-	ComPtr<ID3D12RootSignature> m_pRootSignature{};	// ルートシグネチャ
+	ComPtr<ID3D12RootSignature> m_pSnapshotRootSignature{};	// ルートシグネチャ
 
 	std::vector<CD3DX12_ROOT_PARAMETER> m_RootParams{}; // ルートパラメータ
 	std::vector<CD3DX12_DESCRIPTOR_RANGE> m_DescriptorRanges{}; // ディスクリプタレンジ

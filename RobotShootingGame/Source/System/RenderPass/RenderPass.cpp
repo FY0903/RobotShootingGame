@@ -11,8 +11,9 @@
 // ==============================
 #include "RenderPass.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/RenderTarget/RenderTarget.hpp"
 
-RenderPass::RenderPass()
+RenderPass::RenderPass(RenderTarget* rt)
 {
 	float clearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -52,9 +53,14 @@ RenderPass::RenderPass()
 	assert(m_pIB);	// nullptrチェック
 
 	// ディスクリプタヒープの生成
-	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
-	assert(m_pDescriptorHeap);	// nullptrチェック
+	m_pSnapshotDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+	assert(m_pSnapshotDescriptorHeap);	// nullptrチェック
 
+	// ひとつ前のレンダーターゲットのSRV登録
+	DescriptorHandle* handle = m_pSnapshotDescriptorHeap->Register(rt->Resource(), rt->ViewDesc());
+	m_SnapshotRVHandles.push_back(handle);
+
+	// 射影行列の計算
 	DirectX::XMFLOAT4X4 projMat{};
 	DirectX::XMStoreFloat4x4(&projMat,
 		DirectX::XMMatrixTranspose(
@@ -76,10 +82,40 @@ RenderPass::RenderPass()
 	}
 }
 
+RenderPass::~RenderPass()
+{
+	delete m_pRT;
+	m_pRT = nullptr;
+
+	delete m_pDSV;
+	m_pDSV = nullptr;
+
+	delete m_pVB;
+	m_pVB = nullptr;
+
+	delete m_pIB;
+	m_pIB = nullptr;
+
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		delete m_pWVPCB[i];
+		m_pWVPCB[i] = nullptr;
+	}
+
+	delete m_pSnapshotDescriptorHeap;
+	m_pSnapshotDescriptorHeap = nullptr;
+
+	delete m_pSnapshotRootSignature;
+	m_pSnapshotRootSignature = nullptr;
+
+	delete m_pSnapshotPSO;
+	m_pSnapshotPSO = nullptr;
+}
+
 void RenderPass::Execute()
 {
 	// PSOまたはルートシグネチャが存在しない場合は処理を抜ける
-	if (!m_pPipelineState || !m_pRootSignature) return;
+	if (!m_pSnapshotPSO || !m_pSnapshotRootSignature) return;
 
 	SetRenderTarget();
 	DrawSprite();
@@ -88,12 +124,70 @@ void RenderPass::Execute()
 
 void RenderPass::SetRenderTarget()
 {
+	// リソースバリアの設定
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_pRT->Resource(),
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	Engine::GetInstance().GetCommandList()->ResourceBarrier(1, &barrier);
+
+	// レンダーターゲットのハンドルを取得
+	auto rtvHandle = m_pRT->GetDescriptorHandle()->HandleCPU;
+
+	// 深度ステンシルバッファのハンドルを取得
+	auto dsvHandle = m_pDSV->GetDescriptorHandle()->HandleCPU;
+
+	// レンダーターゲットと深度ステンシルバッファを設定
+	Engine::GetInstance().GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+
+	// レンダーターゲットをクリア
+	Engine::GetInstance().GetCommandList()->ClearRenderTargetView(
+		rtvHandle,
+		m_pRT->GetClearValue().Color,
+		0,
+		nullptr);
+
+	// 深度ステンシルバッファをクリア
+	Engine::GetInstance().GetCommandList()->ClearDepthStencilView(
+		dsvHandle,
+		D3D12_CLEAR_FLAG_DEPTH,
+		1.0f,
+		0,
+		0,
+		nullptr);
 }
 
 void RenderPass::DrawSprite()
 {
+	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
+	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
+	auto materialHeap = m_pSnapshotDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
+
+	auto vbView = m_pVB->GetView();	// 頂点バッファビューを取得
+	auto ibView = m_pIB->GetView();	// インデックスバッファビューを取得
+
+	commandList->SetGraphicsRootSignature(m_pSnapshotRootSignature->Get());			// ルートシグネチャを設定
+	commandList->SetPipelineState(m_pSnapshotPSO->Get());					// パイプラインステートを設定
+	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
+
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
+	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
+	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
+
+	commandList->SetDescriptorHeaps(1, &materialHeap);							// ディスクリプタヒープを設定
+	commandList->SetGraphicsRootDescriptorTable(1, m_SnapshotRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
+
+	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
 }
 
 void RenderPass::WaitGPU()
 {
+	// リソースバリアの設定
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+		m_pRT->Resource(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+	// リソースバリアの適用
+	Engine::GetInstance().GetCommandList()->ResourceBarrier(1, &barrier);
 }

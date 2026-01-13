@@ -37,6 +37,6 @@ private:
 	ComPtr<ID3D12Resource> m_pResource{};			// テクスチャリソース
 	D3D12_CLEAR_VALUE m_ClearValue{};				// クリア値
 
-	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
+	DescriptorHeap* m_pSnapshotDescriptorHeap{}; // ディスクリプタヒープ
 	DescriptorHandle* m_pDescriptorHandle{}; // ディスクリプタハンドル
 };

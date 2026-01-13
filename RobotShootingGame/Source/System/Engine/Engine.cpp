@@ -128,6 +128,8 @@ void Engine::Draw()
 {
 	BeginDraw();
 	Render::GetInstance().Draw();
+	SetBackBufferRenderTarget();
+	Render::GetInstance().CopyBackBufferToFrameBuffer();
 	EndDraw();
 }
 

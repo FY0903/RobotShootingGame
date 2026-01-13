@@ -14,8 +14,8 @@
 
 DepthStencil::~DepthStencil()
 {
-	delete m_pDescriptorHeap;
-	m_pDescriptorHeap = nullptr;
+	delete m_pSnapshotDescriptorHeap;
+	m_pSnapshotDescriptorHeap = nullptr;
 }
 
 HRESULT DepthStencil::Create(UINT width, UINT height, DXGI_FORMAT format, float clearDepth, UINT8 clearStencil)
@@ -60,9 +60,9 @@ HRESULT DepthStencil::Create(UINT width, UINT height, DXGI_FORMAT format, float 
 	m_Width = width;
 	m_Height = height;
 
-	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+	m_pSnapshotDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
 
-	m_pDescriptorHandle = m_pDescriptorHeap->Register(m_pResource.Get());
+	m_pDescriptorHandle = m_pSnapshotDescriptorHeap->Register(m_pResource.Get());
 	if (!m_pDescriptorHandle)
 	{
 		MessageBox(nullptr, "深度ステンシルバッファのディスクリプタハンドルの登録に失敗しました。", "エラー", MB_OK | MB_ICONERROR);

@@ -55,7 +55,7 @@ void SceneGame::OnInit()
 	//AddGameObject<PointLight>(Layer::DEFAULT);
 
 	// スポットライトの生成
-	AddGameObject<SpotLight>(Layer::DEFAULT);
+	//AddGameObject<SpotLight>(Layer::DEFAULT);
 
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/Title.mp3", false, true);
 	//Sound::GetInstance().Play("BGM");

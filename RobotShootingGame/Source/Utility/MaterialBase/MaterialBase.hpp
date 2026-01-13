@@ -56,16 +56,16 @@ public:
 
 	void Create();
 
-	inline RootSignature* GetRootSignature() const { return m_pRootSignature; }
-	inline PipelineState* GetPipelineState() const { return m_pPipelineState; }
+	inline RootSignature* GetRootSignature() const { return m_pSnapshotRootSignature; }
+	inline PipelineState* GetPipelineState() const { return m_pSnapshotPSO; }
 	inline int GetRootParameterIndex() const { return m_rootParameterIndex; }
 	inline InputLayoutType GetInputLayoutType() const { return m_InputLayoutType; }
 
 private:
 	std::wstring m_VSFilepath{};			// 頂点シェーダーファイルパス
 	std::wstring m_PSFilepath{};			// ピクセルシェーダーファイルパス
-	RootSignature* m_pRootSignature{};		// ルートシグネチャ
-	PipelineState* m_pPipelineState{};		// パイプラインステート
+	RootSignature* m_pSnapshotRootSignature{};		// ルートシグネチャ
+	PipelineState* m_pSnapshotPSO{};		// パイプラインステート
 	InputLayoutType m_InputLayoutType{};	// 入力レイアウトタイプ
 
 	int m_rootParameterIndex{};

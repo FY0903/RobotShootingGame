@@ -46,6 +46,6 @@ private:
 	D3D12_SHADER_RESOURCE_VIEW_DESC m_ViewDesc{};	// シェーダーリソースビューの設定
 	D3D12_CLEAR_VALUE m_ClearValue{};				// クリア値
 
-	DescriptorHeap* m_pDescriptorHeap{}; // ディスクリプタヒープ
+	DescriptorHeap* m_pSnapshotDescriptorHeap{}; // ディスクリプタヒープ
 	DescriptorHandle* m_pDescriptorHandle{}; // ディスクリプタハンドル
 };

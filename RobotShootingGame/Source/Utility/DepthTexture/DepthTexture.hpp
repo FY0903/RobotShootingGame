@@ -57,15 +57,15 @@ private:
 	RenderTarget* m_pDepthRT{};						// 深度レンダーターゲット
 	DepthStencil* m_pDepthStencil{};				// 深度ステンシル
 	PipelineState* m_pPSOs[NumPSO]{};				// パイプラインステートオブジェクト
-	RootSignature* m_pRootSignature{};				// ルートシグネチャ
+	RootSignature* m_pSnapshotRootSignature{};				// ルートシグネチャ
 
 	std::vector<Render::RenderItem> m_RenderItems{};
 
 	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
 	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	DescriptorHeap* m_pDescriptorHeap{};	// ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_SRVHandles{}; // SRVハンドル配列
+	DescriptorHeap* m_pSnapshotDescriptorHeap{};	// ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_SnapshotRVHandles{}; // SRVハンドル配列
 	RootSignature* m_pRootSig{};		// ルートシグネチャ
-	PipelineState* m_pPipelineState{};		// パイプラインステート
+	PipelineState* m_pSnapshotPSO{};		// パイプラインステート
 };

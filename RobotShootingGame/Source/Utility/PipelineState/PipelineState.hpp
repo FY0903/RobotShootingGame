@@ -37,11 +37,11 @@ public:
 	void SetDSVFormat(DXGI_FORMAT format);
 	void Create();
 
-	ID3D12PipelineState* Get() const { return m_pPipelineState.Get(); }
+	ID3D12PipelineState* Get() const { return m_pSnapshotPSO.Get(); }
 
 private:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC m_Desc{};	// グラフィックスパイプラインステートの記述
-	ComPtr<ID3D12PipelineState> m_pPipelineState{};	// パイプラインステートオブジェクト
+	ComPtr<ID3D12PipelineState> m_pSnapshotPSO{};	// パイプラインステートオブジェクト
 	ComPtr<ID3DBlob> m_pVSBlob{};					// 頂点シェーダーのバイナリ
 	ComPtr<ID3DBlob> m_pPSBlob{};					// ピクセルシェーダーのバイナリ
 };
