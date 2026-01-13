@@ -61,8 +61,8 @@ private:
 
 	std::vector<Render::RenderItem> m_RenderItems{};
 
-	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
-	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
+	VertexBuffer* m_pVB{};		// 頂点バッファ
+	IndexBuffer* m_pIB{};			// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	DescriptorHeap* m_pSnapshotDescriptorHeap{};	// ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_SnapshotRVHandles{}; // SRVハンドル配列

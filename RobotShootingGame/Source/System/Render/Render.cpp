@@ -64,15 +64,15 @@ Render::Render()
 	// 頂点バッファの生成
 	auto vertexSize = std::size(vertices) * sizeof(Vertex::Sprite);
 	auto vertexStride = sizeof(Vertex::Sprite);
-	m_pVertexBuffer = new VertexBuffer(vertexSize, vertexStride, vertices);
-	assert(m_pVertexBuffer);	// nullptrチェック
+	m_pVB = new VertexBuffer(vertexSize, vertexStride, vertices);
+	assert(m_pVB);	// nullptrチェック
 
 	uint32_t indices[] = { 0, 1, 2, 0, 2, 3 };
 
 	// インデックスバッファの生成
 	auto indexSize = std::size(indices) * sizeof(uint32_t);
-	m_pIndexBuffer = new IndexBuffer(indexSize, indices);
-	assert(m_pIndexBuffer);	// nullptrチェック
+	m_pIB = new IndexBuffer(indexSize, indices);
+	assert(m_pIB);	// nullptrチェック
 
 	// ディスクリプタヒープの生成
 	m_pSnapshotDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
@@ -247,11 +247,11 @@ Render::~Render()
 		cb = nullptr;
 	}
 
-	delete m_pVertexBuffer;
-	m_pVertexBuffer = nullptr;
+	delete m_pVB;
+	m_pVB = nullptr;
 
-	delete m_pIndexBuffer;
-	m_pIndexBuffer = nullptr;
+	delete m_pIB;
+	m_pIB = nullptr;
 
 	delete m_pSnapshotDescriptorHeap;
 	m_pSnapshotDescriptorHeap = nullptr;
@@ -477,8 +477,8 @@ void Render::CopyBackBufferToFrameBuffer()
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
 	auto materialHeap = m_pFrameBufferDescriptorHeap->GetHeap();			// ディスクリプタヒープを取得
 
-	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
-	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
+	auto vbView = m_pVB->GetView();	// 頂点バッファビューを取得
+	auto ibView = m_pIB->GetView();	// インデックスバッファビューを取得
 
 	commandList->SetGraphicsRootSignature(m_pFrameBufferRootSignature->Get());			// ルートシグネチャを設定
 	commandList->SetPipelineState(m_pFrameBufferPSO->Get());							// パイプラインステートを設定
@@ -525,8 +525,8 @@ void Render::DrawOpaqueSprite()
 	cameraPtr->invPMat = invPMat;
 	cameraPtr->PMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 	
-	auto vbView = m_pVertexBuffer->GetView();	// 頂点バッファビューを取得
-	auto ibView = m_pIndexBuffer->GetView();	// インデックスバッファビューを取得
+	auto vbView = m_pVB->GetView();	// 頂点バッファビューを取得
+	auto ibView = m_pIB->GetView();	// インデックスバッファビューを取得
 
 	commandList->SetGraphicsRootSignature(m_pSnapshotRootSignature->Get());			// ルートシグネチャを設定
 	commandList->SetPipelineState(m_pSnapshotPSO->Get());					// パイプラインステートを設定

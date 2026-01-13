@@ -33,7 +33,7 @@ void Line::Draw()
 	Render::RenderItem item{};
 	item.pMaterial = m_Owner->GetMaterial();
 	item.type = D3D_PRIMITIVE_TOPOLOGY_LINELIST;
-	item.pVertexBuffers.push_back(m_pVertexBuffer);
+	item.pVertexBuffers.push_back(m_pVB);
 	item.MeshSize = 1;
 	item.indexCounts.push_back(static_cast<UINT>(m_Lines.size()));
 
@@ -43,8 +43,8 @@ void Line::Draw()
 
 void Line::Uninit()
 {
-	delete m_pVertexBuffer;
-	m_pVertexBuffer = nullptr;
+	delete m_pVB;
+	m_pVB = nullptr;
 	m_pWVPCBs.fill(nullptr);
 }
 
@@ -58,7 +58,7 @@ void Line::Create()
 {
 	auto vertexSize = sizeof(Vertex::Line) * m_Lines.size();
 	auto vertexStride = sizeof(Vertex::Line);
-	m_pVertexBuffer = new VertexBuffer(vertexSize, vertexStride, m_Lines.data());
+	m_pVB = new VertexBuffer(vertexSize, vertexStride, m_Lines.data());
 
 	auto material = m_Owner->GetMaterial();
 

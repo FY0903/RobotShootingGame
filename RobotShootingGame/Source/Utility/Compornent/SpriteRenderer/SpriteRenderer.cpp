@@ -34,15 +34,15 @@ void SpriteRenderer::Init(bool is2D)
 	// 頂点バッファの生成
 	auto vertexSize = std::size(vertices) * sizeof(Vertex::Sprite);
 	auto vertexStride = sizeof(Vertex::Sprite);
-	m_pVertexBuffer = new VertexBuffer(vertexSize, vertexStride, vertices);
-	assert(m_pVertexBuffer);	// nullptrチェック
+	m_pVB = new VertexBuffer(vertexSize, vertexStride, vertices);
+	assert(m_pVB);	// nullptrチェック
 
 	uint32_t indices[] = { 0, 1, 2, 0, 2, 3 };
 
 	// インデックスバッファの生成
 	auto indexSize = std::size(indices) * sizeof(uint32_t);
-	m_pIndexBuffer = new IndexBuffer(indexSize, indices);
-	assert(m_pIndexBuffer);	// nullptrチェック
+	m_pIB = new IndexBuffer(indexSize, indices);
+	assert(m_pIB);	// nullptrチェック
 	m_IndexCount = static_cast<int>(std::size(indices));
 
 	auto material = m_Owner->GetMaterial();
@@ -90,8 +90,8 @@ void SpriteRenderer::Init(size_t cell, float spacing)
 	// 頂点バッファの生成
 	auto vertexSize = vertices.size() * sizeof(Vertex::Sprite);
 	auto vertexStride = sizeof(Vertex::Sprite);
-	m_pVertexBuffer = new VertexBuffer(vertexSize, vertexStride, vertices.data());
-	assert(m_pVertexBuffer);	// nullptrチェック
+	m_pVB = new VertexBuffer(vertexSize, vertexStride, vertices.data());
+	assert(m_pVB);	// nullptrチェック
 
 	std::vector<uint32_t> indices;
 	size_t indexCount = vertexPerSide * 2 * cell + (cell - 1) * 2;
@@ -116,8 +116,8 @@ void SpriteRenderer::Init(size_t cell, float spacing)
 
 	// インデックスバッファの生成
 	auto indexSize = indices.size() * sizeof(uint32_t);
-	m_pIndexBuffer = new IndexBuffer(indexSize, indices.data());
-	assert(m_pIndexBuffer);	// nullptrチェック
+	m_pIB = new IndexBuffer(indexSize, indices.data());
+	assert(m_pIB);	// nullptrチェック
 	m_IndexCount = static_cast<int>(indices.size());
 
 	auto material = m_Owner->GetMaterial();
@@ -162,8 +162,8 @@ void SpriteRenderer::Draw()
 	Render::RenderItem item{};
 	item.pMaterial = m_Owner->GetMaterial();
 	item.type = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	item.pVertexBuffers.push_back(m_pVertexBuffer);
-	item.pIndexBuffers.push_back(m_pIndexBuffer);
+	item.pVertexBuffers.push_back(m_pVB);
+	item.pIndexBuffers.push_back(m_pIB);
 	if (!m_Owner->GetMaterial()->IsOpaque())
 		item.sortKey = CameraManager::GetInstance().CalculateDistanceToMainCamera(m_Owner->GetTransform().GetWorldMatrixFloat4x4(false));
 	item.indexCounts.push_back(static_cast<UINT>(m_IndexCount));
@@ -175,16 +175,16 @@ void SpriteRenderer::Draw()
 
 void SpriteRenderer::Uninit()
 {
-	if (m_pVertexBuffer)
+	if (m_pVB)
 	{
-		delete m_pVertexBuffer;
-		m_pVertexBuffer = nullptr;
+		delete m_pVB;
+		m_pVB = nullptr;
 	}
 
-	if (m_pIndexBuffer)
+	if (m_pIB)
 	{
-		delete m_pIndexBuffer;
-		m_pIndexBuffer = nullptr;
+		delete m_pIB;
+		m_pIB = nullptr;
 	}
 
 	m_pWVPCBs.fill(nullptr);

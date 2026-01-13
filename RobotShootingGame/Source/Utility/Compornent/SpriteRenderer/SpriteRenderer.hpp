@@ -36,8 +36,8 @@ public:
 
 private:
 
-	VertexBuffer* m_pVertexBuffer{};	// 頂点バッファ
-	IndexBuffer* m_pIndexBuffer{};	// インデックスバッファ
+	VertexBuffer* m_pVB{};	// 頂点バッファ
+	IndexBuffer* m_pIB{};	// インデックスバッファ
 
 	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pWVPCBs{}; // WVP用定数バッファ
 	int m_IndexCount{};	// インデックス数

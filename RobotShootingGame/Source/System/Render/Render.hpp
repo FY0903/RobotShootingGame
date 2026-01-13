@@ -121,8 +121,8 @@ private:
 
 	std::vector<RenderPass*> m_RenderPasses{};			// レンダーパス配列
 
-	VertexBuffer* m_pVertexBuffer{};		// 頂点バッファ
-	IndexBuffer* m_pIndexBuffer{};			// インデックスバッファ
+	VertexBuffer* m_pVB{};		// 頂点バッファ
+	IndexBuffer* m_pIB{};			// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	ConstantBuffer* m_pLightCB[FRAME_BUFFER_COUNT]{}; // ライト用定数バッファ
 	ConstantBuffer* m_pCameraCB[FRAME_BUFFER_COUNT]{}; // カメラ用定数バッファ
