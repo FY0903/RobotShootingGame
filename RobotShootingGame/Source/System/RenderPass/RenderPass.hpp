@@ -46,10 +46,10 @@ protected:
 	virtual void CreatePSO() = 0;
 
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	DescriptorHeap* m_pSnapshotDescriptorHeap{};			// ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_SnapshotRVHandles{};	// SRVハンドル配列
-	RootSignature* m_pSnapshotRootSignature{};				// ルートシグネチャ
-	PipelineState* m_pSnapshotPSO{};				// パイプラインステート
+	DescriptorHeap* m_pDescriptorHeap{};			// ディスクリプタヒープ
+	std::vector<DescriptorHandle*> m_SRVHandles{};	// SRVハンドル配列
+	RootSignature* m_pRootSignature{};				// ルートシグネチャ
+	PipelineState* m_pPSO{};						// パイプラインステート
 
 private:
 	void SetRenderTarget();

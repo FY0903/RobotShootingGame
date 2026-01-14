@@ -53,12 +53,12 @@ RenderPass::RenderPass(RenderTarget* rt)
 	assert(m_pIB);	// nullptrチェック
 
 	// ディスクリプタヒープの生成
-	m_pSnapshotDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
-	assert(m_pSnapshotDescriptorHeap);	// nullptrチェック
+	m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+	assert(m_pDescriptorHeap);	// nullptrチェック
 
 	// ひとつ前のレンダーターゲットのSRV登録
-	DescriptorHandle* handle = m_pSnapshotDescriptorHeap->Register(rt->Resource(), rt->ViewDesc());
-	m_SnapshotRVHandles.push_back(handle);
+	DescriptorHandle* handle = m_pDescriptorHeap->Register(rt->Resource(), rt->ViewDesc());
+	m_SRVHandles.push_back(handle);
 
 	// 射影行列の計算
 	DirectX::XMFLOAT4X4 projMat{};
@@ -102,20 +102,20 @@ RenderPass::~RenderPass()
 		m_pWVPCB[i] = nullptr;
 	}
 
-	delete m_pSnapshotDescriptorHeap;
-	m_pSnapshotDescriptorHeap = nullptr;
+	delete m_pDescriptorHeap;
+	m_pDescriptorHeap = nullptr;
 
-	delete m_pSnapshotRootSignature;
-	m_pSnapshotRootSignature = nullptr;
+	delete m_pRootSignature;
+	m_pRootSignature = nullptr;
 
-	delete m_pSnapshotPSO;
-	m_pSnapshotPSO = nullptr;
+	delete m_pPSO;
+	m_pPSO = nullptr;
 }
 
 void RenderPass::Execute()
 {
 	// PSOまたはルートシグネチャが存在しない場合は処理を抜ける
-	if (!m_pSnapshotPSO || !m_pSnapshotRootSignature) return;
+	if (!m_pPSO || !m_pRootSignature) return;
 
 	SetRenderTarget();
 	DrawSprite();
@@ -161,13 +161,13 @@ void RenderPass::DrawSprite()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
-	auto materialHeap = m_pSnapshotDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
+	auto materialHeap = m_pDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
 
 	auto vbView = m_pVB->GetView();	// 頂点バッファビューを取得
 	auto ibView = m_pIB->GetView();	// インデックスバッファビューを取得
 
-	commandList->SetGraphicsRootSignature(m_pSnapshotRootSignature->Get());			// ルートシグネチャを設定
-	commandList->SetPipelineState(m_pSnapshotPSO->Get());					// パイプラインステートを設定
+	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
+	commandList->SetPipelineState(m_pPSO->Get());					// パイプラインステートを設定
 	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
@@ -175,7 +175,7 @@ void RenderPass::DrawSprite()
 	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
 
 	commandList->SetDescriptorHeaps(1, &materialHeap);							// ディスクリプタヒープを設定
-	commandList->SetGraphicsRootDescriptorTable(1, m_SnapshotRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
+	commandList->SetGraphicsRootDescriptorTable(1, m_SRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
 }

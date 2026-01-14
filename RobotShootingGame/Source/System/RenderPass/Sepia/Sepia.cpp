@@ -20,20 +20,20 @@ void Sepia::Init()
 
 void Sepia::CreateRootSignature()
 {
-	m_pSnapshotRootSignature = new RootSignature();
-	m_pSnapshotRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
-	m_pSnapshotRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, D3D12_SHADER_VISIBILITY_PIXEL); // SRV
-	m_pSnapshotRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
-	m_pSnapshotRootSignature->Create();
+	m_pRootSignature = new RootSignature();
+	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
+	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, D3D12_SHADER_VISIBILITY_PIXEL); // SRV
+	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
+	m_pRootSignature->Create();
 }
 
 void Sepia::CreatePSO()
 {
-	m_pSnapshotPSO = new PipelineState();
-	m_pSnapshotPSO->SetInputLayout(Vertex::Sprite::InputLayout);
-	m_pSnapshotPSO->SetRootSignature(m_pSnapshotRootSignature->Get());
-	m_pSnapshotPSO->SetVS(L"Assets/Shader/SpriteVS.cso");
-	m_pSnapshotPSO->SetPS(L"Assets/Shader/SepiaPS.cso");
-	m_pSnapshotPSO->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
-	m_pSnapshotPSO->Create();
+	m_pPSO = new PipelineState();
+	m_pPSO->SetInputLayout(Vertex::Sprite::InputLayout);
+	m_pPSO->SetRootSignature(m_pRootSignature->Get());
+	m_pPSO->SetVS(L"Assets/Shader/SpriteVS.cso");
+	m_pPSO->SetPS(L"Assets/Shader/SepiaPS.cso");
+	m_pPSO->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
+	m_pPSO->Create();
 }
