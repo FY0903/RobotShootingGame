@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Object.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: オブジェクトクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/24 13:58:08 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/24 13:58 初回作成
+			26/01/14 18:36 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -19,8 +19,10 @@
 
 void Object::OnInit()
 {
+	// モデルの読み込み
 	auto pModel = ModelManager::GetInstance().LoadModel("Assets/Model/F15E/F15E.fbx");
 
+	// アニメーションの読み込み
 	m_pAnimations.resize(2);
 	m_pAnimations[0] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/taiki_mae.fbx");
 	m_pAnimations[1] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/walk.fbx");
@@ -29,10 +31,12 @@ void Object::OnInit()
 	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("SkeletalGBuffer");
 	//m_pMaterial = MaterialManager::GetInstance().CreateMaterial("DebugGBuffer");
 
+	// メッシュレンダラーコンポーネントを追加
 	auto meshRenderer = AddComponent<MeshRenderer>();
 	meshRenderer->Init(pModel);
 	//meshRenderer->Init();
 
+	// スケルタルアニメーターコンポーネントを追加
 	//auto skeletalAnimator = AddComponent<SkeletalAnimator>();
 	//skeletalAnimator->Init(pModel);
 	//skeletalAnimator->PlayAnimation(m_pAnimations[0]);

@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: SceneBase.hpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: シーンの基底クラスヘッダーファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/21 15:33:17 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/21 15:33 初回作成
+			26/01/14 19:14 コメント記載
 ===================================================================+*/
 #pragma once
 
@@ -12,12 +12,15 @@
 // ==============================
 #include "Game/Actor/Actor.hpp"
 
+/**
+ * @brief シーンのレイヤー
+ */
 enum class Layer : int
 {
-	DEFAULT,
-	PLAYER,
-	ENEMY,
-	UI,
+	DEFAULT,	// デフォルト
+	PLAYER,		// プレイヤー
+	ENEMY,		// 敵
+	UI,			// UI
 	MAX,
 };
 
@@ -37,12 +40,37 @@ public:
 	 */
 	virtual ~SceneBase() = default;
 
+	/**
+	 * @brief 初期化処理
+	 */
 	void Init();
+
+	/**
+	 * @brief 更新処理
+	 */
 	void Update();
+
+	/**
+	 * @brief 固定更新処理
+	 */
 	void FixedUpdate();
+
+	/**
+	 * @brief 描画処理
+	 */
 	void Draw();
+
+	/**
+	 * @brief 終了処理
+	 */
 	void Uninit();
 
+	/**
+	 * @brief 指定されたレイヤーに新しいゲームオブジェクトを追加します。
+	 * @tparam T 追加するゲームオブジェクトの型。デフォルトは Actor です。
+	 * @param layer ゲームオブジェクトを追加するレイヤー。デフォルトは Layer::DEFAULT です。
+	 * @return 新しく作成され初期化されたゲームオブジェクトへのポインタ。
+	 */
 	template<typename T = Actor>
 	inline T* AddGameObject(Layer layer = Layer::DEFAULT)
 	{
@@ -52,6 +80,11 @@ public:
 		return actor;
 	}
 
+	/**
+	 * @brief 指定された型のゲームオブジェクトを検索して返します。
+	 * @tparam T 検索するゲームオブジェクトの型。
+	 * @return 見つかった場合は指定された型のゲームオブジェクトへのポインタ、見つからない場合はnullptr。
+	 */
 	template<typename T>
 	inline T* GetGameObject()
 	{

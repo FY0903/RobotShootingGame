@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Sprite.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: スプライトを表すクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/24 8:33:45 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/24 08:33 初回作成
+			26/01/14 18:49 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -24,6 +24,7 @@ void Sprite::OnInit()
 	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Water");
 	m_pMaterial->SetTexture(pDefTex);
 
+	// スプライトレンダラーコンポーネントの追加
 	AddComponent<SpriteRenderer>()->Init();
 
 	// 定数バッファの設定
@@ -32,6 +33,7 @@ void Sprite::OnInit()
 
 void Sprite::OnUpdate()
 {
+	// 定数バッファに時間情報を設定
 	size_t currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 
 	CB::Time* pTime = m_pTimeCB[currentIndex]->GetPtr<CB::Time>();

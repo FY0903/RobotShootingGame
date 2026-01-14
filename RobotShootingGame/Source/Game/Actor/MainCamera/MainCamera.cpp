@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: MainCamera.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: メインカメラクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/21 18:12:36 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/21 18:12 初回作成
+			26/01/14 18:34 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -17,7 +17,6 @@ void MainCamera::OnInit()
 {
 	// カメラコンポーネントの生成と初期化
 	Camera* camera = AddComponent<Camera>();
-
 	camera->Init();
 	//camera->SetTargetPos(DirectX::XMLoadFloat3(&targetPos));
 	//camera->SetRadius(10.0f);

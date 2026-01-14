@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Grid.hpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: 座標軸とグリッドを表示するクラスのヘッダーファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/22 16:46:33 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/22 16:46 初回作成
+			26/01/14 18:29 コメント記載
 ===================================================================+*/
 #pragma once
 
@@ -29,7 +29,18 @@ public:
 	~Grid() = default;
 
 private:
+	/**
+	 * @brief 初期化処理
+	 */
 	void OnInit() override final;
+	
+	/**
+	 * @brief 更新処理
+	 */
 	void OnUpdate() override final;
+
+	/**
+	 * @brief 終了処理
+	 */
 	void OnUninit() override final;
 };

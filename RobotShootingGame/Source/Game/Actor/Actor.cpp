@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Actor.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: アクターの基底クラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/14 11:45:12 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/14 11:45 初回作成
+			26/01/14 18:53 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -12,28 +12,22 @@
 #include "Actor.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
 
-Actor::Actor()
-{
-}
-
-Actor::~Actor()
-{
-}
-
 void Actor::Init()
 {
+	// 派生クラスの初期化処理
 	OnInit();
 }
 
 void Actor::Update()
 {
+	// 派生クラスの更新処理
 	OnUpdate();
 
+	// コンポーネントの更新処理
 	for (auto& component : m_Components)
-	{
 		component->Update();
-	}
 
+	// 子アクターの更新処理
 	for (auto& child : m_ChildActors)
 	{
 		Transform worldTransform = child->m_Transform;
@@ -52,29 +46,27 @@ void Actor::Update()
 
 void Actor::FixedUpdate()
 {
+	// 派生クラスの固定更新処理
 	OnFixedUpdate();
-	for (auto& component : m_Components)
-	{
-		component->FixedUpdate();
-	}
 
+	// コンポーネントの固定更新処理
+	for (auto& component : m_Components)
+		component->FixedUpdate();
+
+	// 子アクターの固定更新処理
 	for (auto& child : m_ChildActors)
-	{
 		child->FixedUpdate();
-	}
 }
 
 void Actor::Draw()
 {
+	// コンポーネントの描画処理
 	for (auto& component : m_Components)
-	{
 		component->Draw();
-	}
 
+	// 子アクターの描画処理
 	for (auto& child : m_ChildActors)
-	{
 		child->Draw();
-	}
 }
 
 void Actor::Uninit()
@@ -85,7 +77,9 @@ void Actor::Uninit()
 		delete child;
 	}
 
+	// 派生クラスの終了処理
 	OnUninit();
+
 	for (auto& component : m_Components)
 	{
 		component->Uninit();

@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: DirectionalLight.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: 太陽光源を表すクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/12/18 15:43:42 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/12/18 15:43 初回作成
+			26/01/14 17:54 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -14,8 +14,9 @@
 
 void DirectionalLight::OnInit()
 {
+	// ライトコンポーネントを追加
 	auto light = AddComponent<Light>();
-	light->Init(Light::DIRECTIONAL);
+	light->Init(Light::DIRECTIONAL);	// 太陽光源として初期化
 }
 
 void DirectionalLight::OnUpdate()

@@ -114,27 +114,37 @@ HRESULT Engine::Init(HWND wnd)
 void Engine::BeginDraw()
 {
 	// コマンドアロケーターのリセット
-	m_pAllocator[m_CurrentBackBufferIndex]->Reset();
+	m_pAllocator[m_currentBackBufferIndex]->Reset();
 
 	// コマンドリストのリセット
-	m_pCommandList->Reset(m_pAllocator[m_CurrentBackBufferIndex].Get(), nullptr);
+	m_pCommandList->Reset(m_pAllocator[m_currentBackBufferIndex].Get(), nullptr);
 
 	// ビューポートとシザー矩形の設定
-	m_pCommandList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
+	m_pCommandList->RSSetViewports(1, &m_viewport); // ビューポートの設定
 	m_pCommandList->RSSetScissorRects(1, &m_scissor); // シザー矩形の設定
 }
 
 void Engine::Draw()
 {
+	// 描画開始処理
 	BeginDraw();
+
+	// レンダリング処理
 	Render::GetInstance().Draw();
+	
+	// バックバッファをレンダーターゲットに設定
 	SetBackBufferRenderTarget();
+
+	// バックバッファにコピー
 	Render::GetInstance().CopyBackBufferToFrameBuffer();
+	
+	// 描画終了処理
 	EndDraw();
 }
 
 void Engine::EndDraw()
 {
+	// リソースバリアの設定
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(
 		m_pCurrentRenderTarget.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
@@ -156,21 +166,21 @@ void Engine::EndDraw()
 	WaitRender();
 
 	// 次のバックバッファインデックスを取得
-	m_CurrentBackBufferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+	m_currentBackBufferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 }
 
 void Engine::SetBackBufferRenderTarget()
 {
 	// ビューポートとシザー矩形の設定
-	m_pCommandList->RSSetViewports(1, &m_Viewport); // ビューポートの設定
+	m_pCommandList->RSSetViewports(1, &m_viewport); // ビューポートの設定
 	m_pCommandList->RSSetScissorRects(1, &m_scissor); // シザー矩形の設定
 
 	// 現在のRTVを更新
-	m_pCurrentRenderTarget = m_pRenderTargets[m_CurrentBackBufferIndex].Get();
+	m_pCurrentRenderTarget = m_pRenderTargets[m_currentBackBufferIndex].Get();
 
 	// RTVのディスクリプタヒープの開始アドレスを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pRtvHeap->GetCPUDescriptorHandleForHeapStart();
-	rtvHandle.ptr += m_CurrentBackBufferIndex * m_rtvDescriptorSize;	// 現在のRTVのアドレスを計算
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pRTVHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvHandle.ptr += m_currentBackBufferIndex * m_RTVDescriptorSize;	// 現在のRTVのアドレスを計算
 
 	// DSVのディスクリプタヒープの開始アドレスを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = Render::GetInstance().GetDepthStencil()->GetDescriptorHandle()->HandleCPU;
@@ -202,10 +212,10 @@ Engine::~Engine()
 
 #endif
 
-	if (m_hFenceEvent)
+	if (m_fenceEvent)
 	{
-		CloseHandle(m_hFenceEvent);
-		m_hFenceEvent = nullptr;
+		CloseHandle(m_fenceEvent);
+		m_fenceEvent = nullptr;
 	}
 
 	if (m_pOffScreenRTV)
@@ -267,7 +277,7 @@ HRESULT Engine::CreateSwapChain()
 	desc.SampleDesc.Count = 1; // マルチサンプリングのサンプル数
 	desc.SampleDesc.Quality = 0; // マルチサンプリングの品質
 	desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // バッファの使用法
-	desc.BufferCount = m_unFrameCount; // バッファの数
+	desc.BufferCount = m_frameCount; // バッファの数
 	desc.OutputWindow = m_hWnd; // 出力ウィンドウ
 	desc.Windowed = TRUE; // ウィンドウモード
 	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // スワップ効果
@@ -296,7 +306,7 @@ HRESULT Engine::CreateSwapChain()
 	}
 
 	// バックバッファ番号を取得
-	m_CurrentBackBufferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
+	m_currentBackBufferIndex = m_pSwapChain->GetCurrentBackBufferIndex();
 
 	pFactory->Release();
 	pSwapChain->Release();
@@ -310,7 +320,7 @@ HRESULT Engine::CreateCommandList()
 	// ==============================
 	//	コマンドアロケーターの生成
 	// ==============================
-	for (uint32_t i = 0; i < m_unFrameCount; ++i)
+	for (uint32_t i = 0; i < m_frameCount; ++i)
 	{
 		hr = m_pDevice->CreateCommandAllocator(
 			D3D12_COMMAND_LIST_TYPE_DIRECT,					// コマンドリストのタイプ
@@ -330,7 +340,7 @@ HRESULT Engine::CreateCommandList()
 	hr = m_pDevice->CreateCommandList(
 		0,												// ノードマスク（単一ノード）
 		D3D12_COMMAND_LIST_TYPE_DIRECT,					// コマンドリストのタイプ
-		m_pAllocator[m_CurrentBackBufferIndex].Get(),	// コマンドアロケーター
+		m_pAllocator[m_currentBackBufferIndex].Get(),	// コマンドアロケーター
 		nullptr,										// 初期パイプラインステートオブジェクト
 		IID_PPV_ARGS(m_pCommandList.GetAddressOf()));	// コマンドリストのポインタ
 
@@ -363,17 +373,17 @@ HRESULT Engine::CreateFence()
 
 	m_pFence->SetName(L"Fence");
 
-	m_fenceValue[m_CurrentBackBufferIndex]++; // フェンスの値をインクリメント
+	m_fenceValue[m_currentBackBufferIndex]++; // フェンスの値をインクリメント
 
 	// ==============================
 	//	フェンスイベントの生成
 	// ==============================
-	m_hFenceEvent = CreateEvent(
+	m_fenceEvent = CreateEvent(
 		nullptr,	// デフォルトのセキュリティ属性
 		FALSE,		// 手動リセットイベントフラグ
 		FALSE,		// イベントの初期状態
 		nullptr);	// 名前付きオブジェクト
-	if (m_hFenceEvent == nullptr)
+	if (m_fenceEvent == nullptr)
 	{
 		MessageBox(nullptr, "フェンスイベントの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
@@ -384,12 +394,12 @@ HRESULT Engine::CreateFence()
 
 void Engine::CreateViewPort()
 {
-	m_Viewport.TopLeftX = 0.0f;													// ビューポートの左上X座標
-	m_Viewport.TopLeftY = 0.0f;													// ビューポートの左上Y座標
-	m_Viewport.Width = static_cast<float>(Window::GetInstance().GetWidth());	// ビューポートの幅
-	m_Viewport.Height = static_cast<float>(Window::GetInstance().GetHeight());	// ビューポートの高さ
-	m_Viewport.MinDepth = 0.0f;													// ビューポートの最小深度
-	m_Viewport.MaxDepth = 1.0f;													// ビューポートの最大深度
+	m_viewport.TopLeftX = 0.0f;													// ビューポートの左上X座標
+	m_viewport.TopLeftY = 0.0f;													// ビューポートの左上Y座標
+	m_viewport.Width = static_cast<float>(Window::GetInstance().GetWidth());	// ビューポートの幅
+	m_viewport.Height = static_cast<float>(Window::GetInstance().GetHeight());	// ビューポートの高さ
+	m_viewport.MinDepth = 0.0f;													// ビューポートの最小深度
+	m_viewport.MaxDepth = 1.0f;													// ビューポートの最大深度
 }
 
 void Engine::CreateScissorRect()
@@ -406,27 +416,27 @@ HRESULT Engine::CreateRenderTargetView()
 	//	RTVディスクリプタヒープの生成
 	// ==============================
 	D3D12_DESCRIPTOR_HEAP_DESC desc{};
-	desc.NumDescriptors = m_unFrameCount;			// ディスクリプタ数
+	desc.NumDescriptors = m_frameCount;			// ディスクリプタ数
 	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;		// ヒープのタイプ
 	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;	// フラグ（なし）
 	HRESULT hr = m_pDevice->CreateDescriptorHeap(
 		&desc,												// ヒープの設定
-		IID_PPV_ARGS(m_pRtvHeap.ReleaseAndGetAddressOf()));	// ヒープのポインタ
+		IID_PPV_ARGS(m_pRTVHeap.ReleaseAndGetAddressOf()));	// ヒープのポインタ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "RTVディスクリプタヒープの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 		return E_FAIL; // エラー終了
 	}
 
-	m_pRtvHeap->SetName(L"RTVHeap");
+	m_pRTVHeap->SetName(L"RTVHeap");
 
-	m_rtvDescriptorSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); // RTVディスクリプタサイズを取得
+	m_RTVDescriptorSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV); // RTVディスクリプタサイズを取得
 
 	// ==============================
 	//	RTVの生成
 	// ==============================
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pRtvHeap->GetCPUDescriptorHandleForHeapStart(); // ヒープの先頭ハンドルを取得
-	for (uint32_t i = 0; i < m_unFrameCount; ++i)
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pRTVHeap->GetCPUDescriptorHandleForHeapStart(); // ヒープの先頭ハンドルを取得
+	for (uint32_t i = 0; i < m_frameCount; ++i)
 	{
 		hr = m_pSwapChain->GetBuffer(
 			i,															// バックバッファ番号
@@ -442,7 +452,7 @@ HRESULT Engine::CreateRenderTargetView()
 			nullptr,					// RTVの設定（デフォルト）
 			rtvHandle);
 
-		rtvHandle.ptr += m_rtvDescriptorSize; // 次のハンドルへ
+		rtvHandle.ptr += m_RTVDescriptorSize; // 次のハンドルへ
 	}
 
 	return S_OK;
@@ -468,7 +478,7 @@ HRESULT Engine::CreateDepthStencilView()
 
 	m_pDsvHeap->SetName(L"DSVHeap");
 
-	m_dsvDescriptorSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV); // DSVディスクリプタサイズを取得
+	m_DSVDescriptorSize = m_pDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV); // DSVディスクリプタサイズを取得
 
 	D3D12_CLEAR_VALUE clearValue{};
 	clearValue.Format = DXGI_FORMAT_D32_FLOAT;	// フォーマット
@@ -519,14 +529,14 @@ HRESULT Engine::CreateDepthStencilView()
 
 void Engine::WaitRender()
 {
-	const UINT64 fence = m_fenceValue[m_CurrentBackBufferIndex];
+	const UINT64 fence = m_fenceValue[m_currentBackBufferIndex];
 	m_pQueue->Signal(m_pFence.Get(), fence); // コマンドキューにシグナルを送る
-	m_fenceValue[m_CurrentBackBufferIndex]++; // フェンスの値をインクリメント
+	m_fenceValue[m_currentBackBufferIndex]++; // フェンスの値をインクリメント
 
 	if (m_pFence->GetCompletedValue() < fence) // GPUが処理を終えていない場合
 	{
 		// 完了時にイベントを設定
-		auto hr = m_pFence->SetEventOnCompletion(fence, m_hFenceEvent); // フェンスの値に達したらイベントをセット
+		auto hr = m_pFence->SetEventOnCompletion(fence, m_fenceEvent); // フェンスの値に達したらイベントをセット
 		if (FAILED(hr))
 		{
 			MessageBox(nullptr, "フェンスのイベント設定に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
@@ -534,7 +544,7 @@ void Engine::WaitRender()
 		}
 
 		// 待機処理
-		if (WaitForSingleObjectEx(m_hFenceEvent, INFINITE, FALSE) != WAIT_OBJECT_0)
+		if (WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE) != WAIT_OBJECT_0)
 		{
 			MessageBox(nullptr, "フェンスのイベント待機に失敗しました。", "エラー", MB_OK | MB_ICONERROR);
 			return; // エラー終了
