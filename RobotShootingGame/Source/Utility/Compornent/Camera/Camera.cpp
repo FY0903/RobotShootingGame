@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Camera.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: Cameraクラス実装
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/11/20 18:19:59 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+			26/01/15 17:03 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -85,10 +85,6 @@ void Camera::Draw()
 	// 2Dビュー行列とプロジェクション行列は固定
 }
 
-void Camera::Uninit()
-{
-}
-
 const DirectX::XMFLOAT4X4 Camera::Get3DViewMatrixFloat4x4(bool transpose)
 {
 	DirectX::XMFLOAT4X4 viewf{};
@@ -96,7 +92,6 @@ const DirectX::XMFLOAT4X4 Camera::Get3DViewMatrixFloat4x4(bool transpose)
 
 	if (transpose)
 		wiewMat = DirectX::XMMatrixTranspose(wiewMat);
-
 	DirectX::XMStoreFloat4x4(&viewf, wiewMat);
 
 	return viewf;
@@ -109,7 +104,6 @@ const DirectX::XMFLOAT4X4 Camera::Get3DProjectionMatrixFloat4x4(bool transpose)
 
 	if (transpose)
 		projMat = DirectX::XMMatrixTranspose(projMat);
-
 	DirectX::XMStoreFloat4x4(&projf, projMat);
 
 	return projf;
@@ -122,7 +116,6 @@ const DirectX::XMFLOAT4X4 Camera::Get2DViewMatrixFloat4x4(bool transpose)
 
 	if (transpose)
 		wiewMat = DirectX::XMMatrixTranspose(wiewMat);
-
 	DirectX::XMStoreFloat4x4(&viewf, wiewMat);
 
 	return viewf;

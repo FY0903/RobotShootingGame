@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: SkeletalAnimator.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: SkeletalAnimatorクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/26 13:49:38 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/26 13:49 初回作成
+			26/01/05 18:06 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -37,10 +37,6 @@ void SkeletalAnimator::Update()
 		// ブレンド中であればブレンドアニメーション更新
 		UpdateBlendBoneAnimation();
 	}
-}
-
-void SkeletalAnimator::Draw()
-{
 }
 
 void SkeletalAnimator::Uninit()
@@ -192,8 +188,10 @@ void SkeletalAnimator::UpdateSingleBoneAnimation()
 		pBone.AnimationMatrix = boneTransform.GetWorldMatrix();
 	}
 
+	// ボーン行列を更新
 	UpdateBoneMatrix(m_pModel->GetScene()->mRootNode, DirectX::XMMatrixIdentity());
 
+	// 定数バッファ用にボーン行列を格納
 	std::vector<DirectX::XMMATRIX>& boneMatCB = m_pModel->GetBoneMatCB();
 	for (auto& bone : bones)
 	{
@@ -354,7 +352,7 @@ void SkeletalAnimator::UpdateBlendBoneAnimation()
 	// ボーン行列更新
 	UpdateBoneMatrix(m_pModel->GetScene()->mRootNode, DirectX::XMMatrixIdentity());
 
-	// CB 用配列更新
+	// 定数バッファ用にボーン行列を格納
 	std::vector<DirectX::XMMATRIX>& boneMatCB = m_pModel->GetBoneMatCB();
 	for (auto& bone : bones)
 	{
@@ -387,6 +385,7 @@ void SkeletalAnimator::UpdateBoneMatrix(const aiNode* node, DirectX::XMMATRIX ma
 
 	bone.Matrix = bone.OffsetMatrix * bone.AnimationMatrix * matrix;
 
+	// 子ノードも再帰的に更新
 	for (size_t i = 0; i < node->mNumChildren; ++i)
 	{
 		UpdateBoneMatrix(node->mChildren[i], bone.AnimationMatrix * matrix);

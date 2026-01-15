@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: AnimationManager.hpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: アニメーション管理クラスのヘッダーファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/12/01 20:16:06 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/12/01 20:16 初回作成
+			26/01/15 16:46 コメント記載
 ===================================================================+*/
 #pragma once
 
@@ -13,6 +13,11 @@
 class AnimationManager : public Singleton<AnimationManager>
 {
 public:
+	/**
+	 * @brief 指定したパスからアニメーションを読み込み、Animation オブジェクトへのポインタを返します。
+	 * @param animePath 読み込むアニメーションファイルのパスを表す文字列（const std::string&）。
+	 * @return 読み込んだアニメーションを指す Animation クラスへのポインタを返します。
+	 */
 	class Animation* LoadAnimation(const std::string& animePath);
 
 private:

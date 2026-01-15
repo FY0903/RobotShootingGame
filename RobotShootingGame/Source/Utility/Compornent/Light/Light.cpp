@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Light.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: Lightクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/12/18 14:54:36 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/12/18 14:54 初回作成
+			26/01/15 17:52 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -31,20 +31,9 @@ void Light::Init(Type type, DirectX::XMFLOAT4 color, float range, float angle)
 	LightManager::GetInstance().RegisterLight(this);
 }
 
-void Light::Update()
-{
-}
-
-void Light::Draw()
-{
-}
-
-void Light::Uninit()
-{
-}
-
 DirectX::XMFLOAT3 Light::GetPosition() const
 {
+	// オーナーが存在しない場合はデフォルト値を返す
 	if (!m_Owner) return DirectX::XMFLOAT3{};
 
 	Transform transform = m_Owner->GetTransform();
@@ -53,9 +42,13 @@ DirectX::XMFLOAT3 Light::GetPosition() const
 
 DirectX::XMFLOAT3 Light::GetDirection() const
 {
+	// オーナーが存在しない場合はデフォルト値を返す
 	if (!m_Owner) return DirectX::XMFLOAT3{};
+
+	// ライトの向きを計算
 	Transform transform = m_Owner->GetTransform();
 	DirectX::SimpleMath::Vector3 forward = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 1.0f);
 	DirectX::SimpleMath::Vector3 direction = DirectX::XMVector3Rotate(forward, transform.Rotation);
+	
 	return DirectX::XMFLOAT3(direction.x, direction.y, direction.z);
 }

@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: MeshRenderer.hpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: MeshRendererクラスのヘッダーファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/14 17:22:58 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/14 17:22 初回作成
+			26/01/15 18:02 コメント記載
 ===================================================================+*/
 #pragma once
 
@@ -35,16 +35,36 @@ class MeshRenderer : public Component
 public:
 	using Component::Component;
 
+	/**
+	 * @brief モデルの初期化を行います。オプションで初期化に使用する Model オブジェクトを指定できます。
+	 * @param pModel 初期化に使用する Model オブジェクトへのポインタ。省略または nullptr の場合は既定の初期化を行います。
+	 */
 	void Init(Model* pModel = nullptr);
+	
+	/**
+	 * @brief 更新処理
+	 */
 	void Update() override final;
+
+	/**
+	 * @brief 描画処理
+	 */
 	void Draw() override final;
+
+	/**
+	 * @brief 終了処理
+	 */
 	void Uninit() override final;
 
 private:
+	/**
+	 * @brief 与えられた Model::Mesh の一覧で初期化します。
+	 * @param meshes 初期化に使用する Model::Mesh を格納した std::vector。
+	 */
 	void Init(std::vector<Model::Mesh> meshes);
 
-	Model* m_pModel{};			// モデルデータ
-	std::vector<Model::Mesh> m_Meshes{};
+	Model* m_pModel{};						// モデルデータ
+	std::vector<Model::Mesh> m_Meshes{};	// メッシュ群
 
 	std::vector<VertexBuffer*> m_pVertexBuffers{};	// 頂点バッファ
 	std::vector<IndexBuffer*> m_pIndexBuffers{};	// インデックスバッファ

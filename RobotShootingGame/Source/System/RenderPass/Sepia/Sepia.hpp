@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Sepia.hpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: Sepiaレンダーパスのヘッダーファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2026/01/13 16:41:42 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2026/01/13 16:41 初回作成
+			   01/15 10:18 コメント記載
 ===================================================================+*/
 #pragma once
 
@@ -30,9 +30,19 @@ public:
 	 */
 	~Sepia() = default;
 
+	/**
+	 * @brief 初期化処理
+	 */
 	void Init() override final;
 
 private:
+	/**
+	 * @brief ルートシグネチャ生成
+	 */
 	void CreateRootSignature() override final;
+
+	/**
+	 * @brief パイプラインステート生成
+	 */
 	void CreatePSO() override final;
 };

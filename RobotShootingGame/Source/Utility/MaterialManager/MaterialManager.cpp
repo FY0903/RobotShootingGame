@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: MaterialManager.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: MaterialManagerクラスのソースファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/30 5:41:16 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/30 05:41 初回作成
+			26/01/15 18:58 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -15,7 +15,7 @@
 #include "Utility/RenderTarget/RenderTarget.hpp"
 
 Material::Material(MaterialBase* pMaterial)
-	: m_pMaterial(pMaterial), m_pSnapshotDescriptorHeap(nullptr), m_IsOpaque(true)
+	: m_pMaterial(pMaterial), m_pDescriptorHeap(nullptr), m_IsOpaque(true)
 {
 }
 
@@ -23,8 +23,8 @@ Material::~Material()
 {
 	m_pDescriptorHandle.clear();
 
-	delete m_pSnapshotDescriptorHeap;
-	m_pSnapshotDescriptorHeap = nullptr;
+	delete m_pDescriptorHeap;
+	m_pDescriptorHeap = nullptr;
 
 	for (auto& pair : m_pCBVs)
 	{
@@ -43,11 +43,11 @@ void Material::SetTexture(Texture* pTexture)
 	if (!pTexture) return;
 
 	// ディスクリプタヒープが存在しない場合は作成
-	if (!m_pSnapshotDescriptorHeap)
-		m_pSnapshotDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+	if (!m_pDescriptorHeap)
+		m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
 	m_IsOpaque = pTexture->IsOpaque();
-	DescriptorHandle* handle = m_pSnapshotDescriptorHeap->Register(pTexture->Resource(), pTexture->ViewDesc());
+	DescriptorHandle* handle = m_pDescriptorHeap->Register(pTexture->Resource(), pTexture->ViewDesc());
 	if (!handle) return;
 	m_pDescriptorHandle.push_back(handle);
 }
@@ -57,10 +57,10 @@ void Material::SetTexture(RenderTarget* pRTV)
 	if (!pRTV) return;
 
 	// ディスクリプタヒープが存在しない場合は作成
-	if (!m_pSnapshotDescriptorHeap)
-		m_pSnapshotDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+	if (!m_pDescriptorHeap)
+		m_pDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 
-	DescriptorHandle* handle = m_pSnapshotDescriptorHeap->Register(pRTV->Resource(), pRTV->ViewDesc());
+	DescriptorHandle* handle = m_pDescriptorHeap->Register(pRTV->Resource(), pRTV->ViewDesc());
 	if (!handle) return;
 	m_pDescriptorHandle.push_back(handle);
 }
@@ -107,9 +107,9 @@ size_t Material::GetCBSizeForRegister(int index) const
 DescriptorHeap* Material::GetDescriptorHeap() const
 {
 	// ヒープが存在しない場合はnullptrを返す
-	if (!m_pSnapshotDescriptorHeap) return nullptr;
+	if (!m_pDescriptorHeap) return nullptr;
 	
-	return m_pSnapshotDescriptorHeap;
+	return m_pDescriptorHeap;
 }
 
 DescriptorHandle* Material::GetDescriptorHandle(size_t index) const

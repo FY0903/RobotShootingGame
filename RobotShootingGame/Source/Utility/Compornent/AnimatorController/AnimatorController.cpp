@@ -1,27 +1,15 @@
 /*+===================================================================
 	File: AnimatorController.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: AnimatorControllerクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/27 11:51:37 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/27 11:51 初回作成
+			26/01/15 16:59 コメント記載
 ===================================================================+*/
 
 // ==============================
 //	include
 // ==============================
 #include "AnimatorController.hpp"
-
-void AnimatorController::Init()
-{
-}
-
-void AnimatorController::Update()
-{
-}
-
-void AnimatorController::Draw()
-{
-}
 
 void AnimatorController::Uninit()
 {
@@ -33,6 +21,7 @@ void AnimatorController::Uninit()
 
 void AnimatorController::AddAnimation(const std::string& name, Animation* animation)
 {
+	// すでに同じ名前のアニメーションが存在する場合は追加しない
 	if (m_Animations.find(name) != m_Animations.end()) return;
 
 	m_Animations[name] = animation;

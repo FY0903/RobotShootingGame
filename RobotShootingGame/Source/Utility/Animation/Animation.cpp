@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Animation.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: アニメーションクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/25 14:38:44 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/25 14:38 初回作成
+			26/01/15 16:39 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -15,8 +15,10 @@
 
 HRESULT Animation::Load(const std::string& fileName)
 {
+	// ファイルからアニメーションデータを読み込む
 	auto scene = m_Importer.ReadFile(fileName, aiProcess_MakeLeftHanded);
 
+	// 読み込みに失敗した場合はエラーメッセージを出力して終了
 	if (!scene)
 	{
 		auto error = m_Importer.GetErrorString();
@@ -32,12 +34,14 @@ HRESULT Animation::Load(const std::string& fileName)
 
 aiAnimation* Animation::GetAnimation(int index)
 {
+	// アニメーションシーンが存在しない場合はエラーを出力して終了
 	if (!m_Animations)
 	{
 		assert(0 && "アニメーションが読み込まれていません。");
 		return nullptr;
 	}
 
+	// 指定されたインデックスが範囲外の場合はエラーを出力して終了
 	if (index < 0 || index >= static_cast<int>(m_Animations->mNumAnimations))
 	{
 		assert(0 && "アニメーションのインデックスが範囲外です。");

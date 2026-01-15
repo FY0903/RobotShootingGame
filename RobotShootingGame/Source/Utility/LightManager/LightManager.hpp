@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: LightManager.hpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: LightManagerクラスのヘッダーファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/12/19 12:49:59 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/12/19 12:49 初回作成
+			26/01/15 18:51 コメント記載
 ===================================================================+*/
 #pragma once
 
@@ -17,8 +17,16 @@
 class LightManager : public Singleton<LightManager>
 {
 public:
+	/**
+	 * @brief ライトオブジェクトを登録します。
+	 * @param pLight 登録する Light オブジェクトへのポインタ。
+	 */
 	void RegisterLight(class Light* pLight);
 
+	/**
+	 * @brief Light オブジェクトへのポインタを格納した std::vector への const 参照を取得します。
+	 * @return const std::vector<class Light*>&（Light* を要素とするベクター）への参照。
+	 */
 	const std::vector<class Light*>& GetLights() const;
 
 private:

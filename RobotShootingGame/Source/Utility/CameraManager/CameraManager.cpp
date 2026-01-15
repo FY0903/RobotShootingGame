@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: CameraManager.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: カメラ管理クラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/23 16:39:11 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/23 16:39 初回作成
+			26/01/14 16:50 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -15,11 +15,13 @@ void CameraManager::RegisterCamera(const std::string& name, Camera* pCamera)
 {
 	m_pCameraData[name] = pCamera;
 
+	// 最初に登録されたカメラをメインカメラに設定
 	SetMainCamera(name);
 }
 
 void CameraManager::SetMainCamera(const std::string& name)
 {
+	// 指定された名前のカメラが存在する場合、メインカメラを設定
 	if (m_pCameraData.find(name) != m_pCameraData.end())
 	{
 		m_pMainCamera = m_pCameraData[name];

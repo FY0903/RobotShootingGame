@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Line.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: Lineクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/22 19:06:18 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/22 19:06 初回作成
+			26/01/15 17:56 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -19,6 +19,7 @@ void Line::Update()
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	auto material = m_Owner->GetMaterial();
 
+	// 定数バッファの更新
 	CB::WVP* ptr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
@@ -33,8 +34,8 @@ void Line::Draw()
 	Render::RenderItem item{};
 	item.pMaterial = m_Owner->GetMaterial();
 	item.type = D3D_PRIMITIVE_TOPOLOGY_LINELIST;
-	item.pVertexBuffers.push_back(m_pVB);
-	item.MeshSize = 1;
+	item.pVBs.push_back(m_pVB);
+	item.meshSize = 1;
 	item.indexCounts.push_back(static_cast<UINT>(m_Lines.size()));
 
 	// レンダーキューに登録
@@ -50,6 +51,7 @@ void Line::Uninit()
 
 void Line::AddPoint(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, const DirectX::XMFLOAT4& color)
 {
+	// 頂点データを追加
 	m_Lines.push_back({ start, color });
 	m_Lines.push_back({ end, color });
 }

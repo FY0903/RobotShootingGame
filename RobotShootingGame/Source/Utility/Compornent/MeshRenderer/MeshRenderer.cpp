@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: MeshRenderer.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: MeshRendererクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/14 17:22:58 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/14 17:22 初回作成
+			26/01/15 18:02 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -19,6 +19,7 @@ void MeshRenderer::Init(Model* pModel)
 {
 	m_pModel = pModel;
 
+	// モデルが指定されている場合はそのメッシュで初期化
 	if (m_pModel)
 	{
 		Init(m_pModel->GetMeshes());
@@ -196,11 +197,13 @@ void MeshRenderer::Update()
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	auto material = m_Owner->GetMaterial();
 
+	// WVP行列の更新
 	CB::WVP* ptr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 
+	// ボーン行列の更新
 	if (!m_Owner->GetComponent<SkeletalAnimator>() || !m_pModel) return;
 
 	CB::BoneMatrix* bonePtr = m_pBoneCBs[currentIndex]->GetPtr<CB::BoneMatrix>();
@@ -221,11 +224,11 @@ void MeshRenderer::Draw()
 	// 頂点バッファとインデックスバッファの設定
 	for (size_t i = 0; i < m_Meshes.size(); ++i)
 	{
-		item.pVertexBuffers.push_back(m_pVertexBuffers[i]);
-		item.pIndexBuffers.push_back(m_pIndexBuffers[i]);
+		item.pVBs.push_back(m_pVertexBuffers[i]);
+		item.pIBs.push_back(m_pIndexBuffers[i]);
 		item.indexCounts.push_back(static_cast<UINT>(m_Meshes[i].Indices.size()));
 	}
-	item.MeshSize = m_Meshes.size();	// メッシュ数を設定
+	item.meshSize = m_Meshes.size();	// メッシュ数を設定
 
 	// レンダーキューに登録
 	Render::GetInstance().EnqueueRenderItem(item);

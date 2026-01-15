@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: PipelineState.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: PipelineStateクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/09/03 13:39:26 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/09/03 13:39 初回作成
+			26/01/15 19:09 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -111,7 +111,7 @@ void PipelineState::Create()
 	// パイプラインステートオブジェクトの生成
 	HRESULT hr = Engine::GetInstance().GetDevice()->CreateGraphicsPipelineState(
 		&m_Desc,													// グラフィックスパイプラインステートの記述
-		IID_PPV_ARGS(m_pSnapshotPSO.ReleaseAndGetAddressOf()));	// パイプラインステートオブジェクトのポインタ
+		IID_PPV_ARGS(m_pPSO.ReleaseAndGetAddressOf()));	// パイプラインステートオブジェクトのポインタ
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, "パイプラインステートオブジェクトの生成に失敗しました。", "エラー", MB_OK | MB_ICONERROR);

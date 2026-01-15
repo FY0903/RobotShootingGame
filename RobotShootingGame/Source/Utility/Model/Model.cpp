@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Model.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: モデル読み込みクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/24 10:31:21 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/24 10:31 初回作成
+			26/01/15 19:03 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -36,6 +36,7 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 
 	auto scene = m_Importer.ReadFile(fileName, flag);
 
+	// 読み込み失敗
 	if (!scene)
 	{
 		auto error = m_Importer.GetErrorString();
@@ -44,8 +45,10 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 		return E_FAIL;
 	}
 
+	// ボーンの作成
 	CreateBone(scene->mRootNode);
 
+	// ボーンインデックスの設定
 	unsigned int boneIndex = 0;
 	for (auto& bone : m_Bones)
 	{
@@ -66,19 +69,23 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 	// メッシュの読み込み
 	for (size_t i = 0; i < meshes.size(); ++i)
 	{
+		// メッシュデータの読み込み
 		const auto pMesh = scene->mMeshes[i];
 		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
 		GetBoneInfo(pMesh);
 
+		// テクスチャの読み込み
 		const auto pMaterial = scene->mMaterials[pMesh->mMaterialIndex];
 		LoadTexture(fileName, meshes[i], pMaterial);
 
+		// モデルのその他情報設定
 		m_ModelOtherInfo[i].MeshName = std::string(pMesh->mName.C_Str());
 		m_ModelOtherInfo[i].VertexNum = static_cast<unsigned int>(meshes[i].Vertices.size());
 		m_ModelOtherInfo[i].IndexNum = static_cast<unsigned int>(meshes[i].Indices.size());
 		m_ModelOtherInfo[i].MaterialIndex = pMesh->mMaterialIndex;
 	}
 
+	// メッシュのベースインデックス計算と頂点へのボーンデータ設定
 	CalcMeshBaseIndex(m_ModelOtherInfo);
 	SetBoneDataToVertex(meshes, m_ModelOtherInfo, m_MeshBones);
 
@@ -164,6 +171,7 @@ void Model::CreateBone(const aiNode* node)
 	Bone bone{};
 	m_Bones[node->mName.C_Str()] = bone;
 
+	// 子ノードも再帰的に処理
 	for (size_t i = 0; i < node->mNumChildren; ++i)
 	{
 		CreateBone(node->mChildren[i]);
@@ -183,6 +191,7 @@ void Model::GetBoneInfo(const aiMesh* src)
 
 		bone.Weights.clear();
 
+		// ウェイト情報の取得
 		for (unsigned int j = 0; j < src->mBones[i]->mNumWeights; ++j)
 		{
 			Weight weight{};
@@ -202,6 +211,7 @@ void Model::GetBoneInfo(const aiMesh* src)
 
 void Model::CalcMeshBaseIndex(std::vector<ModelOtherInfo>& modelInfo)
 {
+	// メッシュのベースインデックス計算
 	for (int i = 0; i < modelInfo.size(); ++i)
 	{
 		for (int j = i - 1; j >= 0; --j)
@@ -218,6 +228,7 @@ void Model::CalcMeshBaseIndex(std::vector<ModelOtherInfo>& modelInfo)
 
 void Model::SetBoneDataToVertex(std::vector<Mesh>& meshes, std::vector<ModelOtherInfo>& modelInfo, std::vector<std::vector<Bone>>& meshBones)
 {
+	// 頂点のボーンデータ初期化
 	for (auto& mesh : meshes)
 	{
 		for (auto& vertex : mesh.Vertices)

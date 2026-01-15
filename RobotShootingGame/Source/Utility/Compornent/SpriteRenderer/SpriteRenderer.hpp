@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: SpriteRenderer.hpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: SpriteRendererクラスのヘッダーファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/14 18:31:18 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/14 18:31 初回作成
+			26/01/15 18:10 コメント記載
 ===================================================================+*/
 #pragma once
 
@@ -28,10 +28,32 @@ class SpriteRenderer : public Component
 public:
 	using Component::Component;
 
+	/**
+	 * @brief オブジェクトやモジュールの初期化を行います。is2D が true の場合は 2D モードで初期化します。
+	 * @param is2D 2D モードで初期化する場合は true。
+	 */
 	void Init(bool is2D = false);
+
+	/**
+	 * @brief 指定したセル数と間隔で初期化する関数。
+	 * @param cell 初期化するセルの数（要素数）。size_t 型で指定します。
+	 * @param spacing セル間の間隔を表す浮動小数点値（float）。
+	 */
 	void Init(size_t cell, float spacing);
+
+	/**
+	 * @brief 更新処理
+	 */
 	void Update() override final;
+
+	/**
+	 * @brief 描画処理
+	 */
 	void Draw() override final;
+
+	/**
+	 * @brief 終了処理
+	 */
 	void Uninit() override final;
 
 private:
@@ -41,5 +63,5 @@ private:
 
 	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pWVPCBs{}; // WVP用定数バッファ
 	int m_IndexCount{};	// インデックス数
-	bool m_Is2D{};	// 2D描画かどうか
+	bool m_Is2D{};		// 2D描画かどうか
 };

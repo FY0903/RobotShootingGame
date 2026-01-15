@@ -3,6 +3,7 @@
 	Summary: ディスクリプタヒープのソースファイル
 	Author: AT13C192 23 藤原佑埜
 	Date: 2025/07/24 14:22 初回作成
+			26/01/15 18:26 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -65,6 +66,7 @@ ID3D12DescriptorHeap* DescriptorHeap::GetHeap() const
 
 DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc)
 {
+	// 登録可能数を超えている場合は登録できない
 	auto count = m_pHandles.size();
 	if (count >= HANDLE_MAX) return nullptr;
 
@@ -90,6 +92,7 @@ DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource, D3D12_SHADE
 
 DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource)
 {
+	// 登録可能数を超えている場合は登録できない
 	auto count = m_pHandles.size();
 	if (count >= HANDLE_MAX) return nullptr;
 
@@ -101,6 +104,7 @@ DescriptorHandle* DescriptorHeap::Register(ID3D12Resource* resource)
 	pHandle->HandleCPU = cpuHandle;
 	pHandle->HandleGPU = {}; // RTVはGPUハンドルを使用しない
 
+	// リソースの用途に応じてRTVまたはDSVを作成
 	if (resource->GetDesc().Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
 	{
 		Engine::GetInstance().GetDevice()->CreateRenderTargetView(

@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Render.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: 描画処理を管理するクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/12/09 19:24:38 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/12/09 19:24 初回作成
+			26/01/15 09:30 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -297,7 +297,7 @@ void Render::Init()
 		clearColor);
 
 	// ディスクリプタヒープにSRVを登録
-	for (size_t i = 0; i < NumGbufferRT; ++i)
+	for (size_t i = 0; i < Num; ++i)
 	{
 		// Gバッファ用レンダーターゲットのSRVをディスクリプタヒープに登録
 		auto srvHandle = m_pSnapshotDescriptorHeap->Register(
@@ -316,8 +316,8 @@ void Render::InitRenderPasses()
 void Render::SetGbufferRenderTargets()
 {
 	// Gバッファ用レンダーターゲットをレンダーターゲットとして設定
-	CD3DX12_RESOURCE_BARRIER barriers[NumGbufferRT]{};
-	for (size_t i = 0; i < NumGbufferRT; ++i)
+	CD3DX12_RESOURCE_BARRIER barriers[Num]{};
+	for (size_t i = 0; i < Num; ++i)
 	{
 		barriers[i] = CD3DX12_RESOURCE_BARRIER::Transition(
 			m_GbufferRT[i]->Resource(),
@@ -325,11 +325,11 @@ void Render::SetGbufferRenderTargets()
 			D3D12_RESOURCE_STATE_RENDER_TARGET);
 	}
 
-	Engine::GetInstance().GetCommandList()->ResourceBarrier(NumGbufferRT, barriers);
+	Engine::GetInstance().GetCommandList()->ResourceBarrier(Num, barriers);
 
 	// レンダーターゲットのハンドルを配列に格納
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[NumGbufferRT]{};
-	for (size_t i = 0; i < NumGbufferRT; ++i)
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[Num]{};
+	for (size_t i = 0; i < Num; ++i)
 	{
 		auto handlePtr = m_GbufferRT[i]->GetDescriptorHandle();
 		rtvHandles[i] = handlePtr->HandleCPU;
@@ -339,10 +339,10 @@ void Render::SetGbufferRenderTargets()
 	auto dsvHandle = m_pDepthStencil->GetDescriptorHandle()->HandleCPU;
 
 	// レンダーターゲットと深度ステンシルバッファを設定
-	Engine::GetInstance().GetCommandList()->OMSetRenderTargets(NumGbufferRT, rtvHandles, FALSE, &dsvHandle);
+	Engine::GetInstance().GetCommandList()->OMSetRenderTargets(Num, rtvHandles, FALSE, &dsvHandle);
 
 	// レンダーターゲットをクリア
-	for (size_t i = 0; i < NumGbufferRT; ++i)
+	for (size_t i = 0; i < Num; ++i)
 	{
 		Engine::GetInstance().GetCommandList()->ClearRenderTargetView(
 			rtvHandles[i],
@@ -402,15 +402,15 @@ void Render::DrawOpaque()
 	DrawRenderItems(m_OpaqueRenderItems);
 
 	// Gバッファ用レンダーターゲットをピクセルシェーダーリソースに戻す
-	CD3DX12_RESOURCE_BARRIER barriers[NumGbufferRT]{};
-	for (size_t i = 0; i < NumGbufferRT; ++i)
+	CD3DX12_RESOURCE_BARRIER barriers[Num]{};
+	for (size_t i = 0; i < Num; ++i)
 	{
 		barriers[i] = CD3DX12_RESOURCE_BARRIER::Transition(
 			m_GbufferRT[i]->Resource(),
 			D3D12_RESOURCE_STATE_RENDER_TARGET,
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
-	Engine::GetInstance().GetCommandList()->ResourceBarrier(NumGbufferRT, barriers);
+	Engine::GetInstance().GetCommandList()->ResourceBarrier(Num, barriers);
 }
 
 void Render::DrawTransparent()
@@ -586,16 +586,16 @@ void Render::DrawRenderItems(const std::vector<RenderItem>& renderItems)
 			cmd->SetGraphicsRootConstantBufferView(static_cast<UINT>(i), item.pMaterial->GetCBByRegisterForFrame(static_cast<int>(i), currentIndex)->GetAddress());
 		}
 
-		for (size_t i = 0; i < item.MeshSize; ++i)
+		for (size_t i = 0; i < item.meshSize; ++i)
 		{
-			if (!item.pVertexBuffers[i]) continue;
+			if (!item.pVBs[i]) continue;
 
 			// 頂点バッファとインデックスバッファをセット
-			auto vbView = item.pVertexBuffers[i]->GetView();
+			auto vbView = item.pVBs[i]->GetView();
 			cmd->IASetVertexBuffers(0, 1, &vbView);
-			if (item.pIndexBuffers.size())
+			if (item.pIBs.size())
 			{
-				auto ibView = item.pIndexBuffers[i]->GetView();
+				auto ibView = item.pIBs[i]->GetView();
 				cmd->IASetIndexBuffer(&ibView);
 			}
 			cmd->IASetPrimitiveTopology(item.type);
@@ -607,7 +607,7 @@ void Render::DrawRenderItems(const std::vector<RenderItem>& renderItems)
 					cmd->SetGraphicsRootDescriptorTable(item.pMaterial->GetRootParameterIndex() - 1, srvHandle->HandleGPU);
 			}
 
-			if (item.pIndexBuffers.size())
+			if (item.pIBs.size())
 				cmd->DrawIndexedInstanced(item.indexCounts[i], 1, 0, 0, 0);
 			else
 				cmd->DrawInstanced(item.indexCounts[i], 1, 0, 0);

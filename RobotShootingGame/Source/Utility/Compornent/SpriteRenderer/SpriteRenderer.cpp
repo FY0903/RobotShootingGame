@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: SpriteRenderer.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: SpriteRendererクラス実装
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/11/14 18:31:18 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/11/14 18:31 初回作成
+			26/01/15 18:10 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -55,6 +55,7 @@ void SpriteRenderer::Init(bool is2D)
 		CB::WVP* WVPptr = m_pWVPCBs[i]->GetPtr<CB::WVP>();
 		WVPptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
 
+		// 2D描画の場合はビュー行列と射影行列を2D用に設定
 		if (m_Is2D)
 		{
 			WVPptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get2DViewMatrixFloat4x4(false);
@@ -147,8 +148,11 @@ void SpriteRenderer::Update()
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 	auto material = m_Owner->GetMaterial();
 
+	// 定数バッファの更新
 	CB::WVP* ptr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
 	ptr->WorldMat = m_Owner->GetTransform().GetWorldMatrixFloat4x4(false);
+	
+	// 2D描画の場合はビュー行列と射影行列の更新をスキップ
 	if (m_Is2D) return;
 	ptr->ViewMat = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrixFloat4x4(false);
 	ptr->ProjMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
@@ -162,12 +166,12 @@ void SpriteRenderer::Draw()
 	Render::RenderItem item{};
 	item.pMaterial = m_Owner->GetMaterial();
 	item.type = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	item.pVertexBuffers.push_back(m_pVB);
-	item.pIndexBuffers.push_back(m_pIB);
+	item.pVBs.push_back(m_pVB);
+	item.pIBs.push_back(m_pIB);
 	if (!m_Owner->GetMaterial()->IsOpaque())
 		item.sortKey = CameraManager::GetInstance().CalculateDistanceToMainCamera(m_Owner->GetTransform().GetWorldMatrixFloat4x4(false));
 	item.indexCounts.push_back(static_cast<UINT>(m_IndexCount));
-	item.MeshSize = 1;
+	item.meshSize = 1;
 
 	// レンダーキューにレンダーアイテムを登録
 	Render::GetInstance().EnqueueRenderItem(item);
