@@ -62,8 +62,9 @@ private:
 	 */
 	enum PSOType : size_t
 	{
-		Mesh,		// メッシュ
-		Sprite,		// スプライト
+		SkeletalMesh,	// スケルタルメッシュ
+		Mesh,			// メッシュ
+		Sprite,			// スプライト
 		Num,
 	};
 
@@ -96,6 +97,7 @@ private:
 	DepthStencil* m_pDepthStencil{};				// 深度ステンシル
 	PipelineState* m_pPSOs[Num]{};					// パイプラインステートオブジェクト
 	RootSignature* m_pDSVRootSignature{};			// ルートシグネチャ
+	RootSignature* m_pSkeletalRootSignature{};		// スケルタルメッシュ用ルートシグネチャ
 
 	std::vector<Render::RenderItem> m_RenderItems{};	// レンダーアイテム配列
 

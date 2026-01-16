@@ -11,7 +11,7 @@
 // ==============================
 #include "ModelManager.hpp"
 
-Model* ModelManager::LoadModel(const std::string& modelPath, bool inverseU, bool inverseV)
+Model* ModelManager::LoadModel(const std::string& modelPath, bool createBone, bool inverseU, bool inverseV)
 {
 	// すでに読み込まれている場合はそれを返す
 	if (auto it = m_modelMap.find(modelPath); it != m_modelMap.end())
@@ -21,7 +21,7 @@ Model* ModelManager::LoadModel(const std::string& modelPath, bool inverseU, bool
 
 	// モデルを新規作成して読み込む
 	Model* pModel = new Model();
-	if (FAILED(pModel->Load(modelPath, inverseU, inverseV)))
+	if (FAILED(pModel->Load(modelPath, createBone, inverseU, inverseV)))
 	{
 		assert(0 && modelPath.c_str() && "ModelManager.cpp モデルの読み込みに失敗しました。");
 		delete pModel;

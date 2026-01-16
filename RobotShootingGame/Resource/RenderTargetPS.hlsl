@@ -67,44 +67,24 @@ float4 main(VSOutput input) : SV_TARGET
     float4 albedo = albedoTex.Sample(smp, input.uv);
     float4 normal = normalTex.Sample(smp, input.uv);
     normal.xyz = normalize(normal.xyz * 2.0f - 1.0f); // 法線ベクトルを[-1,1]範囲に変換
-    //float4 worldPos = worldPosTex.Sample(smp, input.uv);
     
     float d = depthTex.Sample(smp, input.uv);
     
     float3 worldPos = ReconstructWorldPositionFromDepth(input.uv, d);
     float3 viewPos = ReconstructViewPositionFromDepth(input.uv, d);
     
-    //float3 L = worldPos - lightPosition;
-    //float D = length(L);
-    //float R = lightRange;
-    
-    //float A = 1.0f - 1.0f / R * D;
-    //A = saturate(A);
-    
-    //A = pow(A, 2.0f);
-    
-    //L = normalize(L);
-    //float3 N = normalize(normal.xyz);
-    //float NdotL = saturate(dot(N, -L));
-    //float3 diffuse = lightColor.rgb * NdotL;
-    //diffuse *= A;
-    
-    //float3 slV = normalize(lightDirection);
-    //float angle = dot(L, slV);
-    //angle = cos(angle);
-    
-    //float affect = 1.0f - 1.0f / lightAngle * angle;
-    //affect = saturate(affect);
-    //affect = pow(affect, 0.5f);
-    
-    //diffuse *= affect;
+    float3 L = lightDirection;
+    float3 N = normalize(normal.xyz);
+    float NdotL = saturate(dot(N, normalize(L)));
+    float3 diffuse = lightColor.rgb * NdotL;
+    float3 ambient = float3(0.1f, 0.1f, 0.1f);
     
     if (albedo.a <= 0.0f)
     {
         discard; // 背景を透過させる(処理しない)
     }
     
-    //return float4(albedo.rgb * diffuse, 1.0f);
+    albedo.rgb *= (diffuse + ambient);
     
     float3 dpdx = ddx(viewPos);
     float3 dpdy = ddy(viewPos);
@@ -113,7 +93,7 @@ float4 main(VSOutput input) : SV_TARGET
     float3 viewNormal = normalize(n);
     
     int occlusion = 0;
-    float radius = 3.0f;
+    float radius = 0.2f;
     for (int i = 0; i < 64; i++)
     {
         float3 sample = mul(GetTBN(viewNormal), kernel[i].xyz); // TBN行列でビュー空間の法線に変換
@@ -136,19 +116,9 @@ float4 main(VSOutput input) : SV_TARGET
     
     float aoRate = 1.0f - clamp((float) occlusion / 64.0f, 0.0f, 1.0f);
     
-    float4 aoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    float4 aoColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
     
     albedo = lerp(albedo, aoColor, aoRate);
     
     return albedo;
-    
-    return float4(d, d, d, 1.0f); // デプス値をグレースケールで出力
-    
-    //float NdotL = saturate(dot(normal.xyz, -lightDirection));
-    
-    //float3 diffuse = lightColor.rgb * NdotL;
-    
-    //float3 finalColor = albedo.rgb * diffuse;
-    
-    //return float4(finalColor, 1.0f);
 }

@@ -148,15 +148,6 @@
     <Filter Include="Source\Utility\DepthStencil">
       <UniqueIdentifier>{0a31134a-3586-4e82-ad42-96ce49afee03}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Game\Actor\Title">
-      <UniqueIdentifier>{228fcca2-1735-4e61-9294-9aed626da5a9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Game\Actor\Skybox">
-      <UniqueIdentifier>{39a31ff7-6999-4d05-90d9-757a18a4e8a6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Game\Actor\TitleText">
-      <UniqueIdentifier>{6ae17b85-7c54-41b7-a59e-cc82bc4505ce}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Utility\Compornent\Light">
       <UniqueIdentifier>{111c600a-784d-4baa-a901-7a3766008a49}</UniqueIdentifier>
     </Filter>
@@ -169,17 +160,23 @@
     <Filter Include="Source\Utility\DepthTexture">
       <UniqueIdentifier>{72cfa81e-3c4d-4f20-a0fc-80a11acbd7cd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Game\Actor\PointLight">
-      <UniqueIdentifier>{80beae20-4470-47ea-b2e9-233c73cbc111}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Game\Actor\SpotLight">
-      <UniqueIdentifier>{85354a78-25b9-48e7-a882-260e8a66dc87}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\System\RenderPass">
       <UniqueIdentifier>{ae520918-4230-4a86-9798-6857184dfb44}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\System\RenderPass\Sepia">
       <UniqueIdentifier>{a46187ee-49ea-4256-9a35-155b4c3c8499}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource\Depth">
+      <UniqueIdentifier>{d9979e59-b535-4686-818e-595f7f0b016b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource\GBuffer">
+      <UniqueIdentifier>{b73618e8-10c1-4920-8c8a-168599f3cf90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource\PostProcess">
+      <UniqueIdentifier>{b9595697-399e-484d-ae7c-cbf494f47a7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource\Common">
+      <UniqueIdentifier>{f1fe6cd5-3b3d-4272-b194-49372401ea27}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -312,15 +309,6 @@
     <ClCompile Include="Source\Utility\DepthStencil\DepthStencil.cpp">
       <Filter>Source\Utility\DepthStencil</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Game\Actor\Title\Title.cpp">
-      <Filter>Source\Game\Actor\Title</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Game\Actor\Skybox\Skybox.cpp">
-      <Filter>Source\Game\Actor\Skybox</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Game\Actor\TitleText\TitleText.cpp">
-      <Filter>Source\Game\Actor\TitleText</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Utility\Compornent\Light\Light.cpp">
       <Filter>Source\Utility\Compornent\Light</Filter>
     </ClCompile>
@@ -332,12 +320,6 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\DepthTexture\DepthTexture.cpp">
       <Filter>Source\Utility\DepthTexture</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Game\Actor\PointLight\PointLight.cpp">
-      <Filter>Source\Game\Actor\PointLight</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Game\Actor\SpotLight\SpotLight.cpp">
-      <Filter>Source\Game\Actor\SpotLight</Filter>
     </ClCompile>
     <ClCompile Include="Source\System\RenderPass\RenderPass.cpp">
       <Filter>Source\System\RenderPass</Filter>
@@ -482,15 +464,6 @@
     <ClInclude Include="Source\Utility\DepthStencil\DepthStencil.hpp">
       <Filter>Source\Utility\DepthStencil</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Actor\Title\Title.hpp">
-      <Filter>Source\Game\Actor\Title</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Game\Actor\Skybox\Skybox.hpp">
-      <Filter>Source\Game\Actor\Skybox</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Game\Actor\TitleText\TitleText.hpp">
-      <Filter>Source\Game\Actor\TitleText</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Utility\Compornent\Light\Light.hpp">
       <Filter>Source\Utility\Compornent\Light</Filter>
     </ClInclude>
@@ -503,12 +476,6 @@
     <ClInclude Include="Source\Utility\DepthTexture\DepthTexture.hpp">
       <Filter>Source\Utility\DepthTexture</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Game\Actor\PointLight\PointLight.hpp">
-      <Filter>Source\Game\Actor\PointLight</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Game\Actor\SpotLight\SpotLight.hpp">
-      <Filter>Source\Game\Actor\SpotLight</Filter>
-    </ClInclude>
     <ClInclude Include="Source\System\RenderPass\RenderPass.hpp">
       <Filter>Source\System\RenderPass</Filter>
     </ClInclude>
@@ -517,77 +484,83 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resource\SimplePS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SimpleVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\DebugPS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SpritePS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SpriteVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\LinePS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\LineVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SkeletalMeshVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\RenderTargetVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\RenderTargetPS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\MeshGBufferVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\MeshGBufferPS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SkeletalMeshGBufferVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SkeletalMeshGBufferPS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
     <FxCompile Include="Resource\WaterPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\WaterVS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\TextPS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
     <FxCompile Include="Resource\DepthMeshPS.hlsl">
-      <Filter>Resource</Filter>
+      <Filter>Resource\Depth</Filter>
     </FxCompile>
     <FxCompile Include="Resource\DepthMeshVS.hlsl">
-      <Filter>Resource</Filter>
+      <Filter>Resource\Depth</Filter>
     </FxCompile>
     <FxCompile Include="Resource\DepthSpritePS.hlsl">
-      <Filter>Resource</Filter>
+      <Filter>Resource\Depth</Filter>
     </FxCompile>
     <FxCompile Include="Resource\DepthSpriteVS.hlsl">
-      <Filter>Resource</Filter>
+      <Filter>Resource\Depth</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\MeshGBufferPS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\MeshGBufferVS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SkeletalMeshGBufferPS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SkeletalMeshGBufferVS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DebugPS.hlsl">
+      <Filter>Resource\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SkeletalMeshVS.hlsl">
+      <Filter>Resource\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SimplePS.hlsl">
+      <Filter>Resource\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SimpleVS.hlsl">
+      <Filter>Resource\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SpritePS.hlsl">
+      <Filter>Resource\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SpriteVS.hlsl">
+      <Filter>Resource\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\LineVS.hlsl">
+      <Filter>Resource\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\LinePS.hlsl">
+      <Filter>Resource\Common</Filter>
     </FxCompile>
     <FxCompile Include="Resource\SepiaPS.hlsl">
-      <Filter>Resource</Filter>
+      <Filter>Resource\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\RenderTargetPS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\RenderTargetVS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DepthSkeletalMeshPS.hlsl">
+      <Filter>Resource\Depth</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DepthSkeletalMeshVS.hlsl">
+      <Filter>Resource\Depth</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DebugGBufferPS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Resource\Common.hlsli">
-      <Filter>Resource</Filter>
+      <Filter>Resource\Common</Filter>
     </None>
   </ItemGroup>
 </Project>

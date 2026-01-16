@@ -29,9 +29,9 @@ Render::Render()
 	m_pDepthStencil = new DepthStencil();
 	m_pDepthTexture = new DepthTexture();
 
-	clearColor[0] = 1.0f;
-	clearColor[1] = 1.0f;
-	clearColor[2] = 1.0f;
+	clearColor[0] = 0.0f;
+	clearColor[1] = 0.0f;
+	clearColor[2] = 0.0f;
 	clearColor[3] = 0.0f;
 
 	// スナップショット用レンダーターゲットの生成
@@ -310,7 +310,7 @@ void Render::Init()
 
 void Render::InitRenderPasses()
 {
-	AddRenderPass<Sepia>();
+	//AddRenderPass<Sepia>();
 }
 
 void Render::SetGbufferRenderTargets()
@@ -397,6 +397,8 @@ void Render::DrawOpaque()
 
 	// Gバッファ用レンダーターゲットをセット
 	SetGbufferRenderTargets();
+
+	//m_pDepthTexture->DrawDebugSprite();
 
 	// 不透明レンダーアイテムの描画
 	DrawRenderItems(m_OpaqueRenderItems);
@@ -498,7 +500,7 @@ void Render::DrawOpaqueSprite()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
 	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
-	auto materialHeap = m_pSnapshotDescriptorHeap->GetHeap();						// ディスクリプタヒープを取得
+	auto materialHeap = m_pSnapshotDescriptorHeap->GetHeap();				// ディスクリプタヒープを取得
 	auto lights = LightManager::GetInstance().GetLights();					// ライト情報を取得
 
 	// ライト情報を定数バッファに転送

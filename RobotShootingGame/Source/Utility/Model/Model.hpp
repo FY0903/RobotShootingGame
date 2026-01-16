@@ -34,7 +34,7 @@ public:
 	 */
 	struct Mesh
 	{
-		std::vector<Vertex::Mesh> Vertices{};	// 頂点データ
+		std::vector<Vertex::SkeletalMesh> Vertices{};	// 頂点データ
 		std::vector<uint32_t> Indices{};		// インデックスデータ
 		Texture* DiffuseMap{};					// ディフューズマップ
 	};
@@ -90,11 +90,12 @@ public:
 	/**
 	 * @brief 指定されたファイルを読み込みます。U座標およびV座標を必要に応じて反転できます。
 	 * @param fileName 読み込むファイルのパスまたは名前。
-	 * @param inverseU U座標（横方向）を反転する場合は true。反転しない場合は false。
-	 * @param inverseV V座標（縦方向）を反転する場合は true。反転しない場合は false。
+	 * @param createBone ボーン情報を作成する場合は true。
+	 * @param inverseU U座標（横方向）を反転する場合は true。
+	 * @param inverseV V座標（縦方向）を反転する場合は true。
 	 * @return HRESULT を返します。成功時は通常 S_OK、失敗時は対応するエラーコードが返されます。
 	 */
-	HRESULT Load(const std::string& fileName, bool inverseU, bool inverseV);
+	HRESULT Load(const std::string& fileName, bool createBone, bool inverseU, bool inverseV);
 
 	/**
 	 * @brief シーン情報を取得します。

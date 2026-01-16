@@ -21,11 +21,12 @@ public:
 	/**
 	 * @brief 指定したファイルパスからモデルを読み込み、Model オブジェクトへのポインタを返します。
 	 * @param modelPath 読み込むモデルファイルへのパスを表す文字列。
-	 * @param inverseU U（横）テクスチャ座標を反転する場合に true。既定値は false。
-	 * @param inverseV V（縦）テクスチャ座標を反転する場合に true。既定値は false。
+	 * @param createBone ボーン情報を作成する場合に true。
+	 * @param inverseU U（横）テクスチャ座標を反転する場合に true。
+	 * @param inverseV V（縦）テクスチャ座標を反転する場合に true。
 	 * @return 読み込まれた Model オブジェクトへのポインタ。読み込みに失敗した場合は nullptr を返す可能性があります。
 	 */
-	Model* LoadModel(const std::string& modelPath, bool inverseU = false, bool inverseV = false);
+	Model* LoadModel(const std::string& modelPath, bool createBone = true, bool inverseU = false, bool inverseV = false);
 
 private:
 	friend class Singleton<ModelManager>;

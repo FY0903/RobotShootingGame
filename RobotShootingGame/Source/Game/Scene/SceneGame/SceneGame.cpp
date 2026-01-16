@@ -15,13 +15,8 @@
 #include "Game/Actor/Sprite/Sprite.hpp"
 #include "Game/Actor/Object/Object.hpp"
 #include "Game/Actor/Empty/Empty.hpp"
-#include "Game/Actor/Title/Title.hpp"
-#include "Game/Actor/Skybox/Skybox.hpp"
-#include "Game/Actor/TitleText/TitleText.hpp"
 #include "Utility/Sound/Sound.hpp"
 #include "Game/Actor/DirectionalLight/DirectionalLight.hpp"
-#include "Game/Actor/PointLight/PointLight.hpp"
-#include "Game/Actor/SpotLight/SpotLight.hpp"
 
 void SceneGame::OnInit()
 {
@@ -30,9 +25,6 @@ void SceneGame::OnInit()
 
 	// グリッドの生成
 	AddGameObject<Grid>(Layer::DEFAULT);
-
-	// スカイボックスの生成
-	//AddGameObject<Skybox>(Layer::DEFAULT);
 
 	// スプライトの生成
 	//auto sprite = AddGameObject<Sprite>(Layer::DEFAULT);
@@ -49,13 +41,7 @@ void SceneGame::OnInit()
 	auto emp = AddGameObject<Empty>(Layer::DEFAULT);
 
 	// ディレクショナルライトの生成
-	//AddGameObject<DirectionalLight>(Layer::DEFAULT);
-
-	// ポイントライトの生成
-	//AddGameObject<PointLight>(Layer::DEFAULT);
-
-	// スポットライトの生成
-	//AddGameObject<SpotLight>(Layer::DEFAULT);
+	AddGameObject<DirectionalLight>(Layer::DEFAULT);
 
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/Title.mp3", false, true);
 	//Sound::GetInstance().Play("BGM");

@@ -28,10 +28,11 @@ public:
 	 */
 	enum InputLayoutType
 	{
-		None = -1,	// 入力レイアウトなし
-		Mesh,		// メッシュ
-		Sprite,		// スプライト
-		Line,		// ライン
+		None = -1,		// 入力レイアウトなし
+		Mesh,			// メッシュ
+		SkeletalMesh,	// スケルタルメッシュ
+		Sprite,			// スプライト
+		Line,			// ライン
 		Num,
 	};
 

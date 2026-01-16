@@ -29,7 +29,7 @@ void MeshRenderer::Init(Model* pModel)
 		std::vector<Model::Mesh> meshes{};
 		meshes.resize(1);
 
-		std::vector<Vertex::Mesh> vertices{};
+		std::vector<Vertex::SkeletalMesh> vertices{};
 		vertices.resize(4 * 6);
 
 		// +Z面
@@ -263,8 +263,8 @@ void MeshRenderer::Init(std::vector<Model::Mesh> meshes)
 		auto& mesh = m_Meshes[i];
 
 		// 頂点バッファの生成
-		auto vertexSize = mesh.Vertices.size() * sizeof(Vertex::Mesh);
-		auto vertexStride = sizeof(Vertex::Mesh);
+		auto vertexSize = mesh.Vertices.size() * sizeof(Vertex::SkeletalMesh);
+		auto vertexStride = sizeof(Vertex::SkeletalMesh);
 		auto pVertexBuffer = new VertexBuffer(vertexSize, vertexStride, mesh.Vertices.data());
 		assert(pVertexBuffer);	// nullptrチェック
 		m_pVertexBuffers.push_back(pVertexBuffer);
@@ -297,7 +297,7 @@ void MeshRenderer::Init(std::vector<Model::Mesh> meshes)
 	}
 
 	// ボーン行列用定数バッファの生成
-	if (m_pModel)
+	if (m_pModel && m_pModel->GetBoneNum())
 	{
 		m_pBoneCBs = material->SetCBAtRegister(1, sizeof(CB::BoneMatrix)); // レジスタ番号1にボーン行列用定数バッファを設定
 

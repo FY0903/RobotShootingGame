@@ -7,9 +7,6 @@ struct VSInput
     float2 uv : TEXCOORD;
     float3 tangent : TANGENT;
     float4 color : COLOR;
-    int4 BoneIndex : BONEINDEX;
-    float4 BoneWeight : BONEWEIGHT;
-    int BoneCount : BONECOUNT;
 };
 
 struct VSOutput
@@ -27,8 +24,6 @@ VSOutput main(VSInput input)
     float4 worldPos = mul(World, localPos); // ワールド座標
     float4 viewPos = mul(View, worldPos); // ビュー座標
     float4 projPos = mul(Proj, viewPos); // 投影座標
-    
-    // TODO: スケルタルメッシュアニメーションを対応させる
     
     output.svpos = projPos;
     output.screenPos = projPos;

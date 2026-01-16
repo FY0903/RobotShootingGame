@@ -11,6 +11,7 @@
 // ==============================
 #include "DirectionalLight.hpp"
 #include "Utility/Compornent/Light/Light.hpp"
+#include "Utility/Input/Input.hpp"
 
 void DirectionalLight::OnInit()
 {
@@ -21,6 +22,28 @@ void DirectionalLight::OnInit()
 
 void DirectionalLight::OnUpdate()
 {
+#ifdef _DEBUG
+	if (Input::IsKeyPress('I'))
+	{
+		m_Transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(-0.01f, 0.0f, 0.0f));
+	}
+
+	if (Input::IsKeyPress('K'))
+	{
+		m_Transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.01f, 0.0f, 0.0f));
+	}
+
+	if (Input::IsKeyPress('J'))
+	{
+		m_Transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, -0.01f, 0.0f));
+	}
+
+	if (Input::IsKeyPress('L'))
+	{
+		m_Transform.Rotation *= Transform::ToQuaternion(DirectX::SimpleMath::Vector3(0.0f, 0.01f, 0.0f));
+	}
+#endif // _DEBUG
+
 }
 
 void DirectionalLight::OnUninit()

@@ -27,12 +27,18 @@ Model::~Model()
 	m_Meshes.clear();
 }
 
-HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
+HRESULT Model::Load(const std::string& fileName, bool createBone, bool inverseU, bool inverseV)
 {
 	int flag = 0;
 	flag |= aiProcess_Triangulate;		// 三角形化
 	flag |= aiProcess_MakeLeftHanded;	// 左手座標系に変換
 	flag |= aiProcess_FlipUVs;			// UV反転
+
+	if (!createBone)
+	{
+		flag |= aiProcess_RemoveComponent;	// 不要な情報を削除
+		flag |= aiComponent_BONEWEIGHTS;	// ボーンウェイト削除
+	}
 
 	auto scene = m_Importer.ReadFile(fileName, flag);
 
@@ -46,14 +52,17 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 	}
 
 	// ボーンの作成
-	CreateBone(scene->mRootNode);
-
-	// ボーンインデックスの設定
-	unsigned int boneIndex = 0;
-	for (auto& bone : m_Bones)
+	if (createBone)
 	{
-		bone.second.index = boneIndex;
-		++boneIndex;
+		CreateBone(scene->mRootNode);
+
+		// ボーンインデックスの設定
+		unsigned int boneIndex = 0;
+		for (auto& bone : m_Bones)
+		{
+			bone.second.index = boneIndex;
+			++boneIndex;
+		}
 	}
 
 	std::vector<Mesh> meshes;
@@ -72,7 +81,9 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 		// メッシュデータの読み込み
 		const auto pMesh = scene->mMeshes[i];
 		LoadMesh(meshes[i], pMesh, inverseU, inverseV);
-		GetBoneInfo(pMesh);
+
+		if (createBone)
+			GetBoneInfo(pMesh);
 
 		// テクスチャの読み込み
 		const auto pMaterial = scene->mMaterials[pMesh->mMaterialIndex];
@@ -86,10 +97,13 @@ HRESULT Model::Load(const std::string& fileName, bool inverseU, bool inverseV)
 	}
 
 	// メッシュのベースインデックス計算と頂点へのボーンデータ設定
-	CalcMeshBaseIndex(m_ModelOtherInfo);
-	SetBoneDataToVertex(meshes, m_ModelOtherInfo, m_MeshBones);
+	if (createBone)
+	{
+		CalcMeshBaseIndex(m_ModelOtherInfo);
+		SetBoneDataToVertex(meshes, m_ModelOtherInfo, m_MeshBones);
 
-	m_BoneMatCB.resize(m_Bones.size());
+		m_BoneMatCB.resize(m_Bones.size());
+	}
 
 	m_Meshes = meshes;
 	m_pScene = scene;
@@ -116,7 +130,7 @@ void Model::LoadMesh(Mesh& dst, const aiMesh* src, bool inverseU, bool inverseV)
 		if (inverseU) uv->x = 1.0f - uv->x;
 		if (inverseV) uv->y = 1.0f - uv->y;
 
-		Vertex::Mesh vertex{};
+		Vertex::SkeletalMesh vertex{};
 		vertex.Position = { position->x, position->y, position->z };
 		vertex.Normal = { normal->x, normal->y, normal->z };
 		vertex.UV = { uv->x, uv->y };

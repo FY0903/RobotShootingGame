@@ -117,6 +117,9 @@ DepthTexture::~DepthTexture()
 	delete m_pDSVRootSignature;
 	m_pDSVRootSignature = nullptr;
 
+	delete m_pSkeletalRootSignature;
+	m_pSkeletalRootSignature = nullptr;
+
 	for (size_t i = 0; i < Num; ++i)
 	{
 		delete m_pPSOs[i];
@@ -191,10 +194,26 @@ void DepthTexture::CreateRootSignature()
 	assert(m_pDSVRootSignature);	// nullptrチェック
 	m_pDSVRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
 	m_pDSVRootSignature->Create();
+
+	m_pSkeletalRootSignature = new RootSignature();
+	assert(m_pSkeletalRootSignature);	// nullptrチェック
+	m_pSkeletalRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
+	m_pSkeletalRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ(スキニング用)
+	m_pSkeletalRootSignature->Create();
 }
 
 void DepthTexture::CreatePSO()
 {
+	// スケルタルメッシュ用PSOの生成
+	m_pPSOs[SkeletalMesh] = new PipelineState();
+	assert(m_pPSOs[SkeletalMesh]);	// nullptrチェック
+	m_pPSOs[SkeletalMesh]->SetInputLayout(Vertex::SkeletalMesh::InputLayout);
+	m_pPSOs[SkeletalMesh]->SetRootSignature(m_pSkeletalRootSignature->Get());
+	m_pPSOs[SkeletalMesh]->SetVS(L"Assets/Shader/DepthSkeletalMeshVS.cso");
+	m_pPSOs[SkeletalMesh]->SetPS(L"Assets/Shader/DepthSkeletalMeshPS.cso");
+	m_pPSOs[SkeletalMesh]->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
+	m_pPSOs[SkeletalMesh]->Create();
+
 	// メッシュ用PSOの生成
 	m_pPSOs[Mesh] = new PipelineState();
 	assert(m_pPSOs[Mesh]);	// nullptrチェック
@@ -260,18 +279,21 @@ void DepthTexture::DrawRenderItems()
 	{
 		if (!item.pMaterial) continue;
 
-		// ルートシグネチャをセット
-		cmd->SetGraphicsRootSignature(m_pDSVRootSignature->Get());
-
-		// パイプラインステートをセット
+		// ルートシグネチャとパイプラインステートをセット
 		MaterialBase::InputLayoutType layoutType = item.pMaterial->GetInputLayoutType();
 		switch (layoutType)
 		{
-		case MaterialBase::Sprite:
-			cmd->SetPipelineState(m_pPSOs[Sprite]->Get());
+		case MaterialBase::SkeletalMesh:
+			cmd->SetGraphicsRootSignature(m_pSkeletalRootSignature->Get());
+			cmd->SetPipelineState(m_pPSOs[SkeletalMesh]->Get());
 			break;
 		case MaterialBase::Mesh:
+			cmd->SetGraphicsRootSignature(m_pDSVRootSignature->Get());
 			cmd->SetPipelineState(m_pPSOs[Mesh]->Get());
+			break;
+		case MaterialBase::Sprite:
+			cmd->SetGraphicsRootSignature(m_pDSVRootSignature->Get());
+			cmd->SetPipelineState(m_pPSOs[Sprite]->Get());
 			break;
 		default:
 			assert(false); // 未対応の入力レイアウトタイプ
@@ -280,6 +302,12 @@ void DepthTexture::DrawRenderItems()
 
 		// 定数バッファをセット
 		cmd->SetGraphicsRootConstantBufferView(0, item.pMaterial->GetCBByRegisterForFrame(0, currentIndex)->GetAddress());
+		for (size_t i = 1; i < item.pMaterial->GetCBSize(); ++i)
+		{
+			if (i > item.pMaterial->GetRootParameterIndex()) assert(false); // RootParameterIndexを超過している
+
+			cmd->SetGraphicsRootConstantBufferView(static_cast<UINT>(i), item.pMaterial->GetCBByRegisterForFrame(static_cast<int>(i), currentIndex)->GetAddress());
+		}
 
 		for (size_t i = 0; i < item.meshSize; ++i)
 		{

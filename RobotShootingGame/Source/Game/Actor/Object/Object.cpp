@@ -20,7 +20,9 @@
 void Object::OnInit()
 {
 	// モデルの読み込み
-	auto pModel = ModelManager::GetInstance().LoadModel("Assets/Model/F15E/F15E.fbx");
+	//auto pModel = ModelManager::GetInstance().LoadModel("Assets/Model/F15E/F15E.fbx");
+	auto pModel = ModelManager::GetInstance().LoadModel("Assets/Model/Kazusa/Kazusa.fbx", false);
+	//auto pModel = ModelManager::GetInstance().LoadModel("Assets/Model/character/Hew_kyaracter(1.0).fbx");
 
 	// アニメーションの読み込み
 	m_pAnimations.resize(2);
@@ -28,8 +30,7 @@ void Object::OnInit()
 	m_pAnimations[1] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/walk.fbx");
 
 	// マテリアルの設定
-	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("SkeletalGBuffer");
-	//m_pMaterial = MaterialManager::GetInstance().CreateMaterial("DebugGBuffer");
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("MeshGBuffer");
 
 	// メッシュレンダラーコンポーネントを追加
 	auto meshRenderer = AddComponent<MeshRenderer>();
@@ -41,8 +42,8 @@ void Object::OnInit()
 	//skeletalAnimator->Init(pModel);
 	//skeletalAnimator->PlayAnimation(m_pAnimations[0]);
 
-	m_Transform.Scale = DirectX::XMFLOAT3(0.01f, 0.01f, 0.01f);
-	m_Transform.Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
+	m_Transform.Scale = DirectX::XMFLOAT3(0.2f, 0.2f, 0.2f);
+	//m_Transform.Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
 }
 
 void Object::OnUpdate()

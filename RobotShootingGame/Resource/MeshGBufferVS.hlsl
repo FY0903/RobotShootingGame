@@ -6,6 +6,7 @@ struct VSInput
     float3 normal : NORMAL;
     float2 uv : TEXCOORD;
     float3 tangent : TANGENT;
+    float4 color : COLOR;
 };
 
 struct VSOutput
