@@ -63,6 +63,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\System\RenderPass\SSAO\SSAO.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\System\Render\Render.cpp">
       <SubType>
       </SubType>
@@ -222,6 +226,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\System\RenderPass\Sepia\Sepia.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="Source\System\RenderPass\SSAO\SSAO.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -471,6 +479,12 @@
     <FxCompile Include="Resource\SpriteVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Resource\SSAOPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Resource\WaterPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

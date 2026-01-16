@@ -18,6 +18,7 @@
 #include "Utility/DepthTexture/DepthTexture.hpp"
 
 #include "System/RenderPass/Sepia/Sepia.hpp"
+#include "System/RenderPass/SSAO/SSAO.hpp"
 
 Render::Render()
 {
@@ -310,6 +311,7 @@ void Render::Init()
 
 void Render::InitRenderPasses()
 {
+	AddRenderPass<SSAO>()->SetDepthSRV(m_pDepthTexture->GetRenderTarget());
 	//AddRenderPass<Sepia>();
 }
 

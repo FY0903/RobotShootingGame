@@ -93,7 +93,7 @@ private:
 	 * @tparam T 作成するレンダーパスの型。デフォルトは RenderPass。
 	 */
 	template <typename T = RenderPass>
-	inline void AddRenderPass()
+	inline T* AddRenderPass()
 	{
 		T* pass{};
 
@@ -112,6 +112,8 @@ private:
 		// 初期化
 		pass->Init();
 		m_RenderPasses.push_back(pass);
+
+		return pass;
 	}
 
 	/**

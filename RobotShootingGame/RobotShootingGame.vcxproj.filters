@@ -178,6 +178,9 @@
     <Filter Include="Resource\Common">
       <UniqueIdentifier>{f1fe6cd5-3b3d-4272-b194-49372401ea27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System\RenderPass\SSAO">
+      <UniqueIdentifier>{5c186824-5a4c-42bc-97f5-bd747a530043}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -326,6 +329,9 @@
     </ClCompile>
     <ClCompile Include="Source\System\RenderPass\Sepia\Sepia.cpp">
       <Filter>Source\System\RenderPass\Sepia</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\RenderPass\SSAO\SSAO.cpp">
+      <Filter>Source\System\RenderPass\SSAO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -482,6 +488,9 @@
     <ClInclude Include="Source\System\RenderPass\Sepia\Sepia.hpp">
       <Filter>Source\System\RenderPass\Sepia</Filter>
     </ClInclude>
+    <ClInclude Include="Source\System\RenderPass\SSAO\SSAO.hpp">
+      <Filter>Source\System\RenderPass\SSAO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\WaterPS.hlsl">
@@ -555,6 +564,9 @@
     </FxCompile>
     <FxCompile Include="Resource\DebugGBufferPS.hlsl">
       <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SSAOPS.hlsl">
+      <Filter>Resource\PostProcess</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

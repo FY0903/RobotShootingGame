@@ -52,7 +52,7 @@ public:
 protected:
 	virtual void CreateRootSignature() = 0;
 	virtual void CreatePSO() = 0;
-	virtual void Update() {}
+	virtual void UpdateCB() {}
 
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
 	DescriptorHeap* m_pDescriptorHeap{};			// ディスクリプタヒープ

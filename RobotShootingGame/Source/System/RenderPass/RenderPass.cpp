@@ -118,7 +118,7 @@ void RenderPass::Execute()
 	if (!m_pPSO || !m_pRootSignature) return;
 
 	SetRenderTarget();
-	Update();
+	UpdateCB();
 	DrawSprite();
 	WaitGPU();
 }
