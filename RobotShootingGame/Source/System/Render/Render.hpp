@@ -195,8 +195,6 @@ private:
 	IndexBuffer* m_pIB{};									// インデックスバッファ
 	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};			// 定数バッファ
 	ConstantBuffer* m_pLightCB[FRAME_BUFFER_COUNT]{};		// ライト用定数バッファ
-	ConstantBuffer* m_pCameraCB[FRAME_BUFFER_COUNT]{};		// カメラ用定数バッファ
-	ConstantBuffer* m_pSSAOKernelCB[FRAME_BUFFER_COUNT]{};	// SSAOカーネル用定数バッファ
 	
 	DescriptorHeap* m_pSnapshotDescriptorHeap{};			// スナップショット用ディスクリプタヒープ
 	std::vector<DescriptorHandle*> m_SnapshotRVHandles{};	// スナップショット用SRVハンドル配列

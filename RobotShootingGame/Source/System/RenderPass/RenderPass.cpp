@@ -118,7 +118,6 @@ void RenderPass::Execute()
 	if (!m_pPSO || !m_pRootSignature) return;
 
 	SetRenderTarget();
-	UpdateCB();
 	DrawSprite();
 	WaitGPU();
 }
@@ -170,6 +169,9 @@ void RenderPass::DrawSprite()
 	commandList->SetGraphicsRootSignature(m_pRootSignature->Get());			// ルートシグネチャを設定
 	commandList->SetPipelineState(m_pPSO->Get());					// パイプラインステートを設定
 	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
+
+	// 定数バッファの更新
+	UpdateCB();
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定

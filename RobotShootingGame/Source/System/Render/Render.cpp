@@ -82,10 +82,6 @@ Render::Render()
 	m_pFrameBufferDescriptorHeap = new DescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 	assert(m_pFrameBufferDescriptorHeap);	// nullptrチェック
 
-	// 深度テクスチャのSRV登録
-	auto DepthSRV = m_pDepthTexture->GetRenderTarget();
-	m_SnapshotRVHandles.push_back(m_pSnapshotDescriptorHeap->Register(DepthSRV->Resource(), DepthSRV->ViewDesc()));
-
 	DirectX::XMFLOAT4X4 projMat{};
 	DirectX::XMStoreFloat4x4(&projMat,
 		DirectX::XMMatrixTranspose(
@@ -101,49 +97,11 @@ Render::Render()
 		assert(m_pWVPCB[i]);	// nullptrチェック
 		m_pLightCB[i] = new ConstantBuffer(sizeof(CB::Light));
 		assert(m_pLightCB[i]);	// nullptrチェック
-		m_pCameraCB[i] = new ConstantBuffer(sizeof(CB::Camera));
-		assert(m_pCameraCB[i]);	// nullptrチェック
-		m_pSSAOKernelCB[i] = new ConstantBuffer(sizeof(CB::SSAOKernel));
-		assert(m_pSSAOKernelCB[i]);	// nullptrチェック
 
 		CB::WVP* ptr = m_pWVPCB[i]->GetPtr<CB::WVP>();
 		ptr->WorldMat = DirectX::SimpleMath::Matrix::Identity;
 		ptr->ViewMat = DirectX::SimpleMath::Matrix::Identity;
 		ptr->ProjMat = projMat;
-	}
-
-	// SSAOカーネルの生成と定数バッファへの転送
-	{
-		DirectX::XMFLOAT3 kernel[64]{};
-
-		std::random_device rd;
-		std::mt19937 rng(rd());
-		std::uniform_real_distribution<float> distNeg1to1(-1.0f, 1.0f);
-		std::uniform_real_distribution<float> dist0to1(0.0f, 1.0f);
-
-		for (size_t i = 0; i < 64; ++i)
-		{
-			DirectX::XMVECTOR vec{};
-			vec = DirectX::XMVectorSet(
-				distNeg1to1(rng),
-				distNeg1to1(rng),
-				dist0to1(rng),
-				0.0f);
-			vec = DirectX::XMVector3Normalize(vec);
-			vec = DirectX::XMVectorScale(vec, dist0to1(rng));
-
-			float scale = static_cast<float>(i) / 64.0f;
-			scale = 0.1f + scale * scale * (1.0f - 0.1f);
-			vec = DirectX::XMVectorScale(vec, scale);
-
-			DirectX::XMStoreFloat3(&kernel[i], vec);
-		}
-
-		for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
-		{
-			auto cbPtr = m_pSSAOKernelCB[i]->GetPtr<CB::SSAOKernel>();
-			std::memcpy(cbPtr, kernel, sizeof(kernel));
-		}
 	}
 	
 	// ルートシグネチャの生成
@@ -151,9 +109,7 @@ Render::Render()
 	assert(m_pSnapshotRootSignature);	// nullptrチェック
 	m_pSnapshotRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
 	m_pSnapshotRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_PIXEL); // 定数バッファ
-	m_pSnapshotRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_PIXEL); // 定数バッファ
-	m_pSnapshotRootSignature->AddRootParameter(2, D3D12_SHADER_VISIBILITY_PIXEL); // 定数バッファ
-	m_pSnapshotRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, D3D12_SHADER_VISIBILITY_PIXEL);	// テクスチャ
+	m_pSnapshotRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, D3D12_SHADER_VISIBILITY_PIXEL);	// テクスチャ
 	m_pSnapshotRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
 	m_pSnapshotRootSignature->Create();
 
@@ -231,18 +187,6 @@ Render::~Render()
 	}
 
 	for (auto& cb : m_pLightCB)
-	{
-		delete cb;
-		cb = nullptr;
-	}
-
-	for (auto& cb : m_pCameraCB)
-	{
-		delete cb;
-		cb = nullptr;
-	}
-
-	for (auto& cb : m_pSSAOKernelCB)
 	{
 		delete cb;
 		cb = nullptr;
@@ -515,36 +459,21 @@ void Render::DrawOpaqueSprite()
 		lightPtr->Angle = lights[0]->GetAngle();
 		lightPtr->Color = lights[0]->GetColor();
 	}
-
-	// カメラの逆VP行列を定数バッファに転送
-	DirectX::XMMATRIX V = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrix();
-	DirectX::XMMATRIX P = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrix();
-	DirectX::XMMATRIX invV = DirectX::XMMatrixInverse(nullptr, V);
-	DirectX::XMMATRIX invP = DirectX::XMMatrixInverse(nullptr, P);
-	DirectX::XMFLOAT4X4 invVMat{}, invPMat{};
-	DirectX::XMStoreFloat4x4(&invVMat, invV);
-	DirectX::XMStoreFloat4x4(&invPMat, invP);
-	CB::Camera* cameraPtr = m_pCameraCB[currentIndex]->GetPtr<CB::Camera>();
-	cameraPtr->invVMat = invVMat;
-	cameraPtr->invPMat = invPMat;
-	cameraPtr->PMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 	
 	auto vbView = m_pVB->GetView();	// 頂点バッファビューを取得
 	auto ibView = m_pIB->GetView();	// インデックスバッファビューを取得
 
 	commandList->SetGraphicsRootSignature(m_pSnapshotRootSignature->Get());			// ルートシグネチャを設定
-	commandList->SetPipelineState(m_pSnapshotPSO->Get());					// パイプラインステートを設定
+	commandList->SetPipelineState(m_pSnapshotPSO->Get());							// パイプラインステートを設定
 	commandList->SetGraphicsRootConstantBufferView(0, m_pWVPCB[currentIndex]->GetAddress());	// 定数バッファを設定
 	commandList->SetGraphicsRootConstantBufferView(1, m_pLightCB[currentIndex]->GetAddress());	// 定数バッファを設定
-	commandList->SetGraphicsRootConstantBufferView(2, m_pCameraCB[currentIndex]->GetAddress()); // カメラ用定数バッファを設定
-	commandList->SetGraphicsRootConstantBufferView(3, m_pSSAOKernelCB[currentIndex]->GetAddress()); // SSAOカーネル用定数バッファを設定
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	// プリミティブトポロジーを設定
 	commandList->IASetVertexBuffers(0, 1, &vbView);								// 頂点バッファを設定
 	commandList->IASetIndexBuffer(&ibView);										// インデックスバッファを設定
 
 	commandList->SetDescriptorHeaps(1, &materialHeap);							// ディスクリプタヒープを設定
-	commandList->SetGraphicsRootDescriptorTable(4, m_SnapshotRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
+	commandList->SetGraphicsRootDescriptorTable(2, m_SnapshotRVHandles[0]->HandleGPU);	// ディスクリプタテーブルを設定
 
 	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);	// 描画
 }

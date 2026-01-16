@@ -11,14 +11,29 @@
 // ==============================
 #include "SSAO.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/CameraManager/CameraManager.hpp"
+
+SSAO::~SSAO()
+{
+	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
+	{
+		delete m_pKernelCB[i];
+		delete m_pCameraCB[i];
+
+		m_pKernelCB[i] = nullptr;
+		m_pCameraCB[i] = nullptr;
+	}
+}
 
 void SSAO::Init()
 {
 	// 定数バッファの生成
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pCB[i] = new ConstantBuffer(sizeof(CB::SSAOKernel));
-		assert(m_pCB[i]);	// nullptrチェック
+		m_pCameraCB[i] = new ConstantBuffer(sizeof(CB::Camera));
+		assert(m_pCameraCB[i]);	// nullptrチェック
+		m_pKernelCB[i] = new ConstantBuffer(sizeof(CB::SSAOKernel));
+		assert(m_pKernelCB[i]);	// nullptrチェック
 	}
 
 	// カーネルの生成と定数バッファへの転送
@@ -50,10 +65,14 @@ void SSAO::Init()
 
 		for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 		{
-			auto cbPtr = m_pCB[i]->GetPtr<CB::SSAOKernel>();
+			auto cbPtr = m_pKernelCB[i]->GetPtr<CB::SSAOKernel>();
 			std::memcpy(cbPtr, kernel, sizeof(kernel));
 		}
 	}
+
+	// ルートシグネチャとパイプラインステートの生成
+	CreateRootSignature();
+	CreatePSO();
 }
 
 void SSAO::SetDepthSRV(RenderTarget* rt)
@@ -62,13 +81,35 @@ void SSAO::SetDepthSRV(RenderTarget* rt)
 	m_SRVHandles.push_back(handle);
 }
 
+void SSAO::UpdateCB()
+{
+	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
+	auto commandList = Engine::GetInstance().GetCommandList();				// コマンドリストを取得
+
+	// カメラの逆VP行列を定数バッファに転送
+	DirectX::XMMATRIX V = CameraManager::GetInstance().GetMainCamera()->Get3DViewMatrix();
+	DirectX::XMMATRIX P = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrix();
+	DirectX::XMMATRIX invV = DirectX::XMMatrixInverse(nullptr, V);
+	DirectX::XMMATRIX invP = DirectX::XMMatrixInverse(nullptr, P);
+	DirectX::XMFLOAT4X4 invVMat{}, invPMat{};
+	DirectX::XMStoreFloat4x4(&invVMat, invV);
+	DirectX::XMStoreFloat4x4(&invPMat, invP);
+	CB::Camera* cameraPtr = m_pCameraCB[currentIndex]->GetPtr<CB::Camera>();
+	cameraPtr->invVMat = invVMat;
+	cameraPtr->invPMat = invPMat;
+	cameraPtr->PMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
+
+	commandList->SetGraphicsRootConstantBufferView(2, m_pCameraCB[currentIndex]->GetAddress()); // カメラ用定数バッファを設定
+	commandList->SetGraphicsRootConstantBufferView(3, m_pKernelCB[currentIndex]->GetAddress()); // カーネル用定数バッファを設定
+}
+
 void SSAO::CreateRootSignature()
 {
 	m_pRootSignature = new RootSignature();
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
+	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, D3D12_SHADER_VISIBILITY_PIXEL); // SRV
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_PIXEL);  // 定数バッファ
 	m_pRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_PIXEL);  // 定数バッファ
-	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, D3D12_SHADER_VISIBILITY_PIXEL); // SRV
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
 	m_pRootSignature->Create();
 }

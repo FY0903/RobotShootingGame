@@ -28,7 +28,7 @@ public:
 	/**
 	 * デストラクタ
 	 */
-	~SSAO() = default;
+	~SSAO();
 
 	/**
 	 * @brief 初期化処理
@@ -41,6 +41,8 @@ public:
 	 */
 	void SetDepthSRV(RenderTarget* rt);
 
+	void UpdateCB() override final;
+
 private:
 	/**
 	 * @brief ルートシグネチャ生成
@@ -52,5 +54,6 @@ private:
 	 */
 	void CreatePSO() override final;
 
-	ConstantBuffer* m_pCB[FRAME_BUFFER_COUNT]{};	// カーネル用定数バッファ
+	ConstantBuffer* m_pKernelCB[FRAME_BUFFER_COUNT]{};	// カーネル用定数バッファ
+	ConstantBuffer* m_pCameraCB[FRAME_BUFFER_COUNT]{};	// カメラ用定数バッファ
 };
