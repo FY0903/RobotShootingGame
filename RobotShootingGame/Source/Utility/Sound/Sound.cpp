@@ -1,9 +1,9 @@
 /*+===================================================================
 	File: Sound.cpp
-	Summary: （このファイルで何をするか記載する）
+	Summary: Soundクラスの実装ファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2025/09/08 11:56:17 初回作成
-	（これ以降下に更新日時と更新内容を書く）
+	Date: 2025/09/08 11:56 初回作成
+            26/01/16 11:26 コメント記載
 ===================================================================+*/
 
 // ==============================
@@ -55,12 +55,12 @@ void Sound::Uninit()
 	m_soundMap.clear();
 }
 
-XAUDIO2_BUFFER* Sound::Load(const std::string& In_strSoundName, const std::string& In_strFileName, const bool& In_bIsSE, const bool& In_bLoop)
+XAUDIO2_BUFFER* Sound::Load(const std::string& soundName, const std::string& fileName, const bool& In_bIsSE, const bool& In_bLoop)
 {
 	SoundData data;
 
 	// 読み込み済みのサウンドファイルか確認
-	auto itr = m_soundMap.find(In_strSoundName);
+	auto itr = m_soundMap.find(soundName);
 	if (itr != m_soundMap.end())
 	{
 		// 読み込み済みのサウンドファイルを返す
@@ -69,19 +69,19 @@ XAUDIO2_BUFFER* Sound::Load(const std::string& In_strSoundName, const std::strin
 
 	// 拡張子ごとに読み込み処理実行
 	HRESULT hr = E_FAIL;
-	LPSTR ext = PathFindExtension(In_strFileName.c_str());
+	LPSTR ext = PathFindExtension(fileName.c_str());
 	if (ext != NULL)
 	{
 		if (memcmp(ext, ".wav", 4) == 0)
-			hr = LoadWav(In_strFileName.c_str(), &data);
+			hr = LoadWav(fileName.c_str(), &data);
 		else if (memcmp(ext, ".mp3", 4) == 0)
-			hr = LoadMP3(In_strFileName.c_str(), &data);
+			hr = LoadMP3(fileName.c_str(), &data);
 	}
 
 	if (FAILED(hr))	return NULL;
 
 	//--- ファイルパスを登録
-	data.data.strFilePath = In_strFileName.c_str();
+	data.data.filePath = fileName.c_str();
 	//--- バッファー作成
 	ZeroMemory(&data.data.sound, sizeof(data.data.sound));
 	// サウンドデータのバイト数
@@ -97,24 +97,24 @@ XAUDIO2_BUFFER* Sound::Load(const std::string& In_strSoundName, const std::strin
 
 	m_pXAudio->CreateSourceVoice(&data.pSourceVoice, &data.data.format);
 
-	In_bIsSE ? data.fVolume = m_fSEVolume : data.fVolume = m_fBGMVolume;
+	In_bIsSE ? data.volume = m_fSEVolume : data.volume = m_fBGMVolume;
 
-	data.pSourceVoice->SetVolume(data.fVolume);
+	data.pSourceVoice->SetVolume(data.volume);
 
-	data.bIsSE = In_bIsSE;
+	data.IsSE = In_bIsSE;
 
 	// 読み込み済みデータとして登録
-	m_soundMap.insert(SoundKey(In_strSoundName, data));
+	m_soundMap.insert(SoundKey(soundName, data));
 
-	return &m_soundMap.at(In_strSoundName).data.sound;
+	return &m_soundMap.at(soundName).data.sound;
 }
 
-void Sound::Play(const std::string& In_strSoundName)
+void Sound::Play(const std::string& soundName)
 {
 	IXAudio2SourceVoice* pSource;
 
 	// 再生するデータを探索
-	auto itr = m_soundMap.find(In_strSoundName);
+	auto itr = m_soundMap.find(soundName);
 	// 該当データなし
 	if (itr == m_soundMap.end()) return;
 
@@ -144,16 +144,16 @@ void Sound::Play(const std::string& In_strSoundName)
 	pSource->Start();
 
 	itr->second.pSourceVoice = pSource;
-	itr->second.bIsSE ?
-		itr->second.pSourceVoice->SetVolume(itr->second.fVolume * m_fSEVolume) :
-		itr->second.pSourceVoice->SetVolume(itr->second.fVolume * m_fSEVolume);
+	itr->second.IsSE ?
+		itr->second.pSourceVoice->SetVolume(itr->second.volume * m_fSEVolume) :
+		itr->second.pSourceVoice->SetVolume(itr->second.volume * m_fSEVolume);
 }
 
-bool Sound::IsPlaying(const std::string& In_strSoundName) const
+bool Sound::IsPlaying(const std::string& soundName) const
 {
 	XAUDIO2_VOICE_STATE state;
 	// 確認するデータを探索
-	auto itr = m_soundMap.find(In_strSoundName);
+	auto itr = m_soundMap.find(soundName);
 	if (itr == m_soundMap.end())
 	{
 		// 該当のデータなし
@@ -169,14 +169,14 @@ bool Sound::IsPlaying(const std::string& In_strSoundName) const
 		return false;
 }
 
-void Sound::Stop(const std::string& In_strSoundName, bool In_bIsFlag)
+void Sound::Stop(const std::string& soundName, bool isFlag)
 {
-	if (In_bIsFlag)
+	if (isFlag)
 	{
 		// 特定のキー以外のサウンドデータを削除
 		for (auto itr = m_soundMap.begin(); itr != m_soundMap.end();)
 		{
-			if (itr->first != In_strSoundName)
+			if (itr->first != soundName)
 			{
 				itr->second.pSourceVoice->Stop();
 				// ストップした後、バッファが残るので削除
@@ -193,7 +193,7 @@ void Sound::Stop(const std::string& In_strSoundName, bool In_bIsFlag)
 	else
 	{
 		// 停止するデータを探索
-		auto itr = m_soundMap.find(In_strSoundName);
+		auto itr = m_soundMap.find(soundName);
 		if (itr == m_soundMap.end() || itr->second.pSourceVoice == nullptr)
 			return;
 
@@ -203,21 +203,21 @@ void Sound::Stop(const std::string& In_strSoundName, bool In_bIsFlag)
 	}
 }
 
-void Sound::SetVolume(const std::string& In_strSoundName, float In_nVolume)
+void Sound::SetVolume(const std::string& soundName, float volume)
 {
 	// ボリュームを設定するデータを探索
-	auto itr = m_soundMap.find(In_strSoundName);
+	auto itr = m_soundMap.find(soundName);
 	if (itr == m_soundMap.end() || itr->second.pSourceVoice == nullptr)
 		return;
 
-	itr->second.fVolume = In_nVolume;
-	itr->second.pSourceVoice->SetVolume(In_nVolume);
+	itr->second.volume = volume;
+	itr->second.pSourceVoice->SetVolume(volume);
 }
 
-void Sound::UnLoad(const std::string& In_strSoundName)
+void Sound::UnLoad(const std::string& soundName)
 {
 	// サウンドデータの削除
-	auto itr = m_soundMap.find(In_strSoundName);
+	auto itr = m_soundMap.find(soundName);
 	if (itr != m_soundMap.end())
 	{
 		itr->second.data.pBuffer = nullptr;
@@ -225,14 +225,14 @@ void Sound::UnLoad(const std::string& In_strSoundName)
 	}
 }
 
-void Sound::SetSEVolume(const float& In_nVolume)
+void Sound::SetSEVolume(const float& volume)
 {
-	m_fSEVolume = roundf(In_nVolume * 10) / 10;
+	m_fSEVolume = roundf(volume * 10) / 10;
 	// ------------------------------
 	//	0.0f ~ 1.0fに収まるように
 	// ------------------------------
-	if (In_nVolume < 0.0f) m_fSEVolume = 0.0f;
-	if (In_nVolume > 1.0f) m_fSEVolume = 1.0f;
+	if (m_fSEVolume < 0.0f) m_fSEVolume = 0.0f;
+	if (m_fSEVolume > 1.0f) m_fSEVolume = 1.0f;
 
 	// ------------------------------
 	//	音声のシーク開始
@@ -241,21 +241,21 @@ void Sound::SetSEVolume(const float& In_nVolume)
 	{
 		if (itr->second.pSourceVoice)
 		{
-			if (itr->second.bIsSE)	// サウンド属性がSEだったら
-				itr->second.pSourceVoice->SetVolume(itr->second.fVolume * m_fSEVolume);
+			if (itr->second.IsSE)	// サウンド属性がSEだったら
+				itr->second.pSourceVoice->SetVolume(itr->second.volume * m_fSEVolume);
 		}
 	}
 }
 
-void Sound::SetBGMVolume(const float& In_nVolume)
+void Sound::SetBGMVolume(const float& volume)
 {
-	m_fBGMVolume = roundf(In_nVolume * 10) / 10;
+	m_fBGMVolume = roundf(volume * 10) / 10;
 
 	// ------------------------------
 	//	0.0f ~ 1.0fに収まるように
 	// ------------------------------
-	if (In_nVolume < 0.0f) m_fBGMVolume = 0.0f;
-	if (In_nVolume > 1.0f) m_fBGMVolume = 1.0f;
+	if (volume < 0.0f) m_fBGMVolume = 0.0f;
+	if (volume > 1.0f) m_fBGMVolume = 1.0f;
 
 	// ------------------------------
 	//	音声のシーク開始
@@ -264,8 +264,8 @@ void Sound::SetBGMVolume(const float& In_nVolume)
 	{
 		if (itr->second.pSourceVoice)
 		{
-			if (!itr->second.bIsSE)	// サウンド属性がSEじゃなかったら
-				itr->second.pSourceVoice->SetVolume(itr->second.fVolume * m_fBGMVolume);
+			if (!itr->second.IsSE)	// サウンド属性がSEじゃなかったら
+				itr->second.pSourceVoice->SetVolume(itr->second.volume * m_fBGMVolume);
 		}
 	}
 }
@@ -280,7 +280,7 @@ Sound::~Sound()
 	Uninit();
 }
 
-HRESULT Sound::LoadWav(const char* In_c_cpFile, SoundData* In_pData)
+HRESULT Sound::LoadWav(const char* filePath, SoundData* data)
 {
 	HMMIO hMmio = NULL;
 	MMIOINFO mmioInfo;
@@ -288,7 +288,7 @@ HRESULT Sound::LoadWav(const char* In_c_cpFile, SoundData* In_pData)
 
 	// WAVEファイルオープン
 	memset(&mmioInfo, 0, sizeof(MMIOINFO));
-	hMmio = mmioOpen(const_cast<char*>(In_c_cpFile), &mmioInfo, MMIO_READ);
+	hMmio = mmioOpen(const_cast<char*>(filePath), &mmioInfo, MMIO_READ);
 	if (hMmio == NULL) return E_FAIL;
 
 	// RIFFチャンク検索
@@ -313,7 +313,7 @@ HRESULT Sound::LoadWav(const char* In_c_cpFile, SoundData* In_pData)
 
 	// フォーマット取得
 	DWORD formatSize = formatChunk.cksize;
-	DWORD size = mmioRead(hMmio, reinterpret_cast<HPSTR>(&In_pData->data.format), formatSize);
+	DWORD size = mmioRead(hMmio, reinterpret_cast<HPSTR>(&data->data.format), formatSize);
 	if (size != formatSize)
 	{
 		mmioClose(hMmio, 0);
@@ -335,17 +335,17 @@ HRESULT Sound::LoadWav(const char* In_c_cpFile, SoundData* In_pData)
 	}
 
 	// データ取得
-	In_pData->data.bufSize = dataChunk.cksize;
-	In_pData->data.pBuffer.reset(new BYTE[In_pData->data.bufSize]);
-	size = mmioRead(hMmio, reinterpret_cast<HPSTR>(In_pData->data.pBuffer.get()), In_pData->data.bufSize);
+	data->data.bufSize = dataChunk.cksize;
+	data->data.pBuffer.reset(new BYTE[data->data.bufSize]);
+	size = mmioRead(hMmio, reinterpret_cast<HPSTR>(data->data.pBuffer.get()), data->data.bufSize);
 	if (size != dataChunk.cksize)
 	{
-		In_pData->data.bufSize = 0;
-		if (In_pData->data.pBuffer != NULL)
+		data->data.bufSize = 0;
+		if (data->data.pBuffer != NULL)
 		{
 			//delete[] pData->data.pBuffer;
-			In_pData->data.pBuffer = nullptr;
-			In_pData->data.pBuffer;
+			data->data.pBuffer = nullptr;
+			data->data.pBuffer;
 		}
 		return E_FAIL;
 	}
@@ -354,14 +354,14 @@ HRESULT Sound::LoadWav(const char* In_c_cpFile, SoundData* In_pData)
 	return S_OK;
 }
 
-HRESULT Sound::LoadMP3(const char* In_c_cpFile, SoundData* In_pData)
+HRESULT Sound::LoadMP3(const char* filePath, SoundData* data)
 {
 	HANDLE hFile; // ファイルポインタ
 	DWORD readSize; // 読み込みサイズ
 
 	// 読み込み
 	hFile = CreateFile(
-		In_c_cpFile, GENERIC_READ, 0, NULL,
+		filePath, GENERIC_READ, 0, NULL,
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL
 	);
 	if (hFile == INVALID_HANDLE_VALUE) return E_FAIL;
@@ -377,18 +377,18 @@ HRESULT Sound::LoadMP3(const char* In_c_cpFile, SoundData* In_pData)
 	if (readSize == 0) return E_FAIL;
 
 	// サウンドデータ読み込み
-	readSize = ReadMP3Data(hFile, format.offset, format.dataSize, &frame, In_pData);
+	readSize = ReadMP3Data(hFile, format.offset, format.dataSize, &frame, data);
 	if (readSize == 0) return E_FAIL;
 
 	return S_OK;
 }
 
-DWORD Sound::ReadMP3Format(HANDLE In_hFile, MP3FormatInfo* In_pFormat)
+DWORD Sound::ReadMP3Format(HANDLE file, MP3FormatInfo* format)
 {
 	DWORD readSize;
 
 	// MP3ファイルサイズ
-	DWORD fileSize = GetFileSize(In_hFile, NULL);
+	DWORD fileSize = GetFileSize(file, NULL);
 
 	// ①ヘッダー/フッターの有無を調べる
 	/*----------
@@ -403,7 +403,7 @@ DWORD Sound::ReadMP3Format(HANDLE In_hFile, MP3FormatInfo* In_pFormat)
 	*----------*/
 	const BYTE ID3V2_HEADER_SIZE = 10;
 	BYTE header[ID3V2_HEADER_SIZE];	// ヘッダー情報
-	static_cast<void>(ReadFile(In_hFile, header, sizeof(header), &readSize, NULL));
+	static_cast<void>(ReadFile(file, header, sizeof(header), &readSize, NULL));
 
 	// タグをチェックし、MP3データの位置、サイズを計算
 	const char* ID3V1_TAG = "TAG";
@@ -425,30 +425,30 @@ DWORD Sound::ReadMP3Format(HANDLE In_hFile, MP3FormatInfo* In_pFormat)
 		DWORD exHeaderSize =
 			(header[6] << 21) | (header[7] << 14) |
 			(header[8] << 7) | (header[9]);
-		In_pFormat->offset = exHeaderSize + ID3V2_HEADER_SIZE;
-		In_pFormat->dataSize = fileSize - In_pFormat->offset;
+		format->offset = exHeaderSize + ID3V2_HEADER_SIZE;
+		format->dataSize = fileSize - format->offset;
 	}
 	else
 	{
 		// ID3v1フッター情報解析
 		const BYTE ID3V1_FOOTER_SIZE = 128;
 		BYTE tag[MP3_TAG_SIZE];
-		SetFilePointer(In_hFile, fileSize - ID3V1_FOOTER_SIZE, NULL, FILE_BEGIN);
-		static_cast<void>(ReadFile(In_hFile, tag, MP3_TAG_SIZE, &readSize, NULL));
-		In_pFormat->offset = 0;
+		SetFilePointer(file, fileSize - ID3V1_FOOTER_SIZE, NULL, FILE_BEGIN);
+		static_cast<void>(ReadFile(file, tag, MP3_TAG_SIZE, &readSize, NULL));
+		format->offset = 0;
 		if (memcmp(tag, ID3V1_TAG, MP3_TAG_SIZE) == CMP_MATCH)
 		{
-			In_pFormat->dataSize = fileSize - 128;
+			format->dataSize = fileSize - 128;
 		}
 		else
 		{
-			In_pFormat->dataSize = fileSize;
+			format->dataSize = fileSize;
 		}
 	}
-	return In_pFormat->dataSize;
+	return format->dataSize;
 }
 
-DWORD Sound::ReadMP3FrameHeader(HANDLE In_hFile, DWORD In_dwSeek, MP3FrameInfo* In_pFrame)
+DWORD Sound::ReadMP3FrameHeader(HANDLE file, DWORD seek, MP3FrameInfo* frame)
 {
 	DWORD readSize;
 
@@ -461,7 +461,7 @@ DWORD Sound::ReadMP3FrameHeader(HANDLE In_hFile, DWORD In_dwSeek, MP3FrameInfo* 
 	 *	...(繰り返し
 	 *----------*/
 	 // MP3データ位置へ移動
-	SetFilePointer(In_hFile, In_dwSeek, NULL, FILE_BEGIN);
+	SetFilePointer(file, seek, NULL, FILE_BEGIN);
 
 	/*----------
 	 * フレームヘッダ情報
@@ -495,7 +495,7 @@ DWORD Sound::ReadMP3FrameHeader(HANDLE In_hFile, DWORD In_dwSeek, MP3FrameInfo* 
 	 *----------*/
 	const BYTE FRAME_HEADER_SIZE = 4;
 	BYTE frameHeader[FRAME_HEADER_SIZE];
-	static_cast<void>(ReadFile(In_hFile, frameHeader, FRAME_HEADER_SIZE, &readSize, NULL));
+	static_cast<void>(ReadFile(file, frameHeader, FRAME_HEADER_SIZE, &readSize, NULL));
 
 	// 同期ビットチェック
 	if (!(frameHeader[0] == 0xFF && (frameHeader[1] & 0xE0) == 0xE0)) return 0;
@@ -590,31 +590,31 @@ DWORD Sound::ReadMP3FrameHeader(HANDLE In_hFile, DWORD In_dwSeek, MP3FrameInfo* 
 	 // sample
 	 // bitRate
 	 // padding
-	In_pFrame->channel = channel == 0x11 ? 1 : 2;
-	In_pFrame->sampleRate = sampleRate;
-	In_pFrame->bitRate = bitRate;
-	In_pFrame->padding = padding;
-	In_pFrame->frameSize = frameBlockSize;
+	frame->channel = channel == 0x11 ? 1 : 2;
+	frame->sampleRate = sampleRate;
+	frame->bitRate = bitRate;
+	frame->padding = padding;
+	frame->frameSize = frameBlockSize;
 
-	return In_pFrame->frameSize;
+	return frame->frameSize;
 }
 
-DWORD Sound::ReadMP3Data(HANDLE In_hFile, DWORD In_dwSeek, DWORD In_dwSize, MP3FrameInfo* In_pFrame, SoundData* In_pData)
+DWORD Sound::ReadMP3Data(HANDLE file, DWORD seek, DWORD size, MP3FrameInfo* frame, SoundData* data)
 {
 	// 変換フォーマット作成
 	MPEGLAYER3WAVEFORMAT mp3WavFormat;
 	mp3WavFormat.wfx.cbSize = MPEGLAYER3_WFX_EXTRA_BYTES;
-	mp3WavFormat.wfx.nChannels = In_pFrame->channel;
+	mp3WavFormat.wfx.nChannels = frame->channel;
 	mp3WavFormat.wfx.wFormatTag = WAVE_FORMAT_MPEGLAYER3;
 	mp3WavFormat.wfx.nBlockAlign = 1;
 	mp3WavFormat.wfx.wBitsPerSample = 0;
-	mp3WavFormat.wfx.nSamplesPerSec = In_pFrame->sampleRate;
-	mp3WavFormat.wfx.nAvgBytesPerSec = (In_pFrame->bitRate * 1000) / 8;
+	mp3WavFormat.wfx.nSamplesPerSec = frame->sampleRate;
+	mp3WavFormat.wfx.nAvgBytesPerSec = (frame->bitRate * 1000) / 8;
 
 	mp3WavFormat.wID = MPEGLAYER3_ID_MPEG;
-	mp3WavFormat.fdwFlags = In_pFrame->padding ? MPEGLAYER3_FLAG_PADDING_ON : MPEGLAYER3_FLAG_PADDING_OFF;
+	mp3WavFormat.fdwFlags = frame->padding ? MPEGLAYER3_FLAG_PADDING_ON : MPEGLAYER3_FLAG_PADDING_OFF;
 	mp3WavFormat.nFramesPerBlock = 1;
-	mp3WavFormat.nBlockSize = static_cast<WORD>(In_pFrame->frameSize * mp3WavFormat.nFramesPerBlock);
+	mp3WavFormat.nBlockSize = static_cast<WORD>(frame->frameSize * mp3WavFormat.nFramesPerBlock);
 	mp3WavFormat.nCodecDelay = 0x571;
 
 	// mp3をwavへ変換可能か
@@ -632,12 +632,12 @@ DWORD Sound::ReadMP3Data(HANDLE In_hFile, DWORD In_dwSeek, DWORD In_dwSize, MP3F
 
 	// MP3のブロックサイズからWAVE形式へデコード後のサイズを取得
 	DWORD waveBlockSize;
-	acmStreamSize(has, In_dwSize, &waveBlockSize, ACM_STREAMSIZEF_SOURCE);
+	acmStreamSize(has, size, &waveBlockSize, ACM_STREAMSIZEF_SOURCE);
 
 	// 変換データセット
 	ACMSTREAMHEADER ash = { 0 };
 	ash.cbStruct = sizeof(ACMSTREAMHEADER);
-	ash.cbSrcLength = In_dwSize;
+	ash.cbSrcLength = size;
 	ash.pbSrc = new BYTE[ash.cbSrcLength];
 	ash.cbDstLength = waveBlockSize;
 	ash.pbDst = new BYTE[ash.cbDstLength];
@@ -645,8 +645,8 @@ DWORD Sound::ReadMP3Data(HANDLE In_hFile, DWORD In_dwSeek, DWORD In_dwSize, MP3F
 	// デコード
 	acmStreamPrepareHeader(has, &ash, 0);
 	DWORD readSize;
-	SetFilePointer(In_hFile, In_dwSeek, NULL, FILE_BEGIN);
-	static_cast<void>(ReadFile(In_hFile, ash.pbSrc, ash.cbSrcLength, &readSize, NULL));
+	SetFilePointer(file, seek, NULL, FILE_BEGIN);
+	static_cast<void>(ReadFile(file, ash.pbSrc, ash.cbSrcLength, &readSize, NULL));
 	mmr = acmStreamConvert(has, &ash, 0);
 	acmStreamUnprepareHeader(has, &ash, 0);
 	acmStreamClose(has, 0);
@@ -654,17 +654,17 @@ DWORD Sound::ReadMP3Data(HANDLE In_hFile, DWORD In_dwSeek, DWORD In_dwSize, MP3F
 	// wavデータコピー
 	if (ash.cbDstLengthUsed > 0)
 	{
-		In_pData->data.bufSize = ash.cbDstLengthUsed;
-		In_pData->data.pBuffer.reset(new BYTE[In_pData->data.bufSize]);
-		In_pData->data.format = wavFormat;
-		memcpy_s(In_pData->data.pBuffer.get(), In_pData->data.bufSize,
+		data->data.bufSize = ash.cbDstLengthUsed;
+		data->data.pBuffer.reset(new BYTE[data->data.bufSize]);
+		data->data.format = wavFormat;
+		memcpy_s(data->data.pBuffer.get(), data->data.bufSize,
 			ash.pbDst, ash.cbDstLengthUsed);
 	}
 
 	delete[] ash.pbSrc;
 	delete[] ash.pbDst;
 
-	CloseHandle(In_hFile);
+	CloseHandle(file);
 
 	return ash.cbSrcLengthUsed;
 }
