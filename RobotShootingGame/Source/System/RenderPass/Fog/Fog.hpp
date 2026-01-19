@@ -1,8 +1,8 @@
 /*+===================================================================
-	File: SSAO.hpp
-	Summary: スクリーンスペースアンビエントオクルージョン(SSAO)を管理するクラスヘッダ
+	File: Fog.hpp
+	Summary: Fogクラスのヘッダーファイル
 	Author: AT13C192 23 藤原佑埜
-	Date: 2026/01/16 20:41 初回作成
+	Date: 2026/01/17 17:52 初回作成
 ===================================================================+*/
 #pragma once
 
@@ -10,12 +10,11 @@
 //	include
 // ==============================
 #include "System/RenderPass/RenderPass.hpp"
-#include "Utility/ConstantBuffer/ConstantBuffer.hpp"
 
 /**
- * @brief SSAOクラス
+ * @brief Fogクラス
  */
-class SSAO : public RenderPass
+class Fog : public RenderPass
 {
 public:
 	using RenderPass::RenderPass;
@@ -23,12 +22,12 @@ public:
 	/**
 	 * コンストラクタ
 	 */
-	SSAO() = default;
+	Fog() = default;
 
 	/**
 	 * デストラクタ
 	 */
-	~SSAO();
+	~Fog();
 
 	/**
 	 * @brief 初期化処理
@@ -51,12 +50,11 @@ private:
 	 * @brief ルートシグネチャ生成
 	 */
 	void CreateRootSignature() override final;
-
+	
 	/**
 	 * @brief パイプラインステート生成
 	 */
 	void CreatePSO() override final;
 
-	ConstantBuffer* m_pKernelCB[FRAME_BUFFER_COUNT]{};	// カーネル用定数バッファ
 	ConstantBuffer* m_pCameraCB[FRAME_BUFFER_COUNT]{};	// カメラ用定数バッファ
 };

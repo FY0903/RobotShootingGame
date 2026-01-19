@@ -45,12 +45,12 @@ public:
 	/**
 	 * @brief 更新処理
 	 */
-	void Update() override final {}
+	void Update() override final;
 
 	/**
 	 * @brief 描画処理
 	 */
-	void Draw() override final {}
+	void Draw() override final;
 
 	/**
 	 * @brief 終了処理
@@ -100,6 +100,12 @@ public:
 	inline void SetColor(const DirectX::XMFLOAT4& color) { m_Color = color; }
 
 private:
+	void CreateShadowMap();
+
+	void SetRenderTarget();
+	void DrawShadowMap();
+	void WaitGPU();
+
 	Type m_Type{};					// ライトの種類
 	DirectX::XMFLOAT4 m_Color{};	// ライトの色
 	float m_Range{};				// ライトの届く距離

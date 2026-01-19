@@ -138,6 +138,7 @@ namespace CB
 		DirectX::XMFLOAT4X4 invVMat{};		// カメラの逆ビュー行列
 		DirectX::XMFLOAT4X4 invPMat{};		// カメラの逆射影行列
 		DirectX::XMFLOAT4X4 PMat{};			// カメラの射影行列
+		DirectX::XMFLOAT3 Pos{};			// カメラの位置
 	};
 
 	/**

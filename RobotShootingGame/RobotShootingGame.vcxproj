@@ -55,6 +55,10 @@
     <ClCompile Include="Source\System\App\App.cpp" />
     <ClCompile Include="Source\System\Engine\Engine.cpp" />
     <ClCompile Include="Source\System\main.cpp" />
+    <ClCompile Include="Source\System\RenderPass\Fog\Fog.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\System\RenderPass\RenderPass.cpp">
       <SubType>
       </SubType>
@@ -161,6 +165,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Source\Utility\RootSignature\RootSignature.cpp" />
+    <ClCompile Include="Source\Utility\ShadowMap\ShadowMap.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Source\Utility\SharedStruct\SharedStruct.cpp" />
     <ClCompile Include="Source\Utility\Singleton\Singleton.cpp" />
     <ClCompile Include="Source\Utility\Sound\Sound.cpp">
@@ -221,6 +229,10 @@
     <ClInclude Include="Source\System\App\App.hpp" />
     <ClInclude Include="Source\System\Engine\Engine.hpp" />
     <ClInclude Include="Source\System\main.hpp" />
+    <ClInclude Include="Source\System\RenderPass\Fog\Fog.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\System\RenderPass\RenderPass.hpp">
       <SubType>
       </SubType>
@@ -325,6 +337,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="Source\Utility\RootSignature\RootSignature.hpp" />
+    <ClInclude Include="Source\Utility\ShadowMap\ShadowMap.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Source\Utility\SharedStruct\SharedStruct.hpp" />
     <ClInclude Include="Source\Utility\Singleton\Singleton.hpp" />
     <ClInclude Include="Source\Utility\Sound\Sound.hpp">
@@ -391,6 +407,12 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Resource\FogPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Resource\MeshGBufferPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

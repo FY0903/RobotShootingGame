@@ -21,10 +21,6 @@ RenderPass::RenderPass(RenderTarget* rt)
 	m_pRT = new RenderTarget();
 	m_pRT->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_R8G8B8A8_UNORM, clearColor);
 
-	// 深度ステンシルの生成
-	m_pDSV = new DepthStencil();
-	m_pDSV->Create(WINDOW_WIDTH, WINDOW_HEIGHT, DXGI_FORMAT_D32_FLOAT);
-
 	float halfWidth = WINDOW_WIDTH / 2.0f;
 	float halfHeight = WINDOW_HEIGHT / 2.0f;
 
@@ -87,9 +83,6 @@ RenderPass::~RenderPass()
 	delete m_pRT;
 	m_pRT = nullptr;
 
-	delete m_pDSV;
-	m_pDSV = nullptr;
-
 	delete m_pVB;
 	m_pVB = nullptr;
 
@@ -134,25 +127,13 @@ void RenderPass::SetRenderTarget()
 	// レンダーターゲットのハンドルを取得
 	auto rtvHandle = m_pRT->GetDescriptorHandle()->HandleCPU;
 
-	// 深度ステンシルバッファのハンドルを取得
-	auto dsvHandle = m_pDSV->GetDescriptorHandle()->HandleCPU;
-
 	// レンダーターゲットと深度ステンシルバッファを設定
-	Engine::GetInstance().GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, &dsvHandle);
+	Engine::GetInstance().GetCommandList()->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
 	// レンダーターゲットをクリア
 	Engine::GetInstance().GetCommandList()->ClearRenderTargetView(
 		rtvHandle,
 		m_pRT->GetClearValue().Color,
-		0,
-		nullptr);
-
-	// 深度ステンシルバッファをクリア
-	Engine::GetInstance().GetCommandList()->ClearDepthStencilView(
-		dsvHandle,
-		D3D12_CLEAR_FLAG_DEPTH,
-		1.0f,
-		0,
 		0,
 		nullptr);
 }

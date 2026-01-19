@@ -79,7 +79,6 @@ private:
 	RenderPass() = delete;
 
 	RenderTarget* m_pRT{};
-	DepthStencil* m_pDSV{};
 
 	VertexBuffer* m_pVB{};	// 頂点バッファ
 	IndexBuffer* m_pIB{};	// インデックスバッファ

@@ -19,6 +19,7 @@
 
 #include "System/RenderPass/Sepia/Sepia.hpp"
 #include "System/RenderPass/SSAO/SSAO.hpp"
+#include "System/RenderPass/Fog/Fog.hpp"
 
 Render::Render()
 {
@@ -255,7 +256,8 @@ void Render::Init()
 
 void Render::InitRenderPasses()
 {
-	AddRenderPass<SSAO>()->SetDepthSRV(m_pDepthTexture->GetRenderTarget());
+	//AddRenderPass<SSAO>()->SetDepthSRV(m_pDepthTexture->GetRenderTarget());
+	//AddRenderPass<Fog>()->SetDepthSRV(m_pDepthTexture->GetRenderTarget());
 	//AddRenderPass<Sepia>();
 }
 

@@ -31,6 +31,16 @@ void Light::Init(Type type, DirectX::XMFLOAT4 color, float range, float angle)
 	LightManager::GetInstance().RegisterLight(this);
 }
 
+void Light::Update()
+{
+
+}
+
+void Light::Draw()
+{
+
+}
+
 DirectX::XMFLOAT3 Light::GetPosition() const
 {
 	// オーナーが存在しない場合はデフォルト値を返す
