@@ -212,9 +212,21 @@ void MaterialManager::Init()
 	debugGBuffer->SetRTVFormat(DXGI_FORMAT_R32G32B32A32_FLOAT, 2);	// WorldPos
 	debugGBuffer->Create();
 
+	auto spriteGBuffer = CreateMaterialBase("SpriteGBuffer", 3);
+	spriteGBuffer->SetVSFilepath(L"Assets/Shader/SpriteGBufferVS.cso");
+	spriteGBuffer->SetPSFilepath(L"Assets/Shader/GBufferPS.cso");
+	spriteGBuffer->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
+	spriteGBuffer->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	spriteGBuffer->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	spriteGBuffer->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	spriteGBuffer->SetRTVFormat(DXGI_FORMAT_R8G8B8A8_UNORM, 0);		// Albedo
+	spriteGBuffer->SetRTVFormat(DXGI_FORMAT_R8G8B8A8_UNORM, 1);		// Normal
+	spriteGBuffer->SetRTVFormat(DXGI_FORMAT_R32G32B32A32_FLOAT, 2);	// WorldPos
+	spriteGBuffer->Create();
+
 	auto meshGBuffer = CreateMaterialBase("MeshGBuffer", 3);
 	meshGBuffer->SetVSFilepath(L"Assets/Shader/MeshGBufferVS.cso");
-	meshGBuffer->SetPSFilepath(L"Assets/Shader/MeshGBufferPS.cso");
+	meshGBuffer->SetPSFilepath(L"Assets/Shader/GBufferPS.cso");
 	meshGBuffer->SetInputLayout(Vertex::SkeletalMesh::InputLayout, MaterialBase::Mesh);
 	meshGBuffer->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	meshGBuffer->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
@@ -226,7 +238,7 @@ void MaterialManager::Init()
 
 	auto skeletalGBuffer = CreateMaterialBase("SkeletalGBuffer", 3);
 	skeletalGBuffer->SetVSFilepath(L"Assets/Shader/SkeletalMeshGBufferVS.cso");
-	skeletalGBuffer->SetPSFilepath(L"Assets/Shader/SkeletalMeshGBufferPS.cso");
+	skeletalGBuffer->SetPSFilepath(L"Assets/Shader/GBufferPS.cso");
 	skeletalGBuffer->SetInputLayout(Vertex::SkeletalMesh::InputLayout, MaterialBase::SkeletalMesh);
 	skeletalGBuffer->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
 	skeletalGBuffer->SetCBV(1, D3D12_SHADER_VISIBILITY_VERTEX);
@@ -238,7 +250,7 @@ void MaterialManager::Init()
 	skeletalGBuffer->Create();
 
 	auto water = CreateMaterialBase("Water");
-	water->SetVSFilepath(L"Assets/Shader/WaterVS.cso");
+	water->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	water->SetPSFilepath(L"Assets/Shader/WaterPS.cso");
 	water->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
 	water->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
@@ -246,6 +258,15 @@ void MaterialManager::Init()
 	water->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	water->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	water->Create();
+
+	auto ground = CreateMaterialBase("Ground");
+	ground->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
+	ground->SetPSFilepath(L"Assets/Shader/GroundPS.cso");
+	ground->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
+	ground->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	ground->SetSRV(0, 2, D3D12_SHADER_VISIBILITY_PIXEL);
+	ground->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	ground->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)

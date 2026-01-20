@@ -40,15 +40,10 @@ public:
 	void Draw();
 
 	/**
-	 * @brief デバッグスプライトの描画処理
-	 */
-	void DrawDebugSprite();
-
-	/**
 	 * @brief 現在の RenderTarget オブジェクトへのポインタを取得します。
 	 * @return RenderTarget へのポインタ。
 	 */
-	RenderTarget* GetRenderTarget() const { return m_pDepthRT; }
+	RenderTarget* GetRenderTarget() const { return m_pRT; }
 
 	/**
 	 * @brief レンダーアイテムを設定します。
@@ -58,9 +53,9 @@ public:
 
 private:
 	/**
-	 * @brief パイプラインステートオブジェクトの種類
+	 * @brief レンダリングタイプ
 	 */
-	enum PSOType : size_t
+	enum RenderType : size_t
 	{
 		SkeletalMesh,	// スケルタルメッシュ
 		Mesh,			// メッシュ
@@ -93,19 +88,10 @@ private:
 	 */
 	void WaitGPU();
 
-	RenderTarget* m_pDepthRT{};						// 深度レンダーターゲット
-	DepthStencil* m_pDepthStencil{};				// 深度ステンシル
+	RenderTarget* m_pRT{};							// 深度レンダーターゲット
+	DepthStencil* m_pDSV{};							// 深度ステンシル
+	RootSignature* m_pRootsignatures[Num]{};		// ルートシグネチャ配列
 	PipelineState* m_pPSOs[Num]{};					// パイプラインステートオブジェクト
-	RootSignature* m_pDSVRootSignature{};			// ルートシグネチャ
-	RootSignature* m_pSkeletalRootSignature{};		// スケルタルメッシュ用ルートシグネチャ
 
 	std::vector<Render::RenderItem> m_RenderItems{};	// レンダーアイテム配列
-
-	VertexBuffer* m_pVB{};								// 頂点バッファ
-	IndexBuffer* m_pIB{};								// インデックスバッファ
-	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};		// 定数バッファ
-	DescriptorHeap* m_pDescriptorHeap{};				// ディスクリプタヒープ
-	std::vector<DescriptorHandle*> m_SRVHandles{};		// SRVハンドル配列
-	RootSignature* m_pRootSignature{};					// ルートシグネチャ
-	PipelineState* m_pPSO{};							// パイプラインステート
 };

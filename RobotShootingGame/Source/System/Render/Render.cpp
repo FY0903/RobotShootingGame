@@ -16,6 +16,7 @@
 #include "Utility/LightManager/LightManager.hpp"
 #include "Utility/Compornent/Light/Light.hpp"
 #include "Utility/DepthTexture/DepthTexture.hpp"
+#include "Utility/ShadowMapManager/ShadowMapManager.hpp"
 
 #include "System/RenderPass/Sepia/Sepia.hpp"
 #include "System/RenderPass/SSAO/SSAO.hpp"
@@ -140,21 +141,37 @@ Render::Render()
 	m_pFrameBufferPSO->SetDSVFormat(DXGI_FORMAT_UNKNOWN);
 	m_pFrameBufferPSO->Create();
 
-	// レンダーパスの初期化
-	InitRenderPasses();
+	// Gバッファ用レンダーターゲットの生成
+	// アルベド
+	m_GbufferRT[Albedo]->Create(
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		clearColor);
 
-	if (m_RenderPasses.size())
+	// 法線
+	m_GbufferRT[Normal]->Create(
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		clearColor);
+
+	// ワールド座標
+	m_GbufferRT[WorldPos]->Create(
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
+		DXGI_FORMAT_R32G32B32A32_FLOAT,
+		clearColor);
+
+	// ディスクリプタヒープにSRVを登録
+	for (size_t i = 0; i < Num; ++i)
 	{
-		// 最後のレンダーターゲットをフレームバッファ用ディスクリプタヒープに登録
-		auto rt = m_RenderPasses.back()->GetRenderTarget();
-		m_FrameBufferRVHandles.push_back(
-			m_pFrameBufferDescriptorHeap->Register(rt->Resource(), rt->ViewDesc()));
-	}
-	else
-	{
-		// スナップショット用レンダーターゲットをフレームバッファ用ディスクリプタヒープに登録
-		m_FrameBufferRVHandles.push_back(
-			m_pFrameBufferDescriptorHeap->Register(m_pSnapshotRT->Resource(), m_pSnapshotRT->ViewDesc()));
+		// Gバッファ用レンダーターゲットのSRVをディスクリプタヒープに登録
+		auto srvHandle = m_pSnapshotDescriptorHeap->Register(
+			m_GbufferRT[i]->Resource(),
+			m_GbufferRT[i]->ViewDesc());
+		assert(srvHandle);	// nullptrチェック
+		m_SnapshotRVHandles.push_back(srvHandle);
 	}
 }
 
@@ -218,47 +235,53 @@ Render::~Render()
 	m_pFrameBufferPSO = nullptr;
 }
 
-void Render::Init()
+void Render::Draw()
 {
-	// Gバッファ用レンダーターゲットの生成
-	// アルベド
-	m_GbufferRT[Albedo]->Create(
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		clearColor);
+	// シャドウマップの描画
+	ShadowMapManager::GetInstance().DrawAllShadowMaps(m_OpaqueRenderItems);
 
-	// 法線
-	m_GbufferRT[Normal]->Create(
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		clearColor);
+	// 不透明レンダーアイテムの描画
+	DrawOpaque();
 
-	// ワールド座標
-	m_GbufferRT[WorldPos]->Create(
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
-		DXGI_FORMAT_R32G32B32A32_FLOAT,
-		clearColor);
+	// スナップショット用レンダーターゲットをセット
+	SetSnapshotRenderTarget();
 
-	// ディスクリプタヒープにSRVを登録
-	for (size_t i = 0; i < Num; ++i)
-	{
-		// Gバッファ用レンダーターゲットのSRVをディスクリプタヒープに登録
-		auto srvHandle = m_pSnapshotDescriptorHeap->Register(
-			m_GbufferRT[i]->Resource(),
-			m_GbufferRT[i]->ViewDesc());
-		assert(srvHandle);	// nullptrチェック
-		m_SnapshotRVHandles.push_back(srvHandle);
-	}
+	// 透明レンダーアイテムの描画
+	DrawTransparent();
+
+	// ポストプロセスの描画
+	DrawPostProcess();
+
+	// GPUの待機
+	WaitGPU();
+
+	// レンダーアイテムのリセット
+	ResetRenderItems();
 }
 
 void Render::InitRenderPasses()
 {
-	//AddRenderPass<SSAO>()->SetDepthSRV(m_pDepthTexture->GetRenderTarget());
-	//AddRenderPass<Fog>()->SetDepthSRV(m_pDepthTexture->GetRenderTarget());
+	std::vector<ShadowMap*>& shadowMaps = ShadowMapManager::GetInstance().GetShadowMaps();
+
+	//AddRenderPass<SSAO>()->SetSRV(m_pDepthTexture->GetRenderTarget());
+	//auto fog = AddRenderPass<Fog>();
+	//fog->SetSRV(m_pDepthTexture->GetRenderTarget());
+	//fog->SetSRV(shadowMaps[0]->GetRenderTarget());
 	//AddRenderPass<Sepia>();
+
+	if (m_RenderPasses.size())
+	{
+		// 最後のレンダーターゲットをフレームバッファ用ディスクリプタヒープに登録
+		auto rt = m_RenderPasses.back()->GetRenderTarget();
+		m_FrameBufferRVHandles.push_back(
+			m_pFrameBufferDescriptorHeap->Register(rt->Resource(), rt->ViewDesc()));
+	}
+	else
+	{
+		// スナップショット用レンダーターゲットをフレームバッファ用ディスクリプタヒープに登録
+		m_FrameBufferRVHandles.push_back(
+			m_pFrameBufferDescriptorHeap->Register(m_pSnapshotRT->Resource(), m_pSnapshotRT->ViewDesc()));
+	}
 }
 
 void Render::SetGbufferRenderTargets()
@@ -322,6 +345,7 @@ void Render::SetSnapshotRenderTarget()
 
 	// レンダーターゲットと深度ステンシルバッファを設定
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_pSnapshotRT->GetDescriptorHandle()->HandleCPU;
+
 	auto dsvHandle = m_pDepthStencil->GetDescriptorHandle()->HandleCPU;
 
 	// レンダーターゲットと深度ステンシルバッファを設定
@@ -378,8 +402,6 @@ void Render::DrawTransparent()
 
 	// 透明レンダーアイテムの描画
 	DrawRenderItems(m_TransparentRenderItems);
-
-	ResetRenderItems();
 }
 
 void Render::DrawPostProcess()
@@ -401,24 +423,6 @@ void Render::WaitGPU()
 
 	// リソースバリアの適用
 	Engine::GetInstance().GetCommandList()->ResourceBarrier(1, &barrier);
-}
-
-void Render::Draw()
-{
-	// 不透明レンダーアイテムの描画
-	DrawOpaque();
-
-	// スナップショット用レンダーターゲットをセット
-	SetSnapshotRenderTarget();
-
-	// 透明レンダーアイテムの描画
-	DrawTransparent();
-
-	// ポストプロセスの描画
-	DrawPostProcess();
-
-	// GPUの待機
-	WaitGPU();
 }
 
 void Render::CopyBackBufferToFrameBuffer()
@@ -484,6 +488,7 @@ void Render::ResetRenderItems()
 {
 	m_OpaqueRenderItems.clear();
 	m_TransparentRenderItems.clear();
+	m_AllRenderItems.clear();
 }
 
 void Render::DrawRenderItems(const std::vector<RenderItem>& renderItems)
@@ -556,4 +561,7 @@ void Render::EnqueueRenderItem(const RenderItem& item)
 	item.pMaterial->IsOpaque()
 		? m_OpaqueRenderItems.push_back(item)
 		: m_TransparentRenderItems.push_back(item);
+
+	// 全レンダーアイテムリストにも追加
+	m_AllRenderItems.push_back(item);
 }

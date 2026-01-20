@@ -34,12 +34,6 @@ public:
 	 */
 	void Init() override final;
 
-	/**
-	 * @brief 深度レンダーターゲットのSRV設定
-	 * @param rt 深度レンダーターゲット
-	 */
-	void SetDepthSRV(RenderTarget* rt);
-
 private:
 	/**
 	 * @brief 定数バッファ更新処理

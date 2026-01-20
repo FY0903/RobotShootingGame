@@ -59,9 +59,9 @@ public:
 	};
 
 	/**
-	 * @brief 初期化処理
+	 * @brief レンダーパスの初期化処理
 	 */
-	void Init();
+	void InitRenderPasses();
 
 	/**
 	 * @brief 描画処理
@@ -127,11 +127,6 @@ private:
 	~Render();
 
 	/**
-	 * @brief レンダーパスの初期化処理
-	 */
-	void InitRenderPasses();
-
-	/**
 	 * @brief 不透明オブジェクトの描画処理
 	 */
 	void DrawOpaque();
@@ -188,6 +183,8 @@ private:
 	
 	std::vector<RenderItem> m_OpaqueRenderItems{};		// 不透明レンダーアイテムマップ
 	std::vector<RenderItem> m_TransparentRenderItems{};	// 透明レンダーアイテムマップ
+
+	std::vector<RenderItem> m_AllRenderItems{};			// 全レンダーアイテムマップ
 
 	std::vector<RenderPass*> m_RenderPasses{};			// レンダーパス配列
 

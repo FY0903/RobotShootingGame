@@ -16,6 +16,7 @@ SamplerState smp : register(s0);
 
 Texture2D<float4> tex : register(t0);
 Texture2D<float> depthTex : register(t1);
+Texture2D<float4> shadowMap : register(t2);
 
 float3 ReconstructWorldPositionFromDepth(float2 uv, float depth)
 {
@@ -32,6 +33,11 @@ float4 main(VSOutput input) : SV_TARGET
 {
     float4 albedo = tex.Sample(smp, input.uv);
     float d = depthTex.Sample(smp, input.uv);
+    float4 shadow = shadowMap.Sample(smp, input.uv);
+    
+    //return albedo;
+    //return d;
+    return shadow;
     
     float3 worldPos = ReconstructWorldPositionFromDepth(input.uv, d);
     

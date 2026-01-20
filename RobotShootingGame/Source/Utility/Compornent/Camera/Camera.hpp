@@ -58,7 +58,7 @@ public:
 	/**
 	 * @brief •`‰æˆ—
 	 */
-	void Draw() override final;
+	void Draw() override final {}
 
 	/**
 	 * @brief I—¹ˆ—

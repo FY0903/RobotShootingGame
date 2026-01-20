@@ -34,7 +34,10 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 	m_3DVP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
 
 	m_2DVP[0] = DirectX::XMMatrixIdentity();
-	m_2DVP[1] = DirectX::XMMatrixOrthographicLH(WINDOW_WIDTH, WINDOW_HEIGHT, 0.1f, 1000.0f);
+	m_2DVP[1] = DirectX::XMMatrixOrthographicOffCenterLH(
+		0.0f, static_cast<float>(WINDOW_WIDTH),
+		static_cast<float>(WINDOW_HEIGHT), 0.0f,
+		0.0f, 1.0f);
 }
 
 void Camera::Update()
@@ -74,14 +77,10 @@ void Camera::Update()
 		m_Radius * cosf(m_RadY) * cosf(m_RadXZ),
 		0.0f);
 #endif // _DEBUG
-}
 
-void Camera::Draw()
-{
 	// ビュー行列とプロジェクション行列の計算
 	m_3DVP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
 	m_3DVP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
-
 	// 2Dビュー行列とプロジェクション行列は固定
 }
 

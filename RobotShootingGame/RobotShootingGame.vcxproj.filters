@@ -187,6 +187,12 @@
     <Filter Include="Source\Utility\ShadowMap">
       <UniqueIdentifier>{11c0d7c0-dd75-4907-9782-d0137080268c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility\ShadowMapManager">
+      <UniqueIdentifier>{6d79a25b-55d0-456f-b66b-37feb1c600bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource\Shadow">
+      <UniqueIdentifier>{988500d3-6108-4afe-a2fe-c5e4c8454bcd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -344,6 +350,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\ShadowMap\ShadowMap.cpp">
       <Filter>Source\Utility\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utility\ShadowMapManager\ShadowMapManager.cpp">
+      <Filter>Source\Utility\ShadowMapManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -509,33 +518,21 @@
     <ClInclude Include="Source\Utility\ShadowMap\ShadowMap.hpp">
       <Filter>Source\Utility\ShadowMap</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Utility\ShadowMapManager\ShadowMapManager.hpp">
+      <Filter>Source\Utility\ShadowMapManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\WaterPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\WaterVS.hlsl">
-      <Filter>Resource</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\DepthMeshPS.hlsl">
-      <Filter>Resource\Depth</Filter>
-    </FxCompile>
     <FxCompile Include="Resource\DepthMeshVS.hlsl">
-      <Filter>Resource\Depth</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\DepthSpritePS.hlsl">
       <Filter>Resource\Depth</Filter>
     </FxCompile>
     <FxCompile Include="Resource\DepthSpriteVS.hlsl">
       <Filter>Resource\Depth</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\MeshGBufferPS.hlsl">
-      <Filter>Resource\GBuffer</Filter>
-    </FxCompile>
     <FxCompile Include="Resource\MeshGBufferVS.hlsl">
-      <Filter>Resource\GBuffer</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\SkeletalMeshGBufferPS.hlsl">
       <Filter>Resource\GBuffer</Filter>
     </FxCompile>
     <FxCompile Include="Resource\SkeletalMeshGBufferVS.hlsl">
@@ -574,9 +571,6 @@
     <FxCompile Include="Resource\RenderTargetVS.hlsl">
       <Filter>Resource\GBuffer</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\DepthSkeletalMeshPS.hlsl">
-      <Filter>Resource\Depth</Filter>
-    </FxCompile>
     <FxCompile Include="Resource\DepthSkeletalMeshVS.hlsl">
       <Filter>Resource\Depth</Filter>
     </FxCompile>
@@ -588,6 +582,30 @@
     </FxCompile>
     <FxCompile Include="Resource\FogPS.hlsl">
       <Filter>Resource\PostProcess</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShadowMeshVS.hlsl">
+      <Filter>Resource\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShadowSkeletalMeshVS.hlsl">
+      <Filter>Resource\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShadowSpriteVS.hlsl">
+      <Filter>Resource\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShadowPS.hlsl">
+      <Filter>Resource\Shadow</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\DepthPS.hlsl">
+      <Filter>Resource\Depth</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\GBufferPS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\SpriteGBufferVS.hlsl">
+      <Filter>Resource\GBuffer</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\GroundPS.hlsl">
+      <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

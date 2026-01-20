@@ -75,12 +75,6 @@ void SSAO::Init()
 	CreatePSO();
 }
 
-void SSAO::SetDepthSRV(RenderTarget* rt)
-{
-	DescriptorHandle* handle = m_pDescriptorHeap->Register(rt->Resource(), rt->ViewDesc());
-	m_SRVHandles.push_back(handle);
-}
-
 void SSAO::UpdateCB()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得

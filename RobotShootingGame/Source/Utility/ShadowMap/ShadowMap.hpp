@@ -11,8 +11,7 @@
 //	include
 // ==============================
 #include "System/Engine/Engine.hpp"
-#include "Utility/VertexBuffer/VertexBuffer.hpp"
-#include "Utility/IndexBuffer/IndexBuffer.hpp"
+#include "System/Render/Render.hpp"
 #include "Utility/RootSignature/RootSignature.hpp"
 #include "Utility/PipelineState/PipelineState.hpp"
 #include "Utility/ConstantBuffer/ConstantBuffer.hpp"
@@ -26,25 +25,101 @@
 class ShadowMap
 {
 public:
+	enum Quality : uint32_t
+	{
+		LOW = 512,
+		MIDDLE = 1024,
+		HIGH = 2048,
+		ULTRA = 4096,
+	};
+
 	/**
 	 * コンストラクタ
+	 * @param pLight ライトコンポーネントへのポインタ
+	 * @param quality シャドウマップの品質（解像度）
 	 */
-	ShadowMap();
+	ShadowMap(Light* pLight, Quality quality);
 
 	/**
 	 * デストラクタ
 	 */
-	~ShadowMap() = default;
+	~ShadowMap();
 
-	void Init();
+	/**
+	 * @brief ライトのビュー・プロジェクション行列の更新
+	 */
+	void UpdateLightVP();
+
+	/**
+	 * @brief 描画処理
+	 */
+	void Draw();
+
+	/**
+	 * @brief 現在の RenderTarget オブジェクトへのポインタを取得します。
+	 * @return RenderTarget へのポインタ。
+	 */
+	RenderTarget* GetRenderTarget() const { return m_pRT; }
+
+	/**
+	 * @brief レンダーアイテムを設定します。
+	 * @param items 設定するレンダーアイテムの配列。
+	 */
+	inline void SetRenderItems(const std::vector<Render::RenderItem>& items) { m_RenderItems = items; }
+
+	/**
+	 * @brief ライトコンポーネントを取得します。
+	 * @return ライトコンポーネントへのポインタ (Light*)。
+	 */
+	Light* GetLight() const { return m_pLight; }
 
 private:
-	RenderTarget* m_pRT{};
-	DepthStencil* m_pDSV{};
+	/**
+	 * @brief レンダリングタイプ
+	 */
+	enum RenderType : size_t
+	{
+		SkeletalMesh,	// スケルタルメッシュ
+		Mesh,			// メッシュ
+		Sprite,			// スプライト
+		DebugSprite,	// デバッグスプライト
+		Num,
+	};
 
-	VertexBuffer* m_pVB{};	// 頂点バッファ
-	IndexBuffer* m_pIB{};	// インデックスバッファ
-	ConstantBuffer* m_pWVPCB[FRAME_BUFFER_COUNT]{};	// 定数バッファ
-	RootSignature* m_pRootSignature{};				// ルートシグネチャ
-	PipelineState* m_pPSO{};						// パイプラインステート
+	/**
+	 * @brief ルートシグネチャの作成
+	 */
+	void CreateRootSignature();
+
+	/**
+	 * @brief パイプラインステートオブジェクトの作成
+	 */
+	void CreatePSO();
+
+	/**
+	 * @brief レンダーターゲットの設定
+	 */
+	void SetRenderTarget();
+
+	/**
+	 * @brief レンダーアイテムの描画
+	 */
+	void DrawRenderItems();
+
+	/**
+	 * @brief GPUの待機処理
+	 */
+	void WaitGPU();
+
+	Light* m_pLight{};	// ライトコンポーネント
+	std::vector<Render::RenderItem> m_RenderItems{};	// レンダーアイテム配列
+
+	D3D12_VIEWPORT m_viewport{};						// ビューポート
+	D3D12_RECT m_scissor{};								// シザー矩形
+	RenderTarget* m_pRT{};								// レンダーターゲット
+	DepthStencil* m_pDSV{};								// 深度ステンシル
+	RootSignature* m_pRootsignatures[Num]{};			// ルートシグネチャ配列
+	PipelineState* m_pPSOs[Num]{};						// パイプラインステートオブジェクト
+
+	ConstantBuffer* m_pWVPCBs[FRAME_BUFFER_COUNT]{};	// ワールドビュー射影行列用定数バッファ
 };

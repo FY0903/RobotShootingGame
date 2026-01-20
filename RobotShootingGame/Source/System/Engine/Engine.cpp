@@ -130,6 +130,9 @@ void Engine::Draw()
 	// 描画開始処理
 	BeginDraw();
 
+	// デフォルトのビューポートとシザー矩形を設定
+	SetDefaultViewPortAndScissor();
+
 	// レンダリング処理
 	Render::GetInstance().Draw();
 	
@@ -172,10 +175,6 @@ void Engine::EndDraw()
 
 void Engine::SetBackBufferRenderTarget()
 {
-	// ビューポートとシザー矩形の設定
-	m_pCommandList->RSSetViewports(1, &m_viewport); // ビューポートの設定
-	m_pCommandList->RSSetScissorRects(1, &m_scissor); // シザー矩形の設定
-
 	// 現在のRTVを更新
 	m_pCurrentRenderTarget = m_pRenderTargets[m_currentBackBufferIndex].Get();
 
@@ -200,6 +199,13 @@ void Engine::SetBackBufferRenderTarget()
 	m_pCommandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 }
 
+void Engine::SetDefaultViewPortAndScissor()
+{
+	// ビューポートとシザー矩形の設定
+	m_pCommandList->RSSetViewports(1, &m_viewport); // ビューポートの設定
+	m_pCommandList->RSSetScissorRects(1, &m_scissor); // シザー矩形の設定
+}
+
 Engine::~Engine()
 {
 #ifdef _DEBUG
@@ -217,12 +223,6 @@ Engine::~Engine()
 	{
 		CloseHandle(m_fenceEvent);
 		m_fenceEvent = nullptr;
-	}
-
-	if (m_pOffScreenRTV)
-	{
-		delete m_pOffScreenRTV;
-		m_pOffScreenRTV = nullptr;
 	}
 }
 

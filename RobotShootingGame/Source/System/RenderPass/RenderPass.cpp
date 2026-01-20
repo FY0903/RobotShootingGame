@@ -115,6 +115,13 @@ void RenderPass::Execute()
 	WaitGPU();
 }
 
+void RenderPass::SetSRV(RenderTarget* rt)
+{
+	// 新しいSRVハンドルを登録
+	DescriptorHandle* handle = m_pDescriptorHeap->Register(rt->Resource(), rt->ViewDesc());
+	m_SRVHandles.push_back(handle);
+}
+
 void RenderPass::SetRenderTarget()
 {
 	// リソースバリアの設定

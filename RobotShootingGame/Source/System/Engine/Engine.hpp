@@ -66,10 +66,9 @@ public:
 	UINT GetCurrentBackBufferIndex() const { return m_currentBackBufferIndex; }
 
 	/**
-	 * @brief レンダーターゲットを設定します。
-	 * @param pRenderTarget 設定するレンダーターゲットへのポインタ。
+	 * @brief ビューポートとシザー矩形をデフォルト設定に戻します。
 	 */
-	void SetRenderTarget(RenderTarget* pRenderTarget) { m_pOffScreenRTV = pRenderTarget; }
+	void SetDefaultViewPortAndScissor();
 
 private:
 	friend class Singleton<Engine>;
@@ -180,6 +179,4 @@ private:
 	ComPtr<ID3D12Resource> m_pCurrentRenderTarget{}; // 現在のレンダーターゲット
 
 	HWND m_hWnd{};			// ウィンドウハンドル
-
-	RenderTarget* m_pOffScreenRTV{}; // オフスクリーンレンダーターゲット
 };

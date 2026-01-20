@@ -12,6 +12,7 @@
 #include "Light.hpp"
 #include "Utility/Input/Input.hpp"
 #include "Utility/LightManager/LightManager.hpp"
+#include "Utility/ShadowMapManager/ShadowMapManager.hpp"
 #include "Game/Actor/Actor.hpp"
 #include "Utility/Transform/Transform.hpp"
 
@@ -27,18 +28,42 @@ void Light::Init(Type type, DirectX::XMFLOAT4 color, float range, float angle)
 	m_Range = range;
 	m_Angle = angle;
 
+	// ビュー行列とプロジェクション行列の計算
+	m_VP[0] = DirectX::XMMatrixIdentity();
+	m_VP[1] = DirectX::XMMatrixOrthographicLH(50.0f, 50.0f, 0.1f, 1000.0f);
+
 	// ライトマネージャーに登録
 	LightManager::GetInstance().RegisterLight(this);
+
+	if (m_Type == Type::DIRECTIONAL)
+	{
+		// シャドウマップマネージャーに登録
+		ShadowMapManager::GetInstance().CreateShadowMap(this, ShadowMap::ULTRA);
+	}
 }
 
 void Light::Update()
 {
+	DirectX::XMFLOAT3 pos = GetPosition();
+	DirectX::XMFLOAT3 dir = GetDirection();
 
+	// ビュー行列の計算
+	m_VP[0] = DirectX::XMMatrixLookAtLH(
+		DirectX::XMVectorSet(
+			pos.x, pos.y, pos.z, 0.0f),
+		DirectX::XMVectorSet(
+			pos.x + dir.x,
+			pos.y + dir.y,
+			pos.z + dir.z,
+			0.0f
+		),
+		DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 }
 
-void Light::Draw()
+void Light::Uninit()
 {
-
+	// シャドウマップマネージャーから破棄
+	ShadowMapManager::GetInstance().DestroyShadowMap(this);
 }
 
 DirectX::XMFLOAT3 Light::GetPosition() const
@@ -61,4 +86,28 @@ DirectX::XMFLOAT3 Light::GetDirection() const
 	DirectX::SimpleMath::Vector3 direction = DirectX::XMVector3Rotate(forward, transform.Rotation);
 	
 	return DirectX::XMFLOAT3(direction.x, direction.y, direction.z);
+}
+
+DirectX::XMFLOAT4X4 Light::GetViewMatrixFloat4x4(bool transpose) const
+{
+	DirectX::XMFLOAT4X4 viewf{};
+	DirectX::XMMATRIX wiewMat = m_VP[0];
+
+	if (transpose)
+		wiewMat = DirectX::XMMatrixTranspose(wiewMat);
+	DirectX::XMStoreFloat4x4(&viewf, wiewMat);
+
+	return viewf;
+}
+
+DirectX::XMFLOAT4X4 Light::GetProjectionMatrixFloat4x4(bool transpose) const
+{
+	DirectX::XMFLOAT4X4 projf{};
+	DirectX::XMMATRIX projMat = m_VP[1];
+
+	if (transpose)
+		projMat = DirectX::XMMatrixTranspose(projMat);
+	DirectX::XMStoreFloat4x4(&projf, projMat);
+	
+	return projf;
 }

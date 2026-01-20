@@ -50,12 +50,12 @@ public:
 	/**
 	 * @brief 描画処理
 	 */
-	void Draw() override final;
+	void Draw() override final {}
 
 	/**
 	 * @brief 終了処理
 	 */
-	void Uninit() override final {}
+	void Uninit() override final;
 
 	/**
 	 * @brief オブジェクトの型を返す const メンバ関数。
@@ -93,18 +93,24 @@ public:
 	 */
 	inline DirectX::XMFLOAT4 GetColor() const { return m_Color; }
 
+	DirectX::XMFLOAT4X4 GetViewMatrixFloat4x4(bool transpose = true) const;
+
+	DirectX::XMFLOAT4X4 GetProjectionMatrixFloat4x4(bool transpose = true) const;
+
 	/**
 	 * @brief オブジェクトの色を設定するメンバ関数。
 	 * @param color DirectX::XMFLOAT4 型の値。設定する色を指定します。
 	 */
 	inline void SetColor(const DirectX::XMFLOAT4& color) { m_Color = color; }
 
-private:
-	void CreateShadowMap();
+	/**
+	 * @brief ライトの届く距離を設定するメンバ関数。
+	 * @param range float 型の値。設定するライトの届く距離を指定します。
+	 */
+	inline void SetRange(float range) { m_Range = range; }
 
-	void SetRenderTarget();
-	void DrawShadowMap();
-	void WaitGPU();
+private:
+	DirectX::XMMATRIX m_VP[2]{};	// ビュー行列とプロジェクション行列
 
 	Type m_Type{};					// ライトの種類
 	DirectX::XMFLOAT4 m_Color{};	// ライトの色

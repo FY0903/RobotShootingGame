@@ -14,30 +14,37 @@
 #include "Utility/MaterialManager/MaterialManager.hpp"
 #include "Utility/TextureManager/TextureManager.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/ShadowMapManager/ShadowMapManager.hpp"
 
 void Sprite::OnInit()
 {
 	// テクスチャの読み込み
 	auto pDefTex = TextureManager::GetInstance().CreateDefaultTexture("DefTex");
+	auto pShadowMaps = ShadowMapManager::GetInstance().GetShadowMaps();
 
 	// マテリアルの設定
-	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Water");
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("Ground");
 	m_pMaterial->SetTexture(pDefTex);
-
+	if (!pShadowMaps.empty())
+	{
+		m_pMaterial->SetTexture(pShadowMaps[0]->GetRenderTarget());
+	}
+	m_pMaterial->SetIsOpaque(false); // ライティングされたくないので不透明設定をfalseにする
+		
 	// スプライトレンダラーコンポーネントの追加
 	AddComponent<SpriteRenderer>()->Init();
 
 	// 定数バッファの設定
-	m_pTimeCB = m_pMaterial->SetCBAtRegister(1, sizeof(CB::Time)); // レジスタ番号1に時間用定数バッファを設定
+	//m_pTimeCB = m_pMaterial->SetCBAtRegister(1, sizeof(CB::Time)); // レジスタ番号1に時間用定数バッファを設定
 }
 
 void Sprite::OnUpdate()
 {
 	// 定数バッファに時間情報を設定
-	size_t currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
+	//size_t currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 
-	CB::Time* pTime = m_pTimeCB[currentIndex]->GetPtr<CB::Time>();
-	pTime->DeltaTime = Time::GetInstance().GetDeltaTimeSinceStartup();
+	//CB::Time* pTime = m_pTimeCB[currentIndex]->GetPtr<CB::Time>();
+	//pTime->DeltaTime = Time::GetInstance().GetDeltaTimeSinceStartup();
 }
 
 void Sprite::OnUninit()

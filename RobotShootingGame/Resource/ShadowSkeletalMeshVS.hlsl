@@ -15,9 +15,8 @@ struct VSInput
 struct VSOutput
 {
     float4 svpos : SV_POSITION;
-    float4 worldPos : TEXCOORD1;
-    float2 uv : TEXCOORD;
-    float4 normal : TEXCOORD2;
+    float4 screenPos : TEXCOORD0;
+    float2 uv : TEXCOORD1;
 };
 
 cbuffer BoneMatrixBuffer : register(b1)
@@ -53,9 +52,8 @@ VSOutput main(VSInput input)
     float4 projPos = mul(Proj, viewPos); // ìäâeç¿ïW
     
     output.svpos = projPos;
+    output.screenPos = projPos;
     output.uv = input.uv;
-    output.worldPos = worldPos;
-    output.normal = mul(World, float4(input.normal, 0.0f));
     
     return output;
 }

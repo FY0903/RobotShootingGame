@@ -35,9 +35,6 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 	// Engine‚Ì‰Šú‰»
 	Engine::GetInstance().Init(Window::GetInstance().GetHandle());
 
-	// Render‚Ì‰Šú‰»
-	Render::GetInstance().Init();
-
 	// Input‚Ì‰Šú‰»
 	Input::Init();
 
@@ -57,6 +54,9 @@ void App::Init(uint32_t width, uint32_t height, HINSTANCE hInstance, int nCmdSho
 	// Scene‚Ì‰Šú‰»
 	m_pCurrentScene = new SceneGame();
 	m_pCurrentScene->Init();
+
+	// RenderPass‚Ì‰Šú‰»
+	Render::GetInstance().InitRenderPasses();
 }
 
 void App::UnInit()

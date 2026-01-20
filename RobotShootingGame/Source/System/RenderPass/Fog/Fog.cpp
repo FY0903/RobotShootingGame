@@ -35,12 +35,6 @@ void Fog::Init()
 	CreatePSO();
 }
 
-void Fog::SetDepthSRV(RenderTarget* rt)
-{
-	DescriptorHandle* handle = m_pDescriptorHeap->Register(rt->Resource(), rt->ViewDesc());
-	m_SRVHandles.push_back(handle);
-}
-
 void Fog::UpdateCB()
 {
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
@@ -67,7 +61,7 @@ void Fog::CreateRootSignature()
 {
 	m_pRootSignature = new RootSignature();
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
-	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, D3D12_SHADER_VISIBILITY_PIXEL); // SRV
+	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, D3D12_SHADER_VISIBILITY_PIXEL); // SRV
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_PIXEL); // カメラ用定数バッファ
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
 	m_pRootSignature->Create();

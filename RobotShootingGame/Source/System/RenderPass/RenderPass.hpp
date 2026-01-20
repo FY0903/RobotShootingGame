@@ -44,6 +44,12 @@ public:
 	void Execute();
 
 	/**
+	 * @brief SRVを設定します。
+	 * @param rt SRVを設定するRenderTargetへのポインタ。
+	 */
+	void SetSRV(RenderTarget* rt);
+
+	/**
 	 * @brief 保持している RenderTarget オブジェクトへのポインタを取得します。
 	 * @return RenderTarget へのポインタ。
 	 */
