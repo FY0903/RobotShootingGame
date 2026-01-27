@@ -12,6 +12,7 @@
 #include "Camera.hpp"
 #include "Utility/Input/Input.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Game/Actor/Actor.hpp"
 
 // ==============================
 //	constexpr
@@ -28,10 +29,12 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 	m_Radius = radius;
 	m_Fov = fov;
 	m_Aspect = aspect;
+	m_Near = 0.1f;
+	m_Far = 1000.0f;
 
 	// ビュー行列とプロジェクション行列の計算
 	m_3DVP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
-	m_3DVP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
+	m_3DVP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, m_Near, m_Far);
 
 	m_2DVP[0] = DirectX::XMMatrixIdentity();
 	m_2DVP[1] = DirectX::XMMatrixOrthographicOffCenterLH(
@@ -77,10 +80,15 @@ void Camera::Update()
 		m_Radius * cosf(m_RadY) * cosf(m_RadXZ),
 		0.0f);
 #endif // _DEBUG
+	
+	if (m_Owner)
+	{
+		// オーナーの位置にカメラ位置を設定
+		m_Owner->GetTransform().Position = m_EyePos;
+	}
 
 	// ビュー行列とプロジェクション行列の計算
 	m_3DVP[0] = DirectX::XMMatrixLookAtLH(m_EyePos, m_TargetPos, m_UpVec);
-	m_3DVP[1] = DirectX::XMMatrixPerspectiveFovLH(m_Fov, m_Aspect, 0.1f, 1000.0f);
 	// 2Dビュー行列とプロジェクション行列は固定
 }
 
@@ -130,4 +138,19 @@ const DirectX::XMFLOAT4X4 Camera::Get2DProjectionMatrixFloat4x4(bool transpose)
 	DirectX::XMStoreFloat4x4(&projf, projMat);
 	
 	return projf;
+}
+
+DirectX::XMVECTOR Camera::GetForward() const
+{
+	DirectX::XMVECTOR forward = DirectX::XMVectorSubtract(m_TargetPos, m_EyePos);
+	forward = DirectX::XMVector3Normalize(forward);
+	return forward;
+}
+
+DirectX::XMVECTOR Camera::GetRight() const
+{
+	DirectX::XMVECTOR forward = GetForward();
+	DirectX::XMVECTOR right = DirectX::XMVector3Cross(m_UpVec, forward);
+	right = DirectX::XMVector3Normalize(right);
+	return right;
 }

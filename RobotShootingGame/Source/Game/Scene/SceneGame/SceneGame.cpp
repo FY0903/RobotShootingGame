@@ -32,7 +32,7 @@ void SceneGame::OnInit()
 	// スプライトの生成
 	auto sprite = AddGameObject<Sprite>(Layer::DEFAULT);
 	auto& transform = sprite->GetTransform();
-	transform.Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
+	transform.Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(-90.0f), 0.0f, 0.0f));
 	transform.Scale = DirectX::XMFLOAT3(100.0f, 100.0f, 1.0f);
 
 	// オブジェクトの生成

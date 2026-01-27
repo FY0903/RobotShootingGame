@@ -129,6 +129,20 @@ public:
 	 */
 	const DirectX::XMMATRIX& Get2DProjectionMatrix() const { return m_2DVP[1]; }
 
+	inline DirectX::XMVECTOR GetPosition() const { return m_EyePos; }
+
+	DirectX::XMVECTOR GetForward() const;
+
+	DirectX::XMVECTOR GetRight() const;
+
+	inline float GetFov() const { return m_Fov; }
+
+	inline float GetAspect() const { return m_Aspect; }
+
+	inline float GetNear() const { return m_Near; }
+
+	inline float GetFar() const { return m_Far; }
+
 private:
 	DirectX::XMMATRIX m_3DVP[2]{};	// 3Dビュー行列とプロジェクション行列
 	DirectX::XMMATRIX m_2DVP[2]{};	// 2Dビュー行列とプロジェクション行列
@@ -143,4 +157,6 @@ private:
 
 	float m_Fov{};		// 視野角
 	float m_Aspect{};	// アスペクト比
+	float m_Near{};		// ニアクリップ
+	float m_Far{};		// ファークリップ
 };

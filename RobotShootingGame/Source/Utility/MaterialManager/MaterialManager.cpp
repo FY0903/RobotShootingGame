@@ -260,7 +260,7 @@ void MaterialManager::Init()
 	water->Create();
 
 	auto ground = CreateMaterialBase("Ground");
-	ground->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
+	ground->SetVSFilepath(L"Assets/Shader/GroundVS.cso");
 	ground->SetPSFilepath(L"Assets/Shader/GroundPS.cso");
 	ground->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
 	ground->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
