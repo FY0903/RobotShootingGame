@@ -30,7 +30,7 @@ void Object::OnInit()
 	m_pAnimations[1] = AnimationManager::GetInstance().LoadAnimation("Assets/Model/character/Animation/walk.fbx");
 
 	// マテリアルの設定
-	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("MeshGBuffer");
+	m_pMaterial = MaterialManager::GetInstance().CreateMaterial("SkeletalGBuffer");
 
 	// メッシュレンダラーコンポーネントを追加
 	auto meshRenderer = AddComponent<MeshRenderer>();

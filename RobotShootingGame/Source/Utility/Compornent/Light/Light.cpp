@@ -42,23 +42,24 @@ void Light::Init(Type type, DirectX::XMFLOAT4 color, float range, float angle)
 	{
 		// シャドウマップマネージャーに登録
 		ShadowMapManager::GetInstance().CreateShadowMap(this, ShadowMap::ULTRA);
-		
-		// ライトの初期位置を設定
-		if (m_Owner) m_Owner->GetTransform().Position.y = 5000.0f;
 	}
 
 	// ビュー行列とプロジェクション行列の計算
-	DirectX::XMFLOAT3 pos = GetPosition();
-	DirectX::XMVECTOR posVec = DirectX::XMLoadFloat3(&pos);
-	DirectX::XMVECTOR targetVec = DirectX::XMVectorZero();
-
-	m_VP[0] = DirectX::XMMatrixLookAtLH(posVec, targetVec, DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f));
-	m_VP[1] = DirectX::XMMatrixOrthographicLH(5000.0f, 5000.0f, 0.1f, 10000.0f);
+	m_VP[0] = DirectX::XMMatrixIdentity();
+	m_VP[1] = DirectX::XMMatrixOrthographicLH(50.0f, 50.0f, 0.1f, 1000.0f);
 }
 
 void Light::Update()
 {
-	const auto vpMat = m_VP[0] * m_VP[1];
+	DirectX::XMVECTOR targetVec = DirectX::XMVectorZero();
+	DirectX::XMFLOAT3 direction = GetDirection();
+	DirectX::XMVECTOR dirVec = DirectX::XMLoadFloat3(&direction);
+
+	DirectX::XMVECTOR pos = DirectX::XMVectorSubtract(targetVec, DirectX::XMVectorScale(dirVec, 100.0f));
+
+	m_VP[0] = DirectX::XMMatrixLookAtLH(pos, targetVec, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+
+	m_LVP = m_VP[0] * m_VP[1];
 
 	const auto cam = CameraManager::GetInstance().GetMainCamera();
 
@@ -135,7 +136,7 @@ void Light::Update()
 	for (auto& corner : frustumCorners)
 	{
 		// ビュープロジェクション行列で変換
-		DirectX::XMVECTOR trfCorner = DirectX::XMVector4Transform(corner, vpMat);
+		DirectX::XMVECTOR trfCorner = DirectX::XMVector4Transform(corner, m_LVP);
 		vMax = DirectX::XMVectorMax(vMax, trfCorner);
 		vMin = DirectX::XMVectorMin(vMin, trfCorner);
 	}
@@ -150,8 +151,6 @@ void Light::Update()
 		DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),
 		DirectX::XMVectorSet(xOffset, yOffset, 0.0f, 1.0f)
 	);
-
-	m_VP[1] = vpMat * cropMat;
 }
 
 void Light::Uninit()
@@ -179,7 +178,9 @@ DirectX::XMFLOAT3 Light::GetDirection() const
 	DirectX::SimpleMath::Vector3 forward = DirectX::SimpleMath::Vector3(0.0f, 0.0f, 1.0f);
 	DirectX::SimpleMath::Vector3 direction = DirectX::XMVector3Rotate(forward, transform.Rotation);
 	DirectX::XMVector3Normalize(direction);
-	return DirectX::XMFLOAT3(direction.x, direction.y, direction.z);
+	DirectX::XMFLOAT3 directionF{};
+	DirectX::XMStoreFloat3(&directionF, direction);
+	return directionF;
 }
 
 DirectX::XMFLOAT4X4 Light::GetViewMatrixFloat4x4(bool transpose) const
@@ -204,4 +205,14 @@ DirectX::XMFLOAT4X4 Light::GetProjectionMatrixFloat4x4(bool transpose) const
 	DirectX::XMStoreFloat4x4(&projf, projMat);
 	
 	return projf;
+}
+
+DirectX::XMFLOAT4X4 Light::GetLightViewProjectionMatrixFloat4x4(bool transpose) const
+{
+	DirectX::XMFLOAT4X4 lvpF{};
+	DirectX::XMMATRIX lvpMat = m_LVP;
+	if (transpose)
+		lvpMat = DirectX::XMMatrixTranspose(lvpMat);
+	DirectX::XMStoreFloat4x4(&lvpF, lvpMat);
+	return lvpF;
 }

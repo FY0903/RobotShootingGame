@@ -57,6 +57,8 @@ float4 main(VSOutput input) : SV_TARGET
             break;
         }
         
+        float3 rayPos = cameraPos + rayDir * currentDistance;       
+        
         float stepTramsmittance = exp(-density * stepSize);
         float fogContribution = totalTransmittance * (1.0f - stepTramsmittance);
         albedo += fogContribution;

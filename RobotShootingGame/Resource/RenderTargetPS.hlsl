@@ -27,7 +27,7 @@ float4 main(VSOutput input) : SV_TARGET
     
     float3 L = lightDirection;
     float3 N = normalize(normal.xyz);
-    float NdotL = saturate(dot(N, normalize(L)));
+    float NdotL = saturate(dot(N, normalize(-L)));
     float3 diffuse = lightColor.rgb * NdotL;
     float3 ambient = float3(0.1f, 0.1f, 0.1f);
     

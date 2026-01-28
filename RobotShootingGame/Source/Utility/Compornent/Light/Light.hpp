@@ -96,6 +96,8 @@ public:
 	DirectX::XMFLOAT4X4 GetViewMatrixFloat4x4(bool transpose = true) const;
 
 	DirectX::XMFLOAT4X4 GetProjectionMatrixFloat4x4(bool transpose = true) const;
+	
+	DirectX::XMFLOAT4X4 GetLightViewProjectionMatrixFloat4x4(bool transpose = true) const;
 
 	/**
 	 * @brief オブジェクトの色を設定するメンバ関数。
@@ -111,6 +113,7 @@ public:
 
 private:
 	DirectX::XMMATRIX m_VP[2]{};	// ビュー行列とプロジェクション行列
+	DirectX::XMMATRIX m_LVP{};	// ライトのビュー行列とプロジェクション行列
 
 	Type m_Type{};					// ライトの種類
 	DirectX::XMFLOAT4 m_Color{};	// ライトの色

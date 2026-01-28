@@ -47,5 +47,6 @@ private:
 	 */
 	void OnUninit() override final;
 
-	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pTimeCB{}; // 時間用定数バッファ
+	//std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pTimeCB{}; // 時間用定数バッファ
+	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pLVP{}; // ライトビュー行列用定数バッファ
 };

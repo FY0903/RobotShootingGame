@@ -148,4 +148,9 @@ namespace CB
 	{
 		DirectX::XMFLOAT3 Kernel[64];		// SSAO用カーネル
 	};
+
+	struct LVP
+	{
+		DirectX::XMFLOAT4X4 VPMat{};			// ライトのビュー・プロジェクション行列
+	};
 }

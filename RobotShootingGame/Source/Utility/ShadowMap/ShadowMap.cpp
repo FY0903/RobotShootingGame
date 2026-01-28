@@ -198,7 +198,7 @@ void ShadowMap::UpdateLightVP()
 	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
 
 	CB::WVP* wvpPtr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
-	wvpPtr->ViewMat = DirectX::SimpleMath::Matrix(); // ビュー行列を単位行列に設定
+	wvpPtr->ViewMat = m_pLight->GetViewMatrixFloat4x4(false);		// ライトのビュー行列を設定
 	wvpPtr->ProjMat = m_pLight->GetProjectionMatrixFloat4x4(false);	// ライトのプロジェクション行列を設定
 }
 
