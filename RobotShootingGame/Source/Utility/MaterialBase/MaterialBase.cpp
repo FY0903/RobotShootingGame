@@ -50,10 +50,10 @@ void MaterialBase::SetSRV(UINT shaderRegister, UINT numDescriptors, D3D12_SHADER
 	++m_rootParameterIndex;
 }
 
-void MaterialBase::SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter)
+void MaterialBase::SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter, D3D12_TEXTURE_ADDRESS_MODE addressMode, D3D12_COMPARISON_FUNC comparisonFunc)
 {
 	if (!m_pRootSignature) return;
-	m_pRootSignature->AddStaticSampler(shaderRegister, filter);
+	m_pRootSignature->AddStaticSampler(shaderRegister, filter, addressMode, comparisonFunc);
 }
 
 void MaterialBase::SetInputLayout(D3D12_INPUT_LAYOUT_DESC layout, InputLayoutType type)

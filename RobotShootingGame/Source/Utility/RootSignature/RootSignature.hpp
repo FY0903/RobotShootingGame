@@ -59,8 +59,11 @@ public:
 	 * @brief スタティックサンプラーの追加
 	 * @param shaderRegiser シェーダーレジスタ
 	 * @param filter フィルターの種類
+	 * @param addressMode テクスチャのアドレスモード
+	 * @param comparisonFunc 比較関数
 	 */
-	void AddStaticSampler(UINT shaderRegiser, D3D12_FILTER filter);
+
+	void AddStaticSampler(UINT shaderRegiser, D3D12_FILTER filter, D3D12_TEXTURE_ADDRESS_MODE addressMode = D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_COMPARISON_FUNC comparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL);
 
 	/**
 	 * @brief ルートシグネチャの作成

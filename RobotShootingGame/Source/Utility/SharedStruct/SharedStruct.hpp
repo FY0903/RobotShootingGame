@@ -151,6 +151,7 @@ namespace CB
 
 	struct LVP
 	{
-		DirectX::XMFLOAT4X4 VPMat{};			// ライトのビュー・プロジェクション行列
+		DirectX::XMFLOAT4X4 VMat{};			// ビュー行列
+		DirectX::XMFLOAT4X4 PMat{};			// 射影行列
 	};
 }

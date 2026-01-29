@@ -88,7 +88,7 @@ public:
 	 * @param shaderRegister シェーダーレジスタ番号。
 	 * @param filter フィルタリングモード。
 	 */
-	void SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter);
+	void SetStaticSampler(UINT shaderRegister, D3D12_FILTER filter, D3D12_TEXTURE_ADDRESS_MODE addressMode = D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_COMPARISON_FUNC comparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL);
 	
 	/**
 	 * @brief 入力レイアウトを設定します。

@@ -2,34 +2,40 @@ struct VSOutput
 {
     float4 svpos : SV_POSITION;
     float2 uv : TEXCOORD;
-    float4 posLVP : TEXCOORD1;
+    float3 worldPos : TEXCOORD1;
 };
 
+cbuffer Light : register(b1)
+{
+    float4x4 View : packoffset(c0);
+    float4x4 Proj : packoffset(c4);
+}
+
 SamplerState smp : register(s0);
+SamplerComparisonState cmpSmp : register(s1);
 Texture2D<float4> tex : register(t0);
-Texture2D<float4> shadowMap : register(t1);
+Texture2D<float> shadowMap : register(t1);
 
 float4 main(VSOutput input) : SV_TARGET
 {
     float4 color = tex.Sample(smp, input.uv);
     
-    float zLVP = input.posLVP.z / input.posLVP.w;
+    float4 lightPos = float4(input.worldPos, 1.0f);
+    lightPos = mul(View, lightPos);
+    lightPos = mul(Proj, lightPos);
     
-    if (zLVP >= 0.0f && zLVP <= 1.0f)
+    float lightDepth = lightPos.z / lightPos.w; // NDC空間の深度値
+    
+    float2 shadowUV = lightPos.xy * 0.5f + 0.5f; // [0,1]範囲に変換
+    shadowUV.y = 1.0f - shadowUV.y; // Y軸反転
+    
+    float4 shadowMap = shadowMap.Sample(smp, input.uv);
+    
+    lightDepth -= 0.005f; // シャドウアキネーション
+
+    if (shadowMap.x < lightDepth)
     {
-        float2 shadowUV = input.posLVP.xy / input.posLVP.w;
-        shadowUV *= float2(0.5f, -0.5f);
-        shadowUV += 0.5f;
-        
-        if (shadowUV.x >= 0.0f && shadowUV.x <= 1.0f &&
-            shadowUV.y >= 0.0f && shadowUV.y <= 1.0f)
-        {
-            float2 shadow = shadowMap.Sample(smp, shadowUV).xy;
-            if (zLVP >= shadow.r)
-            {
-                color *= 0.5f;
-            }
-        }
+        color *= 0.5f; // シャドウ内は暗くする
     }
     
     return color;

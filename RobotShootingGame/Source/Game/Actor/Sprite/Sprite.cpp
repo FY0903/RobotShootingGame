@@ -38,7 +38,7 @@ void Sprite::OnInit()
 	// 定数バッファの設定
 	//m_pTimeCB = m_pMaterial->SetCBAtRegister(1, sizeof(CB::Time)); // レジスタ番号1に時間用定数バッファを設定
 	
-	m_pLVP = m_pMaterial->SetCBAtRegister(1, sizeof(CB::LVP)); // レジスタ番号2にライトビュー行列用定数バッファを設定
+	m_pLVPC = m_pMaterial->SetCBAtRegister(1, sizeof(CB::LVP)); // レジスタ番号2にライトビュー行列用定数バッファを設定
 }
 
 void Sprite::OnUpdate()
@@ -50,8 +50,9 @@ void Sprite::OnUpdate()
 	//pTime->DeltaTime = Time::GetInstance().GetDeltaTimeSinceStartup();
 
 	size_t currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
-	CB::LVP* pLVP = m_pLVP[currentIndex]->GetPtr<CB::LVP>();
-	pLVP->VPMat = LightManager::GetInstance().GetLights()[0]->GetLightViewProjectionMatrixFloat4x4(false);
+	CB::LVP* pLVPC = m_pLVPC[currentIndex]->GetPtr<CB::LVP>();
+	pLVPC->VMat = LightManager::GetInstance().GetLights()[0]->GetViewMatrixFloat4x4(false);
+	pLVPC->PMat = LightManager::GetInstance().GetLights()[0]->GetProjectionMatrixFloat4x4(false);
 }
 
 void Sprite::OnUninit()

@@ -21,7 +21,7 @@ ShadowMap::ShadowMap(Light* pLight, Quality quality)
 
 	// 深度レンダーターゲットの生成
 	m_pRT = new RenderTarget();
-	m_pRT->Create(quality, quality, DXGI_FORMAT_R8G8B8A8_UNORM, clearColor);
+	m_pRT->Create(quality, quality, DXGI_FORMAT_R32_FLOAT, clearColor);
 
 	// 深度ステンシルの生成
 	m_pDSV = new DepthStencil();
@@ -137,6 +137,7 @@ void ShadowMap::CreatePSO()
 	m_pPSOs[SkeletalMesh]->SetRootSignature(m_pRootsignatures[SkeletalMesh]->Get());
 	m_pPSOs[SkeletalMesh]->SetVS(L"Assets/Shader/ShadowSkeletalMeshVS.cso");
 	m_pPSOs[SkeletalMesh]->SetPS(L"Assets/Shader/ShadowPS.cso");
+	m_pPSOs[SkeletalMesh]->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
 	m_pPSOs[SkeletalMesh]->Create();
 
 	// メッシュ用PSOの生成
@@ -146,6 +147,7 @@ void ShadowMap::CreatePSO()
 	m_pPSOs[Mesh]->SetRootSignature(m_pRootsignatures[Mesh]->Get());
 	m_pPSOs[Mesh]->SetVS(L"Assets/Shader/ShadowMeshVS.cso");
 	m_pPSOs[Mesh]->SetPS(L"Assets/Shader/ShadowPS.cso");
+	m_pPSOs[Mesh]->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
 	m_pPSOs[Mesh]->Create();
 
 	// スプライト用PSOの生成
@@ -155,6 +157,7 @@ void ShadowMap::CreatePSO()
 	m_pPSOs[Sprite]->SetRootSignature(m_pRootsignatures[Sprite]->Get());
 	m_pPSOs[Sprite]->SetVS(L"Assets/Shader/ShadowSpriteVS.cso");
 	m_pPSOs[Sprite]->SetPS(L"Assets/Shader/ShadowPS.cso");
+	m_pPSOs[Sprite]->SetRTVFormat(DXGI_FORMAT_R32_FLOAT, 0);
 	m_pPSOs[Sprite]->Create();
 }
 

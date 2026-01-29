@@ -51,4 +51,5 @@ private:
 	void CreatePSO() override final;
 
 	ConstantBuffer* m_pCameraCB[FRAME_BUFFER_COUNT]{};	// カメラ用定数バッファ
+	ConstantBuffer* m_pLVPCB[FRAME_BUFFER_COUNT]{};		// ライトVP用定数バッファ
 };

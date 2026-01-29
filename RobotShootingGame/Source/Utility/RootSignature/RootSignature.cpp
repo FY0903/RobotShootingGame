@@ -31,10 +31,14 @@ void RootSignature::AddDescriptorRange(UINT shaderRegiser, D3D12_DESCRIPTOR_RANG
 	m_RootParams.push_back(param);
 }
 
-void RootSignature::AddStaticSampler(UINT shaderRegiser, D3D12_FILTER filter)
+void RootSignature::AddStaticSampler(UINT shaderRegiser, D3D12_FILTER filter, D3D12_TEXTURE_ADDRESS_MODE addressMode, D3D12_COMPARISON_FUNC comparisonFunc)
 {
 	CD3DX12_STATIC_SAMPLER_DESC sampler{};
 	sampler.Init(shaderRegiser, filter);
+	sampler.AddressU = addressMode;
+	sampler.AddressV = addressMode;
+	sampler.AddressW = addressMode;
+	sampler.ComparisonFunc = comparisonFunc;
 	m_StaticSamplers.push_back(sampler);
 }
 

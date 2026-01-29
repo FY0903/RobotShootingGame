@@ -46,20 +46,23 @@ void Light::Init(Type type, DirectX::XMFLOAT4 color, float range, float angle)
 
 	// ビュー行列とプロジェクション行列の計算
 	m_VP[0] = DirectX::XMMatrixIdentity();
-	m_VP[1] = DirectX::XMMatrixOrthographicLH(50.0f, 50.0f, 0.1f, 1000.0f);
+	m_VP[1] = DirectX::XMMatrixOrthographicLH(10.0f, 10.0f, 0.1f, 5.0f);
 }
 
 void Light::Update()
 {
+	DirectX::XMFLOAT3 position = GetPosition();
+	DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&position);
 	DirectX::XMVECTOR targetVec = DirectX::XMVectorZero();
 	DirectX::XMFLOAT3 direction = GetDirection();
 	DirectX::XMVECTOR dirVec = DirectX::XMLoadFloat3(&direction);
-
-	DirectX::XMVECTOR pos = DirectX::XMVectorSubtract(targetVec, DirectX::XMVectorScale(dirVec, 100.0f));
+	targetVec = DirectX::XMVectorSubtract(pos, DirectX::XMVectorScale(dirVec, 2.0f));
 
 	m_VP[0] = DirectX::XMMatrixLookAtLH(pos, targetVec, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
 
-	m_LVP = m_VP[0] * m_VP[1];
+#if 0
+
+	DirectX::XMMATRIX VP = m_VP[0] * m_VP[1];
 
 	const auto cam = CameraManager::GetInstance().GetMainCamera();
 
@@ -136,21 +139,29 @@ void Light::Update()
 	for (auto& corner : frustumCorners)
 	{
 		// ビュープロジェクション行列で変換
-		DirectX::XMVECTOR trfCorner = DirectX::XMVector4Transform(corner, m_LVP);
+		DirectX::XMVECTOR trfCorner = DirectX::XMVector3Transform(corner, VP);
 		vMax = DirectX::XMVectorMax(vMax, trfCorner);
 		vMin = DirectX::XMVectorMin(vMin, trfCorner);
 	}
 
-	float xScale = 2.0f / (DirectX::XMVectorGetX(DirectX::XMVectorSubtract(vMax, vMin)));
-	float yScale = 2.0f / (DirectX::XMVectorGetY(DirectX::XMVectorSubtract(vMax, vMin)));
-	float xOffset = -0.5f * (DirectX::XMVectorGetX(DirectX::XMVectorAdd(vMax, vMin))) * xScale;
-	float yOffset = -0.5f * (DirectX::XMVectorGetY(DirectX::XMVectorAdd(vMax, vMin))) * yScale;
-	DirectX::XMMATRIX cropMat = DirectX::XMMATRIX(
-		DirectX::XMVectorSet(xScale, 0.0f, 0.0f, 0.0f),
-		DirectX::XMVectorSet(0.0f, yScale, 0.0f, 0.0f),
-		DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f),
-		DirectX::XMVectorSet(xOffset, yOffset, 0.0f, 1.0f)
-	);
+	float vMaxX = DirectX::XMVectorGetX(vMax);
+	float vMinX = DirectX::XMVectorGetX(vMin);
+	float vMaxY = DirectX::XMVectorGetY(vMax);
+	float vMinY = DirectX::XMVectorGetY(vMin);
+
+	float xScale = 2.0f / (vMaxX - vMinX);
+	float yScale = 2.0f / (vMaxY - vMinY);
+	float xOffset = -0.5f * (vMaxX + vMinX) * xScale;
+	float yOffset = -0.5f * (vMaxY + vMinY) * yScale;
+	DirectX::XMMATRIX cropMat =
+		DirectX::XMMatrixSet(
+			xScale, 0.0f, 0.0f, 0.0f,
+			0.0f, yScale, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			xOffset, yOffset, 0.0f, 1.0f);
+
+	m_VPC = VP;
+#endif
 }
 
 void Light::Uninit()
@@ -207,10 +218,10 @@ DirectX::XMFLOAT4X4 Light::GetProjectionMatrixFloat4x4(bool transpose) const
 	return projf;
 }
 
-DirectX::XMFLOAT4X4 Light::GetLightViewProjectionMatrixFloat4x4(bool transpose) const
+DirectX::XMFLOAT4X4 Light::GetViewProjectionCropMatrixFloat4x4(bool transpose) const
 {
 	DirectX::XMFLOAT4X4 lvpF{};
-	DirectX::XMMATRIX lvpMat = m_LVP;
+	DirectX::XMMATRIX lvpMat = m_VPC;
 	if (transpose)
 		lvpMat = DirectX::XMMatrixTranspose(lvpMat);
 	DirectX::XMStoreFloat4x4(&lvpF, lvpMat);

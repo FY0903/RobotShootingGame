@@ -142,15 +142,14 @@ const DirectX::XMFLOAT4X4 Camera::Get2DProjectionMatrixFloat4x4(bool transpose)
 
 DirectX::XMVECTOR Camera::GetForward() const
 {
-	DirectX::XMVECTOR forward = DirectX::XMVectorSubtract(m_TargetPos, m_EyePos);
-	forward = DirectX::XMVector3Normalize(forward);
+	DirectX::XMMATRIX invViewMat = DirectX::XMMatrixInverse(nullptr, Get3DViewMatrix());
+	DirectX::XMVECTOR forward = invViewMat.r[2];
 	return forward;
 }
 
 DirectX::XMVECTOR Camera::GetRight() const
 {
-	DirectX::XMVECTOR forward = GetForward();
-	DirectX::XMVECTOR right = DirectX::XMVector3Cross(m_UpVec, forward);
-	right = DirectX::XMVector3Normalize(right);
+	DirectX::XMMATRIX invViewMat = DirectX::XMMatrixInverse(nullptr, Get3DViewMatrix());
+	DirectX::XMVECTOR right = invViewMat.r[0];
 	return right;
 }

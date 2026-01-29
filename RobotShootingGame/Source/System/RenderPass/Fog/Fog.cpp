@@ -11,6 +11,8 @@
 #include "Fog.hpp"
 #include "Utility/SharedStruct/SharedStruct.hpp"
 #include "Utility/CameraManager/CameraManager.hpp"
+#include "Utility/LightManager/LightManager.hpp"
+#include "Utility/Compornent/Light/Light.hpp"
 
 Fog::~Fog()
 {
@@ -18,6 +20,9 @@ Fog::~Fog()
 	{
 		delete m_pCameraCB[i];
 		m_pCameraCB[i] = nullptr;
+
+		delete m_pLVPCB[i];
+		m_pLVPCB[i] = nullptr;
 	}
 }
 
@@ -28,6 +33,8 @@ void Fog::Init()
 	{
 		m_pCameraCB[i] = new ConstantBuffer(sizeof(CB::Camera));
 		assert(m_pCameraCB[i]);	// nullptrチェック
+		m_pLVPCB[i] = new ConstantBuffer(sizeof(CB::LVP));
+		assert(m_pLVPCB[i]);	// nullptrチェック
 	}
 
 	// ルートシグネチャとパイプラインステートの生成
@@ -54,7 +61,13 @@ void Fog::UpdateCB()
 	cameraPtr->PMat = CameraManager::GetInstance().GetMainCamera()->Get3DProjectionMatrixFloat4x4(false);
 	cameraPtr->Pos = CameraManager::GetInstance().GetMainCameraPosition();
 
+	// ライトVP行列を定数バッファに転送
+	CB::LVP* lvpPtr = m_pLVPCB[currentIndex]->GetPtr<CB::LVP>();
+	lvpPtr->VMat = LightManager::GetInstance().GetLights()[0]->GetViewMatrixFloat4x4(false);
+	lvpPtr->PMat = LightManager::GetInstance().GetLights()[0]->GetProjectionMatrixFloat4x4(false);
+
 	commandList->SetGraphicsRootConstantBufferView(2, m_pCameraCB[currentIndex]->GetAddress()); // カメラ用定数バッファを設定
+	commandList->SetGraphicsRootConstantBufferView(3, m_pLVPCB[currentIndex]->GetAddress());     // ライトVP用定数バッファを設定
 }
 
 void Fog::CreateRootSignature()
@@ -63,6 +76,7 @@ void Fog::CreateRootSignature()
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_VERTEX); // 定数バッファ
 	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, D3D12_SHADER_VISIBILITY_PIXEL); // SRV
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_PIXEL); // カメラ用定数バッファ
+	m_pRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_PIXEL); // ライトVP用定数バッファ
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
 	m_pRootSignature->Create();
 }

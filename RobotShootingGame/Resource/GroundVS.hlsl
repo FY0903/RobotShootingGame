@@ -10,13 +10,8 @@ struct VSOutput
 {
     float4 svpos : SV_POSITION;
     float2 uv : TEXCOORD;
-    float4 posLVP : TEXCOORD1;
+    float3 worldPos : TEXCOORD1;
 };
-
-cbuffer ShadowVPC : register(b1)
-{
-    float4x4 LightViewProj : packoffset(c0);
-}
 
 VSOutput main(VSInput input)
 {
@@ -29,7 +24,7 @@ VSOutput main(VSInput input)
     
     output.svpos = projPos;
     output.uv = input.uv;
-    output.posLVP = mul(LightViewProj, worldPos); // ライトビュー射影座標
+    output.worldPos = worldPos.xyz;
     
     return output;
 }
