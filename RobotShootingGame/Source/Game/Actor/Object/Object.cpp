@@ -43,7 +43,7 @@ void Object::OnInit()
 	//skeletalAnimator->Init(pModel);
 	//skeletalAnimator->PlayAnimation(m_pAnimations[0]);
 
-	m_Transform.Position = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+	//m_Transform.Position = DirectX::XMFLOAT3(0.0f, 0.5f, 0.0f);
 	m_Transform.Scale = DirectX::XMFLOAT3(0.2f, 0.2f, 0.2f);
 	//m_Transform.Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
 }

@@ -40,7 +40,8 @@ void SceneGame::OnInit()
 
 	// エンプティの生成
 	auto emp = AddGameObject<Empty>(Layer::DEFAULT);
-	emp->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
+	emp->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+	AddGameObject<Empty>(Layer::DEFAULT);
 
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/Title.mp3", false, true);
 	//Sound::GetInstance().Play("BGM");

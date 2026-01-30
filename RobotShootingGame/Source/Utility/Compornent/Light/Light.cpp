@@ -46,7 +46,7 @@ void Light::Init(Type type, DirectX::XMFLOAT4 color, float range, float angle)
 
 	// ビュー行列とプロジェクション行列の計算
 	m_VP[0] = DirectX::XMMatrixIdentity();
-	m_VP[1] = DirectX::XMMatrixOrthographicLH(10.0f, 10.0f, 0.1f, 5.0f);
+	m_VP[1] = DirectX::XMMatrixOrthographicLH(10.0f, 10.0f, 0.1f, 100.0f);
 }
 
 void Light::Update()

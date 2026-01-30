@@ -53,8 +53,9 @@ float4 main(VSOutput input) : SV_TARGET
     float d = depthTex.Sample(smp, input.uv);
     float4 shadow = shadowMap.Sample(smp, input.uv);
     
+    //return float4(d, 0.0f, 0.0f, 1.0f);
     return albedo;
-    return shadow;
+    //return shadow;
     
     float3 worldPos = ReconstructWorldPositionFromDepth(input.uv, d);
    
