@@ -2,14 +2,8 @@ struct VSOutput
 {
     float4 svpos : SV_POSITION;
     float2 uv : TEXCOORD;
-    float3 worldPos : TEXCOORD1;
+    float4 lightVP : TEXCOORD1;
 };
-
-cbuffer Light : register(b1)
-{
-    float4x4 View : packoffset(c0);
-    float4x4 Proj : packoffset(c4);
-}
 
 SamplerState smp : register(s0);
 SamplerComparisonState cmpSmp : register(s1);
@@ -19,19 +13,19 @@ Texture2D<float> shadowMap : register(t1);
 float4 main(VSOutput input) : SV_TARGET
 {
     float4 color = tex.Sample(smp, input.uv);
-
-    // ワールド位置をライト空間に投影
-    float4 lightPos = float4(input.worldPos, 1.0f);
-    lightPos = mul(View, lightPos);
-    lightPos = mul(Proj, lightPos);
-
-    // UV に変換（通常の手順）
-    float2 shadowUV = lightPos.xy * 0.5f + 0.5f;
-    shadowUV.y = 1.0f - shadowUV.y;
-
-    float4 shadow = shadowMap.Sample(smp, shadowUV);
     
-    return shadow;
+    // NDC を [0,1] UV に変換
+    float2 shadowUV = input.lightVP.xy * 0.5f + 0.5f;
+    shadowUV.y = 1.0f - shadowUV.y;
+    
+    if (shadowUV.x > 0.0f && shadowUV.x < 1.0f
+        && shadowUV.y > 0.0f && shadowUV.y < 1.0f)
+    {
+        float4 shadow = shadowMap.Sample(smp, shadowUV);
+        color.rgb *= shadow.rgb;
+    }
+    
+    return color;
     
     //// 深度（NDCの z）。DirectX を想定して [0,1] の範囲になっている前提。
     //float writeDepth = lightPos.z / lightPos.w;

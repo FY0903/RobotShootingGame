@@ -14,6 +14,11 @@
 #include "Utility/MaterialManager/MaterialManager.hpp"
 #include "Utility/MaterialBase/MaterialBase.hpp"
 
+// ==============================
+//	constexpr
+// ==============================
+constexpr size_t MXA_WVPS_PER_FRAME = 512; // フレームごとの最大WVP行列数
+
 ShadowMap::ShadowMap(Light* pLight, Quality quality)
 	: m_pLight(pLight)
 {
@@ -30,7 +35,7 @@ ShadowMap::ShadowMap(Light* pLight, Quality quality)
 	// 定数バッファの生成
 	for (size_t i = 0; i < FRAME_BUFFER_COUNT; ++i)
 	{
-		m_pWVPCBs[i] = new ConstantBuffer(sizeof(CB::WVP));
+		m_pWVPCBs[i] = new ConstantBuffer(sizeof(CB::WVP) * MXA_WVPS_PER_FRAME);
 		assert(m_pWVPCBs[i]);	// nullptrチェック
 
 		// ライトのビュー行列とプロジェクション行列を設定
@@ -196,23 +201,20 @@ void ShadowMap::SetRenderTarget()
 		nullptr);
 }
 
-void ShadowMap::UpdateLightVP()
-{
-	auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
-
-	CB::WVP* wvpPtr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
-	wvpPtr->ViewMat = m_pLight->GetViewMatrixFloat4x4(false);		// ライトのビュー行列を設定
-	wvpPtr->ProjMat = m_pLight->GetProjectionMatrixFloat4x4(false);	// ライトのプロジェクション行列を設定
-}
-
 void ShadowMap::DrawRenderItems()
 {
 	const auto cmd = Engine::GetInstance().GetCommandList();						// コマンドリストを取得
 	const auto currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();	// 現在のバックバッファのインデックスを取得
 
+	const size_t cbStride = (sizeof(CB::WVP) + 255) & ~255;	// 定数バッファのアライメント調整
+	BYTE* mappedBase = reinterpret_cast<BYTE*>(m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>()); // CPU 側先頭ポインタ
+	UINT64 baseGPUAddr = m_pWVPCBs[currentIndex]->GetAddress(); // GPU 側先頭アドレス
+	size_t allocIndex{};
+
 	for (auto& item : m_RenderItems)
 	{
 		if (!item.pMaterial) continue;
+		assert(allocIndex < MXA_WVPS_PER_FRAME); // 定数バッファの最大数を超過している
 
 		// ルートシグネチャとパイプラインステートをセット
 		MaterialBase::InputLayoutType layoutType = item.pMaterial->GetInputLayoutType();
@@ -236,12 +238,22 @@ void ShadowMap::DrawRenderItems()
 		}
 
 		// WVP行列の更新
-		CB::WVP* matPtr = item.pMaterial->GetCBByRegisterForFrame(0, currentIndex)->GetPtr<CB::WVP>();
-		CB::WVP* wvpPtr = m_pWVPCBs[currentIndex]->GetPtr<CB::WVP>();
-		wvpPtr->WorldMat = matPtr->WorldMat;	// ワールド行列はそのままコピー
+		// オフセット領域のCPUポインタとGPUアドレス
+		CB::WVP* cpuWvp = reinterpret_cast<CB::WVP*>(mappedBase + allocIndex * cbStride);
+		UINT64 gpuAddr = baseGPUAddr + static_cast<UINT64>(allocIndex) * cbStride;
 
-		// 定数バッファをセット
-		cmd->SetGraphicsRootConstantBufferView(0, m_pWVPCBs[currentIndex]->GetAddress());	// ライトのWVP行列用定数バッファ
+		// ライトの View/Proj を書き込む
+		cpuWvp->ViewMat = m_pLight->GetViewMatrixFloat4x4(false);
+		cpuWvp->ProjMat = m_pLight->GetProjectionMatrixFloat4x4(false);
+
+		// 元マテリアルCBから World のみコピー
+		ConstantBuffer* pMatCB = item.pMaterial->GetCBByRegisterForFrame(0, currentIndex);
+		CB::WVP* matPtr = pMatCB->GetPtr<CB::WVP>();
+		cpuWvp->WorldMat = matPtr->WorldMat;
+
+		// そのオフセットの GPUVA をルートにバインド
+		cmd->SetGraphicsRootConstantBufferView(0, gpuAddr);
+
 		for (size_t i = 1; i < item.pMaterial->GetCBSize(); ++i)
 		{
 			if (i > item.pMaterial->GetRootParameterIndex()) assert(false); // RootParameterIndexを超過している
@@ -268,6 +280,8 @@ void ShadowMap::DrawRenderItems()
 			else
 				cmd->DrawInstanced(item.indexCounts[i], 1, 0, 0);
 		}
+
+		++allocIndex;	// 定数バッファのオフセットを進める
 	}
 }
 

@@ -46,11 +46,6 @@ public:
 	~ShadowMap();
 
 	/**
-	 * @brief ライトのビュー・プロジェクション行列の更新
-	 */
-	void UpdateLightVP();
-
-	/**
 	 * @brief 描画処理
 	 */
 	void Draw();
@@ -121,5 +116,5 @@ private:
 	RootSignature* m_pRootsignatures[Num]{};			// ルートシグネチャ配列
 	PipelineState* m_pPSOs[Num]{};						// パイプラインステートオブジェクト
 
-	ConstantBuffer* m_pWVPCBs[FRAME_BUFFER_COUNT]{};	// ワールドビュー射影行列用定数バッファ
+	ConstantBuffer* m_pWVPCBs[FRAME_BUFFER_COUNT]{};		// WVP行列用定数バッファ
 };

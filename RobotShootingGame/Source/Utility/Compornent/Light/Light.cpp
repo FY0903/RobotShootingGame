@@ -46,122 +46,93 @@ void Light::Init(Type type, DirectX::XMFLOAT4 color, float range, float angle)
 
 	// ビュー行列とプロジェクション行列の計算
 	m_VP[0] = DirectX::XMMatrixIdentity();
-	m_VP[1] = DirectX::XMMatrixOrthographicLH(10.0f, 10.0f, 0.1f, 100.0f);
+	m_VP[1] = DirectX::XMMatrixOrthographicLH(10.0f, 10.0f, 0.1f, 1000.0f);
 }
 
 void Light::Update()
 {
+	// 所有者の位置／方向を取得
 	DirectX::XMFLOAT3 position = GetPosition();
 	DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&position);
-	DirectX::XMVECTOR targetVec = DirectX::XMVectorZero();
-	DirectX::XMFLOAT3 direction = GetDirection();
-	DirectX::XMVECTOR dirVec = DirectX::XMLoadFloat3(&direction);
-	targetVec = DirectX::XMVectorSubtract(pos, DirectX::XMVectorScale(dirVec, 2.0f));
+	DirectX::XMFLOAT3 directionF = GetDirection();
+	DirectX::XMVECTOR dirVec = DirectX::XMLoadFloat3(&directionF);
+	DirectX::XMVector3Normalize(dirVec);
 
-	m_VP[0] = DirectX::XMMatrixLookAtLH(pos, targetVec, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
-
-#if 0
-
-	DirectX::XMMATRIX VP = m_VP[0] * m_VP[1];
-
+	// メインカメラを取得（なければ従来の単純なLookAtでフォールバック）
 	const auto cam = CameraManager::GetInstance().GetMainCamera();
+	if (!cam)
+	{
+		DirectX::XMVECTOR targetVec = DirectX::XMVectorSubtract(pos, DirectX::XMVectorScale(dirVec, 10.0f));
+		m_VP[0] = DirectX::XMMatrixLookAtLH(pos, targetVec, DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f));
+		return;
+	}
 
+	// カメラ情報
 	const auto& camPos = cam->GetPosition();
 	const auto& camForward = cam->GetForward();
 	const auto& camRight = cam->GetRight();
 	const auto& camUp = DirectX::XMVector3Cross(camForward, camRight);
-	const auto& camFov = cam->GetFov();
-	const auto& camAspect = cam->GetAspect();
-	const auto& camNear = cam->GetNear();
-	const auto& camFar = cam->GetFar();
+	const float camFov = cam->GetFov();
+	const float camAspect = cam->GetAspect();
+	const float camNear = cam->GetNear();
+	const float camFar = cam->GetFar();
 
+	// 視錐台のコーナーをワールド空間で計算
 	float nearY = tanf(camFov * 0.5f) * camNear;
 	float nearX = nearY * camAspect;
-	float farY = tanf(camFov * 0.5f) * camFar;
+	float farY = tanf(camFov * 0.5f) * 10.0f;
 	float farX = farY * camAspect;
 
-	DirectX::XMVECTOR nearCenter = DirectX::XMVectorAdd(
-		camPos,
-		DirectX::XMVectorScale(camForward, camNear));
-	DirectX::XMVECTOR farCenter = DirectX::XMVectorAdd(
-		camPos,
-		DirectX::XMVectorScale(camForward, camFar));
+	DirectX::XMVECTOR nearCenter = DirectX::XMVectorAdd(camPos, DirectX::XMVectorScale(camForward, camNear));
+	DirectX::XMVECTOR farCenter = DirectX::XMVectorAdd(camPos, DirectX::XMVectorScale(camForward, 10.0f));
 
 	DirectX::XMVECTOR frustumCorners[8]{};
+	// 近面
+	frustumCorners[0] = DirectX::XMVectorAdd(nearCenter, DirectX::XMVectorAdd(DirectX::XMVectorScale(camUp, nearY), DirectX::XMVectorScale(camRight, nearX)));
+	frustumCorners[1] = DirectX::XMVectorAdd(nearCenter, DirectX::XMVectorAdd(DirectX::XMVectorScale(camUp, nearY), DirectX::XMVectorScale(camRight, -nearX)));
+	frustumCorners[2] = DirectX::XMVectorAdd(nearCenter, DirectX::XMVectorAdd(DirectX::XMVectorScale(camUp, -nearY), DirectX::XMVectorScale(camRight, nearX)));
+	frustumCorners[3] = DirectX::XMVectorAdd(nearCenter, DirectX::XMVectorAdd(DirectX::XMVectorScale(camUp, -nearY), DirectX::XMVectorScale(camRight, -nearX)));
+	// 遠面
+	frustumCorners[4] = DirectX::XMVectorAdd(farCenter, DirectX::XMVectorAdd(DirectX::XMVectorScale(camUp, farY), DirectX::XMVectorScale(camRight, farX)));
+	frustumCorners[5] = DirectX::XMVectorAdd(farCenter, DirectX::XMVectorAdd(DirectX::XMVectorScale(camUp, farY), DirectX::XMVectorScale(camRight, -farX)));
+	frustumCorners[6] = DirectX::XMVectorAdd(farCenter, DirectX::XMVectorAdd(DirectX::XMVectorScale(camUp, -farY), DirectX::XMVectorScale(camRight, farX)));
+	frustumCorners[7] = DirectX::XMVectorAdd(farCenter, DirectX::XMVectorAdd(DirectX::XMVectorScale(camUp, -farY), DirectX::XMVectorScale(camRight, -farX)));
 
-	// 近クリップ面
-	frustumCorners[0] = DirectX::XMVectorAdd(
-		nearCenter,
-		DirectX::XMVectorAdd(
-			DirectX::XMVectorScale(camUp, nearY),
-			DirectX::XMVectorScale(camRight, nearX)));
-	frustumCorners[1] = DirectX::XMVectorAdd(
-		nearCenter,
-		DirectX::XMVectorAdd(
-			DirectX::XMVectorScale(camUp, nearY),
-			DirectX::XMVectorScale(camRight, -nearX)));
-	frustumCorners[2] = DirectX::XMVectorAdd(
-		nearCenter,
-		DirectX::XMVectorAdd(
-			DirectX::XMVectorScale(camUp, -nearY),
-			DirectX::XMVectorScale(camRight, nearX)));
-	frustumCorners[3] = DirectX::XMVectorAdd(
-		nearCenter,
-		DirectX::XMVectorAdd(
-			DirectX::XMVectorScale(camUp, -nearY),
-			DirectX::XMVectorScale(camRight, -nearX)));
+	// 視錐台の中心を求める
+	DirectX::XMVECTOR center = DirectX::XMVectorZero();
+	for (int i = 0; i < 8; ++i) center = DirectX::XMVectorAdd(center, frustumCorners[i]);
+	center = DirectX::XMVectorScale(center, 1.0f / 8.0f);
 
-	// 遠クリップ面
-	frustumCorners[4] = DirectX::XMVectorAdd(
-		farCenter,
-		DirectX::XMVectorAdd(
-			DirectX::XMVectorScale(camUp, farY),
-			DirectX::XMVectorScale(camRight, farX)));
-	frustumCorners[5] = DirectX::XMVectorAdd(
-		farCenter,
-		DirectX::XMVectorAdd(
-			DirectX::XMVectorScale(camUp, farY),
-			DirectX::XMVectorScale(camRight, -farX)));
-	frustumCorners[6] = DirectX::XMVectorAdd(
-		farCenter,
-		DirectX::XMVectorAdd(
-			DirectX::XMVectorScale(camUp, -farY),
-			DirectX::XMVectorScale(camRight, farX)));
-	frustumCorners[7] = DirectX::XMVectorAdd(
-		farCenter,
-		DirectX::XMVectorAdd(
-			DirectX::XMVectorScale(camUp, -farY),
-			DirectX::XMVectorScale(camRight, -farX)));
+	// ライトの位置は中心からライト方向へ十分離す（方向光なので大きめの距離）
+	const float lightDistance = 500.0f; // 必要に応じて調整
+	DirectX::XMVECTOR lightPos = DirectX::XMVectorSubtract(center, DirectX::XMVectorScale(dirVec, lightDistance));
 
-	DirectX::XMVECTOR vMax{}, vMin{};
-	vMax = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
-	vMin = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
-	for (auto& corner : frustumCorners)
+	// up ベクトルの決定（ライト方向とほぼ平行にならないようにする）
+	DirectX::XMVECTOR upVec = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	float dot = fabs(DirectX::XMVectorGetX(DirectX::XMVector3Dot(upVec, dirVec)));
+	if (dot > 0.99f) // ほぼ平行なら別の up を使う
+		upVec = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+
+	// ライトのビュー行列
+	DirectX::XMMATRIX lightView = DirectX::XMMatrixLookAtLH(lightPos, center, upVec);
+
+	// 視錐台のコーナーをライト空間に変換して AABB を求める
+	DirectX::XMVECTOR vMin = DirectX::XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+	DirectX::XMVECTOR vMax = DirectX::XMVectorSet(-FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+	for (int i = 0; i < 8; ++i)
 	{
-		// ビュープロジェクション行列で変換
-		DirectX::XMVECTOR trfCorner = DirectX::XMVector3Transform(corner, VP);
-		vMax = DirectX::XMVectorMax(vMax, trfCorner);
-		vMin = DirectX::XMVectorMin(vMin, trfCorner);
+		DirectX::XMVECTOR lc = DirectX::XMVector3Transform(frustumCorners[i], lightView);
+		vMin = DirectX::XMVectorMin(vMin, lc);
+		vMax = DirectX::XMVectorMax(vMax, lc);
 	}
 
-	float vMaxX = DirectX::XMVectorGetX(vMax);
-	float vMinX = DirectX::XMVectorGetX(vMin);
-	float vMaxY = DirectX::XMVectorGetY(vMax);
-	float vMinY = DirectX::XMVectorGetY(vMin);
+	float sizeX = DirectX::XMVectorGetX(DirectX::XMVectorSubtract(vMax, vMin));
+	float sizeY = DirectX::XMVectorGetY(DirectX::XMVectorSubtract(vMax, vMin));
 
-	float xScale = 2.0f / (vMaxX - vMinX);
-	float yScale = 2.0f / (vMaxY - vMinY);
-	float xOffset = -0.5f * (vMaxX + vMinX) * xScale;
-	float yOffset = -0.5f * (vMaxY + vMinY) * yScale;
-	DirectX::XMMATRIX cropMat =
-		DirectX::XMMatrixSet(
-			xScale, 0.0f, 0.0f, 0.0f,
-			0.0f, yScale, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			xOffset, yOffset, 0.0f, 1.0f);
+	DirectX::XMMATRIX lightProj = DirectX::XMMatrixOrthographicLH(sizeX, sizeY, 0.1f, 1000.0f);
 
-	m_VPC = VP;
-#endif
+	m_VP[0] = lightView;
+	m_VP[1] = lightProj;
 }
 
 void Light::Uninit()

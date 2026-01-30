@@ -31,9 +31,6 @@ void ShadowMapManager::DrawAllShadowMaps(std::vector<Render::RenderItem> renderI
 		// レンダーアイテムの設定
 		pShadowMap->SetRenderItems(renderItem);
 	
-		// ライトのビュー・プロジェクション行列の更新
-		pShadowMap->UpdateLightVP();
-	
 		// シャドウマップの描画
 		pShadowMap->Draw();
 	}
