@@ -97,6 +97,8 @@ float4 main(VSOutput input) : SV_TARGET
     float currentDistance = randomOffset;
     float totalTransmittance = 1.0f;
     
+    float stepTransmittance = exp(-density * stepSize);
+    
     for (int i = 0; i < 64; ++i)
     {
         currentDistance += stepSize; // ƒTƒ“ƒvƒŠƒ“ƒOŠÔŠu
@@ -106,10 +108,9 @@ float4 main(VSOutput input) : SV_TARGET
         }
         
         float3 rayPos = cameraPos + rayDir * currentDistance;
-        
-        float stepTramsmittance = exp(-density * stepSize);
-        float fogContribution = totalTransmittance * (1.0f - stepTramsmittance);
-        
+
+        float fogContribution = totalTransmittance * (1.0f - stepTransmittance);
+
         float4 shadowCoord = TransformWorldToShadowCoord(rayPos);
         
         float shadowAttenuation = shadowMap.SampleCmp(cmpSmp, shadowCoord.xy, shadowCoord.z);
@@ -122,7 +123,7 @@ float4 main(VSOutput input) : SV_TARGET
         float3 finalFogColor = litColor + ambientColor;
         albedo.rgb += finalFogColor * fogContribution;
         
-        totalTransmittance *= stepTramsmittance;
+        totalTransmittance *= stepTransmittance;
         if (totalTransmittance < 0.01f)
         {
             break;

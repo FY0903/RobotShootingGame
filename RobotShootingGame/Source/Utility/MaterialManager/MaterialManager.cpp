@@ -269,6 +269,16 @@ void MaterialManager::Init()
 	ground->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	ground->SetStaticSampler(1, D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 	ground->Create();
+
+	auto cloud = CreateMaterialBase("Cloud");
+	cloud->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
+	cloud->SetPSFilepath(L"Assets/Shader/CloudPS.cso");
+	cloud->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
+	cloud->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	cloud->SetCBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
+	cloud->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	cloud->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	cloud->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)

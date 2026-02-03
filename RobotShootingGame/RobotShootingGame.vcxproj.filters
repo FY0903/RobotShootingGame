@@ -193,6 +193,9 @@
     <Filter Include="Resource\Shadow">
       <UniqueIdentifier>{988500d3-6108-4afe-a2fe-c5e4c8454bcd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game\Actor\Cloud">
+      <UniqueIdentifier>{edbaaeb4-05a3-4aae-8e16-9863be783547}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -353,6 +356,9 @@
     </ClCompile>
     <ClCompile Include="Source\Utility\ShadowMapManager\ShadowMapManager.cpp">
       <Filter>Source\Utility\ShadowMapManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Cloud\Cloud.cpp">
+      <Filter>Source\Game\Actor\Cloud</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -521,6 +527,9 @@
     <ClInclude Include="Source\Utility\ShadowMapManager\ShadowMapManager.hpp">
       <Filter>Source\Utility\ShadowMapManager</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Cloud\Cloud.hpp">
+      <Filter>Source\Game\Actor\Cloud</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\WaterPS.hlsl">
@@ -608,6 +617,9 @@
       <Filter>Resource</Filter>
     </FxCompile>
     <FxCompile Include="Resource\GroundVS.hlsl">
+      <Filter>Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\CloudPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

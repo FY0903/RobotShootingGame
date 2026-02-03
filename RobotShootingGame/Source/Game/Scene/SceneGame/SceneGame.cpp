@@ -17,6 +17,7 @@
 #include "Game/Actor/Empty/Empty.hpp"
 #include "Utility/Sound/Sound.hpp"
 #include "Game/Actor/DirectionalLight/DirectionalLight.hpp"
+#include "Game/Actor/Cloud/Cloud.hpp"
 
 void SceneGame::OnInit()
 {
@@ -28,6 +29,11 @@ void SceneGame::OnInit()
 
 	// グリッドの生成
 	AddGameObject<Grid>(Layer::DEFAULT);
+
+	// 雲の生成
+	auto cloud = AddGameObject<Cloud>(Layer::DEFAULT);
+	cloud->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 5.0f, 0.0f);
+	cloud->GetTransform().Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
 
 	// スプライトの生成
 	auto sprite0 = AddGameObject<Sprite>(Layer::DEFAULT);

@@ -23,6 +23,7 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Cloud\Cloud.cpp" />
     <ClCompile Include="Source\Game\Actor\DirectionalLight\DirectionalLight.cpp">
       <SubType>
       </SubType>
@@ -201,6 +202,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Cloud\Cloud.hpp" />
     <ClInclude Include="Source\Game\Actor\DirectionalLight\DirectionalLight.hpp">
       <SubType>
       </SubType>
@@ -374,6 +376,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Resource\CloudPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
     <FxCompile Include="Resource\DebugGBufferPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
