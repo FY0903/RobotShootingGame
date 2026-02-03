@@ -94,7 +94,7 @@ void Fog::CreateRootSignature()
 	m_pRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_PIXEL); // ライトVP用定数バッファ
 	m_pRootSignature->AddRootParameter(2, D3D12_SHADER_VISIBILITY_PIXEL); // ライトVP用定数バッファ
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
-	m_pRootSignature->AddStaticSampler(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+	m_pRootSignature->AddStaticSampler(1, D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 	m_pRootSignature->Create();
 }
 

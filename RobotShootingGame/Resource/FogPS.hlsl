@@ -56,6 +56,11 @@ float4 TransformWorldToShadowCoord(float3 worldPos)
     float2 shadowUV = lightProjPos.xy * 0.5f + 0.5f;
     shadowUV.y = 1.0f - shadowUV.y;
     
+    if (shadowUV.x < 0.0f || shadowUV.x > 1.0f || shadowUV.y < 0.0f || shadowUV.y > 1.0f)
+    {
+        return float4(-1.0f, -1.0f, -1.0f, 1.0f); // シャドウマップの範囲外
+    }
+    
     float writeDepth = lightProjPos.z / lightProjPos.w;
     
     return float4(shadowUV, writeDepth, 1.0f);
@@ -76,7 +81,7 @@ float HenyeyGreenstein(float cos, float g)
 float4 main(VSOutput input) : SV_TARGET
 {
     float4 density = float4(0.1f, 0.1f, 0.1f, 1.0f);
-    float stepSize = 0.1f;
+    float stepSize = 0.08f;
     float3 fogColor = float3(1.0f, 1.0f, 1.0f);
     float3 ambientFogColor = float3(0.0f, 0.0f, 0.0f);
 
@@ -89,7 +94,7 @@ float4 main(VSOutput input) : SV_TARGET
     float3 rayDir = normalize(ray);
     
     float randomOffset = Random(input.uv) * stepSize;
-    float currentDistance = 0.0f;
+    float currentDistance = randomOffset;
     float totalTransmittance = 1.0f;
     
     for (int i = 0; i < 64; ++i)
@@ -109,16 +114,13 @@ float4 main(VSOutput input) : SV_TARGET
         
         float shadowAttenuation = shadowMap.SampleCmp(cmpSmp, shadowCoord.xy, shadowCoord.z);
         
-        // デバッグでshadowAttenuationを表示する
-        albedo.rgb += float3(0.0f, shadowAttenuation, 0.0f) * 0.01f;
+        float cos = dot(-rayDir, lightDirection);
+        float phaseFunction = HenyeyGreenstein(cos, 1.0f);
         
-        //float cos = dot(-rayDir, lightDirection);
-        //float phaseFunction = HenyeyGreenstein(cos, 1.0f);
-        
-        //float3 litColor = fogColor * shadowAttenuation;
-        //float3 ambientColor = ambientFogColor * (1.0f - shadowAttenuation);
-        //float3 finalFogColor = litColor + ambientColor;
-        //albedo.rgb += finalFogColor * fogContribution;
+        float3 litColor = fogColor * shadowAttenuation;
+        float3 ambientColor = ambientFogColor * (1.0f - shadowAttenuation);
+        float3 finalFogColor = litColor + ambientColor;
+        albedo.rgb += finalFogColor * fogContribution;
         
         totalTransmittance *= stepTramsmittance;
         if (totalTransmittance < 0.01f)

@@ -27,13 +27,18 @@ float4 main(VSOutput input) : SV_TARGET
     float2 shadowUV = lightProjPos.xy * 0.5f + 0.5f;
     shadowUV.y = 1.0f - shadowUV.y;
     
-    float writeDepth = lightProjPos.z / lightProjPos.w;
+    // シャドウマップの範囲外チェック
+    if (shadowUV.x > 0.0f && shadowUV.x < 1.0f && shadowUV.y > 0.0f && shadowUV.y < 1.0f)
+    {
+        float writeDepth = lightProjPos.z / lightProjPos.w;
     
-    // PCFによるシャドウマッピング
-    // 影の部分が0、影の外が1を返す
-    float shadow = shadowMap.SampleCmpLevelZero(cmpSmp, shadowUV, writeDepth);
+        // PCFによるシャドウマッピング
+        // 影の部分が0、影の外が1を返す
+        float shadow = shadowMap.SampleCmpLevelZero(cmpSmp, shadowUV, writeDepth);
     
-    color.rgb *= lerp(color.rgb * 0.2f, color.rgb, shadow);
+        color.rgb *= lerp(color.rgb * 0.2f, color.rgb, shadow);
+    
+    }
     
     return color;
 }
