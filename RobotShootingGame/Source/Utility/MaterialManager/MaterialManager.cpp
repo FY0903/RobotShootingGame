@@ -264,10 +264,10 @@ void MaterialManager::Init()
 	ground->SetPSFilepath(L"Assets/Shader/GroundPS.cso");
 	ground->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
 	ground->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
-	ground->SetCBV(1, D3D12_SHADER_VISIBILITY_VERTEX);
+	ground->SetCBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
 	ground->SetSRV(0, 2, D3D12_SHADER_VISIBILITY_PIXEL);
 	ground->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-	ground->SetStaticSampler(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_COMPARISON_FUNC_GREATER);
+	ground->SetStaticSampler(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 	ground->Create();
 }
 

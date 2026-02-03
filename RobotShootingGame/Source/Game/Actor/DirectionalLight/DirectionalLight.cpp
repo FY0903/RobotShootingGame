@@ -20,7 +20,7 @@ void DirectionalLight::OnInit()
 
 	// ライトコンポーネントを追加
 	auto light = AddComponent<Light>();
-	light->Init(Light::DIRECTIONAL, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));	// 太陽光源として初期化
+	light->Init(Light::DIRECTIONAL);	// 太陽光源として初期化
 
 	auto dir = light->GetDirection();
 	DirectX::XMVECTOR dirV = DirectX::XMLoadFloat3(&dir);

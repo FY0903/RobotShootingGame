@@ -12,74 +12,86 @@ cbuffer cameraBuffer : register(b0)
     float3 cameraPos : packoffset(c12);
 };
 
-cbuffer Light : register(b1)
+cbuffer LightVP : register(b1)
 {
     float4x4 View : packoffset(c0);
     float4x4 Proj : packoffset(c4);
 };
 
+cbuffer Light : register(b2)
+{
+    float3 lightPosition : packoffset(c0);
+    float lightRange : packoffset(c0.w);
+    float3 lightDirection : packoffset(c1);
+    float lightAngle : packoffset(c1.w);
+    float4 lightColor : packoffset(c2);
+};
+
 SamplerState smp : register(s0);
+SamplerComparisonState cmpSmp : register(s1);
 
 Texture2D<float4> tex : register(t0);
 Texture2D<float> depthTex : register(t1);
-Texture2D<float4> shadowMap : register(t2);
+Texture2D<float> shadowMap : register(t2);
 
-float3 ReconstructWorldPositionFromDepth(float2 uv, float depth)
+float4 ReconstructWorldPositionFromDepth(float2 uv, float depth)
 {
     float4 proj = float4(uv * 2.0f - 1.0f, depth, 1.0f); // NDC空間の座標に変換
     proj.y = -proj.y; // Y軸を反転（DirectXのNDCは左手系）
     
-    float4x4 invVP = mul(invV, invP);
-    float4 pos = mul(invVP, proj);
+    float4 viewPos = mul(invP, proj);
+    viewPos /= viewPos.w; // 視点座標に変換
     
-    return pos.xyz / pos.w;
+    float4 worldPos = mul(invV, viewPos);
+    
+    return worldPos;
 }
 
 float4 TransformWorldToShadowCoord(float3 worldPos)
 {
-    float4 shadowCoord = mul(View, float4(worldPos, 1.0f));
-    shadowCoord = mul(Proj, shadowCoord);
-    shadowCoord.xy /= shadowCoord.w; // NDC空間に変換
-    shadowCoord.xy = shadowCoord.xy * 0.5f + 0.5f; // [0,1]範囲に変換
-    shadowCoord.y = 1.0f - shadowCoord.y; // Y軸反転
-    shadowCoord.z /= shadowCoord.w; // 深度値を正規化
+    float4 lightViewPos = mul(View, float4(worldPos, 1.0f));
+    float4 lightProjPos = mul(Proj, lightViewPos);
+    
+    // NDC を [0,1] UV に変換
+    float2 shadowUV = lightProjPos.xy * 0.5f + 0.5f;
+    shadowUV.y = 1.0f - shadowUV.y;
+    
+    float writeDepth = lightProjPos.z / lightProjPos.w;
+    
+    return float4(shadowUV, writeDepth, 1.0f);
+}
 
-    return float4(shadowCoord.xyz, 0.0f);
+float Random(float2 seed)
+{
+    float s = dot(seed, float2(12.9898f, 78.233f));
+    return frac(sin(s) * 43758.5453f);
+}
+
+float HenyeyGreenstein(float cos, float g)
+{
+    float g2 = g * g;
+    return (1.0f - g2) / (4.0f * 3.14159265f * pow(1.0f + g2 - 2.0f * g * cos, 1.5f));
 }
 
 float4 main(VSOutput input) : SV_TARGET
 {
+    float4 density = float4(0.1f, 0.1f, 0.1f, 1.0f);
+    float stepSize = 0.1f;
+    float3 fogColor = float3(1.0f, 1.0f, 1.0f);
+    float3 ambientFogColor = float3(0.0f, 0.0f, 0.0f);
+
     float4 albedo = tex.Sample(smp, input.uv);
     float d = depthTex.Sample(smp, input.uv);
-    float4 shadow = shadowMap.Sample(smp, input.uv);
+    float4 worldPos = ReconstructWorldPositionFromDepth(input.uv, d);
     
-    //return float4(d, 0.0f, 0.0f, 1.0f);
-    return albedo;
-    //return shadow;
-    
-    float3 worldPos = ReconstructWorldPositionFromDepth(input.uv, d);
-   
-    float4 lightPos = float4(worldPos, 1.0f);
-    lightPos = mul(View, lightPos);
-    lightPos = mul(Proj, lightPos);
-    float zLVP = lightPos.z / lightPos.w; // ライトビュー射影空間での深度値
-    
-    return float4(zLVP, 0.0f, 0.0f, 1.0f);
-    
-    float4 shadowCoord = TransformWorldToShadowCoord(worldPos);
-    float4 color = shadowMap.Sample(smp, shadowCoord.xy);
-
-    //return shadowCoord;
-    //return color;
-
-    float3 ray = worldPos - cameraPos;
+    float3 ray = worldPos.xyz - cameraPos;
     float distance = length(ray);
     float3 rayDir = normalize(ray);
     
+    float randomOffset = Random(input.uv) * stepSize;
     float currentDistance = 0.0f;
     float totalTransmittance = 1.0f;
-    float4 density = float4(0.1f, 0.1f, 0.1f, 1.0f);
-    float stepSize = 0.1f;
+    
     for (int i = 0; i < 64; ++i)
     {
         currentDistance += stepSize; // サンプリング間隔
@@ -88,14 +100,27 @@ float4 main(VSOutput input) : SV_TARGET
             break;
         }
         
-        float3 rayPos = cameraPos + rayDir * currentDistance;       
+        float3 rayPos = cameraPos + rayDir * currentDistance;
         
         float stepTramsmittance = exp(-density * stepSize);
         float fogContribution = totalTransmittance * (1.0f - stepTramsmittance);
-        albedo += fogContribution;
+        
+        float4 shadowCoord = TransformWorldToShadowCoord(rayPos);
+        
+        float shadowAttenuation = shadowMap.SampleCmp(cmpSmp, shadowCoord.xy, shadowCoord.z);
+        
+        // デバッグでshadowAttenuationを表示する
+        albedo.rgb += float3(0.0f, shadowAttenuation, 0.0f) * 0.01f;
+        
+        //float cos = dot(-rayDir, lightDirection);
+        //float phaseFunction = HenyeyGreenstein(cos, 1.0f);
+        
+        //float3 litColor = fogColor * shadowAttenuation;
+        //float3 ambientColor = ambientFogColor * (1.0f - shadowAttenuation);
+        //float3 finalFogColor = litColor + ambientColor;
+        //albedo.rgb += finalFogColor * fogContribution;
         
         totalTransmittance *= stepTramsmittance;
-        
         if (totalTransmittance < 0.01f)
         {
             break;

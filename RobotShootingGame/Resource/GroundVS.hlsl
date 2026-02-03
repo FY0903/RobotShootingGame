@@ -10,14 +10,8 @@ struct VSOutput
 {
     float4 svpos : SV_POSITION;
     float2 uv : TEXCOORD;
-    float4 lightVP : TEXCOORD1;
+    float4 worldPos : TEXCOORD1;
 };
-
-cbuffer Light : register(b1)
-{
-    float4x4 LView : packoffset(c0);
-    float4x4 LProj : packoffset(c4);
-}
 
 VSOutput main(VSInput input)
 {
@@ -30,8 +24,7 @@ VSOutput main(VSInput input)
     
     output.svpos = projPos;
     output.uv = input.uv;
-    float4 lightVpos = mul(LView, worldPos);
-    output.lightVP = mul(LProj, lightVpos);
+    output.worldPos = worldPos;
     
     return output;
 }

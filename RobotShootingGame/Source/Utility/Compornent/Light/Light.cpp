@@ -80,11 +80,11 @@ void Light::Update()
 	// 視錐台のコーナーをワールド空間で計算
 	float nearY = tanf(camFov * 0.5f) * camNear;
 	float nearX = nearY * camAspect;
-	float farY = tanf(camFov * 0.5f) * 10.0f;
+	float farY = tanf(camFov * 0.5f) * 5.0f;
 	float farX = farY * camAspect;
 
 	DirectX::XMVECTOR nearCenter = DirectX::XMVectorAdd(camPos, DirectX::XMVectorScale(camForward, camNear));
-	DirectX::XMVECTOR farCenter = DirectX::XMVectorAdd(camPos, DirectX::XMVectorScale(camForward, 10.0f));
+	DirectX::XMVECTOR farCenter = DirectX::XMVectorAdd(camPos, DirectX::XMVectorScale(camForward, 5.0f));
 
 	DirectX::XMVECTOR frustumCorners[8]{};
 	// 近面
@@ -103,8 +103,7 @@ void Light::Update()
 	for (int i = 0; i < 8; ++i) center = DirectX::XMVectorAdd(center, frustumCorners[i]);
 	center = DirectX::XMVectorScale(center, 1.0f / 8.0f);
 
-	// ライトの位置は中心からライト方向へ十分離す（方向光なので大きめの距離）
-	const float lightDistance = 500.0f; // 必要に応じて調整
+	const float lightDistance = 5.0f;
 	DirectX::XMVECTOR lightPos = DirectX::XMVectorSubtract(center, DirectX::XMVectorScale(dirVec, lightDistance));
 
 	// up ベクトルの決定（ライト方向とほぼ平行にならないようにする）

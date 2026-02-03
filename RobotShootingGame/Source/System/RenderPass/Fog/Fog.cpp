@@ -23,6 +23,9 @@ Fog::~Fog()
 
 		delete m_pLVPCB[i];
 		m_pLVPCB[i] = nullptr;
+
+		delete m_pLightCB[i];
+		m_pLightCB[i] = nullptr;
 	}
 }
 
@@ -35,6 +38,8 @@ void Fog::Init()
 		assert(m_pCameraCB[i]);	// nullptrチェック
 		m_pLVPCB[i] = new ConstantBuffer(sizeof(CB::LVP));
 		assert(m_pLVPCB[i]);	// nullptrチェック
+		m_pLightCB[i] = new ConstantBuffer(sizeof(CB::Light));
+		assert(m_pLightCB[i]);	// nullptrチェック
 	}
 
 	// ルートシグネチャとパイプラインステートの生成
@@ -62,12 +67,22 @@ void Fog::UpdateCB()
 	cameraPtr->Pos = CameraManager::GetInstance().GetMainCameraPosition();
 
 	// ライトVP行列を定数バッファに転送
+	Light* light = LightManager::GetInstance().GetLights()[0];
 	CB::LVP* lvpPtr = m_pLVPCB[currentIndex]->GetPtr<CB::LVP>();
-	lvpPtr->VMat = LightManager::GetInstance().GetLights()[0]->GetViewMatrixFloat4x4(false);
-	lvpPtr->PMat = LightManager::GetInstance().GetLights()[0]->GetProjectionMatrixFloat4x4(false);
+	lvpPtr->VMat = light->GetViewMatrixFloat4x4(false);
+	lvpPtr->PMat = light->GetProjectionMatrixFloat4x4(false);
+
+	// ライト情報を定数バッファに転送
+	CB::Light* lightPtr = m_pLightCB[currentIndex]->GetPtr<CB::Light>();
+	lightPtr->Position = light->GetPosition();
+	lightPtr->Range = light->GetRange();
+	lightPtr->Direction = light->GetDirection();
+	lightPtr->Angle = light->GetAngle();
+	lightPtr->Color = light->GetColor();
 
 	commandList->SetGraphicsRootConstantBufferView(2, m_pCameraCB[currentIndex]->GetAddress()); // カメラ用定数バッファを設定
 	commandList->SetGraphicsRootConstantBufferView(3, m_pLVPCB[currentIndex]->GetAddress());     // ライトVP用定数バッファを設定
+	commandList->SetGraphicsRootConstantBufferView(4, m_pLightCB[currentIndex]->GetAddress());  // ライト用定数バッファを設定
 }
 
 void Fog::CreateRootSignature()
@@ -77,7 +92,9 @@ void Fog::CreateRootSignature()
 	m_pRootSignature->AddDescriptorRange(0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, D3D12_SHADER_VISIBILITY_PIXEL); // SRV
 	m_pRootSignature->AddRootParameter(0, D3D12_SHADER_VISIBILITY_PIXEL); // カメラ用定数バッファ
 	m_pRootSignature->AddRootParameter(1, D3D12_SHADER_VISIBILITY_PIXEL); // ライトVP用定数バッファ
+	m_pRootSignature->AddRootParameter(2, D3D12_SHADER_VISIBILITY_PIXEL); // ライトVP用定数バッファ
 	m_pRootSignature->AddStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR); // スタティックサンプラー
+	m_pRootSignature->AddStaticSampler(1, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 	m_pRootSignature->Create();
 }
 

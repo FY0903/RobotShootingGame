@@ -21,6 +21,7 @@ void Sprite::OnInit()
 {
 	// テクスチャの読み込み
 	auto pDefTex = TextureManager::GetInstance().CreateDefaultTexture("DefTex");
+	//auto tex = TextureManager::GetInstance().LoadTexture("Assets/Texture/TitleLogo.png");
 	auto pShadowMaps = ShadowMapManager::GetInstance().GetShadowMaps();
 
 	// マテリアルの設定
@@ -31,7 +32,7 @@ void Sprite::OnInit()
 		m_pMaterial->SetTexture(pShadowMaps[0]->GetRenderTarget());
 	}
 	m_pMaterial->SetIsOpaque(false); // ライティングされたくないので不透明設定をfalseにする
-		
+	
 	// スプライトレンダラーコンポーネントの追加
 	AddComponent<SpriteRenderer>()->Init();
 

@@ -30,8 +30,8 @@ void SceneGame::OnInit()
 	AddGameObject<Grid>(Layer::DEFAULT);
 
 	// スプライトの生成
-	auto sprite = AddGameObject<Sprite>(Layer::DEFAULT);
-	auto& transform = sprite->GetTransform();
+	auto sprite0 = AddGameObject<Sprite>(Layer::DEFAULT);
+	auto& transform = sprite0->GetTransform();
 	transform.Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
 	transform.Scale = DirectX::XMFLOAT3(10.0f, 10.0f, 1.0f);
 
@@ -39,9 +39,9 @@ void SceneGame::OnInit()
 	//AddGameObject<Object>(Layer::DEFAULT);
 
 	// エンプティの生成
-	auto emp = AddGameObject<Empty>(Layer::DEFAULT);
-	emp->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
-	//AddGameObject<Empty>(Layer::DEFAULT);
+	//auto emp = AddGameObject<Empty>(Layer::DEFAULT);
+	//emp->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+	AddGameObject<Empty>(Layer::DEFAULT);
 
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/Title.mp3", false, true);
 	//Sound::GetInstance().Play("BGM");
