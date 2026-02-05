@@ -14,6 +14,8 @@
 #include "Utility/TextureManager/TextureManager.hpp"
 #include "Utility/ShadowMapManager/ShadowMapManager.hpp"
 #include "Utility/Compornent/SpriteRenderer/SpriteRenderer.hpp"
+#include "Utility/SharedStruct/SharedStruct.hpp"
+#include "Utility/LightManager/LightManager.hpp"
 
 void Cloud::OnInit()
 {
@@ -32,10 +34,28 @@ void Cloud::OnInit()
 
 	// スプライトレンダラーコンポーネントの追加
 	AddComponent<SpriteRenderer>()->Init();
+
+	m_pLightCB = m_pMaterial->SetCBAtRegister(1, sizeof(CB::Light)); // レジスタ番号1にライト用定数バッファを設定
+	m_pTimeCB = m_pMaterial->SetCBAtRegister(2, sizeof(CB::Time)); // レジスタ番号2に時間用定数バッファを設定
 }
 
 void Cloud::OnUpdate()
 {
+	size_t currentIndex = Engine::GetInstance().GetCurrentBackBufferIndex();
+	CB::Light* pLightCB = m_pLightCB[currentIndex]->GetPtr<CB::Light>();
+	CB::Time* pTimeCB = m_pTimeCB[currentIndex]->GetPtr<CB::Time>();
+
+	auto lights = LightManager::GetInstance().GetLights();
+
+	// ライト情報の設定
+	pLightCB->Position = lights[0]->GetPosition();
+	pLightCB->Color = lights[0]->GetColor();
+	pLightCB->Direction = lights[0]->GetDirection();
+	pLightCB->Range = lights[0]->GetRange();
+	pLightCB->Angle = lights[0]->GetAngle();
+
+	// 時間情報の設定
+	pTimeCB->DeltaTime = Time::GetInstance().GetDeltaTimeSinceStartup();
 }
 
 void Cloud::OnUninit()

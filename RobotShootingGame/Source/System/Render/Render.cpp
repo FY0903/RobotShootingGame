@@ -264,9 +264,9 @@ void Render::InitRenderPasses()
 	std::vector<ShadowMap*>& shadowMaps = ShadowMapManager::GetInstance().GetShadowMaps();
 
 	//AddRenderPass<SSAO>()->SetSRV(m_pDepthTexture->GetRenderTarget());
-	auto fog = AddRenderPass<Fog>();
-	fog->SetSRV(m_pDepthTexture->GetRenderTarget());
-	fog->SetSRV(shadowMaps[0]->GetRenderTarget());
+	//auto fog = AddRenderPass<Fog>();
+	//fog->SetSRV(m_pDepthTexture->GetRenderTarget());
+	//fog->SetSRV(shadowMaps[0]->GetRenderTarget());
 	//AddRenderPass<Sepia>();
 
 	if (m_RenderPasses.size())

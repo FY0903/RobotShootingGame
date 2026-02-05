@@ -22,6 +22,7 @@ float2 Random(float2 seed)
     return -1.0f + 2.0f * frac(sin(s) * 43758.5453f);
 }
 
+// バリューノイズ関数
 float Noize(float2 uv)
 {
     // グリッドの四隅のランダム勾配ベクトルを取得

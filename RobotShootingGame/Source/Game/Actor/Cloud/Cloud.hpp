@@ -43,4 +43,7 @@ private:
 	 * @brief 終了処理
 	 */
 	void OnUninit() override final;
+
+	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pLightCB{};	// ライト用定数バッファ
+	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pTimeCB{};	// 時間用定数バッファ
 };
