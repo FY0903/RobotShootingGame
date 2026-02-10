@@ -25,6 +25,11 @@ Texture2D<float4> tex : register(t0);
 #define MAX_STEPS 100
 #define MATCH_SIZE 0.08f
 
+float hash(float n)
+{
+    return frac(sin(n) * 43758.5453f);
+}
+
 // 球のSDF関数
 // p: 点の位置, radius: 球の半径
 // 中心に一番近いほど正の値、遠いほど負の値を返す
@@ -40,38 +45,42 @@ float Noise(float3 x)
     
     f = f * f * (3.0f - 2.0f * f);
     
-    float2 uv = (p.xy + float2(37.0f, 239.0f) * p.z) + f.xy;
-    float2 col = tex.Sample(smp, (uv + 0.5f) / 256.0f).xy;
-    
-    return lerp(col.x, col.y, f.z) * 2.0f - 1.0f;
+    float n = p.x + p.y * 57.0f + 113.0f * p.z;
+    float res = lerp(lerp(lerp(hash(n + 0.0f), hash(n + 1.0f), f.x),
+                          lerp(hash(n + 57.0f), hash(n + 58.0f), f.x), f.y),
+                     lerp(lerp(hash(n + 113.0f), hash(n + 114.0f), f.x),
+                          lerp(hash(n + 170.0f), hash(n + 171.0f), f.x), f.y), f.z);
+    return res;
 }
 
 float FBM(float3 p)
 {
-    float3 q = p + time * 0.5f * float3(1.0f, -0.2f, -1.0f);
-    
-    float f = 0.0f;
-    float scale = 0.5f;
-    float factor = 2.02f;
-    
-    for (int i = 0; i < 6; ++i)
+    float3 q = p + time * 0.5 * float3(1.0, -0.2, -1.0);
+
+    float f = 0.0;
+    float scale = 0.5;
+    float factor = 2.02;
+
+    for (int i = 0; i < 6; i++)
     {
         f += scale * Noise(q);
         q *= factor;
-        factor += 0.21f;
-        scale *= 0.5f;
+        factor += 0.21;
+        scale *= 0.5;
     }
-    
+
     return f;
 }
 
 float Scene(float3 p)
 {
-    float distance = SDFSphere(p, 1.0f); // シーン内のオブジェクトの距離関数
+    // より大きなスケールのノイズを追加
+    float largeFBM = FBM(p * 0.5f); // 大きな雲の塊
+    float detailFBM = FBM(p * 2.0f); // 細かいディテール
     
-    float f = FBM(p);
+    float density = largeFBM * 0.7f + detailFBM * 0.3f;
     
-    return -distance + f; // 内部が正、外部が負
+    return density - 0.6f; // 閾値を調整
 }
 
 float4 Raymarch(float3 rayOrigin, float3 rayDirection)

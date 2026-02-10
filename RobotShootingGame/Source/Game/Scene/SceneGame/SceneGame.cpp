@@ -32,7 +32,7 @@ void SceneGame::OnInit()
 
 	// 雲の生成
 	auto cloud = AddGameObject<Cloud>(Layer::DEFAULT);
-	cloud->GetTransform().Scale = DirectX::XMFLOAT3(10.0f, 10.0f, 1.0f);
+	cloud->GetTransform().Scale = DirectX::XMFLOAT3(50.0f, 50.0f, 1.0f);
 	cloud->GetTransform().Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
 
 	// スプライトの生成
