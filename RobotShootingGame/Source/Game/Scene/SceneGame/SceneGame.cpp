@@ -18,6 +18,7 @@
 #include "Utility/Sound/Sound.hpp"
 #include "Game/Actor/DirectionalLight/DirectionalLight.hpp"
 #include "Game/Actor/Cloud/Cloud.hpp"
+#include "Game/Actor/Sky/Sky.hpp"
 
 void SceneGame::OnInit()
 {
@@ -28,12 +29,17 @@ void SceneGame::OnInit()
 	AddGameObject<DirectionalLight>(Layer::DEFAULT);
 
 	// グリッドの生成
-	AddGameObject<Grid>(Layer::DEFAULT);
+	//AddGameObject<Grid>(Layer::DEFAULT);
 
 	// 雲の生成
 	auto cloud = AddGameObject<Cloud>(Layer::DEFAULT);
-	cloud->GetTransform().Scale = DirectX::XMFLOAT3(50.0f, 50.0f, 1.0f);
+	cloud->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 100.0f, 0.0f);
+	cloud->GetTransform().Scale = DirectX::XMFLOAT3(1000.0f, 1000.0f, 1.0f);
 	cloud->GetTransform().Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
+
+	// 空の生成
+	auto sky = AddGameObject<Sky>(Layer::DEFAULT);
+	sky->GetTransform().Scale = DirectX::XMFLOAT3(500.0f, 500.0f, 500.0f);
 
 	// スプライトの生成
 	//auto sprite0 = AddGameObject<Sprite>(Layer::DEFAULT);
@@ -46,7 +52,7 @@ void SceneGame::OnInit()
 
 	// エンプティの生成
 	//auto emp = AddGameObject<Empty>(Layer::DEFAULT);
-	//emp->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+	//emp->GetTransform().Position = DirectX::XMFLOAT3(1.0f, 0.0f, 1.0f);
 	//AddGameObject<Empty>(Layer::DEFAULT);
 
 	Sound::GetInstance().Load("BGM", "Assets/Sound/BGM/Title.mp3", false, true);

@@ -25,7 +25,7 @@ void DirectionalLight::OnInit()
 	auto dir = light->GetDirection();
 	DirectX::XMVECTOR dirV = DirectX::XMLoadFloat3(&dir);
 	DirectX::XMVECTOR posV = DirectX::XMLoadFloat3(&m_Transform.Position);
-	DirectX::XMVECTOR targetV = DirectX::XMVectorSubtract(posV, DirectX::XMVectorScale(dirV, 10.0f));
+	DirectX::XMVECTOR targetV = DirectX::XMVectorSubtract(posV, DirectX::XMVectorScale(dirV, 100.0f));
 	DirectX::XMFLOAT3 target{};
 	DirectX::XMStoreFloat3(&target, targetV);
 

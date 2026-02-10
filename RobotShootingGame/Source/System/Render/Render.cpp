@@ -32,9 +32,9 @@ Render::Render()
 	m_pDepthStencil = new DepthStencil();
 	m_pDepthTexture = new DepthTexture();
 
-	clearColor[0] = 0.0f;
-	clearColor[1] = 0.0f;
-	clearColor[2] = 0.0f;
+	clearColor[0] = 0.6f;
+	clearColor[1] = 0.6f;
+	clearColor[2] = 0.75f;
 	clearColor[3] = 0.0f;
 
 	// スナップショット用レンダーターゲットの生成

@@ -196,6 +196,9 @@
     <Filter Include="Source\Game\Actor\Cloud">
       <UniqueIdentifier>{edbaaeb4-05a3-4aae-8e16-9863be783547}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Game\Actor\Sky">
+      <UniqueIdentifier>{9e93d860-c4d1-46dc-8031-eb9696eab360}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -359,6 +362,9 @@
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\Cloud\Cloud.cpp">
       <Filter>Source\Game\Actor\Cloud</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Game\Actor\Sky\Sky.cpp">
+      <Filter>Source\Game\Actor\Sky</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -530,6 +536,9 @@
     <ClInclude Include="Source\Game\Actor\Cloud\Cloud.hpp">
       <Filter>Source\Game\Actor\Cloud</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Game\Actor\Sky\Sky.hpp">
+      <Filter>Source\Game\Actor\Sky</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\WaterPS.hlsl">
@@ -622,7 +631,7 @@
     <FxCompile Include="Resource\CloudPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\CloudVS.hlsl">
+    <FxCompile Include="Resource\AtmosphericScatteringPS.hlsl">
       <Filter>Resource</Filter>
     </FxCompile>
   </ItemGroup>

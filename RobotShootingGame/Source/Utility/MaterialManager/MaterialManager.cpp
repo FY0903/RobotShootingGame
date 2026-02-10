@@ -271,7 +271,7 @@ void MaterialManager::Init()
 	ground->Create();
 
 	auto cloud = CreateMaterialBase("Cloud");
-	cloud->SetVSFilepath(L"Assets/Shader/CloudVS.cso");
+	cloud->SetVSFilepath(L"Assets/Shader/SpriteVS.cso");
 	cloud->SetPSFilepath(L"Assets/Shader/CloudPS.cso");
 	cloud->SetInputLayout(Vertex::Sprite::InputLayout, MaterialBase::Sprite);
 	cloud->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
@@ -280,6 +280,15 @@ void MaterialManager::Init()
 	cloud->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	cloud->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	cloud->Create();
+
+	auto atmosphericScattering = CreateMaterialBase("AtmosphericScattering");
+	atmosphericScattering->SetVSFilepath(L"Assets/Shader/SimpleVS.cso");
+	atmosphericScattering->SetPSFilepath(L"Assets/Shader/AtmosphericScatteringPS.cso");
+	atmosphericScattering->SetInputLayout(Vertex::SkeletalMesh::InputLayout, MaterialBase::Mesh);
+	atmosphericScattering->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	atmosphericScattering->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
+	atmosphericScattering->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+	atmosphericScattering->Create();
 }
 
 Material* MaterialManager::CreateMaterial(const std::string& materialName)

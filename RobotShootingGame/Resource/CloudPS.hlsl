@@ -2,7 +2,6 @@ struct VSOutput
 {
     float4 svpos : SV_POSITION;
     float2 uv : TEXCOORD;
-    float4 worldPos : TEXCOORD1;
 };
 
 cbuffer lightBuffer : register(b1)
@@ -22,9 +21,10 @@ cbuffer TimeBuffer : register(b2)
 SamplerState smp : register(s0);
 Texture2D<float4> tex : register(t0);
 
-#define MAX_STEPS 100
-#define MATCH_SIZE 0.08f
+#define MAX_STEPS 32
+#define MATCH_SIZE 0.1f
 
+// https://www.shadertoy.com/view/WdXGRj
 float hash(float n)
 {
     return frac(sin(n) * 43758.5453f);
@@ -38,6 +38,7 @@ float SDFSphere(float3 p, float radius)
     return length(p) - radius; // 球のSDF
 }
 
+// https://www.shadertoy.com/view/WdXGRj
 float Noise(float3 x)
 {
     float3 p = floor(x);
@@ -53,20 +54,22 @@ float Noise(float3 x)
     return res;
 }
 
+// https://thebookofshaders.com/13/?lan=jp
 float FBM(float3 p)
 {
-    float3 q = p + time * 0.5 * float3(1.0, -0.2, -1.0);
+    // アニメーションのために時間を加える
+    float3 q = p + time * 0.1f * float3(1.0f, -0.2f, -1.0f);
 
-    float f = 0.0;
-    float scale = 0.5;
-    float factor = 2.02;
+    float f = 0.0f;
+    float scale = 0.5f;
+    float factor = 2.02f;
 
     for (int i = 0; i < 6; i++)
     {
         f += scale * Noise(q);
         q *= factor;
-        factor += 0.21;
-        scale *= 0.5;
+        factor += 0.21f;
+        scale *= 0.5f;
     }
 
     return f;
@@ -75,12 +78,18 @@ float FBM(float3 p)
 float Scene(float3 p)
 {
     // より大きなスケールのノイズを追加
-    float largeFBM = FBM(p * 0.5f); // 大きな雲の塊
-    float detailFBM = FBM(p * 2.0f); // 細かいディテール
+    float largeFBM = FBM(p * 2.0f); // 大きな雲の塊
+    float detailFBM = FBM(p * 7.0f); // 細かいディテール
     
-    float density = largeFBM * 0.7f + detailFBM * 0.3f;
+    float density = largeFBM * 0.1f + detailFBM * 0.8f;
     
-    return density - 0.6f; // 閾値を調整
+    float distance = SDFSphere(p, 1.0f);
+    
+    //return -distance + FBM(p);
+    
+    return -0.5f + detailFBM * 0.95f;
+    
+    return density - 0.5f; // 閾値を調整
 }
 
 float4 Raymarch(float3 rayOrigin, float3 rayDirection)
@@ -97,8 +106,16 @@ float4 Raymarch(float3 rayOrigin, float3 rayDirection)
         // 描画するものがある場合
         if (density > 0.0f)
         {
+            // ライトの方向に対する影の濃さを計算
+            // https://iquilezles.org/articles/derivative/
+            float diffuse = saturate(Scene(p) - Scene(p + 0.1f * -float3(lightDirection.x, -lightDirection.z, lightDirection.y)));
+            
+            // ライトの色と拡散光を計算
+            float3 lin = float3(0.9f, 0.9f, 0.9f) + lightColor.rgb * diffuse;
+            
             // 値が大きいほど濃くなる
             float4 color = float4(lerp(float3(1.0f, 1.0f, 1.0f), float3(0.0f, 0.0f, 0.0f), density), density);
+            color.rgb *= lin;
             color.rgb *= color.a;
             res += color * (1.0f - res.a);
         }
@@ -118,9 +135,10 @@ float4 main(VSOutput input) : SV_TARGET
     float3 ro = float3(0.0f, 0.0f, 5.0f); // カメラ位置
     float3 rd = normalize(float3(uv, -1.0f)); // レイ方向
     
-    float3 color = float3(0.0f, 0.0f, 0.0f);
+    float3 color = float3(0.6f, 0.6f, 0.75f);
+    
     float4 res = Raymarch(ro, rd);
-    color = res.rgb;
+    color = color * (1.0f - res.a) + res.rgb;
     
     return float4(color, 1.0f);
 }
