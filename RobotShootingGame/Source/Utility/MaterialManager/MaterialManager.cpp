@@ -282,10 +282,13 @@ void MaterialManager::Init()
 	cloud->Create();
 
 	auto atmosphericScattering = CreateMaterialBase("AtmosphericScattering");
-	atmosphericScattering->SetVSFilepath(L"Assets/Shader/SimpleVS.cso");
+	atmosphericScattering->SetVSFilepath(L"Assets/Shader/AtmosphericScatteringVS.cso");
 	atmosphericScattering->SetPSFilepath(L"Assets/Shader/AtmosphericScatteringPS.cso");
 	atmosphericScattering->SetInputLayout(Vertex::SkeletalMesh::InputLayout, MaterialBase::Mesh);
 	atmosphericScattering->SetCBV(0, D3D12_SHADER_VISIBILITY_VERTEX);
+	atmosphericScattering->SetCBV(1, D3D12_SHADER_VISIBILITY_PIXEL);
+	atmosphericScattering->SetCBV(2, D3D12_SHADER_VISIBILITY_PIXEL);
+	atmosphericScattering->SetCBV(3, D3D12_SHADER_VISIBILITY_PIXEL);
 	atmosphericScattering->SetSRV(0, 1, D3D12_SHADER_VISIBILITY_PIXEL);
 	atmosphericScattering->SetStaticSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
 	atmosphericScattering->Create();

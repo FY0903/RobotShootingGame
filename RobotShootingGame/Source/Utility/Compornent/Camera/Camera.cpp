@@ -45,7 +45,7 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 
 void Camera::Update()
 {
-#ifdef _DEBUG
+#ifndef _DEBUG
 	// “ü—Íˆ—
 	if (Input::IsKeyPress(VK_LEFT))
 	{

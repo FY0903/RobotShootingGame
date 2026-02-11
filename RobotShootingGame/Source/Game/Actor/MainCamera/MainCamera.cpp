@@ -17,10 +17,10 @@ void MainCamera::OnInit()
 {
 	// カメラコンポーネントの生成と初期化
 	Camera* camera = AddComponent<Camera>();
-	camera->Init();
+	camera->Init(DirectX::XMVectorSet(0.0f, 10000.0f, 0.0f, 0.0f));
 	//camera->SetTargetPos(DirectX::XMLoadFloat3(&targetPos));
-	camera->SetRadius(10.0f);
-	//camera->SetTargetPos(DirectX::XMVectorSet(0.0f, 2.0f, 0.0f, 0.0f));
+	//camera->SetRadius(10.0f);
+	//camera->SetTargetPos(DirectX::XMVectorSet(0.0f, 5000.0f, 0.0f, 0.0f));
 
 	// カメラマネージャーに登録
 	CameraManager::GetInstance().RegisterCamera("Camera01", camera);

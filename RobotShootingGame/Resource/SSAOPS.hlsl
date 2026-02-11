@@ -9,6 +9,7 @@ cbuffer cameraBuffer : register(b0)
     float4x4 invV : packoffset(c0);
     float4x4 invP : packoffset(c4);
     float4x4 P : packoffset(c8);
+    float3 cameraPos : packoffset(c12);
 };
 
 cbuffer KernelBuffer : register(b1)
