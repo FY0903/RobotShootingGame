@@ -13,7 +13,6 @@ struct VSOutput
 {
     float4 svpos : SV_POSITION;
     float2 uv : TEXCOORD;
-    float4 worldPos : TEXCOORD1;
 };
 
 VSOutput main(VSInput input)
@@ -27,7 +26,6 @@ VSOutput main(VSInput input)
     
     output.svpos = projPos;
     output.uv = input.uv;
-    output.worldPos = worldPos;
     
     return output;
 }

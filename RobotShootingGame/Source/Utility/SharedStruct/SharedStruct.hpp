@@ -155,12 +155,13 @@ namespace CB
 		DirectX::XMFLOAT4X4 PMat{};			// 射影行列
 	};
 
+	struct Screen
+	{
+
+	};
+
 	struct Sky
 	{
-		float InnerRadius{};	// 大気の内半径
-		float OuterRadius{};	// 大気の外半径
 
-		float Kr{};	// レイリー散乱定数
-		float Km{};	// ミー散乱定数
 	};
 }
