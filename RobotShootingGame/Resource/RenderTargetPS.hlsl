@@ -23,6 +23,8 @@ float4 main(VSOutput input) : SV_TARGET
 {
     float4 albedo = albedoTex.Sample(smp, input.uv);
     
+    return albedo;
+    
     float4 normal = normalTex.Sample(smp, input.uv);
     normal.xyz = normalize(normal.xyz * 2.0f - 1.0f); // 法線ベクトルを[-1,1]範囲に変換
     

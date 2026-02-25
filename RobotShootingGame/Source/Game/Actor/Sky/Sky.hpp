@@ -44,7 +44,5 @@ private:
 	 */
 	void OnUninit() override final;
 
-	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pSkyCB{};		// スカイ用定数バッファ
-	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pCameraCB{};	// カメラ用定数バッファ
-	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pLightCB{};	// ライト用定数バッファ
+	std::array<ConstantBuffer*, FRAME_BUFFER_COUNT> m_pSkyCB{};
 };

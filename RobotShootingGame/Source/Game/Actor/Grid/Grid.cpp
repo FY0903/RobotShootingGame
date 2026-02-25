@@ -23,14 +23,14 @@ void Grid::OnInit()
 	line->AddPoint({ 0.0f, -100.0f, 0.0f }, { 0.0f, 100.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }); // Y軸
 	line->AddPoint({ 0.0f, 0.0f, -100.0f }, { 0.0f, 0.0f, 100.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }); // Z軸
 
-	//for (int i = -10; i <= 10; ++i)
-	//{
-	//	if (!i) continue; // 中心線はスキップ
+	for (int i = -10; i <= 10; ++i)
+	{
+		if (!i) continue; // 中心線はスキップ
 
-	//	// グリッド線の追加（XZ平面）
-	//	line->AddPoint({ static_cast<float>(i), 0.0f, -10.0f }, { static_cast<float>(i), 0.0f, 10.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
-	//	line->AddPoint({ -10.0f, 0.0f, static_cast<float>(i) }, { 10.0f, 0.0f, static_cast<float>(i) }, { 1.0f, 1.0f, 1.0f, 1.0f });
-	//}
+		// グリッド線の追加（XZ平面）
+		line->AddPoint({ static_cast<float>(i), 0.0f, -10.0f }, { static_cast<float>(i), 0.0f, 10.0f }, { 1.0f, 1.0f, 1.0f, 1.0f });
+		line->AddPoint({ -10.0f, 0.0f, static_cast<float>(i) }, { 10.0f, 0.0f, static_cast<float>(i) }, { 1.0f, 1.0f, 1.0f, 1.0f });
+	}
 
 	// 線分の作成
 	line->Create();

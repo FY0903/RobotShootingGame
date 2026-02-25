@@ -155,13 +155,10 @@ namespace CB
 		DirectX::XMFLOAT4X4 PMat{};			// Ë‰es—ñ
 	};
 
-	struct Screen
-	{
-
-	};
-
 	struct Sky
 	{
-
+		DirectX::XMFLOAT3 lightDir{};	// Œõ‚Ì•ûŒü
+		float pad{};
+		DirectX::XMFLOAT3 cameraPos{};	// ƒJƒƒ‰‚ÌˆÊ’u
 	};
 }

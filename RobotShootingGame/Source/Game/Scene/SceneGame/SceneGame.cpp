@@ -31,14 +31,14 @@ void SceneGame::OnInit()
 	// グリッドの生成
 	//AddGameObject<Grid>(Layer::DEFAULT);
 
-	// 雲の生成
-	//auto cloud = AddGameObject<Cloud>(Layer::DEFAULT);
-	//cloud->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 100.0f, 0.0f);
-	//cloud->GetTransform().Scale = DirectX::XMFLOAT3(1000.0f, 1000.0f, 1.0f);
-	//cloud->GetTransform().Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
-
 	// 空の生成
 	auto sky = AddGameObject<Sky>(Layer::DEFAULT);
+
+	// 雲の生成
+	//auto cloud = AddGameObject<Cloud>(Layer::DEFAULT);
+	//cloud->GetTransform().Position = DirectX::XMFLOAT3(0.0f, 300.0f, 0.0f);
+	//cloud->GetTransform().Scale = DirectX::XMFLOAT3(1000.0f, 1000.0f, 1.0f);
+	//cloud->GetTransform().Rotation = Transform::ToQuaternion(DirectX::XMFLOAT3(DirectX::XMConvertToRadians(90.0f), 0.0f, 0.0f));
 
 	// スプライトの生成
 	//auto sprite0 = AddGameObject<Sprite>(Layer::DEFAULT);

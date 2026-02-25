@@ -30,14 +30,6 @@ float hash(float n)
     return frac(sin(n) * 43758.5453f);
 }
 
-// 球のSDF関数
-// p: 点の位置, radius: 球の半径
-// 中心に一番近いほど正の値、遠いほど負の値を返す
-float SDFSphere(float3 p, float radius)
-{
-    return length(p) - radius; // 球のSDF
-}
-
 // https://www.shadertoy.com/view/WdXGRj
 float Noise(float3 x)
 {
@@ -83,13 +75,7 @@ float Scene(float3 p)
     
     float density = largeFBM * 0.1f + detailFBM * 0.8f;
     
-    float distance = SDFSphere(p, 1.0f);
-    
-    //return -distance + FBM(p);
-    
-    return -0.5f + detailFBM * 0.95f;
-    
-    return density - 0.5f; // 閾値を調整
+    return -0.5f + detailFBM * 0.9f;
 }
 
 float4 Raymarch(float3 rayOrigin, float3 rayDirection)
@@ -114,7 +100,7 @@ float4 Raymarch(float3 rayOrigin, float3 rayDirection)
             float3 lin = float3(0.9f, 0.9f, 0.9f) + lightColor.rgb * diffuse;
             
             // 値が大きいほど濃くなる
-            float4 color = float4(lerp(float3(1.0f, 1.0f, 1.0f), float3(0.0f, 0.0f, 0.0f), density), density);
+            float4 color = float4(1.0f, 1.0f, 1.0f, density);
             color.rgb *= lin;
             color.rgb *= color.a;
             res += color * (1.0f - res.a);
@@ -135,10 +121,7 @@ float4 main(VSOutput input) : SV_TARGET
     float3 ro = float3(0.0f, 0.0f, 5.0f); // カメラ位置
     float3 rd = normalize(float3(uv, -1.0f)); // レイ方向
     
-    float3 color = float3(0.6f, 0.6f, 0.75f);
-    
     float4 res = Raymarch(ro, rd);
-    color = color * (1.0f - res.a) + res.rgb;
     
-    return float4(color, 1.0f);
+    return res;
 }
