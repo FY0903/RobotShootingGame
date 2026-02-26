@@ -11,7 +11,7 @@ cbuffer Param : register(b1)
 };
 
 #define CAMERA_HEIGHT 1.000001
-#define INV_WAVE_LENGTH float3( 5.60204474633241, 9.4732844379203038, 19.643802610477206 )
+#define INV_WAVE_LENGTH float3( 1.0 / pow(0.68, 4.0), 1.0 / pow(0.55, 4.0), 1.0 / pow(0.44, 4.0) )
 #define INNER_RADIUS 1.0
 #define OUTER_RADIUS 1.025
 #define ESUN 10.0
@@ -20,7 +20,7 @@ cbuffer Param : register(b1)
 #define SCALE_DEPTH 0.25
 #define SAMPLES 2
 #define G -0.99
-#define GROUND_COLOR float3( 0.37, 0.35, 0.34 )
+#define GROUND_COLOR float3( 1.0, 1.0, 1.0 )
 #define GAMMA 1.0 / 2.2
 
 #define PI 3.14159265

@@ -45,7 +45,7 @@ void Camera::Init(DirectX::XMVECTOR eyePos, DirectX::XMVECTOR targetPos, DirectX
 
 void Camera::Update()
 {
-#ifndef _DEBUG
+//#ifndef _DEBUG
 	// “ü—Íˆ—
 	if (Input::IsKeyPress(VK_LEFT))
 	{
@@ -79,7 +79,7 @@ void Camera::Update()
 		m_Radius * sinf(m_RadY),
 		m_Radius * cosf(m_RadY) * cosf(m_RadXZ),
 		0.0f);
-#endif // _DEBUG
+//#endif // _DEBUG
 	
 	if (m_Owner)
 	{
