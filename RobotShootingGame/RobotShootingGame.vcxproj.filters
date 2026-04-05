@@ -199,6 +199,9 @@
     <Filter Include="Source\Game\Actor\Sky">
       <UniqueIdentifier>{9e93d860-c4d1-46dc-8031-eb9696eab360}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\System\ThreadPool">
+      <UniqueIdentifier>{58ad7428-2c5f-4223-94a0-e01121a699b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\main.cpp">
@@ -365,6 +368,9 @@
     </ClCompile>
     <ClCompile Include="Source\Game\Actor\Sky\Sky.cpp">
       <Filter>Source\Game\Actor\Sky</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\ThreadPool\ThreadPool.cpp">
+      <Filter>Source\System\ThreadPool</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -538,6 +544,9 @@
     </ClInclude>
     <ClInclude Include="Source\Game\Actor\Sky\Sky.hpp">
       <Filter>Source\Game\Actor\Sky</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\System\ThreadPool\ThreadPool.hpp">
+      <Filter>Source\System\ThreadPool</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
