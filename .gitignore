@@ -366,3 +366,7 @@ FodyWeavers.xsd
 
 # Crash dumps
 *.stackdump
+
+# Claude Code / MCP ローカル設定
+.claude/settings.local.json
+.mcp.json
